@@ -1,2 +1,0 @@
-# etcdlab
-etcdlab
