@@ -4,7 +4,7 @@
         "name": "etcd-app"
     },
     "apps": [{
-        "root": "src",
+        "root": "frontend",
         "outDir": "dist",
         "assets": "assets",
         "index": "index.html",
