@@ -24,7 +24,8 @@ import {OverlayModule} from '@angular2-material/core/overlay/overlay-directives'
 import {MdMenuModule} from '@angular2-material/menu/menu';
 import {RtlModule} from '@angular2-material/core/rtl/dir';
 
-import {EtcdAppComponent} from './app.component';
+import {AppComponent} from './app.component';
+import {routing, routedComponents} from './app.routing';
 
 @NgModule({
   imports: [
@@ -51,15 +52,19 @@ import {EtcdAppComponent} from './app.component';
     OverlayModule.forRoot(),
     PortalModule.forRoot(),
     RtlModule.forRoot(),
+    routing,
   ],
-  declarations: [EtcdAppComponent],
-  entryComponents: [EtcdAppComponent],
+  declarations: [
+    AppComponent,
+    routedComponents
+  ],
+  entryComponents: [AppComponent],
 })
 
 export class MaterialAppModule {
   constructor(private _appRef: ApplicationRef) { }
 
   ngDoBootstrap() {
-    this._appRef.bootstrap(EtcdAppComponent);
+    this._appRef.bootstrap(AppComponent);
   }
 }

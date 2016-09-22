@@ -6,4 +6,4 @@ import {Component} from '@angular/core';
   styleUrls: ['app.component.css'],
 })
 
-export class EtcdAppComponent { }
+export class AppComponent { }
