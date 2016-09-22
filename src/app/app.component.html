@@ -1,0 +1,86 @@
+<md-toolbar color="primary">
+    <!--TODO: redirect to /-->
+    <button md-button>etcd</button>
+
+    <!--TODO: redirect to /doc-->
+    <!--TODO: redirect to /docs-->
+    <!--TODO: redirect to /documentation-->
+    <button md-button>Documentation</button>
+
+    <!--TODO: redirect to /play-->
+    <!--TODO: redirect to /playground-->
+    <button md-button>Playground</button>
+
+    <span class="app-toolbar-filler"></span>
+
+    <!--TODO: redirect to github repo-->
+    <md-icon>home</md-icon>
+</md-toolbar>
+
+<div class="app-content">
+    Hello World!
+
+    <!--<md-card>
+    </md-card>-->
+    <md-tab-group>
+        <md-tab>
+            <template md-tab-label>
+				A
+			</template>
+            <template md-tab-content>
+				<p>Hello</p>
+			</template>
+        </md-tab>
+        <md-tab>
+            <template md-tab-label>
+				B
+			</template>
+            <template md-tab-content>
+				<p>World</p>
+			</template>
+        </md-tab>
+    </md-tab-group>
+
+    <md-grid-list cols="4">
+        <md-grid-tile [colspan]="1" [style.background]="'#DDBDF1'">
+            <md-tab-group>
+                <md-tab>
+                    <template md-tab-label>
+						A
+					</template>
+                    <template md-tab-content>
+						<p>Hello</p>
+					</template>
+                </md-tab>
+                <md-tab>
+                    <template md-tab-label>
+						B
+					</template>
+                    <template md-tab-content>
+						<p>World</p>
+					</template>
+                </md-tab>
+            </md-tab-group>
+        </md-grid-tile>
+        <md-grid-tile [colspan]="3">
+            <md-tab-group>
+                <md-tab>
+                    <template md-tab-label>
+						A
+					</template>
+                    <template md-tab-content>
+						<p>Hello</p>
+					</template>
+                </md-tab>
+                <md-tab>
+                    <template md-tab-label>
+						B
+					</template>
+                    <template md-tab-content>
+						<p>World</p>
+					</template>
+                </md-tab>
+            </md-tab-group>
+        </md-grid-tile>
+    </md-grid-list>
+</div>
