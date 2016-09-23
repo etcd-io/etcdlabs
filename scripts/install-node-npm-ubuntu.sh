@@ -13,7 +13,6 @@ sudo apt-get -y update
 
 # install nvm
 curl -sL https://raw.githubusercontent.com/creationix/nvm/v0.31.0/install.sh -o $HOME/install_nvm.sh
-cat $HOME/install_nvm.sh
 bash $HOME/install_nvm.sh
 source $HOME/.profile
 nvm ls-remote

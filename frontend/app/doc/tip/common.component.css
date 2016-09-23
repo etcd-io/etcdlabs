@@ -11,20 +11,13 @@ md-sidenav-layout {
     padding: 30px;
 }
 
-a:visited {
+a {
     color: black;
+    text-decoration: none !important;
 }
 
 .no-text-decoration {
     color: black;
-    text-decoration: none !important;
-}
-
-md-list a {
-    text-decoration: none !important;
-}
-
-md-list-item a {
     text-decoration: none !important;
 }
 

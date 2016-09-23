@@ -1,7 +1,9 @@
 import { Routes, RouterModule } from '@angular/router';
 import { HomeComponent } from './home/home.component';
+import { BlogComponent } from './blog/blog.component';
 import { PlayComponent } from './play/play.component';
 
+// '/doc' page
 import { doc_tip_Component } from './doc/tip/doc.component';
 import { install_deploy_tip_Component } from './doc/tip/install-deploy.component';
 import { kubernetes_tip_Component } from './doc/tip/kubernetes.component';
@@ -14,6 +16,9 @@ const appRoutes: Routes = [
     { path: '', redirectTo: '/home', pathMatch: 'full' },
     { path: 'main', redirectTo: '/home', pathMatch: 'full' },
     { path: 'home', component: HomeComponent },
+
+    { path: 'blogs', redirectTo: '/blog', pathMatch: 'full' },
+    { path: 'blog', component: BlogComponent },
 
     { path: 'playground', redirectTo: '/play', pathMatch: 'full' },
     { path: 'play', component: PlayComponent },
@@ -46,6 +51,7 @@ export const routing = RouterModule.forRoot(appRoutes);
 export const routedComponents = [
     HomeComponent,
     PlayComponent,
+    BlogComponent,
 
     doc_tip_Component,
     install_deploy_tip_Component,
