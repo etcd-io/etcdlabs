@@ -1,18 +1,19 @@
 import { Routes, RouterModule } from '@angular/router';
-import { MainComponent } from './main.component';
+import { HomeComponent } from './home/home.component';
 import { PlayComponent } from './play/play.component';
 
-import { DocTipComponent } from './doc/tip/doc.component';
-import { InstallDeployTipComponent } from './doc/tip/install-deploy.component';
-import { KubernetesTipComponent } from './doc/tip/kubernetes.component';
-import { EtcdctlTipComponent } from './doc/tip/etcdctl.component';
-import { FAQTipComponent } from './doc/tip/faq.component';
-import { PerformanceTipComponent } from './doc/tip/performance.component';
-import { ReliabilityTipComponent } from './doc/tip/reliability.component';
+import { doc_tip_Component } from './doc/tip/doc.component';
+import { install_deploy_tip_Component } from './doc/tip/install-deploy.component';
+import { kubernetes_tip_Component } from './doc/tip/kubernetes.component';
+import { etcdctl_tip_Component } from './doc/tip/etcdctl.component';
+import { faq_tip_Component } from './doc/tip/faq.component';
+import { performance_tip_Component } from './doc/tip/performance.component';
+import { reliability_tip_Component } from './doc/tip/reliability.component';
 
 const appRoutes: Routes = [
-    { path: '', redirectTo: '/main', pathMatch: 'full' },
-    { path: 'main', component: MainComponent },
+    { path: '', redirectTo: '/home', pathMatch: 'full' },
+    { path: 'main', redirectTo: '/home', pathMatch: 'full' },
+    { path: 'home', component: HomeComponent },
 
     { path: 'playground', redirectTo: '/play', pathMatch: 'full' },
     { path: 'play', component: PlayComponent },
@@ -24,13 +25,13 @@ const appRoutes: Routes = [
     {
         path: 'doc/tip',
         children: [
-            { path: '', component: DocTipComponent },
-            { path: 'install-deploy', component: InstallDeployTipComponent },
-            { path: 'kubernetes', component: KubernetesTipComponent },
-            { path: 'etcdctl', component: EtcdctlTipComponent },
-            { path: 'faq', component: FAQTipComponent },
-            { path: 'performance', component: PerformanceTipComponent },
-            { path: 'reliability', component: ReliabilityTipComponent }
+            { path: '', component: doc_tip_Component },
+            { path: 'install-deploy', component: install_deploy_tip_Component },
+            { path: 'kubernetes', component: kubernetes_tip_Component },
+            { path: 'etcdctl', component: etcdctl_tip_Component },
+            { path: 'faq', component: faq_tip_Component },
+            { path: 'performance', component: performance_tip_Component },
+            { path: 'reliability', component: reliability_tip_Component }
         ]
     },
 
@@ -42,15 +43,14 @@ const appRoutes: Routes = [
 export const routing = RouterModule.forRoot(appRoutes);
 
 export const routedComponents = [
-    MainComponent,
-
+    HomeComponent,
     PlayComponent,
 
-    DocTipComponent,
-    InstallDeployTipComponent,
-    KubernetesTipComponent,
-    EtcdctlTipComponent,
-    FAQTipComponent,
-    PerformanceTipComponent,
-    ReliabilityTipComponent
+    doc_tip_Component,
+    install_deploy_tip_Component,
+    kubernetes_tip_Component,
+    etcdctl_tip_Component,
+    faq_tip_Component,
+    performance_tip_Component,
+    reliability_tip_Component
 ];

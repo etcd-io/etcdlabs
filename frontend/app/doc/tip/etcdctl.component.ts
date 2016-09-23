@@ -6,8 +6,7 @@ import { Versioner } from './version';
     templateUrl: 'etcdctl.component.html',
     styleUrls: ['common.component.css']
 })
-
-export class EtcdctlTipComponent {
+export class etcdctl_tip_Component {
     versioner = new Versioner();
     version = this.versioner.getVersion();
 }

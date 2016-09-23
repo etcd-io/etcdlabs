@@ -6,8 +6,7 @@ import { Versioner } from './version';
     templateUrl: 'install-deploy.component.html',
     styleUrls: ['common.component.css']
 })
-
-export class InstallDeployTipComponent {
+export class install_deploy_tip_Component {
     versioner = new Versioner();
     version = this.versioner.getVersion();
 }

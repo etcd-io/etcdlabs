@@ -6,8 +6,7 @@ import { Versioner } from './version';
     templateUrl: 'kubernetes.component.html',
     styleUrls: ['common.component.css']
 })
-
-export class KubernetesTipComponent {
+export class kubernetes_tip_Component {
     versioner = new Versioner();
     version = this.versioner.getVersion();
 }

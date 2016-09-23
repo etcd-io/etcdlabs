@@ -6,8 +6,7 @@ import { Versioner } from './version';
     templateUrl: 'reliability.component.html',
     styleUrls: ['common.component.css']
 })
-
-export class ReliabilityTipComponent {
+export class reliability_tip_Component {
     versioner = new Versioner();
     version = this.versioner.getVersion();
 }
