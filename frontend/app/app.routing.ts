@@ -36,6 +36,7 @@ const appRoutes: Routes = [
     },
 
     // TODO: create versioned docs after release
+    // TODO: dot routing
     { path: 'doc/v31', redirectTo: '/doc/tip', pathMatch: 'full' },
     { path: 'doc/v32', redirectTo: '/doc/tip', pathMatch: 'full' }
 ];
