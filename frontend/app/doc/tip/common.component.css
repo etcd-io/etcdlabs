@@ -7,11 +7,24 @@ md-sidenav-layout {
     min-width: 150px;
 }
 
-.no-underline {
+.doc-group {
+    padding: 30px;
+}
+
+a:visited {
+    color: black;
+}
+
+.no-text-decoration {
+    color: black;
     text-decoration: none !important;
 }
 
 md-list a {
+    text-decoration: none !important;
+}
+
+md-list-item a {
     text-decoration: none !important;
 }
 
@@ -22,8 +35,4 @@ md-divider {
 .other-versions {
     font-family: 'Open Sans', sans-serif;
     font-size: 12px;
-}
-
-.doc-group {
-    padding: 30px;
 }
