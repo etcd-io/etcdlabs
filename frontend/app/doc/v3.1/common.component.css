@@ -3,6 +3,10 @@
     min-width: 150px;
 }
 
+md-list a {
+    text-decoration: none !important;
+}
+
 .doc-group {
     padding: 30px;
 }

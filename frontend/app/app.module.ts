@@ -61,7 +61,7 @@ import {routing, routedComponents} from './app.routing';
   entryComponents: [AppComponent],
 })
 
-export class MaterialAppModule {
+export class AppModule {
   constructor(private _appRef: ApplicationRef) { }
 
   ngDoBootstrap() {
