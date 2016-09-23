@@ -7,6 +7,5 @@
 
 #### Project Status
 
-- Angular 2 Material is still in development, so this has some limitations in
+- Angular 2 Material is still in active development, so this has some limitations in
   frontend
-
