@@ -1,0 +1,29 @@
+md-sidenav-layout {
+    min-height: 600px;
+}
+
+.doc-sidenav {
+    padding: 10px;
+    min-width: 150px;
+}
+
+.no-underline {
+    text-decoration: none !important;
+}
+
+md-list a {
+    text-decoration: none !important;
+}
+
+md-divider {
+    color: lightgray;
+}
+
+.other-versions {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 12px;
+}
+
+.doc-group {
+    padding: 30px;
+}
