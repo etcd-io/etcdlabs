@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { parentComponent } from './common.component';
 
 @Component({
-    selector: 'doc-contents',
+    selector: 'doc',
     templateUrl: 'doc.component.html',
     styleUrls: ['common.component.css']
 })
