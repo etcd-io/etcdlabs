@@ -4,42 +4,21 @@
             <a routerLink="/doc/{{version.etcdVersionURL}}">
                 <h3 md-subheader>Getting Started ({{version.etcdVersion}})</h3>
             </a>
-            <md-list-item class="no-text-decoration" *ngFor="let item of getStartedItems">
-                <a routerLink="{{item.url}}">{{item.title}}</a>
+            <md-list-item *ngFor="let item of getStartedItems">
+                <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
             </md-list-item>
 
             <md-divider></md-divider>
-            <h3 md-subheader>Tutorials</h3>
-            <md-list-item class="no-text-decoration" *ngFor="let item of tutorialItems">
-                <a routerLink="{{item.url}}">{{item.title}}</a>
-            </md-list-item>
 
-            <md-divider></md-divider>
             <h3 md-subheader>More</h3>
-            <md-list-item class="no-text-decoration" *ngFor="let item of moreItems">
-                <a routerLink="{{item.url}}">{{item.title}}</a>
+            <md-list-item *ngFor="let item of moreItems">
+                <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
             </md-list-item>
-
-            <md-list-item [md-menu-trigger-for]="menu">Other versions</md-list-item>
-            <md-menu #menu="mdMenu">
-                <button md-menu-item class="other-versions" *ngFor="let item of otherVersions">
-                    <a routerLink="{{item.url}}" class="no-text-decoration">{{item.title}}</a>
-                </button>
-            </md-menu>
         </md-list>
     </md-sidenav>
 
     <div class="doc-group">
         <router-outlet></router-outlet>
-        <md-tab-group>
-            <md-tab>
-                <template md-tab-label>
-					Kubernetes
-				</template>
-                <template md-tab-content>
-					<p>(Working in progress... Kubernetes)</p>
-				</template>
-            </md-tab>
-        </md-tab-group>
+        <p>(Working in progress...)</p>
     </div>
 </md-sidenav-layout>

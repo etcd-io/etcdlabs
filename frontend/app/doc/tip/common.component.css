@@ -1,3 +1,7 @@
+md-divider {
+    color: lightgray;
+}
+
 md-sidenav-layout {
     min-height: 600px;
 }
@@ -21,11 +25,38 @@ a {
     text-decoration: none !important;
 }
 
-md-divider {
-    color: lightgray;
+.doc-title {
+    color: black;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 15px;
 }
 
-.other-versions {
+.doc-description {
+    color: darkgray;
     font-family: 'Open Sans', sans-serif;
     font-size: 12px;
+    font-style: italic;
+}
+
+.versions-link-main {
+    color: black;
+    text-decoration: none !important;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 15px;
+}
+
+.versions-link-main-emphasize {
+    color: black;
+    text-decoration: none !important;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 17px;
+    font-weight: bold;
+}
+
+.versions-link-other {
+    color: darkgray;
+    text-decoration: none !important;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 12px;
+    font-style: italic;
 }

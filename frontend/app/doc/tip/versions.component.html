@@ -17,32 +17,22 @@
         </md-list>
     </md-sidenav>
 
-    <!--TODO: configuration generator with latest version-->
     <div class="doc-group">
         <router-outlet></router-outlet>
         <md-tab-group>
-            <md-tab>
-                <template md-tab-label>
-					TLS
-				</template>
+            <md-tab *ngFor="let majorVersionItem of majorVersionItems">
+                <template md-tab-label>{{majorVersionItem.version}}</template>
                 <template md-tab-content>
-					<p>(Working in progress... TLS)</p>
-				</template>
-            </md-tab>
-            <md-tab>
-                <template md-tab-label>
-					Baremetal, VM
-				</template>
-                <template md-tab-content>
-					<p>(Working in progress... VM)</p>
-				</template>
-            </md-tab>
-            <md-tab>
-                <template md-tab-label>
-					rkt
-				</template>
-                <template md-tab-content>
-					<p>(Working in progress... rkt)</p>
+					<md-list>
+						<md-list-item *ngFor="let versionItem of majorVersionItem.versionItems">
+							<h3 md-line class="{{versionItem.versionHTMLClassLinkMain}}">
+								<a href="{{versionItem.releaseLink}}" class="{{versionItem.versionHTMLClassLinkRelease}}" target="_blank">{{versionItem.version}}</a>
+							</h3>
+							<p md-line>
+								<a href="{{versionItem.docLink}}" class="{{versionItem.versionHTMLClassLinkDoc}}" target="_blank">Documentation</a>
+							</p>
+						</md-list-item>
+					</md-list>
 				</template>
             </md-tab>
         </md-tab-group>

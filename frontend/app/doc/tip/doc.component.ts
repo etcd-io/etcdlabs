@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { parentComponent } from './common.component';
+import { parentComponent, sidebarItem } from './common.component';
 
 @Component({
     selector: 'doc',
@@ -7,7 +7,9 @@ import { parentComponent } from './common.component';
     styleUrls: ['common.component.css']
 })
 export class doc_tip_Component extends parentComponent {
+    docItems: sidebarItem[];
     constructor() {
         super();
+        this.docItems = super.getAllSidebarItems();
     }
 }
