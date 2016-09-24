@@ -1,11 +1,17 @@
 
 #### Technology Used
 
-- Angular 2, Angular 2 Material, TypeScript (frontend)
-- Go (backend)
+Frontend
+
+- [Angular 2](https://angular.io/)
+- [Angular 2 Material](https://github.com/angular/material2)
+- [TypeScript](https://www.typescriptlang.org/index.html)
+
+Backend
+
+- [Go](https://golang.org/)
 
 
 #### Project Status
 
-- Angular 2 Material is still in active development, so this has some limitations in
-  frontend
+- [Angular 2 Material](https://github.com/angular/material2) is still in active development

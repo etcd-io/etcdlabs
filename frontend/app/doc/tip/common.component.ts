@@ -10,7 +10,7 @@ export class Versioner {
     version: Version = {
         etcdVersion: "tip",
         etcdVersionURL: 'tip',
-        etcdVersionLatestRelease: "v3.1.0-alpha.1"
+        etcdVersionLatestRelease: "v3.1.0-alpha.1",
     };
 
     getVersion() {
@@ -63,7 +63,7 @@ export class parentComponent {
                 'etcdctl, client requests, basic operations',
                 `/doc/${this.version.etcdVersionURL}/tutorials`,
                 'no-text-decoration'
-            )
+            ),
         ];
 
         this.moreItems = [
@@ -90,11 +90,11 @@ export class parentComponent {
                 'looking for documentation of other versions?',
                 `/doc/${this.version.etcdVersionURL}/versions`,
                 'no-text-decoration'
-            )
+            ),
         ];
     }
 
     public getAllSidebarItems() {
-        return this.getStartedItems.concat(this.moreItems)
+        return this.getStartedItems.concat(this.moreItems);
     }
 }

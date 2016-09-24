@@ -43,7 +43,7 @@ export class versions_tip_Component extends parentComponent {
                     'versions-link-main',
                     'https://github.com/coreos/etcd/tree/master/Documentation/v2',
                     'versions-link-other'
-                )
+                ),
             ]),
             new majorVersionItem('v3', [
                 new versionItem(
@@ -66,7 +66,14 @@ export class versions_tip_Component extends parentComponent {
                     'versions-link-main',
                     'https://github.com/coreos/etcd/tree/master/Documentation',
                     'versions-link-other'
-                )
+                ),
+                new versionItem(
+                    'v3.0.0',
+                    'https://github.com/coreos/etcd/releases/tag/v3.0.0',
+                    'versions-link-main',
+                    'https://github.com/coreos/etcd/tree/master/Documentation',
+                    'versions-link-other'
+                ),
             ])
         ]
     }

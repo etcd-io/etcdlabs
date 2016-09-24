@@ -25,8 +25,6 @@ const appRoutes: Routes = [
     { path: 'playground', redirectTo: '/play', pathMatch: 'full' },
     { path: 'play', component: PlayComponent },
 
-    // TODO: dot routing with '/doc/v3.1'
-    // https://github.com/angular/angular/issues/11842
     { path: 'docs', redirectTo: '/doc', pathMatch: 'full' },
     { path: 'doc', redirectTo: '/doc/tip', pathMatch: 'full' },
     {
@@ -44,8 +42,7 @@ const appRoutes: Routes = [
         ]
     },
 
-    // TODO: create versioned docs after release
-    // TODO: dot routing
+    // TODO: dot routing https://github.com/angular/angular/issues/11842
     { path: 'doc/v31', redirectTo: '/doc/tip', pathMatch: 'full' },
     { path: 'doc/v32', redirectTo: '/doc/tip', pathMatch: 'full' }
 ];
