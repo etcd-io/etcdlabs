@@ -18,13 +18,16 @@ export class Versioner {
     }
 }
 
-
 export class sidebarItem {
     title: string;
+    description: string;
     url: string;
-    constructor(title: string, url: string) {
+    htmlClass: string;
+    constructor(title: string, description: string, url: string, htmlClass: string) {
         this.title = title;
+        this.description = description;
         this.url = url;
+        this.htmlClass = htmlClass;
     }
 }
 
@@ -32,30 +35,66 @@ export class parentComponent {
     versioner = new Versioner();
     version = this.versioner.getVersion();
 
-    getStartedItems;
-    tutorialItems;
-    moreItems;
-    otherVersions;
+    getStartedItems: sidebarItem[];
+    moreItems: sidebarItem[];
 
     constructor() {
         this.getStartedItems = [
-            new sidebarItem('Install, Deploy', `/doc/${this.version.etcdVersionURL}/install-deploy`),
-            new sidebarItem('Kubernetes', `/doc/${this.version.etcdVersionURL}/kubernetes`)
-        ];
-
-        this.tutorialItems = [
-            new sidebarItem('etcdctl', `/doc/${this.version.etcdVersionURL}/etcdctl`)
+            new sidebarItem(
+                'Why',
+                'etcd use cases, when to use',
+                `/doc/${this.version.etcdVersionURL}/why`,
+                'no-text-decoration'
+            ),
+            new sidebarItem(
+                'Install, Deploy',
+                'set up etcd cluster in various settings',
+                `/doc/${this.version.etcdVersionURL}/install-deploy`,
+                'no-text-decoration'
+            ),
+            new sidebarItem(
+                'Kubernetes',
+                'manage, automate etcd cluster operations using Kubernetes',
+                `/doc/${this.version.etcdVersionURL}/kubernetes`,
+                'no-text-decoration'
+            ),
+            new sidebarItem(
+                'Tutorials',
+                'etcdctl, client requests, basic operations',
+                `/doc/${this.version.etcdVersionURL}/tutorials`,
+                'no-text-decoration'
+            )
         ];
 
         this.moreItems = [
-            new sidebarItem('FAQ', `/doc/${this.version.etcdVersionURL}/faq`),
-            new sidebarItem('Performance', `/doc/${this.version.etcdVersionURL}/performance`),
-            new sidebarItem('Reliability', `/doc/${this.version.etcdVersionURL}/reliability`)
+            new sidebarItem(
+                'FAQ',
+                'frequently asked questions',
+                `/doc/${this.version.etcdVersionURL}/faq`,
+                'no-text-decoration'
+            ),
+            new sidebarItem(
+                'Performance',
+                'benchmark results, performance analysis',
+                `/doc/${this.version.etcdVersionURL}/performance`,
+                'no-text-decoration'
+            ),
+            new sidebarItem(
+                'Reliability',
+                `etcd's #1 goal is Reliability, and this is how we ensure that`,
+                `/doc/${this.version.etcdVersionURL}/reliability`,
+                'no-text-decoration'
+            ),
+            new sidebarItem(
+                'Versions',
+                'looking for documentation of other versions?',
+                `/doc/${this.version.etcdVersionURL}/versions`,
+                'no-text-decoration'
+            )
         ];
+    }
 
-        this.otherVersions = [
-            new sidebarItem('v3.1 (Planned)', '/doc/v31'),
-            new sidebarItem('v3.2 (Planned)', '/doc/v32')
-        ];
+    public getAllSidebarItems() {
+        return this.getStartedItems.concat(this.moreItems)
     }
 }
