@@ -41,7 +41,7 @@ export class versions_tip_Component extends parentComponent {
                     'v2.3.7',
                     'https://github.com/coreos/etcd/releases/tag/v2.3.7',
                     'versions-link-main',
-                    'https://github.com/coreos/etcd/tree/master/Documentation/v2',
+                    'https://github.com/coreos/etcd/tree/release-2.3/Documentation',
                     'versions-link-other'
                 ),
             ]),
