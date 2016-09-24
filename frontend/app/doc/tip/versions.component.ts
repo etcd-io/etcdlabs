@@ -64,14 +64,14 @@ export class versions_tip_Component extends parentComponent {
                     'v3.0.10',
                     'https://github.com/coreos/etcd/releases/tag/v3.0.10',
                     'versions-link-main',
-                    'https://github.com/coreos/etcd/tree/master/Documentation',
+                    'https://github.com/coreos/etcd/tree/release-3.0/Documentation',
                     'versions-link-other'
                 ),
                 new versionItem(
                     'v3.0.0',
                     'https://github.com/coreos/etcd/releases/tag/v3.0.0',
                     'versions-link-main',
-                    'https://github.com/coreos/etcd/tree/master/Documentation',
+                    'https://github.com/coreos/etcd/tree/release-3.0/Documentation',
                     'versions-link-other'
                 ),
             ])
