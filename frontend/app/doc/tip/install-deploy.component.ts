@@ -71,14 +71,6 @@ export class etcdFlag {
         this.peerKeyFile = peerKeyFile;
         this.peerTrustedCAFile = peerTrustedCAFile;
     }
-
-    setProtocol(secure: boolean) {
-        if (secure) {
-            this.protocol = 'https';
-            return;
-        }
-        this.protocol = 'http';
-    }
 }
 
 @Component({
@@ -258,6 +250,10 @@ export class install_deploy_tip_Component extends parentComponent {
     }
 
     getInitialCluster() {
+        if (this.inputClusterSize > 7) {
+            this.inputClusterSize = 7;
+        }
+
         let txt = '';
         for (let _i = 0; _i < this.flags.length; _i++) {
             if (_i > 0) {
@@ -282,11 +278,5 @@ export class install_deploy_tip_Component extends parentComponent {
             this.flags[_i].initialCluster = txt;
         }
         return txt;
-    }
-
-    generateFlag() {
-        if (this.inputClusterSize > 7) {
-            this.inputClusterSize = 7;
-        }
     }
 }
