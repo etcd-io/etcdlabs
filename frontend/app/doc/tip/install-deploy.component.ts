@@ -10,8 +10,8 @@ export class etcdFlag {
     clientPort: number;
     peerPort: number;
 
-    clusterToken: string;
-    clusterState: string;
+    initialClusterToken: string;
+    initialClusterState: string;
 
     initialCluster: string;
 
@@ -33,8 +33,8 @@ export class etcdFlag {
         clientPort: number,
         peerPort: number,
 
-        clusterToken: string,
-        clusterState: string,
+        initialClusterToken: string,
+        initialClusterState: string,
 
         initialCluster: string,
 
@@ -58,8 +58,8 @@ export class etcdFlag {
         this.clientPort = clientPort;
         this.peerPort = peerPort;
 
-        this.clusterToken = clusterToken;
-        this.clusterState = clusterState;
+        this.initialClusterToken = initialClusterToken;
+        this.initialClusterState = initialClusterState;
 
         this.initialCluster = initialCluster;
 
@@ -249,9 +249,56 @@ export class install_deploy_tip_Component extends parentComponent {
         ];
     }
 
+    getEtcdCommandInitial() {
+        return `ETCD_VER=${this.inputVersion}
+GOOGLE_URL=https://storage.googleapis.com/etcd
+GITHUB_URL=https://github.com/coreos/etcd/releases/download
+` + "DOWNLOAD_URL=${GOOGLE_URL}" + `
+` + "# DOWNLOAD_URL=${GITHUB_URL}" + `
+`;
+    }
+
+    getEtcdCommandInstallLinux() {
+        return "rm -f /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz" + `
+` + "curl -L ${DOWNLOAD_PATH}/${ETCD_VER}/etcd-${ETCD_VER}-linux-amd64.tar.gz -o /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz" + `
+rm -rf /tmp/etcd-test && mkdir -p /tmp/etcd-test
+` + "tar xzvf /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz -C /tmp/etcd-test --strip-components=1" + `
+
+/tmp/etcd-test/etcd --version
+`;
+    }
+
+    getEtcdCommandInstallOSX() {
+        return "rm -f /tmp/etcd-${ETCD_VER}-darwin-amd64.zip" + `
+` + "curl -L ${DOWNLOAD_PATH}/${ETCD_VER}/etcd-${ETCD_VER}-darwin-amd64.zip -o /tmp/etcd-${ETCD_VER}-darwin-amd64.zip" + `
+rm -rf /tmp/etcd-test
+` + "unzip /tmp/etcd-${ETCD_VER}-darwin-amd64.zip -d /tmp && mv /tmp/etcd-${ETCD_VER}-darwin-amd64 /tmp/etcd-test" + `
+
+/tmp/etcd-test/etcd --version
+`;
+    }
+
+    getClientURL(flag: etcdFlag) {
+        if (this.inputSecure) {
+            flag.protocol = 'https';
+        } else {
+            flag.protocol = 'http';
+        }
+        return flag.protocol + '://' + flag.ipAddress + ':' + String(flag.clientPort);
+    }
+
+    getPeerURL(flag: etcdFlag) {
+        if (this.inputSecure) {
+            flag.protocol = 'https';
+        } else {
+            flag.protocol = 'http';
+        }
+        return flag.protocol + '://' + flag.ipAddress + ':' + String(flag.peerPort);
+    }
+
     getInitialCluster() {
         if (this.inputClusterSize > 7) {
-            this.inputClusterSize = 7;
+            return '(error: cluster size over 7 is not supported)';
         }
 
         let txt = '';
@@ -266,9 +313,7 @@ export class install_deploy_tip_Component extends parentComponent {
                 this.flags[_i].protocol = 'http';
             }
 
-            txt += this.flags[_i].name + '=' +
-                this.flags[_i].protocol + '://' +
-                this.flags[_i].ipAddress + ':' + String(this.flags[_i].clientPort);
+            txt += this.flags[_i].name + '=' + this.getPeerURL(this.flags[_i]);
 
             if (_i + 1 === this.inputClusterSize) {
                 break;
@@ -278,5 +323,37 @@ export class install_deploy_tip_Component extends parentComponent {
             this.flags[_i].initialCluster = txt;
         }
         return txt;
+    }
+
+    getEtcdCommandBash(flag: etcdFlag) {
+        let cmd = '/tmp/etcd-test/etcd' + ' ' + '--name' + ' ' + flag.name + ' ' + '--data-dir' + ' ' + flag.dataDir + ' \\' + `
+    ` + '--listen-client-urls' + ' ' + this.getClientURL(flag) + ' ' + '--advertise-client-urls' + ' ' + this.getClientURL(flag) + ' \\' + `
+    ` + '--listen-peer-urls' + ' ' + this.getPeerURL(flag) + ' ' + '--initial-advertise-peer-urls' + ' ' + this.getPeerURL(flag) + ' \\' + `
+    ` + '--initial-cluster' + ' ' + this.getInitialCluster() + ' \\' + `
+    ` + '--initial-cluster-token' + ' ' + flag.initialClusterToken + ' ' + '--initial-cluster-state' + ' ' + flag.initialClusterState;
+
+        if (this.inputSecure) {
+            cmd += ' \\' + `
+    ` + '--client-cert-auth' + ' \\' + `
+    ` + '--cert-file' + ' ' + flag.clientCertFile + ' \\' + `
+    ` + '--key-file' + ' ' + flag.clientKeyFile + ' \\' + `
+    ` + '--trusted-ca-file' + ' ' + flag.clientTrustedCAFile + ' \\' + `
+    ` + '--peer-client-cert-auth' + ' \\' + `
+    ` + '--peer-cert-file' + ' ' + flag.peerCertFile + ' \\' + `
+    ` + '--peer-key-file' + ' ' + flag.peerKeyFile + ' \\' + `
+    ` + '--peer-trusted-ca-file' + ' ' + flag.peerTrustedCAFile;
+        }
+
+        if (this.inputEnableProfile) {
+            cmd += ' \\' + `
+    ` + '--enable-pprof';
+        }
+
+        if (this.inputDebug) {
+            cmd += ' \\' + `
+    ` + '--debug';
+        }
+
+        return cmd;
     }
 }

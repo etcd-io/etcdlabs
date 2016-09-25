@@ -46,6 +46,7 @@ a {
     color: darkgray;
     font-family: 'Open Sans', sans-serif;
     font-size: 13px;
+    line-height: 0.07;
 }
 
 .versions-link-main {
@@ -84,4 +85,36 @@ a {
     font-family: 'Open Sans', sans-serif;
     font-size: 12px;
     font-style: italic;
+}
+
+.code-light {
+    white-space: pre-wrap;
+    border-style: solid;
+    border-width: 1px;
+    border-color: lightslategrey;
+    border-radius: 5px;
+    background: #f5f5f5;
+    color: #366354;
+    font-family: monospace;
+    font-size: 14px;
+    font-weight: 400;
+    padding: 8px;
+    margin: 1em 0px 1em;
+    word-wrap: normal;
+}
+
+.code-dark {
+    white-space: pre-wrap;
+    border-style: solid;
+    border-width: 1px;
+    border-color: lightslategrey;
+    border-radius: 5px;
+    background: #37474F;
+    color: #76FF03;
+    font-family: monospace;
+    font-size: 14px;
+    font-weight: 400;
+    padding: 8px;
+    margin: 1em 0px 1em;
+    word-wrap: normal;
 }

@@ -62,9 +62,9 @@
                     <md-input type="number" [(ngModel)]="flag.clientPort" placeholder="client port"></md-input>
                     <md-input type="number" [(ngModel)]="flag.peerPort" placeholder="peer port"></md-input>
                     <br>
-                    <md-input type="text" [(ngModel)]="flag.clusterToken" placeholder="cluster token"></md-input>
-                    <md-input type="text" [(ngModel)]="flag.clusterState" placeholder="cluster state"></md-input>
-                    <span *ngIf="flag.clusterState != 'new' && flag.clusterState != 'existing'" class="error-message">Cluster state must be either 'new' or 'existing'</span>
+                    <md-input type="text" [(ngModel)]="flag.initialClusterToken" placeholder="cluster token"></md-input>
+                    <md-input type="text" [(ngModel)]="flag.initialClusterState" placeholder="cluster state"></md-input>
+                    <span *ngIf="flag.initialClusterState != 'new' && flag.initialClusterState != 'existing'" class="error-message">Cluster state must be either 'new' or 'existing'</span>
                     <br>
                     <md-input type="text" [(ngModel)]="flag.clientCertFile" placeholder="client cert"></md-input>
                     <md-input type="text" [(ngModel)]="flag.clientKeyFile" placeholder="client key"></md-input>
@@ -83,14 +83,14 @@
         </md-card>
 
         <br><br>
-        <h4>Generated Configuration</h4>
+        <h4>Generated Commands</h4>
         <md-tab-group>
             <md-tab>
                 <template md-tab-label>
 					TLS
 				</template>
                 <template md-tab-content>
-					<p>{{getInitialCluster()}}</p>
+					<p>etcd {{inputVersion}}</p>
 				</template>
             </md-tab>
             <md-tab>
@@ -98,7 +98,24 @@
 					Baremetal, VM
 				</template>
                 <template md-tab-content>
-					<p>etcd {{inputVersion}}</p>
+					<h5 style="line-height: 0.07;">Initial Setting</h5>
+					<pre class="code-dark">{{getEtcdCommandInitial()}}</pre>
+
+					<br>
+					<h5 style="line-height: 0.07;">Install on Linux</h5>
+					<pre class="code-dark">{{getEtcdCommandInstallLinux()}}</pre>
+
+					<br>
+					<h5 style="line-height: 0.07;">Install on Mac OS (Darwin)</h5>
+					<pre class="code-dark">{{getEtcdCommandInstallOSX()}}</pre>
+
+					<br>
+					<h5 style="line-height: 0.07;">Deploy Cluster</h5>
+					<div *ngFor="let flag of flags; let i = index;">
+						<div *ngIf="inputClusterSize > i">
+							<pre class="code-dark">{{getEtcdCommandBash(flag)}}</pre>
+						</div>
+					</div>
 				</template>
             </md-tab>
             <md-tab>
