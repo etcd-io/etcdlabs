@@ -42,6 +42,12 @@ a {
     font-style: italic;
 }
 
+.sub-sub-title {
+    color: darkgray;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13px;
+}
+
 .versions-link-main {
     color: black;
     text-decoration: none !important;
@@ -67,6 +73,14 @@ a {
 .versions-link-other {
     color: darkgray;
     text-decoration: none !important;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 12px;
+    font-style: italic;
+}
+
+.error-message {
+    margin: 5px;
+    color: red;
     font-family: 'Open Sans', sans-serif;
     font-size: 12px;
     font-style: italic;

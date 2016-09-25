@@ -96,11 +96,11 @@ export class parentComponent {
         ];
     }
 
-    public getVersion() {
+    getVersion() {
         return this.version;
     }
 
-    public getAllSidebarItems() {
+    getAllSidebarItems() {
         return this.getStartedItems.concat(this.moreItems);
     }
 }

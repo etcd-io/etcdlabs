@@ -26,17 +26,17 @@
         </h4>
         <md-card>
             <md-card-subtitle>TLS</md-card-subtitle>
-            <md-input [(ngModel)]="inputOrganization" placeholder="Organization"></md-input>
-            <md-input [(ngModel)]="inputOrganizationUnit" placeholder="Organization Unit"></md-input>
-            <md-input [(ngModel)]="inputLocationCity" placeholder="City"></md-input>
-            <md-input [(ngModel)]="inputLocationState" placeholder="State"></md-input>
-            <md-input [(ngModel)]="inputLocationCountry" placeholder="Country"></md-input>
+            <md-input type="text" [(ngModel)]="inputOrganization" placeholder="Organization"></md-input>
+            <md-input type="text" [(ngModel)]="inputOrganizationUnit" placeholder="Organization Unit"></md-input>
+            <md-input type="text" [(ngModel)]="inputLocationCity" placeholder="City"></md-input>
+            <md-input type="text" [(ngModel)]="inputLocationState" placeholder="State"></md-input>
+            <md-input type="text" [(ngModel)]="inputLocationCountry" placeholder="Country"></md-input>
             <br>
-            <md-input [(ngModel)]="inputKeyAlgorithm" placeholder="Key Algorithm"></md-input>
-            <md-input [(ngModel)]="inputKeySize" placeholder="Key Size"></md-input>
-            <md-input [(ngModel)]="inputKeyExpirationHour" placeholder="Key Expiration (hour)"></md-input>
+            <md-input type="text" [(ngModel)]="inputKeyAlgorithm" placeholder="Key Algorithm"></md-input>
+            <md-input type="number" [(ngModel)]="inputKeySize" placeholder="Key Size"></md-input>
+            <md-input type="number" [(ngModel)]="inputKeyExpirationHour" placeholder="Key Expiration (hour)"></md-input>
             <br>
-            <md-input [(ngModel)]="inputCommonName" placeholder="Common Name"></md-input>
+            <md-input type="text" [(ngModel)]="inputCommonName" placeholder="Common Name"></md-input>
         </md-card>
 
         <md-card>
@@ -45,18 +45,44 @@
             <md-checkbox [(ngModel)]="inputEnableProfile">Enable profiler</md-checkbox>
             <md-checkbox [(ngModel)]="inputDebug">Debug mode</md-checkbox>
             <p></p>
-            <md-input [(ngModel)]="inputVersion" placeholder="etcd version"></md-input>
-            <md-input [(ngModel)]="inputClusterSize" placeholder="Cluster size"></md-input>
+            <md-input type="text" [(ngModel)]="inputVersion" placeholder="etcd version"></md-input>
+            <md-input type="number" [(ngModel)]="inputClusterSize" placeholder="Cluster size (up to 7)"></md-input>
+            <span *ngIf="inputClusterSize > 7" class="error-message">This tool only supports up to 7 nodes</span>
+            <span *ngIf="inputClusterSize < 1" class="error-message">Minimum cluster size is 1</span>
+            <span *ngIf="inputClusterSize % 2 == 0" class="error-message">Cluster size should an odd number</span>
+            <br>
+
+            <div *ngFor="let flag of flags; let i = index;">
+                <div *ngIf="inputClusterSize > i">
+                    <br>
+                    <md-card-subtitle class="sub-sub-title">Node {{i+1}}</md-card-subtitle>
+                    <md-input type="text" [(ngModel)]="flag.name" placeholder="etcd name"></md-input>
+                    <md-input type="text" [(ngModel)]="flag.dataDir" placeholder="data directory"></md-input>
+                    <md-input type="text" [(ngModel)]="flag.ipAddress" placeholder="IP address"></md-input>
+                    <md-input type="number" [(ngModel)]="flag.clientPort" placeholder="client port"></md-input>
+                    <md-input type="number" [(ngModel)]="flag.peerPort" placeholder="peer port"></md-input>
+                    <br>
+                    <md-input type="text" [(ngModel)]="flag.clusterToken" placeholder="cluster token"></md-input>
+                    <md-input type="text" [(ngModel)]="flag.clusterState" placeholder="cluster state"></md-input>
+                    <span *ngIf="flag.clusterState != 'new' && flag.clusterState != 'existing'" class="error-message">Cluster state must be either 'new' or 'existing'</span>
+                    <br>
+                    <md-input type="text" [(ngModel)]="flag.clientCertFile" placeholder="client cert"></md-input>
+                    <md-input type="text" [(ngModel)]="flag.clientKeyFile" placeholder="client key"></md-input>
+                    <md-input type="text" [(ngModel)]="flag.clientTrustedCAFile" placeholder="client CA"></md-input>
+                    <br>
+                    <md-input type="text" [(ngModel)]="flag.peerCertFile" placeholder="peer cert"></md-input>
+                    <md-input type="text" [(ngModel)]="flag.peerKeyFile" placeholder="peer key"></md-input>
+                    <md-input type="text" [(ngModel)]="flag.peerTrustedCAFile" placeholder="peer CA"></md-input>
+                </div>
+            </div>
 
             <br>
             <md-card-actions>
-                <button md-button color="primary">Generate</button>
                 <a href="{{version.etcdFlagPage}}" target="_blank"><button md-button color="warn">More flags</button></a>
             </md-card-actions>
         </md-card>
 
         <br><br>
-        <hr>
         <h4>Generated Configuration</h4>
         <md-tab-group>
             <md-tab>
@@ -64,7 +90,7 @@
 					TLS
 				</template>
                 <template md-tab-content>
-					<p>(Working in progress... TLS)</p>
+					<p>{{getInitialCluster()}}</p>
 				</template>
             </md-tab>
             <md-tab>
