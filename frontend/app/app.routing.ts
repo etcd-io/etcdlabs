@@ -1,4 +1,7 @@
 import { Routes, RouterModule } from '@angular/router';
+
+import { NotFoundComponent } from './not-found.component';
+
 import { HomeComponent } from './home/home.component';
 import { BlogComponent } from './blog/blog.component';
 import { PlayComponent } from './play/play.component';
@@ -38,18 +41,23 @@ const appRoutes: Routes = [
             { path: 'faq', component: faq_tip_Component },
             { path: 'performance', component: performance_tip_Component },
             { path: 'reliability', component: reliability_tip_Component },
-            { path: 'versions', component: versions_tip_Component }
-        ]
+            { path: 'versions', component: versions_tip_Component },
+        ],
     },
 
     // TODO: dot routing https://github.com/angular/angular/issues/11842
     { path: 'doc/v31', redirectTo: '/doc/tip', pathMatch: 'full' },
-    { path: 'doc/v32', redirectTo: '/doc/tip', pathMatch: 'full' }
+    { path: 'doc/v32', redirectTo: '/doc/tip', pathMatch: 'full' },
+
+    // { path: '**', redirectTo: '/home' },
+    { path: '**', component: NotFoundComponent },
 ];
 
 export const routing = RouterModule.forRoot(appRoutes);
 
 export const routedComponents = [
+    NotFoundComponent,
+
     HomeComponent,
     PlayComponent,
     BlogComponent,
@@ -62,5 +70,5 @@ export const routedComponents = [
     faq_tip_Component,
     performance_tip_Component,
     reliability_tip_Component,
-    versions_tip_Component
+    versions_tip_Component,
 ];

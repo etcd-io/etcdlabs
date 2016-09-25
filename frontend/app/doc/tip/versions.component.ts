@@ -29,7 +29,7 @@ export class majorVersionItem {
 @Component({
     selector: 'versions',
     templateUrl: 'versions.component.html',
-    styleUrls: ['common.component.css']
+    styleUrls: ['common.component.css'],
 })
 export class versions_tip_Component extends parentComponent {
     majorVersionItems: majorVersionItem[];

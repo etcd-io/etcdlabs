@@ -56,7 +56,7 @@ import {routing, routedComponents} from './app.routing';
   ],
   declarations: [
     AppComponent,
-    routedComponents
+    routedComponents,
   ],
   entryComponents: [AppComponent],
 })
