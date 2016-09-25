@@ -4,13 +4,15 @@ export class Version {
     etcdVersion: string;
     etcdVersionURL: string;
     etcdVersionLatestRelease: string;
+    etcdFlagPage: string;
 }
 
 export class Versioner {
     version: Version = {
         etcdVersion: "tip",
         etcdVersionURL: 'tip',
-        etcdVersionLatestRelease: "v3.1.0-alpha.1",
+        etcdVersionLatestRelease: 'v3.1.0',
+        etcdFlagPage: 'https://github.com/coreos/etcd/blob/master/etcdmain/help.go',
     };
 
     getVersion() {

@@ -1,5 +1,6 @@
 import {NgModule, ApplicationRef} from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
+import {FormsModule}   from '@angular/forms';
 
 import {MdButtonToggleModule} from '@angular2-material/button-toggle/button-toggle';
 import {MdButtonModule} from '@angular2-material/button/button';
@@ -30,6 +31,7 @@ import {routing, routedComponents} from './app.routing';
 @NgModule({
   imports: [
     BrowserModule,
+    FormsModule,
     MdButtonModule.forRoot(),
     MdButtonToggleModule.forRoot(),
     MdCardModule.forRoot(),

@@ -15,6 +15,10 @@ md-sidenav-layout {
     padding: 30px;
 }
 
+.doc-group md-checkbox {
+    margin: 10px;
+}
+
 a {
     color: black;
     text-decoration: none !important;
@@ -51,6 +55,13 @@ a {
     font-family: 'Open Sans', sans-serif;
     font-size: 17px;
     font-weight: bold;
+}
+
+.versions-link-normal {
+    color: dimgrey;
+    text-decoration: none !important;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13px;
 }
 
 .versions-link-other {

@@ -21,13 +21,43 @@
     <div class="doc-group">
         <router-outlet></router-outlet>
 
-        <p>
-            Latest etcd release version <span class="versions-link-main-emphasize">{{version.etcdVersionLatestRelease}}</span>
-        </p>
-        <p>
-            Hello World!
-        </p>
+        <h4>
+            Install and Deploy etcd <span class="versions-link-main-emphasize">{{inputVersion}}</span> <span class="versions-link-normal">(latest {{etcdVersionLatestRelease}})</span>
+        </h4>
+        <md-card>
+            <md-card-subtitle>TLS</md-card-subtitle>
+            <md-input [(ngModel)]="inputOrganization" placeholder="Organization"></md-input>
+            <md-input [(ngModel)]="inputOrganizationUnit" placeholder="Organization Unit"></md-input>
+            <md-input [(ngModel)]="inputLocationCity" placeholder="City"></md-input>
+            <md-input [(ngModel)]="inputLocationState" placeholder="State"></md-input>
+            <md-input [(ngModel)]="inputLocationCountry" placeholder="Country"></md-input>
+            <br>
+            <md-input [(ngModel)]="inputKeyAlgorithm" placeholder="Key Algorithm"></md-input>
+            <md-input [(ngModel)]="inputKeySize" placeholder="Key Size"></md-input>
+            <md-input [(ngModel)]="inputKeyExpirationHour" placeholder="Key Expiration (hour)"></md-input>
+            <br>
+            <md-input [(ngModel)]="inputCommonName" placeholder="Common Name"></md-input>
+        </md-card>
 
+        <md-card>
+            <md-card-subtitle>etcd flags</md-card-subtitle>
+            <md-checkbox [(ngModel)]="inputSecure">Secure connection (HTTPS)</md-checkbox>
+            <md-checkbox [(ngModel)]="inputEnableProfile">Enable profiler</md-checkbox>
+            <md-checkbox [(ngModel)]="inputDebug">Debug mode</md-checkbox>
+            <p></p>
+            <md-input [(ngModel)]="inputEnableProfile" placeholder="Enable profiler"></md-input>
+            <md-input [(ngModel)]="inputDebug" placeholder="Debug mode"></md-input>
+
+            <br>
+            <md-card-actions>
+                <button md-button color="primary">Generate</button>
+                <a href="{{version.etcdFlagPage}}" target="_blank"><button md-button color="warn">More flags</button></a>
+            </md-card-actions>
+        </md-card>
+
+        <br><br>
+        <hr>
+        <h4>Generated Configuration</h4>
         <md-tab-group>
             <md-tab>
                 <template md-tab-label>
@@ -42,7 +72,7 @@
 					Baremetal, VM
 				</template>
                 <template md-tab-content>
-					<p>(Working in progress... VM)</p>
+					<p>etcd {{inputVersion}}</p>
 				</template>
             </md-tab>
             <md-tab>
@@ -50,7 +80,7 @@
 					rkt
 				</template>
                 <template md-tab-content>
-					<p>(Working in progress... rkt)</p>
+					<p>etcd {{inputVersion}}</p>
 				</template>
             </md-tab>
         </md-tab-group>
