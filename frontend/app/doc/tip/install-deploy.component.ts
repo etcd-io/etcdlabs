@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { parentComponent } from './common.component';
+import { Version, parentComponent } from './common.component';
 
 @Component({
     selector: 'install-deploy',
@@ -7,7 +7,9 @@ import { parentComponent } from './common.component';
     styleUrls: ['common.component.css'],
 })
 export class install_deploy_tip_Component extends parentComponent {
+    version: Version;
     constructor() {
         super();
+        this.version = super.getVersion();
     }
 }

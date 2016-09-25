@@ -94,6 +94,10 @@ export class parentComponent {
         ];
     }
 
+    public getVersion() {
+        return this.version;
+    }
+
     public getAllSidebarItems() {
         return this.getStartedItems.concat(this.moreItems);
     }
