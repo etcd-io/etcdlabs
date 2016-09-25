@@ -68,11 +68,11 @@
                     <br>
                     <md-input type="text" [(ngModel)]="flag.clientCertFile" placeholder="client cert"></md-input>
                     <md-input type="text" [(ngModel)]="flag.clientKeyFile" placeholder="client key"></md-input>
-                    <md-input type="text" [(ngModel)]="flag.clientTrustedCAFile" placeholder="client CA"></md-input>
+                    <md-input type="text" [(ngModel)]="flag.clientTrustedCAFile" placeholder="client trusted CA"></md-input>
                     <br>
                     <md-input type="text" [(ngModel)]="flag.peerCertFile" placeholder="peer cert"></md-input>
                     <md-input type="text" [(ngModel)]="flag.peerKeyFile" placeholder="peer key"></md-input>
-                    <md-input type="text" [(ngModel)]="flag.peerTrustedCAFile" placeholder="peer CA"></md-input>
+                    <md-input type="text" [(ngModel)]="flag.peerTrustedCAFile" placeholder="peer trusted CA"></md-input>
                 </div>
             </div>
 
@@ -83,21 +83,65 @@
         </md-card>
 
         <br><br>
-        <h4>Generated Commands</h4>
+        <h4>Commands</h4>
         <md-tab-group>
             <md-tab>
                 <template md-tab-label>
-					TLS
+					TLS (cfssl)
 				</template>
                 <template md-tab-content>
-					<p>etcd {{inputVersion}}</p>
+					<br>
+					<h5 style="line-height: 0.07;">Why?</h5>
+					<p>
+						Let's secure your etcd with TLS.
+					</p>
+					<p>
+						It's easy to generate self-signed TLS certificates with
+						<a href="https://github.com/cloudflare/cfssl" target="_blank" class="normal-link">cfssl</a>.
+					</p>
+					<p>
+						Guides with <a href="https://letsencrypt.org/" target="_blank" class="normal-link">Let's Encrypt</a> is coming soon!
+					</p>
+
+					<br>
+					<h5 style="line-height: 0.07;">Initial Setting</h5>
+					<pre class="code-dark">{{getCfsslCommandInitial()}}</pre>
+
+					<br>
+					<h5 style="line-height: 0.07;">Generate self-signed root CA certificate</h5>
+					<pre class="code-dark">{{getCfsslCommandRootCA()}}</pre>
+
+					<br>
+					<h5 style="line-height: 0.07;">Create a configuration file</h5>
+					<pre class="code-dark">{{getCfsslCommandConfig()}}</pre>
+
+					<br>
+					<h5 style="line-height: 0.07;">Generate local-issued certificates with private keys</h5>
+					<div *ngFor="let flag of flags; let i = index;">
+						<div *ngIf="inputClusterSize > i">
+							<pre class="code-dark">{{getCfsslCommandKeys(flag)}}</pre>
+						</div>
+					</div>
+
+					<br>
 				</template>
             </md-tab>
+
             <md-tab>
                 <template md-tab-label>
-					Baremetal, VM
+					Bare metal, VM
 				</template>
                 <template md-tab-content>
+					<br>
+					<h5 style="line-height: 0.07;">Why?</h5>
+					<p>
+						etcd needs to write data to disk, and such stateful application can be complicated to run in container.
+					</p>
+					<p>
+						Bare metal or virtual machine provides the simplest way to run etcd.
+					</p>
+
+					<br>
 					<h5 style="line-height: 0.07;">Initial Setting</h5>
 					<pre class="code-dark">{{getEtcdCommandInitial()}}</pre>
 
@@ -116,16 +160,42 @@
 							<pre class="code-dark">{{getEtcdCommandBash(flag)}}</pre>
 						</div>
 					</div>
+					<br>
 				</template>
             </md-tab>
+
             <md-tab>
                 <template md-tab-label>
-					rkt
+					Kubernetes
 				</template>
                 <template md-tab-content>
-					<p>etcd {{inputVersion}}</p>
+					<br>
+					<h5 style="line-height: 0.07;">Why?</h5>
+					<p>
+						Application container gives much portability to your development phase.
+					</p>
+					<p>
+						But operating and scaling the application requires much more work.
+					</p>
+					<p>
+						<a href="http://kubernetes.io/" target="_blank" class="normal-link">Kubernetes</a> helps manage such complex container
+						environment.
+					</p>
+					<p>
+						This shows only basics of running etcd with Kubernetes.
+					</p>
+					<p>
+						For completely managed etcd cluster, please check out <a routerLink="/doc/{{version.etcdVersionURL}}/kubernetes-controller"
+							class="normal-link">Kubernetes etcd controller</a>.
+					</p>
+
+					<br><br>
+					<p>Sorry, this page is still working in progress.</p>
+					<md-progress-circle mode="indeterminate" style.width="'7px'"></md-progress-circle>
+
 				</template>
             </md-tab>
+
         </md-tab-group>
     </div>
 </md-sidenav-layout>

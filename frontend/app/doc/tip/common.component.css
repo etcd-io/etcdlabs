@@ -49,6 +49,13 @@ a {
     line-height: 0.07;
 }
 
+.normal-link {
+    color: dodgerblue;
+    text-decoration: none !important;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 15px;
+}
+
 .versions-link-main {
     color: black;
     text-decoration: none !important;
@@ -109,7 +116,7 @@ a {
     border-width: 1px;
     border-color: lightslategrey;
     border-radius: 5px;
-    background: #37474F;
+    background: #4f6672;
     color: #76FF03;
     font-family: monospace;
     font-size: 14px;

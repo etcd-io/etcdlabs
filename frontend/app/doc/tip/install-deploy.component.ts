@@ -34,17 +34,7 @@ export class etcdFlag {
         peerPort: number,
 
         initialClusterToken: string,
-        initialClusterState: string,
-
-        initialCluster: string,
-
-        clientCertFile: string,
-        clientKeyFile: string,
-        clientTrustedCAFile: string,
-
-        peerCertFile: string,
-        peerKeyFile: string,
-        peerTrustedCAFile: string,
+        initialClusterState: string
     ) {
         this.name = name;
         this.dataDir = dataDir;
@@ -61,15 +51,15 @@ export class etcdFlag {
         this.initialClusterToken = initialClusterToken;
         this.initialClusterState = initialClusterState;
 
-        this.initialCluster = initialCluster;
+        this.initialCluster = '';
 
-        this.clientCertFile = clientCertFile;
-        this.clientKeyFile = clientKeyFile;
-        this.clientTrustedCAFile = clientTrustedCAFile;
+        this.clientCertFile = '/tmp/test-certs/' + this.name + '.pem';
+        this.clientKeyFile = '/tmp/test-certs/' + this.name + '-key.pem';
+        this.clientTrustedCAFile = '/tmp/test-certs/trusted-ca.pem';
 
-        this.peerCertFile = peerCertFile;
-        this.peerKeyFile = peerKeyFile;
-        this.peerTrustedCAFile = peerTrustedCAFile;
+        this.peerCertFile = '/tmp/test-certs/' + this.name + '.pem';
+        this.peerKeyFile = '/tmp/test-certs/' + this.name + '-key.pem';
+        this.peerTrustedCAFile = '/tmp/test-certs/trusted-ca.pem';
     }
 }
 
@@ -135,14 +125,7 @@ export class install_deploy_tip_Component extends parentComponent {
                 12379,
                 12380,
                 'test-token',
-                'new',
-                '',
-                '/tmp/tests/cert-1.pem',
-                '/tmp/tests/cert-1-key.pem',
-                '/tmp/tests/trusted-ca.pem',
-                '/tmp/tests/cert-1.pem',
-                '/tmp/tests/cert-1-key.pem',
-                '/tmp/tests/trusted-ca.pem'
+                'new'
             ),
             new etcdFlag(
                 'test-name-2',
@@ -152,14 +135,7 @@ export class install_deploy_tip_Component extends parentComponent {
                 22379,
                 22380,
                 'test-token',
-                'new',
-                '',
-                '/tmp/tests/cert-2.pem',
-                '/tmp/tests/cert-2-key.pem',
-                '/tmp/tests/trusted-ca.pem',
-                '/tmp/tests/cert-2.pem',
-                '/tmp/tests/cert-2-key.pem',
-                '/tmp/tests/trusted-ca.pem'
+                'new'
             ),
             new etcdFlag(
                 'test-name-3',
@@ -169,14 +145,7 @@ export class install_deploy_tip_Component extends parentComponent {
                 32379,
                 32380,
                 'test-token',
-                'new',
-                '',
-                '/tmp/tests/cert-3.pem',
-                '/tmp/tests/cert-3-key.pem',
-                '/tmp/tests/trusted-ca.pem',
-                '/tmp/tests/cert-3.pem',
-                '/tmp/tests/cert-3-key.pem',
-                '/tmp/tests/trusted-ca.pem'
+                'new'
             ),
             new etcdFlag(
                 'test-name-4',
@@ -186,14 +155,7 @@ export class install_deploy_tip_Component extends parentComponent {
                 4379,
                 4380,
                 'test-token',
-                'new',
-                '',
-                '/tmp/tests/cert-4.pem',
-                '/tmp/tests/cert-4-key.pem',
-                '/tmp/tests/trusted-ca.pem',
-                '/tmp/tests/cert-4.pem',
-                '/tmp/tests/cert-4-key.pem',
-                '/tmp/tests/trusted-ca.pem'
+                'new'
             ),
             new etcdFlag(
                 'test-name-5',
@@ -203,14 +165,7 @@ export class install_deploy_tip_Component extends parentComponent {
                 5379,
                 5380,
                 'test-token',
-                'new',
-                '',
-                '/tmp/tests/cert-5.pem',
-                '/tmp/tests/cert-5-key.pem',
-                '/tmp/tests/trusted-ca.pem',
-                '/tmp/tests/cert-5.pem',
-                '/tmp/tests/cert-5-key.pem',
-                '/tmp/tests/trusted-ca.pem'
+                'new'
             ),
             new etcdFlag(
                 'test-name-6',
@@ -220,14 +175,7 @@ export class install_deploy_tip_Component extends parentComponent {
                 6379,
                 6380,
                 'test-token',
-                'new',
-                '',
-                '/tmp/tests/cert-6.pem',
-                '/tmp/tests/cert-6-key.pem',
-                '/tmp/tests/trusted-ca.pem',
-                '/tmp/tests/cert-6.pem',
-                '/tmp/tests/cert-6-key.pem',
-                '/tmp/tests/trusted-ca.pem'
+                'new'
             ),
             new etcdFlag(
                 'test-name-7',
@@ -237,16 +185,92 @@ export class install_deploy_tip_Component extends parentComponent {
                 7379,
                 7380,
                 'test-token',
-                'new',
-                '',
-                '/tmp/tests/cert-7.pem',
-                '/tmp/tests/cert-7-key.pem',
-                '/tmp/tests/trusted-ca.pem',
-                '/tmp/tests/cert-7.pem',
-                '/tmp/tests/cert-7-key.pem',
-                '/tmp/tests/trusted-ca.pem'
+                'new'
             ),
         ];
+    }
+
+    getCfsslCommandInitial() {
+        return `go get -v github.com/cloudflare/cfssl/cmd/cfssl
+go get -v github.com/cloudflare/cfssl/cmd/cfssljson
+rm -rf /tmp/test-certs && mkdir -p /tmp/test-certs
+`;
+    }
+
+    getCfsslCommandRootCA() {
+        return `echo '{
+  "key": {
+    "algo": "${this.inputKeyAlgorithm}",
+    "size": ${this.inputKeySize}
+  },
+  "names": [
+    {
+      "O": "${this.inputOrganization}",
+      "OU": "${this.inputOrganizationUnit}",
+      "L": "${this.inputLocationCity}",
+      "ST": "${this.inputLocationState}",
+      "C": "${this.inputLocationCountry}"
+    }
+  ],
+  "CN": "${this.inputCommonName}"
+}
+' > /tmp/test-certs/trusted-ca-csr.json
+
+cfssl gencert --initca=true /tmp/test-certs/trusted-ca-csr.json | cfssljson --bare /tmp/test-certs/trusted-ca
+`;
+    }
+
+    getCfsslCommandConfig() {
+        return `echo '{
+  "signing": {
+    "default": {
+        "usages": [
+          "signing",
+          "key encipherment",
+          "server auth",
+          "client auth"
+        ],
+        "expiry": "${this.inputKeyExpirationHour}h"
+    }
+  }
+}
+' > /tmp/test-certs/gencert-config.json
+`;
+    }
+
+    getCfsslCommandKeys(flag: etcdFlag) {
+        let hostTxt = `    "localhost"`;
+        if (flag.ipAddress !== 'localhost') {
+            hostTxt += `,
+    "${flag.ipAddress}"`;
+        }
+
+        return `echo '{
+  "key": {
+    "algo": "${this.inputKeyAlgorithm}",
+    "size": ${this.inputKeySize}
+  },
+  "names": [
+    {
+      "O": "${this.inputOrganization}",
+      "OU": "${this.inputOrganizationUnit}",
+      "L": "${this.inputLocationCity}",
+      "ST": "${this.inputLocationState}",
+      "C": "${this.inputLocationCountry}"
+    }
+  ],
+  "CN": "${this.inputCommonName}",
+  "hosts": [
+${hostTxt}
+  ]
+}
+' > /tmp/test-certs/request-ca-csr-${flag.name}.json
+
+cfssl gencert` + ' \\' + `
+    ` + '--ca /tmp/test-certs/trusted-ca.pem' + ' \\' + `
+    ` + '--ca-key /tmp/test-certs/trusted-ca-key.pem' + ' \\' + `
+    ` + '--config /tmp/test-certs/gencert-config.json' + ' \\' + `
+    ` + `/tmp/test-certs/request-ca-csr-${flag.name}.json | cfssljson --bare /tmp/test-certs/${flag.name}`;
     }
 
     getEtcdCommandInitial() {
