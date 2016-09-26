@@ -106,7 +106,7 @@
 					</p>
 
 					<br>
-					<h5 style="line-height: 0.07;">Initial Commands</h5>
+					<h5 style="line-height: 0.07;">Install cfssl</h5>
 					<!--<pre class="code-dark">{{getCfsslCommandInitial()}}</pre>-->
 					<div class="osx-window">
 						<div class="window-narrow">
@@ -150,14 +150,14 @@
 					<br>
 					<h5 style="line-height: 0.07;">Why?</h5>
 					<p>
-						etcd writes data to disk. Such stateful application can be complicated to run in container.
+						etcd writes data to disk. Such stateful application is complicated to run in container.
 					</p>
 					<p>
 						Bare metal or virtual machine is the simplest way to run etcd.
 					</p>
 
 					<br>
-					<h5 style="line-height: 0.07;">Initial Commands</h5>
+					<h5 style="line-height: 0.07;">Initial Settings</h5>
 					<!--<pre class="code-dark">{{getEtcdCommandInitial()}}</pre>-->
 					<div class="osx-window">
 						<div class="window-narrow">
@@ -182,7 +182,10 @@
 					<pre class="code-dark">{{getEtcdCommandInstallOSX()}}</pre>
 
 					<br>
-					<h5 style="line-height: 0.07;">Deploy Cluster</h5>
+					<h5 style="line-height: 0.07;">Deploy etcd cluster</h5>
+					<p *ngIf="flags[0].ipAddress == 'localhost'">
+						Seems like etcd is configured to run in localhost. Please make sure ports do not conflict!
+					</p>
 					<div *ngFor="let flag of flags; let i = index;">
 						<div *ngIf="inputClusterSize > i">
 							<pre class="code-dark">{{getEtcdCommandBash(flag)}}</pre>
@@ -209,7 +212,7 @@
 						<a href="http://kubernetes.io/" target="_blank" class="normal-link">Kubernetes</a> manages such complex container environments.
 					</p>
 					<p>
-						This shows only basics of running etcd with Kubernetes.
+						Here's how to run etcd with Kubernetes.
 					</p>
 					<p>
 						For completely managed etcd cluster, please check out <a routerLink="/doc/{{version.etcdVersionURL}}/kubernetes-controller"
@@ -221,7 +224,7 @@
 					<br>
 
 					<br>
-					<h5 style="line-height: 0.07;">Initial Commands</h5>
+					<h5 style="line-height: 0.07;">Install Kubernetes</h5>
 					This assumes host OS is Linux.
 					<div class="osx-window">
 						<div class="window">
