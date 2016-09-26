@@ -132,6 +132,9 @@
 
 					<br>
 					<h5 style="line-height: 0.07;">Generate local-issued certificates with private keys</h5>
+					<p *ngIf="flags[0].ipAddress == 'localhost'">
+						Seems like cert is configured for localhost. Please make sure to specify remote hosts, if any.
+					</p>
 					<div *ngFor="let flag of flags; let i = index;">
 						<div *ngIf="inputClusterSize > i">
 							<pre class="code-dark">{{getCfsslCommandKeys(flag)}}</pre>
