@@ -21,7 +21,7 @@
         <router-outlet></router-outlet>
 
         <h4>
-            Install and Deploy etcd <span class="versions-link-main-emphasize">{{inputVersion}}</span> <span class="versions-link-normal">(latest {{etcdVersionLatestRelease}})</span>
+            Install and Deploy etcd <span class="versions-link-main-emphasize">{{inputEtcdVersion}}</span> <span class="versions-link-normal">(latest {{etcdVersionLatestRelease}})</span>
         </h4>
         <md-card>
             <md-card-subtitle>TLS</md-card-subtitle>
@@ -44,7 +44,7 @@
             <md-checkbox [(ngModel)]="inputEnableProfile">Enable profiler</md-checkbox>
             <md-checkbox [(ngModel)]="inputDebug">Debug mode</md-checkbox>
             <p></p>
-            <md-input type="text" [(ngModel)]="inputVersion" placeholder="etcd version"></md-input>
+            <md-input type="text" [(ngModel)]="inputEtcdVersion" placeholder="etcd version"></md-input>
             <md-input type="number" [(ngModel)]="inputClusterSize" placeholder="Cluster size (up to 7)"></md-input>
             <span *ngIf="inputClusterSize > 7" class="error-message">This tool only supports up to 7 nodes</span>
             <span *ngIf="inputClusterSize < 1" class="error-message">Minimum cluster size is 1</span>
@@ -217,7 +217,12 @@
 					</p>
 
 					<br>
+					<md-input type="text" [(ngModel)]="inputKubernetesVersion" placeholder="Kubernetes version"></md-input>
+					<br>
+
+					<br>
 					<h5 style="line-height: 0.07;">Initial Commands</h5>
+                    This assumes host OS is Linux.
 					<div class="osx-window">
 						<div class="window">
 							<div class="titlebar">

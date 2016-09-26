@@ -69,6 +69,8 @@ export class etcdFlag {
     styleUrls: ['common.component.css'],
 })
 export class install_deploy_tip_Component extends parentComponent {
+    ////////////////////////////////////
+    // TLS setting properties
     inputOrganization: string;
     inputOrganizationUnit: string;
     inputLocationCity: string;
@@ -80,17 +82,26 @@ export class install_deploy_tip_Component extends parentComponent {
     inputKeyExpirationHour: number;
 
     inputCommonName: string;
+    ////////////////////////////////////
 
+    ////////////////////////////////////
+    // etcd setting properties
     inputSecure: boolean;
     inputEnableProfile: boolean;
     inputDebug: boolean;
 
     etcdVersionLatestRelease: string;
-    inputVersion: string;
+    inputEtcdVersion: string;
 
     inputClusterSize: number;
 
     flags: etcdFlag[];
+    ////////////////////////////////////
+
+    ////////////////////////////////////
+    // Kubernetes setting properties
+    inputKubernetesVersion: string;
+    ////////////////////////////////////
 
     constructor() {
         super();
@@ -112,7 +123,7 @@ export class install_deploy_tip_Component extends parentComponent {
         this.inputDebug = false;
 
         this.etcdVersionLatestRelease = super.getVersion().etcdVersionLatestRelease;
-        this.inputVersion = this.etcdVersionLatestRelease;
+        this.inputEtcdVersion = this.etcdVersionLatestRelease;
 
         this.inputClusterSize = 3;
 
@@ -188,6 +199,8 @@ export class install_deploy_tip_Component extends parentComponent {
                 'new'
             ),
         ];
+
+        this.inputKubernetesVersion = 'v1.4.0-beta.11';
     }
 
     getCfsslCommandInitial() {
@@ -274,7 +287,7 @@ cfssl gencert` + ' \\' + `
     }
 
     getEtcdCommandInitial() {
-        return `ETCD_VER=${this.inputVersion}
+        return `ETCD_VER=${this.inputEtcdVersion}
 
 GOOGLE_URL=https://storage.googleapis.com/etcd
 GITHUB_URL=https://github.com/coreos/etcd/releases/download
@@ -380,7 +393,7 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
     }
 
     getKubernetesCommandInitial() {
-        return `KUBERNETES_VER=v1.4.0-beta.11
+        return `KUBERNETES_VER=${this.inputKubernetesVersion}
 
 DOWNLOAD_URL=https://github.com/kubernetes/kubernetes/releases/download
 rm -f /tmp/kubernetes.tar.gz && rm -rf /tmp/test-kubernetes && mkdir -p /tmp/test-kubernetes
