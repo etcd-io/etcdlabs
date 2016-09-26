@@ -1,3 +1,5 @@
+<link rel="stylesheet" type="text/css" href="app/blog/blog.component.css">
+
 <md-sidenav-layout>
     <md-sidenav #left [opened]="true" mode="side" class="blog-sidenav">
         <div *ngFor="let sidebarItem of sidebarItems">
@@ -17,6 +19,6 @@
 
     <div class="blog-group">
         <router-outlet></router-outlet>
-        Hello World! Welcome to etcd blogs!
+        Announcing etcd website
     </div>
 </md-sidenav-layout>
