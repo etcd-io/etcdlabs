@@ -50,7 +50,7 @@ export class parentComponent {
             ),
             new sidebarItem(
                 'Install, Deploy',
-                'set up etcd cluster in various settings',
+                'set up etcd cluster in various environments',
                 `/doc/${this.version.etcdVersionURL}/install-deploy`,
                 'no-text-decoration'
             ),

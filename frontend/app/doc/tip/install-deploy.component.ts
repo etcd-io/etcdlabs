@@ -194,8 +194,7 @@ export class install_deploy_tip_Component extends parentComponent {
         return `go get -v github.com/cloudflare/cfssl/cmd/cfssl
 go get -v github.com/cloudflare/cfssl/cmd/cfssljson
 
-rm -rf /tmp/certs && mkdir -p /tmp/certs
-`;
+rm -rf /tmp/certs && mkdir -p /tmp/certs`;
     }
 
     getCfsslCommandRootCA() {
@@ -280,28 +279,25 @@ cfssl gencert` + ' \\' + `
 GOOGLE_URL=https://storage.googleapis.com/etcd
 GITHUB_URL=https://github.com/coreos/etcd/releases/download
 
-` + "DOWNLOAD_URL=${GOOGLE_URL}" + `
-`;
+` + 'DOWNLOAD_URL=${GOOGLE_URL}';
     }
 
     getEtcdCommandInstallLinux() {
-        return "rm -f /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz" + `
-` + "curl -L ${DOWNLOAD_PATH}/${ETCD_VER}/etcd-${ETCD_VER}-linux-amd64.tar.gz -o /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz" + `
-rm -rf /tmp/etcd-test && mkdir -p /tmp/etcd-test
-` + "tar xzvf /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz -C /tmp/etcd-test --strip-components=1" + `
+        return 'rm -f /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz && rm -rf /tmp/test-etcd && mkdir -p /tmp/test-etcd' + `
 
-/tmp/etcd-test/etcd --version
-`;
+` + 'curl -L ${DOWNLOAD_URL}/${ETCD_VER}/etcd-${ETCD_VER}-linux-amd64.tar.gz -o /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz' + `
+` + 'tar xzvf /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz -C /tmp/test-etcd --strip-components=1' + `
+
+/tmp/test-etcd/etcd --version`;
     }
 
     getEtcdCommandInstallOSX() {
-        return "rm -f /tmp/etcd-${ETCD_VER}-darwin-amd64.zip" + `
-` + "curl -L ${DOWNLOAD_PATH}/${ETCD_VER}/etcd-${ETCD_VER}-darwin-amd64.zip -o /tmp/etcd-${ETCD_VER}-darwin-amd64.zip" + `
-rm -rf /tmp/etcd-test
-` + "unzip /tmp/etcd-${ETCD_VER}-darwin-amd64.zip -d /tmp && mv /tmp/etcd-${ETCD_VER}-darwin-amd64 /tmp/etcd-test" + `
+        return 'rm -f /tmp/etcd-${ETCD_VER}-darwin-amd64.zip && rm -rf /tmp/test-etcd' + `
 
-/tmp/etcd-test/etcd --version
-`;
+` + 'curl -L ${DOWNLOAD_URL}/${ETCD_VER}/etcd-${ETCD_VER}-darwin-amd64.zip -o /tmp/etcd-${ETCD_VER}-darwin-amd64.zip' + `
+` + 'unzip /tmp/etcd-${ETCD_VER}-darwin-amd64.zip -d /tmp && mv /tmp/etcd-${ETCD_VER}-darwin-amd64 /tmp/test-etcd' + `
+
+/tmp/test-etcd/etcd --version`;
     }
 
     getClientURL(flag: etcdFlag) {
@@ -352,7 +348,7 @@ rm -rf /tmp/etcd-test
     }
 
     getEtcdCommandBash(flag: etcdFlag) {
-        let cmd = '/tmp/etcd-test/etcd' + ' ' + '--name' + ' ' + flag.name + ' ' + '--data-dir' + ' ' + flag.dataDir + ' \\' + `
+        let cmd = '/tmp/test-etcd/etcd' + ' ' + '--name' + ' ' + flag.name + ' ' + '--data-dir' + ' ' + flag.dataDir + ' \\' + `
     ` + '--listen-client-urls' + ' ' + this.getClientURL(flag) + ' ' + '--advertise-client-urls' + ' ' + this.getClientURL(flag) + ' \\' + `
     ` + '--listen-peer-urls' + ' ' + this.getPeerURL(flag) + ' ' + '--initial-advertise-peer-urls' + ' ' + this.getPeerURL(flag) + ' \\' + `
     ` + '--initial-cluster' + ' ' + this.getInitialCluster() + ' \\' + `
@@ -381,5 +377,17 @@ rm -rf /tmp/etcd-test
         }
 
         return cmd;
+    }
+
+    getKubernetesCommandInitial() {
+        return `KUBERNETES_VER=v1.4.0-beta.11
+
+DOWNLOAD_URL=https://github.com/kubernetes/kubernetes/releases/download
+rm -f /tmp/kubernetes.tar.gz && rm -rf /tmp/test-kubernetes && mkdir -p /tmp/test-kubernetes
+
+` + 'curl -L ${DOWNLOAD_URL}/${KUBERNETES_VER}/kubernetes.tar.gz -o /tmp/kubernetes.tar.gz' + `
+tar xzvf /tmp/kubernetes.tar.gz -C /tmp/test-kubernetes --strip-components=1
+
+/tmp/test-kubernetes/platforms/linux/amd64/kubectl version`;
     }
 }

@@ -143,9 +143,19 @@ https://codepen.io/JohJakob/pen/YPxgwo
     vertical-align: 50%;
 }
 
-.osx-window .window {
+.osx-window .window-narrow {
     background: #fff;
     max-width: 35em;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #acacac;
+    border-radius: 6px;
+    box-shadow: 0px 0px 20px #acacac;
+}
+
+.osx-window .window {
+    background: #fff;
+    max-width: 50em;
     margin-top: 20px;
     margin-bottom: 20px;
     border: 1px solid #acacac;

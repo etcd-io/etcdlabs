@@ -92,7 +92,7 @@
 					<br>
 					<h5 style="line-height: 0.07;">Why?</h5>
 					<p>
-						If etcd stores information that should not be public, it's highly recommended to encrypt its communication.
+						If etcd stores information that should not be public, it is highly recommended to encrypt its communication.
 					</p>
 					<p>
 						etcd supports SSL/TLS and authentication both for clients to server as well as peer communication.
@@ -109,7 +109,7 @@
 					<h5 style="line-height: 0.07;">Initial Commands</h5>
 					<!--<pre class="code-dark">{{getCfsslCommandInitial()}}</pre>-->
 					<div class="osx-window">
-						<div class="window">
+						<div class="window-narrow">
 							<div class="titlebar">
 								<div class="buttons">
 									<div class="closebtn"><span><strong></strong></span></div>
@@ -150,17 +150,17 @@
 					<br>
 					<h5 style="line-height: 0.07;">Why?</h5>
 					<p>
-						etcd needs to write data to disk, and such stateful application can be complicated to run in container.
+						etcd writes data to disk. Such stateful application can be complicated to run in container.
 					</p>
 					<p>
-						Bare metal or virtual machine provides the simplest way to run etcd.
+						Bare metal or virtual machine is the simplest way to run etcd.
 					</p>
 
 					<br>
 					<h5 style="line-height: 0.07;">Initial Commands</h5>
 					<!--<pre class="code-dark">{{getEtcdCommandInitial()}}</pre>-->
 					<div class="osx-window">
-						<div class="window">
+						<div class="window-narrow">
 							<div class="titlebar">
 								<div class="buttons">
 									<div class="closebtn"><span><strong></strong></span></div>
@@ -206,8 +206,7 @@
 						Operating and scaling container requires much more work.
 					</p>
 					<p>
-						<a href="http://kubernetes.io/" target="_blank" class="normal-link">Kubernetes</a> helps manage such complex container
-						environment.
+						<a href="http://kubernetes.io/" target="_blank" class="normal-link">Kubernetes</a> manages such complex container environments.
 					</p>
 					<p>
 						This shows only basics of running etcd with Kubernetes.
@@ -216,6 +215,22 @@
 						For completely managed etcd cluster, please check out <a routerLink="/doc/{{version.etcdVersionURL}}/kubernetes-controller"
 							class="normal-link">Kubernetes etcd controller</a>.
 					</p>
+
+					<br>
+					<h5 style="line-height: 0.07;">Initial Commands</h5>
+					<div class="osx-window">
+						<div class="window">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{getKubernetesCommandInitial()}}</pre>
+							</div>
+						</div>
+					</div>
 
 					<br><br>
 					<p>Sorry, this page is still working in progress.</p>
