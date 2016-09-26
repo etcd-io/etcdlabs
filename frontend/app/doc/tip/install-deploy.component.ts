@@ -193,6 +193,7 @@ export class install_deploy_tip_Component extends parentComponent {
     getCfsslCommandInitial() {
         return `go get -v github.com/cloudflare/cfssl/cmd/cfssl
 go get -v github.com/cloudflare/cfssl/cmd/cfssljson
+
 rm -rf /tmp/test-certs && mkdir -p /tmp/test-certs
 `;
     }
@@ -275,10 +276,11 @@ cfssl gencert` + ' \\' + `
 
     getEtcdCommandInitial() {
         return `ETCD_VER=${this.inputVersion}
+
 GOOGLE_URL=https://storage.googleapis.com/etcd
 GITHUB_URL=https://github.com/coreos/etcd/releases/download
+
 ` + "DOWNLOAD_URL=${GOOGLE_URL}" + `
-` + "# DOWNLOAD_URL=${GITHUB_URL}" + `
 `;
     }
 
