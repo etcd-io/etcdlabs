@@ -21,6 +21,8 @@ html {
     font-size: 15px;
 }
 
+
+/*Reference https://www.tensorflow.org/*/
 *,
 *::after,
 *::before {
@@ -49,7 +51,6 @@ body {
     font-weight: 300;
     color: #000
 }
-
 
 h2 {
     font-size: 1.5rem;
