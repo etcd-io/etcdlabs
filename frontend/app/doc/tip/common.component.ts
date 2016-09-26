@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 
 export class Version {
+    goVersion: string;
     etcdVersion: string;
     etcdVersionURL: string;
     etcdVersionLatestRelease: string;
@@ -9,6 +10,7 @@ export class Version {
 
 export class Versioner {
     version: Version = {
+        goVersion: '1.7.1',
         etcdVersion: 'tip',
         etcdVersionURL: 'tip',
         etcdVersionLatestRelease: 'v3.1.0-alpha.1',
@@ -56,7 +58,7 @@ export class parentComponent {
             ),
             new sidebarItem(
                 'Kubernetes controller',
-                'manage, automate etcd cluster operations using Kubernetes',
+                'automate etcd cluster operations using Kubernetes',
                 `/doc/${this.version.etcdVersionURL}/kubernetes-controller`,
                 'no-text-decoration'
             ),

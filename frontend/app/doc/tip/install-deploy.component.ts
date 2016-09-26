@@ -84,6 +84,10 @@ export class install_deploy_tip_Component extends parentComponent {
     inputCommonName: string;
     ////////////////////////////////////
 
+    inputGoVersion: string;
+    inputGitUser: string;
+    inputGitBranch: string;
+
     ////////////////////////////////////
     // etcd setting properties
     inputSecure: boolean;
@@ -121,6 +125,10 @@ export class install_deploy_tip_Component extends parentComponent {
         this.inputSecure = true;
         this.inputEnableProfile = false;
         this.inputDebug = false;
+
+        this.inputGoVersion = super.getVersion().goVersion;
+        this.inputGitUser = 'coreos';
+        this.inputGitBranch = 'master';
 
         this.etcdVersionLatestRelease = super.getVersion().etcdVersionLatestRelease;
         this.inputEtcdVersion = this.etcdVersionLatestRelease;
@@ -284,6 +292,45 @@ cfssl gencert` + ' \\' + `
     ` + '--ca-key /tmp/certs/trusted-ca-key.pem' + ' \\' + `
     ` + '--config /tmp/certs/gencert-config.json' + ' \\' + `
     ` + `/tmp/certs/request-ca-csr-${flag.name}.json | cfssljson --bare /tmp/certs/${flag.name}`;
+    }
+
+    getGoCommand() {
+        return `GO_VERSION=${this.inputGoVersion}
+
+sudo rm -f /usr/local/go/bin/go && sudo rm -rf /usr/local/go
+
+GOOGLE_URL=https://storage.googleapis.com/golang
+` + 'DOWNLOAD_URL=${GOOGLE_URL}' + `
+
+` + 'sudo curl -s ${DOWNLOAD_URL}/go$GO_VERSION.linux-amd64.tar.gz | sudo tar -v -C /usr/local/ -xz' + `
+
+` + 'if grep -q GOPATH "$(echo $HOME)/.bashrc"; then ' + `
+    echo "bashrc already has GOPATH";
+else
+    echo "adding GOPATH to bashrc";` + `
+    ` + 'echo "export GOPATH=$(echo $HOME)/go" >> $HOME/.bashrc;' + `
+    ` + 'PATH_VAR=$PATH":/usr/local/go/bin:$(echo $HOME)/go/bin";' + `
+    ` + 'echo "export PATH=$(echo $PATH_VAR)" >> $HOME/.bashrc;' + `
+    ` + 'source $HOME/.bashrc;' + `
+fi
+
+mkdir -p $GOPATH/bin/
+go version
+`;
+    }
+
+    getEtcdCommandBuildFromSource() {
+        return `GIT_PATH=github.com/coreos/etcd
+
+USER_NAME=${this.inputGitUser}
+BRANCH_NAME=${this.inputGitBranch}
+
+` + 'rm -rf $HOME/go/src/${GIT_PATH}' + `
+` + 'git clone https://github.com/${USER_NAME}/etcd --branch ${BRANCH_NAME} $HOME/go/src/${GIT_PATH}' + `
+
+` + 'cd $HOME/go/src/${GIT_PATH} && ./build' + `
+
+` + '$HOME/go/src/${GIT_PATH}/bin/etcd -version';
     }
 
     getEtcdCommandInitial() {

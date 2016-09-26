@@ -107,7 +107,6 @@
 
 					<br>
 					<h5 style="line-height: 0.07;">Install cfssl</h5>
-					<!--<pre class="code-dark">{{getCfsslCommandInitial()}}</pre>-->
 					<div class="osx-window">
 						<div class="window-narrow">
 							<div class="titlebar">
@@ -145,6 +144,58 @@
 				</template>
             </md-tab>
 
+
+            <md-tab>
+                <template md-tab-label>
+					Build from source
+				</template>
+                <template md-tab-content>
+					<br>
+					<p>
+						etcd is written in Go. To build from source, you need Go 1.7+. This assumes host OS is Linux.
+					</p>
+					<p>
+						<md-input type="text" [(ngModel)]="inputGoVersion" placeholder="Go version"></md-input>
+					</p>
+					<div class="osx-window">
+						<div class="window">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{getGoCommand()}}</pre>
+							</div>
+						</div>
+					</div>
+					<br>
+					<p>
+						Now let's build etcd from source.
+					</p>
+					<p>
+						<md-input type="text" [(ngModel)]="inputGitUser" placeholder="Git User"></md-input>
+						<md-input type="text" [(ngModel)]="inputGitBranch" placeholder="Git Branch"></md-input>
+					</p>
+					<div class="osx-window">
+						<div class="window">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{getEtcdCommandBuildFromSource()}}</pre>
+							</div>
+						</div>
+					</div>
+					<br>
+				</template>
+            </md-tab>
+
+
             <md-tab>
                 <template md-tab-label>
 					Bare metal, VM
@@ -160,8 +211,7 @@
 					</p>
 
 					<br>
-					<h5 style="line-height: 0.07;">Initial Settings</h5>
-					<!--<pre class="code-dark">{{getEtcdCommandInitial()}}</pre>-->
+					<h5 style="line-height: 0.07;">Install releases</h5>
 					<div class="osx-window">
 						<div class="window-narrow">
 							<div class="titlebar">

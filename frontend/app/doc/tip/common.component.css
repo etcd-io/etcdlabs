@@ -55,7 +55,7 @@ footer {
 }
 
 .footer-link {
-    color: blue;
+    color: dodgerblue;
     text-decoration: none !important;
     font-family: 'Inconsolata', sans-serif;
     font-size: 12px;
@@ -186,7 +186,7 @@ https://codepen.io/JohJakob/pen/YPxgwo
 
 .osx-window .window {
     background: #fff;
-    max-width: 50em;
+    max-width: 52em;
     margin-top: 20px;
     margin-bottom: 20px;
     border: 1px solid #acacac;
@@ -376,7 +376,7 @@ section.features .feature-grid .feature p {
     max-width: 1170px;
     margin-left: auto;
     margin-right: auto;
-    padding: 0 15px
+    padding: 0 10px
 }
 
 .inner::after {
@@ -387,7 +387,7 @@ section.features .feature-grid .feature p {
 
 @media screen and (min-width: 768px) {
     .inner {
-        padding: 0 30px
+        padding: 0 20px
     }
 }
 
