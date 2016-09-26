@@ -53,13 +53,13 @@ export class etcdFlag {
 
         this.initialCluster = '';
 
-        this.clientCertFile = '/tmp/test-certs/' + this.name + '.pem';
-        this.clientKeyFile = '/tmp/test-certs/' + this.name + '-key.pem';
-        this.clientTrustedCAFile = '/tmp/test-certs/trusted-ca.pem';
+        this.clientCertFile = '/tmp/certs/' + this.name + '.pem';
+        this.clientKeyFile = '/tmp/certs/' + this.name + '-key.pem';
+        this.clientTrustedCAFile = '/tmp/certs/trusted-ca.pem';
 
-        this.peerCertFile = '/tmp/test-certs/' + this.name + '.pem';
-        this.peerKeyFile = '/tmp/test-certs/' + this.name + '-key.pem';
-        this.peerTrustedCAFile = '/tmp/test-certs/trusted-ca.pem';
+        this.peerCertFile = '/tmp/certs/' + this.name + '.pem';
+        this.peerKeyFile = '/tmp/certs/' + this.name + '-key.pem';
+        this.peerTrustedCAFile = '/tmp/certs/trusted-ca.pem';
     }
 }
 
@@ -194,7 +194,7 @@ export class install_deploy_tip_Component extends parentComponent {
         return `go get -v github.com/cloudflare/cfssl/cmd/cfssl
 go get -v github.com/cloudflare/cfssl/cmd/cfssljson
 
-rm -rf /tmp/test-certs && mkdir -p /tmp/test-certs
+rm -rf /tmp/certs && mkdir -p /tmp/certs
 `;
     }
 
@@ -215,9 +215,9 @@ rm -rf /tmp/test-certs && mkdir -p /tmp/test-certs
   ],
   "CN": "${this.inputCommonName}"
 }
-' > /tmp/test-certs/trusted-ca-csr.json
+' > /tmp/certs/trusted-ca-csr.json
 
-cfssl gencert --initca=true /tmp/test-certs/trusted-ca-csr.json | cfssljson --bare /tmp/test-certs/trusted-ca
+cfssl gencert --initca=true /tmp/certs/trusted-ca-csr.json | cfssljson --bare /tmp/certs/trusted-ca
 `;
     }
 
@@ -235,7 +235,7 @@ cfssl gencert --initca=true /tmp/test-certs/trusted-ca-csr.json | cfssljson --ba
     }
   }
 }
-' > /tmp/test-certs/gencert-config.json
+' > /tmp/certs/gencert-config.json
 `;
     }
 
@@ -265,13 +265,13 @@ cfssl gencert --initca=true /tmp/test-certs/trusted-ca-csr.json | cfssljson --ba
 ${hostTxt}
   ]
 }
-' > /tmp/test-certs/request-ca-csr-${flag.name}.json
+' > /tmp/certs/request-ca-csr-${flag.name}.json
 
 cfssl gencert` + ' \\' + `
-    ` + '--ca /tmp/test-certs/trusted-ca.pem' + ' \\' + `
-    ` + '--ca-key /tmp/test-certs/trusted-ca-key.pem' + ' \\' + `
-    ` + '--config /tmp/test-certs/gencert-config.json' + ' \\' + `
-    ` + `/tmp/test-certs/request-ca-csr-${flag.name}.json | cfssljson --bare /tmp/test-certs/${flag.name}`;
+    ` + '--ca /tmp/certs/trusted-ca.pem' + ' \\' + `
+    ` + '--ca-key /tmp/certs/trusted-ca-key.pem' + ' \\' + `
+    ` + '--config /tmp/certs/gencert-config.json' + ' \\' + `
+    ` + `/tmp/certs/request-ca-csr-${flag.name}.json | cfssljson --bare /tmp/certs/${flag.name}`;
     }
 
     getEtcdCommandInitial() {
