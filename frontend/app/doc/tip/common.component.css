@@ -87,6 +87,14 @@ footer {
     font-size: 15px;
 }
 
+.faq-list-title {
+    color: midnightblue;
+    text-decoration: none !important;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 20px;
+    font-style: bold;
+}
+
 .faq-list {
     color: dodgerblue;
     text-decoration: none !important;
