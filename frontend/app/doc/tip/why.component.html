@@ -22,29 +22,80 @@
 
         <section class="features">
             <div class="inner">
-                <h2>Why etcd</h2>
+                <h2><a href="/doc/{{version.etcdVersionURL}}/why#what-is-etcd">What is etcd</a></h2>
+                <div id="what-is-etcd"></div>
+                <p>
+                    etcd is distributed reliable key-value store for the most critical data of a distributed system. It is distributed by replicating data to multiple machines, therefore highly available against single point of failures. Using the Raft<sup>[1]</sup>                    consensus algorithms, etcd gracefully handles network partitions and machine failures, even leader failures.
+                </p>
 
+                <br>
+                <h2><a href="/doc/{{version.etcdVersionURL}}/why#why-etcd">Why etcd</a></h2>
+                <div id="why-etcd"></div>
                 <div class="feature-grid">
                     <div class="table-row">
                         <div class="feature">
                             <h3>Consistent</h3>
-                            <p>etcd is ...</p>
+                            <p>
+                                etcd is not an eventually consistent database, where two different nodes give two different values. etcd provides <b>linearizability</b><sup>[2]</sup> with <b>strong consistency</b><sup>[3]</sup>. When write completes,
+                                all etcd clients read the same value, most recent and up-to-date in any node.
+                            </p>
                         </div>
 
                         <div class="feature">
                             <h3>Partition Tolerant</h3>
-                            <p>etcd is ...</p>
+                            <p>
+                                etcd continues to function, even with network partition, where message is not delivered or gets delayed. Network glitches are very common, and <b>no system is immune</b> from such network faults<sup>[4]</sup>.
+                            </p>
                         </div>
 
                         <div class="feature">
                             <h3>Highly Available</h3>
-                            <p>etcd is ...</p>
+                            <p>
+                                etcd is <i>highly</i> available, choosing <b>consistency</b> over availability when <b>network partitioned</b>. etcd can make progress as long as majority of servers are available. For example, 5-node etcd cluster tolerates
+                                up to 2 nodes being down, as long as 3 are up.
+                            </p>
                         </div>
                     </div>
-
                 </div>
+
+                <br>
+                <h2><a href="/doc/{{version.etcdVersionURL}}/why#use-case-coreos">Use Case: CoreOS</a></h2>
+                <div id="use-case-coreos"></div>
+                <p>
+                    Application on <a href="https://coreos.com/why/" target="_blank" class="normal-link">CoreOS</a> gets automatic,
+                    no-downtime Linux kernel updates. CoreOS uses
+                    <a href="https://github.com/coreos/locksmith" target="_blank" class="normal-link">locksmith</a> to coordinate those updates.
+                    locksmith stores semephore values in etcd. And ensures that only subset of cluster are rebooting at any given time.
+                </p>
+
+                <br>
+                <h2><a href="/doc/{{version.etcdVersionURL}}/why#use-case-kubernetes">Use Case: Kubernetes</a></h2>
+                <div id="use-case-kubernetes"></div>
+                <p>
+                    <a href="http://kubernetes.io/docs/whatisk8s/" target="_blank" class="normal-link">Kubernetes</a> needs to store configuration data and service discovery information to manage cluster of containers. Kubernetes API server writes such
+                    persistent cluster states in etcd. And also watch for changes with etcd watch API. Consistency is criticial to ensure that services are correctly scheduled and operatated.
+                </p>
+
+                <br>
+                <h2><a href="/doc/{{version.etcdVersionURL}}/why#when-not-to-use">When Not to Use etcd</a></h2>
+                <div id="when-not-to-use"></div>
+                <p>
+                    etcd is designed for storing small chunks of data: configuration file, JSON, YAML, etc. etcd limits the size of one request in 1.5MB (see <a href="https://github.com/coreos/etcd/blob/master/etcdserver/v3_server.go#L34-L38" target="_blank"
+                        class="code-link">maxRequestBytes</a>). And default storage size limit is 2GB (see <a href="https://github.com/coreos/etcd/blob/master/mvcc/backend/backend.go#L46-L53" target="_blank" class="code-link">DefaultQuotaBytes</a>). These
+                    are the tradeoffs required for strong consistency. So if you need higher availability or bigger storage size, etcd might not be the option.
+                </p>
             </div>
         </section>
 
+        <br><br>
+        <hr align="left" class="footer-top-line">
+        <footer>
+            [1] Diego Ongaro and John K Ousterhout: "<a href="https://raft.github.io/raft.pdf" target="_blank" class="footer-link">In Search of an Understandable Consensus Algorithm (Extended Version)</a>," at USENIX Annual Technical Conference (ATC),
+            June 2014.
+            <br> [2] Maurice P Herlihy and Jeannette M Wing: "<a href="http://www.cs.cornell.edu/andru/cs711/2002fa/reading/linearizability.pdf" target="_blank" class="footer-link">Linearizability: A Correctness Condition for Concurrent Objects</a>,"
+            ACM Transactions on Programming Languages and Systems (TOPLAS), volume 12, number 3, pages 463–492, July 1990.
+            <br> [3] David K Gifford: "<a href="http://dl.acm.org/citation.cfm?id=910052" target="_blank" class="footer-link">Information Storage in a Decentralized Computer System</a>," Xerox Palo Alto Research Centers, CSL-81-8, June 1981.
+            <br> [4] Peter Bailis and Kyle Kingsbury: "<a href="http://queue.acm.org/detail.cfm?id=2655736" target="_blank" class="footer-link">The Network is Reliable</a>," ACM Queue, volume 12, number 7, July 2014.
+        </footer>
     </div>
 </md-sidenav-layout>

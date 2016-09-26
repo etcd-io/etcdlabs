@@ -36,15 +36,6 @@ export class versions_tip_Component extends parentComponent {
     constructor() {
         super();
         this.majorVersionItems = [
-            new majorVersionItem('v2', [
-                new versionItem(
-                    'v2.3.7',
-                    'https://github.com/coreos/etcd/releases/tag/v2.3.7',
-                    'versions-link-main',
-                    'https://github.com/coreos/etcd/tree/release-2.3/Documentation',
-                    'versions-link-other'
-                ),
-            ]),
             new majorVersionItem('v3', [
                 new versionItem(
                     'tip (master branch)',
@@ -74,7 +65,16 @@ export class versions_tip_Component extends parentComponent {
                     'https://github.com/coreos/etcd/tree/release-3.0/Documentation',
                     'versions-link-other'
                 ),
-            ])
+            ]),
+            new majorVersionItem('v2', [
+                new versionItem(
+                    'v2.3.7',
+                    'https://github.com/coreos/etcd/releases/tag/v2.3.7',
+                    'versions-link-main',
+                    'https://github.com/coreos/etcd/tree/release-2.3/Documentation',
+                    'versions-link-other'
+                ),
+            ]),
         ]
     }
 }

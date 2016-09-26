@@ -9,9 +9,9 @@ export class Version {
 
 export class Versioner {
     version: Version = {
-        etcdVersion: "tip",
+        etcdVersion: 'tip',
         etcdVersionURL: 'tip',
-        etcdVersionLatestRelease: 'v3.1.0',
+        etcdVersionLatestRelease: 'v3.1.0-alpha.1',
         etcdFlagPage: 'https://github.com/coreos/etcd/blob/master/etcdmain/help.go',
     };
 
@@ -50,12 +50,12 @@ export class parentComponent {
             ),
             new sidebarItem(
                 'Install, Deploy',
-                'set up etcd cluster in various environments',
+                'set up etcd cluster: bare metal, virtual machine, Kubernetes',
                 `/doc/${this.version.etcdVersionURL}/install-deploy`,
                 'no-text-decoration'
             ),
             new sidebarItem(
-                'Kubernetes',
+                'Kubernetes controller',
                 'manage, automate etcd cluster operations using Kubernetes',
                 `/doc/${this.version.etcdVersionURL}/kubernetes-controller`,
                 'no-text-decoration'

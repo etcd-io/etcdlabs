@@ -200,7 +200,7 @@ export class install_deploy_tip_Component extends parentComponent {
             ),
         ];
 
-        this.inputKubernetesVersion = 'v1.4.0-beta.11';
+        this.inputKubernetesVersion = 'v1.4.0';
     }
 
     getCfsslCommandInitial() {

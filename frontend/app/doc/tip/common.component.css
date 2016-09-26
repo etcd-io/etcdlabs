@@ -42,6 +42,37 @@ a {
     font-style: italic;
 }
 
+sup {
+    color: black;
+    font-family: 'Inconsolata', sans-serif;
+    font-size: 10px;
+}
+
+footer {
+    color: black;
+    font-family: 'Inconsolata', sans-serif;
+    font-size: 12px;
+}
+
+.footer-link {
+    color: blue;
+    text-decoration: none !important;
+    font-family: 'Inconsolata', sans-serif;
+    font-size: 12px;
+}
+
+.code-link {
+    color: dodgerblue;
+    text-decoration: none !important;
+    font-family: 'Roboto', sans-serif;
+    font-size: 15px;
+}
+
+.footer-top-line {
+    color: darkgray;
+    width: 30%;
+}
+
 .sub-sub-title {
     color: darkgray;
     font-family: 'Open Sans', sans-serif;
