@@ -1,11 +1,9 @@
 import { Routes, RouterModule } from '@angular/router';
 
-import { NotFoundComponent } from './not-found.component';
-
+/*
+/home
+*/
 import { HomeComponent } from './home/home.component';
-import { BlogComponent } from './blog/blog.component';
-import { PlayComponent } from './play/play.component';
-
 
 /*
 /doc
@@ -23,19 +21,24 @@ import { versions_tip_Component } from './doc/tip/versions.component';
 /*
 /blog
 */
+import { BlogComponent } from './blog/blog.component';
 import { AnnouncingEtcdV31Component } from './blog/2016/announcing-etcd-v3.1.component';
 import { AnnouncingEtcdWebsiteComponent } from './blog/2016/announcing-etcd-website.component';
+
+/*
+/play
+*/
+import { PlayComponent } from './play/play.component';
+
+/*
+/**
+*/
+import { NotFoundComponent } from './not-found.component';
 
 const appRoutes: Routes = [
     { path: '', redirectTo: '/home', pathMatch: 'full' },
     { path: 'main', redirectTo: '/home', pathMatch: 'full' },
     { path: 'home', component: HomeComponent },
-
-    { path: 'blogs', redirectTo: '/blog', pathMatch: 'full' },
-    { path: 'blog', component: BlogComponent },
-
-    { path: 'playground', redirectTo: '/play', pathMatch: 'full' },
-    { path: 'play', component: PlayComponent },
 
     { path: 'docs', redirectTo: '/doc', pathMatch: 'full' },
     { path: 'doc', redirectTo: '/doc/tip', pathMatch: 'full' },
@@ -55,7 +58,7 @@ const appRoutes: Routes = [
     },
 
     { path: 'blogs', redirectTo: '/blog', pathMatch: 'full' },
-    { path: 'blog', redirectTo: '/blog/2016/announcing-etcd-website', pathMatch: 'full' }, // update this whenever we have a new post
+    { path: 'blog', component: AnnouncingEtcdV31Component }, // update whenever we have a new post
     {
         path: 'blog',
         children: [
@@ -73,6 +76,10 @@ const appRoutes: Routes = [
     { path: 'doc/v31', redirectTo: '/doc/tip', pathMatch: 'full' },
     { path: 'doc/v32', redirectTo: '/doc/tip', pathMatch: 'full' },
 
+    // TODO
+    { path: 'playground', redirectTo: '/play', pathMatch: 'full' },
+    { path: 'play', component: PlayComponent },
+
     // { path: '**', redirectTo: '/home' },
     { path: '**', component: NotFoundComponent },
 ];
@@ -80,11 +87,7 @@ const appRoutes: Routes = [
 export const routing = RouterModule.forRoot(appRoutes);
 
 export const routedComponents = [
-    NotFoundComponent,
-
     HomeComponent,
-    PlayComponent,
-    BlogComponent,
 
     doc_tip_Component,
     why_tip_Component,
@@ -96,6 +99,11 @@ export const routedComponents = [
     reliability_tip_Component,
     versions_tip_Component,
 
+    BlogComponent,
     AnnouncingEtcdV31Component,
     AnnouncingEtcdWebsiteComponent,
+
+    PlayComponent,
+
+    NotFoundComponent,
 ];
