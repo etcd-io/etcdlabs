@@ -15,13 +15,13 @@ md-sidenav-layout {
     padding: 30px;
 }
 
-.doc-group md-checkbox {
-    margin: 10px;
-}
-
 a {
     color: black;
     text-decoration: none !important;
+}
+
+.doc-group md-checkbox {
+    margin: 10px;
 }
 
 .no-text-decoration {

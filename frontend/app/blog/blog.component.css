@@ -1,3 +1,28 @@
 .blog-group {
     padding: 30px;
 }
+
+md-divider {
+    color: lightgray;
+}
+
+md-sidenav-layout {
+    min-height: 600px;
+}
+
+.blog-sidenav {
+    padding: 10px;
+    min-width: 150px;
+}
+
+a {
+    color: black;
+    text-decoration: none !important;
+}
+
+.blog-item-title-sidebar {
+    color: black;
+    text-decoration: none !important;
+    font-family: 'Inconsolata', monospace;
+    font-size: 13px;
+}

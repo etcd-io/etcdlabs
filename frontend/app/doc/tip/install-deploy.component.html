@@ -1,5 +1,5 @@
 <md-sidenav-layout>
-    <md-sidenav #sidenav [opened]="true" mode="side" class="doc-sidenav">
+    <md-sidenav #left [opened]="true" mode="side" class="doc-sidenav">
         <md-list>
             <a routerLink="/doc/{{version.etcdVersionURL}}">
                 <h3 md-subheader>Getting Started ({{version.etcdVersion}})</h3>
@@ -222,7 +222,7 @@
 
 					<br>
 					<h5 style="line-height: 0.07;">Initial Commands</h5>
-                    This assumes host OS is Linux.
+					This assumes host OS is Linux.
 					<div class="osx-window">
 						<div class="window">
 							<div class="titlebar">
