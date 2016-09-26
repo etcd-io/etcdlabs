@@ -60,7 +60,7 @@ h2 {
 }
 
 .block+.block {
-    margin-top: 60px
+    margin-top: 50px
 }
 
 @media screen and (min-width: 768px) {
@@ -116,12 +116,6 @@ h2 {
     }
     .block-graphic:last-child {
         margin-right: 0
-    }
-}
-
-@media screen and (min-width: 768px) {
-    section.updates .inner {
-        max-width: 1040px
     }
 }
 

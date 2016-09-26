@@ -87,6 +87,20 @@ footer {
     font-size: 15px;
 }
 
+.faq-list {
+    color: dodgerblue;
+    text-decoration: none !important;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 15px;
+}
+
+h2 .faq-title {
+    color: dodgerblue;
+    text-decoration: none !important;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 20px;
+}
+
 .versions-link-main {
     color: black;
     text-decoration: none !important;
@@ -398,5 +412,49 @@ section {
 @media screen and (min-width: 768px) {
     section {
         padding: 15px 0
+    }
+}
+
+@media screen and (min-width: 768px) {
+    .block.half {
+        margin-top: 0
+    }
+}
+
+@media screen and (min-width: 768px) {
+    .block-copy.half {
+        float: left;
+        display: block;
+        margin-right: 4.34783%;
+        width: 47.82609%
+    }
+    .block-copy.half:last-child {
+        margin-right: 0
+    }
+}
+
+.block-copy p {
+    margin-top: 30px;
+    line-height: 1.75rem;
+    color: #000
+}
+
+@media screen and (min-width: 768px) {
+    section.more-about .inner {
+        display: table;
+        max-width: 1100px
+    }
+}
+
+@media screen and (min-width: 768px) {
+    section.more-about .inner .block-copy {
+        float: left;
+        display: block;
+        margin-right: 4.34783%;
+        width: 47.82609%;
+        padding-right: 35px
+    }
+    section.more-about .inner .block-copy:last-child {
+        margin-right: 0
     }
 }
