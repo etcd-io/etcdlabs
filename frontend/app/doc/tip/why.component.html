@@ -22,8 +22,8 @@
 
         <section class="features">
             <div class="inner">
-                <h2><a href="/doc/{{version.etcdVersionURL}}/why#what-is-etcd">What is etcd</a></h2>
                 <div id="what-is-etcd"></div>
+                <h2><a href="/doc/{{version.etcdVersionURL}}/why#what-is-etcd">What is etcd</a></h2>
                 <p>
                     etcd is distributed reliable key-value store for the most critical data of a distributed system. It is distributed by replicating data to multiple machines, therefore highly available against single point of failures. Using the Raft<sup>[1]</sup>                    consensus algorithms, etcd gracefully handles network partitions and machine failures, even leader failures.
                 </p>
@@ -59,8 +59,8 @@
                 </div>
 
                 <br>
-                <h2><a href="/doc/{{version.etcdVersionURL}}/why#use-case-coreos">Use Case: CoreOS</a></h2>
                 <div id="use-case-coreos"></div>
+                <h2><a href="/doc/{{version.etcdVersionURL}}/why#use-case-coreos">Use Case: CoreOS</a></h2>
                 <p>
                     Application running on <a href="https://coreos.com/why/" target="_blank" class="normal-link">CoreOS</a> gets automatic, no-downtime Linux kernel updates. CoreOS uses
                     <a href="https://github.com/coreos/locksmith" target="_blank" class="normal-link">locksmith</a> to coordinate those updates. locksmith stores semephore values in etcd. And ensures that only subset of cluster are rebooting at any given
@@ -68,16 +68,16 @@
                 </p>
 
                 <br>
-                <h2><a href="/doc/{{version.etcdVersionURL}}/why#use-case-kubernetes">Use Case: Kubernetes</a></h2>
                 <div id="use-case-kubernetes"></div>
+                <h2><a href="/doc/{{version.etcdVersionURL}}/why#use-case-kubernetes">Use Case: Kubernetes</a></h2>
                 <p>
                     <a href="http://kubernetes.io/docs/whatisk8s/" target="_blank" class="normal-link">Kubernetes</a> needs configuration storage for service discovery and cluster management. Kubernetes API server writes such persistent cluster states
                     in etcd. And uses etcd watch API to get notified whenever changes happen. Consistency is the key to ensure that services correctly schedule and operatate.
                 </p>
 
                 <br>
-                <h2><a href="/doc/{{version.etcdVersionURL}}/why#when-not-to-use">When Not to Use etcd</a></h2>
                 <div id="when-not-to-use"></div>
+                <h2><a href="/doc/{{version.etcdVersionURL}}/why#when-not-to-use">When Not to Use etcd</a></h2>
                 <p>
                     etcd is designed for storing small chunks of data: configuration file, JSON, YAML, etc. etcd limits the size of one request in 1.5MB (see <a href="https://github.com/coreos/etcd/blob/master/etcdserver/v3_server.go#L34-L38" target="_blank"
                         class="code-link">maxRequestBytes</a>). And default storage size limit is 2GB (see <a href="https://github.com/coreos/etcd/blob/master/mvcc/backend/backend.go#L46-L53" target="_blank" class="code-link">DefaultQuotaBytes</a>). These
