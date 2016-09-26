@@ -26,3 +26,27 @@ a {
     font-family: 'Inconsolata', monospace;
     font-size: 14px;
 }
+
+.blog-title {
+    color: grey;
+    font-family: Sans-Serif;
+}
+
+.blog-date {
+    color: #999;
+    font-family: Sans-Serif;
+    font-size: 14px;
+}
+
+.blog-author {
+    color: darkgray;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13px;
+    font-style: italic;
+}
+
+.blog-contents p {
+    color: black;
+    font-family: 'Inconsolata', monospace;
+    font-size: 15px;
+}
