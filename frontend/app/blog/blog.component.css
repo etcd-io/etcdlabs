@@ -15,16 +15,12 @@ md-sidenav-layout {
     min-width: 150px;
 }
 
-a {
-    color: black;
-    text-decoration: none !important;
-}
-
 .blog-item-title-sidebar {
     color: black;
     text-decoration: none !important;
-    font-family: 'Inconsolata', monospace;
-    font-size: 14px;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13px;
+    padding-bottom: 3px;
 }
 
 .blog-title {
@@ -45,8 +41,50 @@ a {
     font-style: italic;
 }
 
+.blog-author-link {
+    color: darkgray;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13px;
+    font-style: italic;
+    text-decoration: none !important;
+}
+
 .blog-contents p {
     color: black;
-    font-family: 'Inconsolata', monospace;
-    font-size: 15px;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 300;
+    font-style: normal;
+}
+
+.normal-link {
+    color: dodgerblue;
+    text-decoration: none !important;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 300;
+    font-style: normal;
+}
+
+.code-light-snippet {
+    background: #f5f5f5;
+    color: #366354;
+    font-family: monospace;
+    font-size: 14px;
+}
+
+.code-light {
+    white-space: pre-wrap;
+    border-style: solid;
+    border-width: 1px;
+    border-color: lightslategrey;
+    border-radius: 5px;
+    background: #f5f5f5;
+    color: #366354;
+    font-family: monospace;
+    font-size: 14px;
+    font-weight: 400;
+    padding: 8px;
+    margin: 1em 0px 1em;
+    word-wrap: normal;
 }

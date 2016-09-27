@@ -24,6 +24,7 @@ import { versions_tip_Component } from './doc/tip/versions.component';
 import { BlogComponent } from './blog/blog.component';
 import { AnnouncingEtcdV31Component } from './blog/2016/announcing-etcd-v3.1.component';
 import { AnnouncingEtcdWebsiteComponent } from './blog/2016/announcing-etcd-website.component';
+import { STMComponent } from './blog/2016/stm.component';
 
 /*
 /play
@@ -67,6 +68,7 @@ const appRoutes: Routes = [
                 children: [
                     { path: 'announcing-etcd-v31', component: AnnouncingEtcdV31Component },
                     { path: 'announcing-etcd-website', component: AnnouncingEtcdWebsiteComponent },
+                    { path: 'etcd-stm', component: STMComponent },
                 ],
             }
         ],
@@ -102,6 +104,7 @@ export const routedComponents = [
     BlogComponent,
     AnnouncingEtcdV31Component,
     AnnouncingEtcdWebsiteComponent,
+    STMComponent,
 
     PlayComponent,
 

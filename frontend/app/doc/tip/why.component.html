@@ -81,7 +81,7 @@
                 <p>
                     etcd is designed for storing small chunks of data: configuration file, JSON, YAML, etc. etcd limits the size of one request in 1.5MB (see <a href="https://github.com/coreos/etcd/blob/master/etcdserver/v3_server.go#L34-L38" target="_blank"
                         class="code-link">maxRequestBytes</a>). And default storage size limit is 2GB (see <a href="https://github.com/coreos/etcd/blob/master/mvcc/backend/backend.go#L46-L53" target="_blank" class="code-link">DefaultQuotaBytes</a>). These
-                    are the tradeoffs required for strong consistency. So if you need higher availability or bigger storage size, etcd might not be the option.
+                    are the tradeoffs that etcd makes for strong consistency. So if you need higher availability or bigger storage size, etcd might not be the option.
                 </p>
 
                 <br><br>

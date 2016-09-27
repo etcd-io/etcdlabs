@@ -44,20 +44,20 @@ a {
 
 sup {
     color: black;
-    font-family: 'Inconsolata', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 10px;
 }
 
 footer {
     color: black;
-    font-family: 'Inconsolata', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 12px;
 }
 
 .footer-link {
     color: dodgerblue;
     text-decoration: none !important;
-    font-family: 'Inconsolata', sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 12px;
 }
 
