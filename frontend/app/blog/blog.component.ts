@@ -44,7 +44,7 @@ export class BlogComponent {
                     ),
                     new blogItem(
                         'Serializability and Distributed Software Transactional Memory with etcd3',
-                        '/blog/2016/etcd-stm'
+                        '/blog/2016/stm'
                     ),
                 ]
             ),

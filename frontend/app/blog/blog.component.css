@@ -88,3 +88,27 @@ md-sidenav-layout {
     margin: 1em 0px 1em;
     word-wrap: normal;
 }
+
+sup {
+    color: black;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 10px;
+}
+
+footer {
+    color: black;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 12px;
+}
+
+.footer-link {
+    color: dodgerblue;
+    text-decoration: none !important;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 12px;
+}
+
+.footer-top-line {
+    color: darkgray;
+    width: 30%;
+}

@@ -36,15 +36,15 @@
                         <div class="feature">
                             <h3>Consistent</h3>
                             <p>
-                                etcd is not an eventually consistent database, where two different nodes give two different values. etcd provides <b>linearizability</b><sup>[2]</sup> with <b>strong consistency</b><sup>[3]</sup>. When write completes,
-                                all etcd clients read the same value, most recent and up-to-date in any node.
+                                etcd is not an eventually consistent database, where two different nodes can serve two different values (stale data). etcd provides <b>linearizability</b><sup>[2]</sup> with <b>strong consistency</b><sup>[3]</sup>. When
+                                write completes, all etcd clients would read the same, <i>most recent and up-to-date</i>, value in any node.
                             </p>
                         </div>
 
                         <div class="feature">
                             <h3>Partition Tolerant</h3>
                             <p>
-                                etcd continues to function, even with network partition, where message is not delivered or gets delayed. Network glitches are very common, and <b>no system is immune</b> from such network faults<sup>[4]</sup>.
+                                etcd continues to function, even with network partition, where message is not delivered or gets delayed. Network glitches are very common, and <b>no system is immune</b> from network faults<sup>[4]</sup>.
                             </p>
                         </div>
 

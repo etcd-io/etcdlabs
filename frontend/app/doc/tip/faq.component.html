@@ -42,10 +42,15 @@
         <div id="cap-theorem-in-etcd"></div>
         <h2><a href="/doc/{{version.etcdVersionURL}}/faq#cap-theorem-in-etcd" class="faq-title">CAP theorem in etcd?</a></h2>
         <p>
-            CAP often represents <i>Consistency</i>, <i>Availability</i>, <i>Partition tolerance</i>: you can only pick 2 out of 3. Since network partition is not avoidable, you are left with either consitency or availability when partition happens. That
-            is, systems with A and P are more tolerant of network faults, but possible to serve stale data. etcd chooses C and P to achieve linearizability with strong consistency.
+            CAP<sup>[1]</sup> represents <i>Consistency</i>, <i>Availability</i>, <i>Partition tolerance</i>: you can only pick 2 out of 3. Since network partition is not avoidable, you are left with either consitency or availability when partition happens.
+            That is, systems with A and P are more tolerant of network faults, but possible to serve stale data. etcd chooses C and P to achieve linearizability with strong consistency.
         </p>
-        <br>
+        <hr align="left" class="footer-top-line">
+        <footer>
+            [1] Seth Gilbert and Nancy Lynch: "<a href="https://pdfs.semanticscholar.org/24ce/ce61e2128780072bc58f90b8ba47f624bc27.pdf" target="_blank" class="footer-link">Brewer's Conjecture and the Feasibility of Consistent, Available, Partition-Tolerant Web Services</a>,"
+            ACM SIGACT News, volume 33, number 2, pages 51–59, 2002.
+        </footer>
+        <br><br>
 
         <div id="remove-member-first"></div>
         <h2><a href="/doc/{{version.etcdVersionURL}}/faq#remove-member-first" class="faq-title">Always remove first when replacing member?</a></h2>
@@ -56,17 +61,14 @@
         <p>
             How this applies to membership:
         </p>
-
         <p>
             If a 3-member cluster has 1 downed member, it can still make forward progress because the quorum is 2 and 2 members are still live. However, adding a new member to a 3-member cluster will increase the quorum to 3 because 3 votes are required for a majority
             of 4 members. Since the quorum increased, this extra member buys nothing in terms of fault tolerance; the cluster is still one node failure away from being unrecoverable.
         </p>
-
         <p>
             Additionally, that new member is risky because it may turn out to be misconfigured or incapable of joining the cluster. In that case, there's no way to recover quorum because the cluster has two members down and two members up, but needs three votes to
             change membership to undo the botched membership addition. etcd will by default (as of last week) reject member add attempts that could take down the cluster in this manner.
         </p>
-
         <p>
             On the other hand, if the downed member is removed from cluster membership first, the number of members becomes 2 and the quorum remains at 2. Following that removal by adding a new member will also keep the quorum steady at 2. So, even if the new node
             can't be brought up, it's still possible to remove the new member through quorum on the remaining live members.
@@ -75,7 +77,6 @@
             Reference: <a href="https://github.com/coreos/etcd/issues/6114" target="_blank" class="normal-link">https://github.com/coreos/etcd/issues/6114</a>
         </p>
         <br>
-
 
         <div id="why-so-strict-about-membership-change"></div>
         <h2><a href="/doc/{{version.etcdVersionURL}}/faq#why-so-strict-about-membership-change" class="faq-title">Why so strict about membershp change?</a></h2>

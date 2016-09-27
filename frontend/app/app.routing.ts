@@ -68,7 +68,7 @@ const appRoutes: Routes = [
                 children: [
                     { path: 'announcing-etcd-v31', component: AnnouncingEtcdV31Component },
                     { path: 'announcing-etcd-website', component: AnnouncingEtcdWebsiteComponent },
-                    { path: 'etcd-stm', component: STMComponent },
+                    { path: 'stm', component: STMComponent },
                 ],
             }
         ],
