@@ -215,3 +215,47 @@ func TestClusterStartClientTLS(t *testing.T) {
 	cl.Shutdown()
 	capnslog.SetGlobalLogLevel(capnslog.INFO)
 }
+
+func TestClusterStartClientTLSAuto(t *testing.T) {
+	dir, err := ioutil.TempDir(os.TempDir(), "cluster-test")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cfg := Config{
+		Size:     1,
+		RootDir:  dir,
+		RootPort: 4379,
+
+		ClientAutoTLS: true,
+	}
+	cl, err := Start(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// wait until cluster is ready
+	time.Sleep(time.Second)
+
+	tlsConfig, err := cl.cfgs[0].ClientTLSInfo.ClientConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	cli, err := clientv3.New(clientv3.Config{
+		Endpoints:   cl.GetAllClientEndpoints(),
+		DialTimeout: 3 * time.Second,
+		TLS:         tlsConfig,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer cli.Close()
+	_, err = cli.Put(context.TODO(), "foo", "bar")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	capnslog.SetGlobalLogLevel(capnslog.CRITICAL)
+	cl.Shutdown()
+	capnslog.SetGlobalLogLevel(capnslog.INFO)
+}

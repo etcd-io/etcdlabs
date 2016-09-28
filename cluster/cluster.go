@@ -54,7 +54,7 @@ func (c *Cluster) GetClientEndpoints(i int) []string {
 	ups := c.cfgs[i].LCUrls
 	eps := make([]string, len(ups))
 	for j := range ups {
-		eps[j] = ups[j].Host
+		eps[j] = ups[j].Host // to omit scheme
 	}
 	return eps
 }
@@ -167,6 +167,9 @@ func Start(ccfg Config) (*Cluster, error) {
 		if err != nil {
 			return nil, err
 		}
+
+		nc := c.embeds[i].GetConfig()
+		c.cfgs[i] = &nc
 	}
 
 	var wg sync.WaitGroup
