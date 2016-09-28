@@ -17,7 +17,6 @@ package cluster
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -27,6 +26,13 @@ import (
 	"github.com/coreos/etcd/pkg/transport"
 	"github.com/coreos/pkg/capnslog"
 )
+
+var testTLSInfo = transport.TLSInfo{
+	CertFile:       "../test-certs/test-cert.pem",
+	KeyFile:        "../test-certs/test-cert-key.pem",
+	TrustedCAFile:  "../test-certs/trusted-ca.pem",
+	ClientCertAuth: true,
+}
 
 func TestClusterStart(t *testing.T) {
 	dir, err := ioutil.TempDir(os.TempDir(), "cluster-test")
@@ -86,18 +92,13 @@ func TestClusterStartPeerTLS(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	tlsInfo := transport.TLSInfo{
-		CertFile:      "../test-certs/test-cert.pem",
-		KeyFile:       "../test-certs/test-cert-key.pem",
-		TrustedCAFile: "../test-certs/trusted-ca.pem",
-	}
 	cfg := Config{
 		Size:     3,
 		RootDir:  dir,
 		RootPort: 2379,
 
 		PeerAutoTLS: false,
-		PeerTLSInfo: tlsInfo,
+		PeerTLSInfo: testTLSInfo,
 	}
 	cl, err := Start(cfg)
 	if err != nil {
@@ -170,19 +171,13 @@ func TestClusterStartClientTLS(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	tlsInfo := transport.TLSInfo{
-		CertFile:       "../test-certs/test-cert.pem",
-		KeyFile:        "../test-certs/test-cert-key.pem",
-		TrustedCAFile:  "../test-certs/trusted-ca.pem",
-		ClientCertAuth: true,
-	}
 	cfg := Config{
 		Size:     1,
 		RootDir:  dir,
 		RootPort: 4379,
 
 		ClientAutoTLS: false,
-		ClientTLSInfo: tlsInfo,
+		ClientTLSInfo: testTLSInfo,
 	}
 	cl, err := Start(cfg)
 	if err != nil {
@@ -192,7 +187,7 @@ func TestClusterStartClientTLS(t *testing.T) {
 	// wait until cluster is ready
 	time.Sleep(time.Second)
 
-	tlsConfig, err := tlsInfo.ClientConfig()
+	tlsConfig, err := testTLSInfo.ClientConfig()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -207,7 +202,6 @@ func TestClusterStartClientTLS(t *testing.T) {
 	defer cli.Close()
 	_, err = cli.Put(context.TODO(), "foo", "bar")
 	if err != nil {
-		fmt.Println(cl.GetAllClientEndpoints())
 		t.Fatal(err)
 	}
 
