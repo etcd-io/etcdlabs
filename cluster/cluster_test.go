@@ -85,10 +85,9 @@ func TestClusterStartPeerTLS(t *testing.T) {
 	}
 
 	tlsInfo := transport.TLSInfo{
-		CertFile:       "../test-certs/test-cert.pem",
-		KeyFile:        "../test-certs/test-cert-key.pem",
-		TrustedCAFile:  "../test-certs/trusted-ca.pem",
-		ClientCertAuth: true,
+		CertFile:      "../test-certs/test-cert.pem",
+		KeyFile:       "../test-certs/test-cert-key.pem",
+		TrustedCAFile: "../test-certs/trusted-ca.pem",
 	}
 	cfg := Config{
 		Size:     1,
