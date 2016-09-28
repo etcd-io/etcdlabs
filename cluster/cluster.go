@@ -54,7 +54,7 @@ func (c *Cluster) GetClientEndpoints(i int) []string {
 	ups := c.cfgs[i].LCUrls
 	eps := make([]string, len(ups))
 	for j := range ups {
-		eps[j] = ups[j].String()
+		eps[j] = ups[j].Host
 	}
 	return eps
 }
