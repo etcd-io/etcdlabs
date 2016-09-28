@@ -24,6 +24,7 @@ import (
 	"sync"
 
 	"github.com/coreos/etcd/embed"
+	"github.com/coreos/etcd/pkg/transport"
 	"github.com/coreos/pkg/capnslog"
 )
 
@@ -53,7 +54,7 @@ func (c *Cluster) GetClientEndpoints(i int) []string {
 	ups := c.cfgs[i].LCUrls
 	eps := make([]string, len(ups))
 	for j := range ups {
-		eps[i] = ups[j].String()
+		eps[j] = ups[j].String()
 	}
 	return eps
 }
@@ -74,45 +75,76 @@ func (c *Cluster) GetAllClientEndpoints() []string {
 	return eps
 }
 
+// Config defines etcd local cluster Configuration.
+type Config struct {
+	Size     int
+	RootDir  string
+	RootPort int
+
+	ClientTLSInfo transport.TLSInfo
+	ClientAutoTLS bool
+	PeerTLSInfo   transport.TLSInfo
+	PeerAutoTLS   bool
+}
+
 // Start starts embedded etcd cluster.
-func Start(size int, rootDir string, rootPort int) (*Cluster, error) {
-	plog.Printf("starting %d nodes (root directory %q, root port :%d)", size, rootDir, rootPort)
+func Start(ccfg Config) (*Cluster, error) {
+	plog.Printf("starting %d nodes (root directory %q, root port :%d)", ccfg.Size, ccfg.RootDir, ccfg.RootPort)
 
 	c := &Cluster{
-		rootDir: rootDir,
-		cfgs:    make([]*embed.Config, size),
-		embeds:  make([]*embed.Etcd, size),
+		rootDir: ccfg.RootDir,
+		cfgs:    make([]*embed.Config, ccfg.Size),
+		embeds:  make([]*embed.Etcd, ccfg.Size),
 	}
 
-	if !existFileOrDir(rootDir) {
-		if err := mkdirAll(rootDir); err != nil {
+	if !existFileOrDir(ccfg.RootDir) {
+		if err := mkdirAll(ccfg.RootDir); err != nil {
 			return nil, err
 		}
 	}
 
-	startPort := rootPort
-	for i := 0; i < size; i++ {
+	if !ccfg.ClientTLSInfo.Empty() && ccfg.ClientAutoTLS {
+		return nil, fmt.Errorf("choose either auto TLS or manual client TLS")
+	}
+	clientScheme := "https"
+	if ccfg.ClientTLSInfo.Empty() && !ccfg.ClientAutoTLS {
+		clientScheme = "http"
+	}
+
+	if !ccfg.PeerTLSInfo.Empty() && ccfg.PeerAutoTLS {
+		return nil, fmt.Errorf("choose either auto TLS or manual peer TLS")
+	}
+	peerScheme := "https"
+	if ccfg.PeerTLSInfo.Empty() && !ccfg.PeerAutoTLS {
+		peerScheme = "http"
+	}
+
+	startPort := ccfg.RootPort
+	for i := 0; i < ccfg.Size; i++ {
 		cfg := embed.NewConfig()
 
 		cfg.Name = fmt.Sprintf("name%d", i)
-		cfg.Dir = filepath.Join(rootDir, cfg.Name+".etcd")
+		cfg.Dir = filepath.Join(ccfg.RootDir, cfg.Name+".etcd")
 		cfg.WalDir = filepath.Join(cfg.Dir, "wal")
 
-		// TODO: use TLS + https
 		clientURL := url.URL{
-			Scheme: "http",
+			Scheme: clientScheme,
 			Host:   fmt.Sprintf("localhost:%d", startPort),
 		}
-		peerURL := url.URL{
-			Scheme: "http",
-			Host:   fmt.Sprintf("localhost:%d", startPort+1),
-		}
-
 		cfg.LCUrls = []url.URL{clientURL}
 		cfg.ACUrls = []url.URL{clientURL}
 
+		peerURL := url.URL{
+			Scheme: peerScheme,
+			Host:   fmt.Sprintf("localhost:%d", startPort+1),
+		}
 		cfg.LPUrls = []url.URL{peerURL}
 		cfg.APUrls = []url.URL{peerURL}
+
+		cfg.ClientAutoTLS = ccfg.ClientAutoTLS
+		cfg.ClientTLSInfo = ccfg.ClientTLSInfo
+		cfg.PeerAutoTLS = ccfg.PeerAutoTLS
+		cfg.PeerTLSInfo = ccfg.PeerTLSInfo
 
 		c.cfgs[i] = cfg
 
@@ -122,12 +154,12 @@ func Start(size int, rootDir string, rootPort int) (*Cluster, error) {
 	}
 
 	var initialClusters []string
-	for i := 0; i < size; i++ {
+	for i := 0; i < ccfg.Size; i++ {
 		initialClusters = append(initialClusters, c.cfgs[i].Name+"="+c.cfgs[i].APUrls[0].String())
 	}
 	initialCluster := strings.Join(initialClusters, ",")
 
-	for i := 0; i < size; i++ {
+	for i := 0; i < ccfg.Size; i++ {
 		c.cfgs[i].InitialCluster = initialCluster
 
 		var err error
@@ -147,7 +179,7 @@ func Start(size int, rootDir string, rootPort int) (*Cluster, error) {
 	}
 	wg.Wait()
 
-	plog.Printf("%d nodes are ready", size)
+	plog.Printf("%d nodes are ready", ccfg.Size)
 	return c, nil
 }
 

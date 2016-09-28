@@ -15,9 +15,16 @@
 package cluster
 
 import (
+	"bytes"
+	"context"
 	"io/ioutil"
 	"os"
 	"testing"
+	"time"
+
+	"github.com/coreos/etcd/clientv3"
+	"github.com/coreos/etcd/pkg/transport"
+	"github.com/coreos/pkg/capnslog"
 )
 
 func TestClusterStart(t *testing.T) {
@@ -26,10 +33,142 @@ func TestClusterStart(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cl, err := Start(5, dir, 2379)
+	cfg := Config{
+		Size:     3,
+		RootDir:  dir,
+		RootPort: 2379,
+	}
+	cl, err := Start(cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	// wait until cluster is ready
+	time.Sleep(time.Second)
+
+	cli, err := clientv3.New(clientv3.Config{
+		Endpoints:   cl.GetAllClientEndpoints(),
+		DialTimeout: 3 * time.Second,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer cli.Close()
+	_, err = cli.Put(context.TODO(), "foo", "bar")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// wait until the value is ready
+	time.Sleep(time.Second)
+
+	var resp *clientv3.GetResponse
+	resp, err = cli.Get(context.TODO(), "foo")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(resp.Kvs[0].Key, []byte("foo")) {
+		t.Fatalf("key expected 'foo', got %q", resp.Kvs[0].Key)
+	}
+	if !bytes.Equal(resp.Kvs[0].Value, []byte("bar")) {
+		t.Fatalf("value expected 'bar', got %q", resp.Kvs[0].Key)
+	}
+
+	capnslog.SetGlobalLogLevel(capnslog.CRITICAL)
+	cl.Shutdown()
+}
+
+func TestClusterStartPeerTLS(t *testing.T) {
+	dir, err := ioutil.TempDir(os.TempDir(), "cluster-test")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tlsInfo := transport.TLSInfo{
+		CertFile:       "../test-certs/test-cert.pem",
+		KeyFile:        "../test-certs/test-cert-key.pem",
+		TrustedCAFile:  "../test-certs/trusted-ca.pem",
+		ClientCertAuth: true,
+	}
+	cfg := Config{
+		Size:     1,
+		RootDir:  dir,
+		RootPort: 2379,
+
+		PeerAutoTLS: false,
+		PeerTLSInfo: tlsInfo,
+	}
+	cl, err := Start(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// wait until cluster is ready
+	time.Sleep(time.Second)
+
+	cli, err := clientv3.New(clientv3.Config{
+		Endpoints:   cl.GetAllClientEndpoints(),
+		DialTimeout: 3 * time.Second,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer cli.Close()
+	_, err = cli.Put(context.TODO(), "foo", "bar")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	capnslog.SetGlobalLogLevel(capnslog.CRITICAL)
+	cl.Shutdown()
+}
+
+func TestClusterStartClientTLS(t *testing.T) {
+	dir, err := ioutil.TempDir(os.TempDir(), "cluster-test")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tlsInfo := transport.TLSInfo{
+		CertFile:       "../test-certs/test-cert.pem",
+		KeyFile:        "../test-certs/test-cert-key.pem",
+		TrustedCAFile:  "../test-certs/trusted-ca.pem",
+		ClientCertAuth: true,
+	}
+	cfg := Config{
+		Size:     1,
+		RootDir:  dir,
+		RootPort: 2379,
+
+		ClientAutoTLS: false,
+		ClientTLSInfo: tlsInfo,
+	}
+	cl, err := Start(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// wait until cluster is ready
+	time.Sleep(time.Second)
+
+	tlsConfig, err := tlsInfo.ClientConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	cli, err := clientv3.New(clientv3.Config{
+		Endpoints:   cl.GetAllClientEndpoints(),
+		DialTimeout: 3 * time.Second,
+		TLS:         tlsConfig,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer cli.Close()
+	_, err = cli.Put(context.TODO(), "foo", "bar")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	capnslog.SetGlobalLogLevel(capnslog.CRITICAL)
 	cl.Shutdown()
 }

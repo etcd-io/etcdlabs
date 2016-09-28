@@ -1,0 +1,21 @@
+
+{
+  "key": {
+    "algo": "rsa",
+    "size": 4096
+  },
+  "names": [
+    {
+      "O": "etcd",
+      "OU": "etcd, security",
+      "L": "San Francisco",
+      "ST": "California",
+      "C": "US"
+    }
+  ],
+  "CN": "etcd",
+  "hosts": [
+    "localhost"
+  ]
+}
+
