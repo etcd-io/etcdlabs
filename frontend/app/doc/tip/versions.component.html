@@ -29,7 +29,8 @@
 								<a href="{{versionItem.releaseLink}}" class="{{versionItem.versionHTMLClassLinkRelease}}" target="_blank">{{versionItem.version}}</a>
 							</h3>
 							<p md-line>
-								<a href="{{versionItem.docLink}}" class="{{versionItem.versionHTMLClassLinkDoc}}" target="_blank">Documentation</a>
+								<a *ngIf="!versionItem.isRoutable" href="{{versionItem.docLink}}" class="{{versionItem.versionHTMLClassLinkDoc}}" target="_blank">Documentation</a>
+								<a *ngIf="versionItem.isRoutable" routerLink="{{versionItem.docLink}}" class="{{versionItem.versionHTMLClassLinkDoc}}">Documentation</a>
 							</p>
 						</md-list-item>
 					</md-list>
