@@ -22,8 +22,10 @@
 
         <div class="inner">
             <div class="block block-copy half">
-                <div class="faq-list-title">Distributed system</div>
-                <a href="/doc/{{version.etcdVersionURL}}/faq#cap-theorem-in-etcd" class="faq-list">CAP theorem in etcd?</a>
+                <div class="faq-list-title">Distributed System</div>
+                <a href="/doc/{{version.etcdVersionURL}}/faq#consensus-algorithm" class="faq-list">Consensus algorithm in etcd?</a>
+                <br>
+                <a href="/doc/{{version.etcdVersionURL}}/faq#cap-theorem" class="faq-list">CAP theorem in etcd?</a>
                 <br>
             </div>
             <div class="block block-copy half">
@@ -39,24 +41,41 @@
         <hr>
         <br>
 
-        <div id="cap-theorem-in-etcd"></div>
-        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#cap-theorem-in-etcd" class="faq-title">CAP theorem in etcd?</a></h2>
+        <div id="consensus-algorithm"></div>
+        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#consensus-algorithm" class="faq-title">Consensus algorithm in etcd?</a></h2>
         <p>
-            CAP<sup>[1]</sup> represents <i>Consistency</i>, <i>Availability</i>, <i>Partition tolerance</i>: you can only pick 2 out of 3. Since network partition is not avoidable, you are left with either consitency or availability when partition happens.
-            That is, systems with A and P are more tolerant of network faults, but possible to serve stale data. etcd chooses C and P to achieve linearizability with strong consistency.
+            etcd uses Raft<sup>[1]</sup> consensus algorithm. It handles faulty processes in distributed computing systems, and keeps data consistent even when system loses one of its communications. Raft ensures safety, which means system never present
+            incorrect values under non-Byzantine failures, such as network partitions and delays. System is fully functional as long as any majority of servers can communicate with each other. Command completes as soon as quorum has responded, and minority
+            does not affect the overall performance
+        </p>
+        <hr align="left" class="footer-top-line">
+        <footer>
+            [1] Diego Ongaro and John K Ousterhout: "<a href="https://raft.github.io/raft.pdf" target="_blank" class="footer-link">In Search of an Understandable Consensus Algorithm (Extended Version)</a>," at USENIX Annual Technical Conference (ATC),
+            June 2014.
+        </footer>
+        <br><br>
+
+        <div id="cap-theorem"></div>
+        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#cap-theorem" class="faq-title">CAP theorem in etcd?</a></h2>
+        <p>
+            CAP<sup>[1]</sup> represents <i>Consistency</i>, <i>Availability</i>, <i>Partition tolerance</i>: you can only pick 2 out of 3, it is impossible that a distributed computer system simultaneously satisfies them all. Since network partition
+            is not avoidable, you are left with either consitency or availability when partition happens. That is, systems with <i>A</i> and <i>P</i> are more tolerant of network faults, but possible to serve stale data. etcd chooses
+            <i>C</i> and <i>P</i> to achieve sequential consistency<sup>[2]</sup>.
         </p>
         <hr align="left" class="footer-top-line">
         <footer>
             [1] Seth Gilbert and Nancy Lynch: "<a href="https://pdfs.semanticscholar.org/24ce/ce61e2128780072bc58f90b8ba47f624bc27.pdf" target="_blank" class="footer-link">Brewer's Conjecture and the Feasibility of Consistent, Available, Partition-Tolerant Web Services</a>,"
             ACM SIGACT News, volume 33, number 2, pages 51–59, 2002.
+            <br> [2] Leslie Lamport: "<a href="http://research.microsoft.com/en-us/um/people/lamport/pubs/multi.pdf" target="_blank" class="footer-link">How to Make a Multiprocessor Computer That Correctly Executes Multiprocess Programs</a>," IEEE Trans.
+            Comput. C-28,9, pages 690-691, September 1979.
         </footer>
         <br><br>
 
         <div id="remove-member-first"></div>
         <h2><a href="/doc/{{version.etcdVersionURL}}/faq#remove-member-first" class="faq-title">Always remove first when replacing member?</a></h2>
         <p>
-            When replacing an etcd node, we recommend to remove the member first and then add its replacement. etcd employs distributed consensus based on a quorum model; (n+1)/2 members, a majority, must agree on a proposal before it can be committed to the cluster.
-            These proposals include key-value updates and membership changes. This model totally avoids any possibility of split brain inconsistency. The downside is permanent quorum loss is catastrophic.
+            When replacing an etcd node, we recommend to remove the member first and then add its replacement<sup>[1]</sup>. etcd employs distributed consensus based on a quorum model; (n+1)/2 members, a majority, must agree on a proposal before it can
+            be committed to the cluster. These proposals include key-value updates and membership changes. This model totally avoids any possibility of split brain inconsistency. The downside is permanent quorum loss is catastrophic.
         </p>
         <p>
             How this applies to membership:
@@ -73,21 +92,23 @@
             On the other hand, if the downed member is removed from cluster membership first, the number of members becomes 2 and the quorum remains at 2. Following that removal by adding a new member will also keep the quorum steady at 2. So, even if the new node
             can't be brought up, it's still possible to remove the new member through quorum on the remaining live members.
         </p>
-        <p>
-            Reference: <a href="https://github.com/coreos/etcd/issues/6114" target="_blank" class="normal-link">https://github.com/coreos/etcd/issues/6114</a>
-        </p>
-        <br>
+        <hr align="left" class="footer-top-line">
+        <footer>
+            [1] "<a href="https://github.com/coreos/etcd/issues/6114" target="_blank" class="footer-link">Adding replacement member before removing</a>," etcd GitHub issue.
+        </footer>
+        <br><br>
 
         <div id="why-so-strict-about-membership-change"></div>
         <h2><a href="/doc/{{version.etcdVersionURL}}/faq#why-so-strict-about-membership-change" class="faq-title">Why so strict about membershp change?</a></h2>
         <p>
-            Abandoning quorum is really risky (especially when the cluster is already in a bad way). We're aware that losing quorum is painful, but disabling quorum on membership could lead to full fledged cluster inconsistency and that would be even worse in many
-            applications ("disk geometry corruption" being a candidate for most terrifying). It's too dangerous to be a legitimate fix, sorry. Permitting a member add when the cluster is unhealthy is clearly broken and the fix for that, which is safe,
-            is already inflight.
+            etcd sets <span class="code-light-snippet">strict-reconfig-check</span> in order to reject reconfiguration requests that would cause quorum loss. Abandoning quorum is really risky (especially when the cluster is already in a bad way)<sup>[1]</sup>.
+            We're aware that losing quorum is painful, but disabling quorum on membership could lead to full fledged cluster inconsistency and that would be even worse in many applications ("disk geometry corruption" being a candidate for most terrifying).
+            It's too dangerous to be a legitimate fix, sorry. Permitting a member add when the cluster is unhealthy is clearly broken and the fix for that, which is safe, is already inflight.
         </p>
-        <p>
-            Reference: <a href="https://github.com/coreos/etcd/issues/6103" target="_blank" class="normal-link">https://github.com/coreos/etcd/issues/6103</a>
-        </p>
-        <br>
+        <hr align="left" class="footer-top-line">
+        <footer>
+            [1] "<a href="https://github.com/coreos/etcd/issues/6103" target="_blank" class="footer-link">Can't add or remove node in unhealthy cluster</a>," etcd GitHub issue.
+        </footer>
+        <br><br>
     </div>
 </md-sidenav-layout>

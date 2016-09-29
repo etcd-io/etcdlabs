@@ -36,15 +36,15 @@
                         <div class="feature">
                             <h3>Consistent</h3>
                             <p>
-                                etcd is not an eventually consistent database, where two different nodes can serve two different values (stale data). etcd provides <b>linearizability</b><sup>[2]</sup> with <b>strong consistency</b><sup>[3]</sup>. When
-                                write completes, all etcd clients would read the same, <i>most recent and up-to-date</i>, value in any node.
+                                etcd is not an eventually consistent database, where two different nodes can serve two different values (stale data). etcd provides <b>linearizable writes and reads</b><sup>[2]</sup> with <b>sequential consistency</b><sup>[3]</sup>.
+                                When write completes, all etcd clients would read the same, <i>most recent and up-to-date</i>, value.
                             </p>
                         </div>
 
                         <div class="feature">
                             <h3>Partition Tolerant</h3>
                             <p>
-                                etcd continues to function, even with network partition, where message is not delivered or gets delayed. Network glitches are very common, and <b>no system is immune</b> from network faults<sup>[4]</sup>.
+                                etcd continues to operate under transient network faults, where message is not delivered or gets delayed. Network glitches are very common in practice, and <b>no system is immune</b> from network faults<sup>[4]</sup>.
                             </p>
                         </div>
 
@@ -90,7 +90,8 @@
                     (ATC), June 2014.
                     <br> [2] Maurice P Herlihy and Jeannette M Wing: "<a href="http://www.cs.cornell.edu/andru/cs711/2002fa/reading/linearizability.pdf" target="_blank" class="footer-link">Linearizability: A Correctness Condition for Concurrent Objects</a>,"
                     ACM Transactions on Programming Languages and Systems (TOPLAS), volume 12, number 3, pages 463–492, July 1990.
-                    <br> [3] David K Gifford: "<a href="http://dl.acm.org/citation.cfm?id=910052" target="_blank" class="footer-link">Information Storage in a Decentralized Computer System</a>," Xerox Palo Alto Research Centers, CSL-81-8, June 1981.
+                    <br> [3] Hagit Attiya and Jennifer L Welch: "<a href="http://dl.acm.org/citation.cfm?id=176576" target="_blank" class="footer-link">Sequential Consistency versus Linearizability</a>," ACM Transactions on Computer Systems (TOCS), volume
+                    12, number 2, pages 91–122, May 1994.
                     <br> [4] Peter Bailis and Kyle Kingsbury: "<a href="http://queue.acm.org/detail.cfm?id=2655736" target="_blank" class="footer-link">The Network is Reliable</a>," ACM Queue, volume 12, number 7, July 2014.
                 </footer>
             </div>

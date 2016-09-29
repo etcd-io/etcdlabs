@@ -163,6 +163,13 @@ h2 .faq-title {
     word-wrap: normal;
 }
 
+.code-light-snippet {
+    background: #f5f5f5;
+    color: #366354;
+    font-family: monospace;
+    font-size: 14px;
+}
+
 .code-dark {
     white-space: pre-wrap;
     border-style: solid;
