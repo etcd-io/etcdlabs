@@ -23,23 +23,8 @@
         <h4>
             Install and Deploy etcd <span class="versions-link-main-emphasize">{{inputEtcdVersion}}</span> <span class="versions-link-normal">(latest {{etcdVersionLatestRelease}})</span>
         </h4>
-        <md-card>
-            <md-card-subtitle>TLS</md-card-subtitle>
-            <md-input type="text" [(ngModel)]="inputOrganization" placeholder="Organization"></md-input>
-            <md-input type="text" [(ngModel)]="inputOrganizationUnit" placeholder="Organization Unit"></md-input>
-            <md-input type="text" [(ngModel)]="inputLocationCity" placeholder="City"></md-input>
-            <md-input type="text" [(ngModel)]="inputLocationState" placeholder="State"></md-input>
-            <md-input type="text" [(ngModel)]="inputLocationCountry" placeholder="Country"></md-input>
-            <br>
-            <md-input type="text" [(ngModel)]="inputKeyAlgorithm" placeholder="Key Algorithm"></md-input>
-            <md-input type="number" [(ngModel)]="inputKeySize" placeholder="Key Size"></md-input>
-            <md-input type="number" [(ngModel)]="inputKeyExpirationHour" placeholder="Key Expiration (hour)"></md-input>
-            <br>
-            <md-input type="text" [(ngModel)]="inputCommonName" placeholder="Common Name"></md-input>
-        </md-card>
 
         <md-card>
-            <md-card-subtitle>etcd flags</md-card-subtitle>
             <md-checkbox [(ngModel)]="inputSecure">Secure connection (HTTPS)</md-checkbox>
             <md-checkbox [(ngModel)]="inputEnableProfile">Enable profiler</md-checkbox>
             <md-checkbox [(ngModel)]="inputDebug">Debug mode</md-checkbox>
@@ -84,117 +69,6 @@
         <br><br>
         <h4>Commands</h4>
         <md-tab-group>
-            <md-tab>
-                <template md-tab-label>
-					TLS (cfssl)
-				</template>
-                <template md-tab-content>
-					<br>
-					<h5 style="line-height: 0.07;">Why?</h5>
-					<p>
-						If etcd stores information that should not be public, encryption is highly recommended.
-					</p>
-					<p>
-						etcd supports SSL/TLS and authentication both for clients to server as well as peer communication.
-					</p>
-					<p>
-						Here's how to generate self-signed TLS certificates with
-						<a href="https://github.com/cloudflare/cfssl" target="_blank" class="normal-link">cfssl</a>.
-					</p>
-					<p>
-						Guides with <a href="https://letsencrypt.org/" target="_blank" class="normal-link">Let's Encrypt</a> is coming soon!
-					</p>
-
-					<br>
-					<h5 style="line-height: 0.07;">Install cfssl</h5>
-					<div class="osx-window">
-						<div class="window-narrow">
-							<div class="titlebar">
-								<div class="buttons">
-									<div class="closebtn"><span><strong></strong></span></div>
-									<div class="minimize"><span><strong></strong></span></div>
-									<div class="zoom"><span><strong></strong></span></div>
-								</div><span class="title-bar-text">terminal</span></div>
-							<div class="content">
-								<pre class="osx-terminal-contents">{{getCfsslCommandInitial()}}</pre>
-							</div>
-						</div>
-					</div>
-
-					<br>
-					<h5 style="line-height: 0.07;">Generate self-signed root CA certificate</h5>
-					<pre class="code-dark">{{getCfsslCommandRootCA()}}</pre>
-
-					<br>
-					<h5 style="line-height: 0.07;">Create a configuration file</h5>
-					<pre class="code-dark">{{getCfsslCommandConfig()}}</pre>
-
-					<br>
-					<h5 style="line-height: 0.07;">Generate local-issued certificates with private keys</h5>
-					<p *ngIf="flags[0].ipAddress == 'localhost'">
-						Seems like cert is configured for localhost. Please make sure to specify remote hosts, if any.
-					</p>
-					<div *ngFor="let flag of flags; let i = index;">
-						<div *ngIf="inputClusterSize > i">
-							<pre class="code-dark">{{getCfsslCommandKeys(flag)}}</pre>
-						</div>
-					</div>
-
-					<br>
-				</template>
-            </md-tab>
-
-
-            <md-tab>
-                <template md-tab-label>
-					Build from source
-				</template>
-                <template md-tab-content>
-					<br>
-					<p>
-						etcd is written in Go. To build from source, you need Go 1.7+. This assumes host OS is Linux.
-					</p>
-					<p>
-						<md-input type="text" [(ngModel)]="inputGoVersion" placeholder="Go version"></md-input>
-					</p>
-					<div class="osx-window">
-						<div class="window">
-							<div class="titlebar">
-								<div class="buttons">
-									<div class="closebtn"><span><strong></strong></span></div>
-									<div class="minimize"><span><strong></strong></span></div>
-									<div class="zoom"><span><strong></strong></span></div>
-								</div><span class="title-bar-text">terminal</span></div>
-							<div class="content">
-								<pre class="osx-terminal-contents">{{getGoCommand()}}</pre>
-							</div>
-						</div>
-					</div>
-					<br>
-					<p>
-						Now let's build etcd from source.
-					</p>
-					<p>
-						<md-input type="text" [(ngModel)]="inputGitUser" placeholder="Git User"></md-input>
-						<md-input type="text" [(ngModel)]="inputGitBranch" placeholder="Git Branch"></md-input>
-					</p>
-					<div class="osx-window">
-						<div class="window-narrow">
-							<div class="titlebar">
-								<div class="buttons">
-									<div class="closebtn"><span><strong></strong></span></div>
-									<div class="minimize"><span><strong></strong></span></div>
-									<div class="zoom"><span><strong></strong></span></div>
-								</div><span class="title-bar-text">terminal</span></div>
-							<div class="content">
-								<pre class="osx-terminal-contents">{{getEtcdCommandBuildFromSource()}}</pre>
-							</div>
-						</div>
-					</div>
-					<br>
-				</template>
-            </md-tab>
-
 
             <md-tab>
                 <template md-tab-label>
@@ -292,6 +166,128 @@
 
 					<br><br>
 					<p>Sorry, this page is still working in progress.</p>
+				</template>
+            </md-tab>
+
+            <md-tab>
+                <template md-tab-label>
+					Build from source
+				</template>
+                <template md-tab-content>
+					<br>
+					<p>
+						etcd is written in Go. To build from source, you need Go 1.7+. This assumes host OS is Linux.
+					</p>
+					<p>
+						<md-input type="text" [(ngModel)]="inputGoVersion" placeholder="Go version"></md-input>
+					</p>
+					<div class="osx-window">
+						<div class="window">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{getGoCommand()}}</pre>
+							</div>
+						</div>
+					</div>
+					<br>
+					<p>
+						Now let's build etcd from source.
+					</p>
+					<p>
+						<md-input type="text" [(ngModel)]="inputGitUser" placeholder="Git User"></md-input>
+						<md-input type="text" [(ngModel)]="inputGitBranch" placeholder="Git Branch"></md-input>
+					</p>
+					<div class="osx-window">
+						<div class="window-narrow">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{getEtcdCommandBuildFromSource()}}</pre>
+							</div>
+						</div>
+					</div>
+					<br>
+				</template>
+            </md-tab>
+
+            <md-tab>
+                <template md-tab-label>
+					TLS (cfssl)
+				</template>
+                <template md-tab-content>
+					<br>
+					<h5 style="line-height: 0.07;">Why?</h5>
+					<p>
+						If etcd stores information that should not be public, encryption is highly recommended.
+					</p>
+					<p>
+						etcd supports SSL/TLS and authentication both for clients to server as well as peer communication.
+					</p>
+					<p>
+						Here's how to generate self-signed TLS certificates with
+						<a href="https://github.com/cloudflare/cfssl" target="_blank" class="normal-link">cfssl</a>.
+					</p>
+
+					<br>
+					<h5 style="line-height: 0.07;">Install cfssl</h5>
+					<div class="osx-window">
+						<div class="window-narrow">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{getCFSSLCommandInitial()}}</pre>
+							</div>
+						</div>
+					</div>
+
+					<br>
+					<md-card-subtitle>Certificate Configuration</md-card-subtitle>
+					<md-input type="text" [(ngModel)]="inputCFSSLOrganization" placeholder="Organization"></md-input>
+					<md-input type="text" [(ngModel)]="inputCFSSLOrganizationUnit" placeholder="Organization Unit"></md-input>
+					<md-input type="text" [(ngModel)]="inputCFSSLLocationCity" placeholder="City"></md-input>
+					<md-input type="text" [(ngModel)]="inputCFSSLLocationState" placeholder="State"></md-input>
+					<md-input type="text" [(ngModel)]="inputCFSSLLocationCountry" placeholder="Country"></md-input>
+					<br>
+					<md-input type="text" [(ngModel)]="inputCFSSLKeyAlgorithm" placeholder="Key Algorithm"></md-input>
+					<md-input type="number" [(ngModel)]="inputCFSSLKeySize" placeholder="Key Size"></md-input>
+					<md-input type="number" [(ngModel)]="inputCFSSLKeyExpirationHour" placeholder="Key Expiration (hour)"></md-input>
+					<br>
+					<md-input type="text" [(ngModel)]="inputCFSSLCommonName" placeholder="Common Name"></md-input>
+					<br>
+					<br>
+
+					<h5 style="line-height: 0.07;">Generate self-signed root CA certificate</h5>
+					<pre class="code-dark">{{getCFSSLCommandRootCA()}}</pre>
+
+					<br>
+					<h5 style="line-height: 0.07;">Create a configuration file</h5>
+					<pre class="code-dark">{{getCFSSLCommandConfig()}}</pre>
+
+					<br>
+					<h5 style="line-height: 0.07;">Generate local-issued certificates with private keys</h5>
+					<p *ngIf="flags[0].ipAddress == 'localhost'">
+						Seems like cert is configured for localhost. Please make sure to specify remote hosts, if any.
+					</p>
+					<div *ngFor="let flag of flags; let i = index;">
+						<div *ngIf="inputClusterSize > i">
+							<pre class="code-dark">{{getCFSSLCommandKeys(flag)}}</pre>
+						</div>
+					</div>
+
+					<br>
 				</template>
             </md-tab>
 

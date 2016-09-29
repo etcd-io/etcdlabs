@@ -63,16 +63,15 @@
                 <h2><a href="/doc/{{version.etcdVersionURL}}/why#use-case-coreos">Use Case: CoreOS</a></h2>
                 <p>
                     Application running on <a href="https://coreos.com/why/" target="_blank" class="normal-link">CoreOS</a> gets automatic, no-downtime Linux kernel updates. CoreOS uses
-                    <a href="https://github.com/coreos/locksmith" target="_blank" class="normal-link">locksmith</a> to coordinate those updates. locksmith stores semephore values in etcd. And ensures that only subset of cluster are rebooting at any given
-                    time.
+                    <a href="https://github.com/coreos/locksmith" target="_blank" class="normal-link">locksmith</a> to coordinate updates. locksmith stores semephore values in etcd to ensure that only subset of cluster are rebooting at any given time.
                 </p>
 
                 <br>
                 <div id="use-case-kubernetes"></div>
                 <h2><a href="/doc/{{version.etcdVersionURL}}/why#use-case-kubernetes">Use Case: Kubernetes</a></h2>
                 <p>
-                    <a href="http://kubernetes.io/docs/whatisk8s/" target="_blank" class="normal-link">Kubernetes</a> needs configuration storage for service discovery and cluster management. Kubernetes API server writes such persistent cluster states
-                    in etcd. And uses etcd watch API to get notified whenever changes happen. Consistency is the key to ensure that services correctly schedule and operatate.
+                    <a href="http://kubernetes.io/docs/whatisk8s/" target="_blank" class="normal-link">Kubernetes</a> needs configuration storage for service discovery and cluster management. Kubernetes API server writes persistent cluster states in etcd.
+                    And uses etcd watch API to get notified whenever changes happen. Consistency is the key to ensure that services correctly schedule and operatate.
                 </p>
 
                 <br>
