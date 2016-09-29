@@ -53,13 +53,13 @@ export class etcdFlag {
 
         this.initialCluster = '';
 
-        this.clientCertFile = '/tmp/certs/' + this.name + '.pem';
-        this.clientKeyFile = '/tmp/certs/' + this.name + '-key.pem';
-        this.clientTrustedCAFile = '/tmp/certs/trusted-ca.pem';
+        this.clientCertFile = '/tmp/test-certs/' + this.name + '.pem';
+        this.clientKeyFile = '/tmp/test-certs/' + this.name + '-key.pem';
+        this.clientTrustedCAFile = '/tmp/test-certs/trusted-ca.pem';
 
-        this.peerCertFile = '/tmp/certs/' + this.name + '.pem';
-        this.peerKeyFile = '/tmp/certs/' + this.name + '-key.pem';
-        this.peerTrustedCAFile = '/tmp/certs/trusted-ca.pem';
+        this.peerCertFile = '/tmp/test-certs/' + this.name + '.pem';
+        this.peerKeyFile = '/tmp/test-certs/' + this.name + '-key.pem';
+        this.peerTrustedCAFile = '/tmp/test-certs/trusted-ca.pem';
     }
 }
 
@@ -234,10 +234,9 @@ rm -rf /tmp/certs && mkdir -p /tmp/certs`;
     }
   ],
   "CN": "${this.inputCommonName}"
-}
-' > /tmp/certs/trusted-ca-csr.json
+}' > /tmp/test-certs/trusted-ca-csr.json
 
-cfssl gencert --initca=true /tmp/certs/trusted-ca-csr.json | cfssljson --bare /tmp/certs/trusted-ca
+cfssl gencert --initca=true /tmp/test-certs/trusted-ca-csr.json | cfssljson --bare /tmp/test-certs/trusted-ca
 `;
     }
 
@@ -254,8 +253,7 @@ cfssl gencert --initca=true /tmp/certs/trusted-ca-csr.json | cfssljson --bare /t
         "expiry": "${this.inputKeyExpirationHour}h"
     }
   }
-}
-' > /tmp/certs/gencert-config.json
+}' > /tmp/test-certs/gencert-config.json
 `;
     }
 
@@ -284,14 +282,13 @@ cfssl gencert --initca=true /tmp/certs/trusted-ca-csr.json | cfssljson --bare /t
   "hosts": [
 ${hostTxt}
   ]
-}
-' > /tmp/certs/request-ca-csr-${flag.name}.json
+}' > /tmp/test-certs/request-ca-csr-${flag.name}.json
 
 cfssl gencert` + ' \\' + `
-    ` + '--ca /tmp/certs/trusted-ca.pem' + ' \\' + `
-    ` + '--ca-key /tmp/certs/trusted-ca-key.pem' + ' \\' + `
-    ` + '--config /tmp/certs/gencert-config.json' + ' \\' + `
-    ` + `/tmp/certs/request-ca-csr-${flag.name}.json | cfssljson --bare /tmp/certs/${flag.name}`;
+    ` + '--ca /tmp/test-certs/trusted-ca.pem' + ' \\' + `
+    ` + '--ca-key /tmp/test-certs/trusted-ca-key.pem' + ' \\' + `
+    ` + '--config /tmp/test-certs/gencert-config.json' + ' \\' + `
+    ` + `/tmp/test-certs/request-ca-csr-${flag.name}.json | cfssljson --bare /tmp/test-certs/${flag.name}`;
     }
 
     getGoCommand() {
@@ -315,8 +312,7 @@ else
 fi
 
 mkdir -p $GOPATH/bin/
-go version
-`;
+go version`;
     }
 
     getEtcdCommandBuildFromSource() {
@@ -348,7 +344,8 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
 ` + 'curl -L ${DOWNLOAD_URL}/${ETCD_VER}/etcd-${ETCD_VER}-linux-amd64.tar.gz -o /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz' + `
 ` + 'tar xzvf /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz -C /tmp/test-etcd --strip-components=1' + `
 
-/tmp/test-etcd/etcd --version`;
+/tmp/test-etcd/etcd --version
+/tmp/test-etcd/etcdctl --version`;
     }
 
     getEtcdCommandInstallOSX() {
@@ -357,7 +354,8 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
 ` + 'curl -L ${DOWNLOAD_URL}/${ETCD_VER}/etcd-${ETCD_VER}-darwin-amd64.zip -o /tmp/etcd-${ETCD_VER}-darwin-amd64.zip' + `
 ` + 'unzip /tmp/etcd-${ETCD_VER}-darwin-amd64.zip -d /tmp && mv /tmp/etcd-${ETCD_VER}-darwin-amd64 /tmp/test-etcd' + `
 
-/tmp/test-etcd/etcd --version`;
+/tmp/test-etcd/etcd --version
+/tmp/test-etcd/etcdctl --version`;
     }
 
     getClientURL(flag: etcdFlag) {
@@ -376,6 +374,17 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
             flag.protocol = 'http';
         }
         return flag.protocol + '://' + flag.ipAddress + ':' + String(flag.peerPort);
+    }
+
+    getAllClientEndpoints() {
+        let txt = '';
+        for (let _i = 0; _i < this.flags.length; _i++) {
+            if (_i > 0) {
+                txt += ',';
+            }
+            txt += this.flags[_i].ipAddress + ':' + String(this.flags[_i].clientPort);
+        }
+        return txt;
     }
 
     getInitialCluster() {
