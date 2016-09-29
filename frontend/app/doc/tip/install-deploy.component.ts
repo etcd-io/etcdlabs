@@ -322,7 +322,9 @@ USER_NAME=${this.inputGitUser}
 BRANCH_NAME=${this.inputGitBranch}
 
 ` + 'rm -rf ${GOPATH}/src/${GIT_PATH}' + `
-` + 'git clone https://github.com/${USER_NAME}/etcd --branch ${BRANCH_NAME} ${GOPATH}/src/${GIT_PATH}' + `
+` + 'git clone https://github.com/${USER_NAME}/etcd' + ' \\' + `
+    ` + '--branch ${BRANCH_NAME}' + ' \\' + `
+    ` + '${GOPATH}/src/${GIT_PATH}' + `
 
 ` + 'cd ${GOPATH}/src/${GIT_PATH} && ./build' + `
 
