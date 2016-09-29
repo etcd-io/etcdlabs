@@ -24,7 +24,6 @@ import (
 
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/pkg/transport"
-	"github.com/coreos/pkg/capnslog"
 )
 
 var testTLSInfo = transport.TLSInfo{
@@ -34,7 +33,7 @@ var testTLSInfo = transport.TLSInfo{
 	ClientCertAuth: true,
 }
 
-func TestClusterStart(t *testing.T) {
+func TestClusterStartNoTLS(t *testing.T) {
 	dir, err := ioutil.TempDir(os.TempDir(), "cluster-test")
 	if err != nil {
 		t.Fatal(err)
@@ -81,12 +80,10 @@ func TestClusterStart(t *testing.T) {
 		t.Fatalf("value expected 'bar', got %q", resp.Kvs[0].Key)
 	}
 
-	capnslog.SetGlobalLogLevel(capnslog.CRITICAL)
 	cl.Shutdown()
-	capnslog.SetGlobalLogLevel(capnslog.INFO)
 }
 
-func TestClusterStartPeerTLS(t *testing.T) {
+func TestClusterStartPeerTLSManual(t *testing.T) {
 	dir, err := ioutil.TempDir(os.TempDir(), "cluster-test")
 	if err != nil {
 		t.Fatal(err)
@@ -121,9 +118,7 @@ func TestClusterStartPeerTLS(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	capnslog.SetGlobalLogLevel(capnslog.CRITICAL)
 	cl.Shutdown()
-	capnslog.SetGlobalLogLevel(capnslog.INFO)
 }
 
 func TestClusterStartPeerTLSAuto(t *testing.T) {
@@ -160,12 +155,10 @@ func TestClusterStartPeerTLSAuto(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	capnslog.SetGlobalLogLevel(capnslog.CRITICAL)
 	cl.Shutdown()
-	capnslog.SetGlobalLogLevel(capnslog.INFO)
 }
 
-func TestClusterStartClientTLS(t *testing.T) {
+func TestClusterStartClientTLSManual(t *testing.T) {
 	dir, err := ioutil.TempDir(os.TempDir(), "cluster-test")
 	if err != nil {
 		t.Fatal(err)
@@ -205,9 +198,7 @@ func TestClusterStartClientTLS(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	capnslog.SetGlobalLogLevel(capnslog.CRITICAL)
 	cl.Shutdown()
-	capnslog.SetGlobalLogLevel(capnslog.INFO)
 }
 
 func TestClusterStartClientTLSAuto(t *testing.T) {
@@ -219,7 +210,7 @@ func TestClusterStartClientTLSAuto(t *testing.T) {
 	cfg := Config{
 		Size:     1,
 		RootDir:  dir,
-		RootPort: 4379,
+		RootPort: 5379,
 
 		ClientAutoTLS: true,
 	}
@@ -249,7 +240,5 @@ func TestClusterStartClientTLSAuto(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	capnslog.SetGlobalLogLevel(capnslog.CRITICAL)
 	cl.Shutdown()
-	capnslog.SetGlobalLogLevel(capnslog.INFO)
 }
