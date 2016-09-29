@@ -321,13 +321,13 @@ go version`;
 USER_NAME=${this.inputGitUser}
 BRANCH_NAME=${this.inputGitBranch}
 
-` + 'rm -rf $HOME/go/src/${GIT_PATH}' + `
-` + 'git clone https://github.com/${USER_NAME}/etcd --branch ${BRANCH_NAME} $HOME/go/src/${GIT_PATH}' + `
+` + 'rm -rf ${GOPATH}/${GIT_PATH}' + `
+` + 'git clone https://github.com/${USER_NAME}/etcd --branch ${BRANCH_NAME} ${GOPATH}/${GIT_PATH}' + `
 
-` + 'cd $HOME/go/src/${GIT_PATH} && ./build' + `
+` + 'cd ${GOPATH}/${GIT_PATH} && ./build' + `
 
-` + '$HOME/go/src/${GIT_PATH}/bin/etcd --version' + `
-` + '$HOME/go/src/${GIT_PATH}/bin/etcdctl --version';
+` + '${GOPATH}/${GIT_PATH}/bin/etcd --version' + `
+` + '${GOPATH}/${GIT_PATH}/bin/etcdctl --version';
     }
 
     getEtcdCommandInitial() {
