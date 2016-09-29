@@ -39,8 +39,8 @@ type Cluster struct {
 	embeds  []*embed.Etcd
 }
 
-// GetConfig returns embed.Config of the index.
-func (c *Cluster) GetConfig(i int) *embed.Config {
+// Config returns embed.Config of the index.
+func (c *Cluster) Config(i int) *embed.Config {
 	return c.cfgs[i]
 }
 
@@ -168,7 +168,7 @@ func Start(ccfg Config) (*Cluster, error) {
 			return nil, err
 		}
 
-		nc := c.embeds[i].GetConfig()
+		nc := c.embeds[i].Config()
 		c.cfgs[i] = &nc
 	}
 
