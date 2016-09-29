@@ -36,11 +36,7 @@ export class BlogComponent {
                     // TODO: dot routing
                     new blogItem(
                         'Announcing etcd v3.1',
-                        '/blog/2016/announcing-etcd-v31'
-                    ),
-                    new blogItem(
-                        'Announcing etcd website',
-                        '/blog/2016/announcing-etcd-website'
+                        '/blog/2016/v31'
                     ),
                     new blogItem(
                         'Serializability and Distributed Software Transactional Memory with etcd3',

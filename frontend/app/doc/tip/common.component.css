@@ -371,7 +371,7 @@ section.features .feature-grid .table-row {
 }
 
 section.features .feature-grid .feature {
-    padding: 30px 15px;
+    padding: 10px 5px;
     text-align: center;
     vertical-align: top
 }
@@ -385,7 +385,7 @@ section.features .feature-grid .feature {
 }
 
 section.features .feature-grid .feature h3 {
-    margin-bottom: 15px
+    margin-bottom: 5px
 }
 
 section.features .feature-grid .feature p {
@@ -398,7 +398,7 @@ section.features .feature-grid .feature p {
     max-width: 1170px;
     margin-left: auto;
     margin-right: auto;
-    padding: 0 10px
+    padding: 0 5px
 }
 
 .inner::after {
@@ -409,7 +409,7 @@ section.features .feature-grid .feature p {
 
 @media screen and (min-width: 768px) {
     .inner {
-        padding: 0 20px
+        padding: 0 10px
     }
 }
 
@@ -419,7 +419,7 @@ section {
 
 @media screen and (min-width: 768px) {
     section {
-        padding: 15px 0
+        padding: 10px 0
     }
 }
 
@@ -442,7 +442,7 @@ section {
 }
 
 .block-copy p {
-    margin-top: 30px;
+    margin-top: 15px;
     line-height: 1.75rem;
     color: #000
 }
