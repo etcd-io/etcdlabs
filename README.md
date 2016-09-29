@@ -1,7 +1,6 @@
 
-Demo is being served at http://104.199.121.254:4200
-
-https://github.com/coreos/etcd
+- [etcd website](http://104.199.121.254:420)
+- [Debug etcd](./debug-etcd)
 
 #### Technology Used
 
