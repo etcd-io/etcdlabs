@@ -57,12 +57,6 @@ export class parentComponent {
                 'no-text-decoration'
             ),
             new sidebarItem(
-                'Kubernetes controller',
-                'automate etcd cluster operations using Kubernetes',
-                `/doc/${this.version.etcdVersionURL}/kubernetes-controller`,
-                'no-text-decoration'
-            ),
-            new sidebarItem(
                 'Tutorials',
                 'etcdctl, client requests, basic operations',
                 `/doc/${this.version.etcdVersionURL}/tutorials`,

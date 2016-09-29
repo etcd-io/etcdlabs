@@ -326,7 +326,8 @@ BRANCH_NAME=${this.inputGitBranch}
 
 ` + 'cd $HOME/go/src/${GIT_PATH} && ./build' + `
 
-` + '$HOME/go/src/${GIT_PATH}/bin/etcd -version';
+` + '$HOME/go/src/${GIT_PATH}/bin/etcd --version' + `
+` + '$HOME/go/src/${GIT_PATH}/bin/etcdctl --version';
     }
 
     getEtcdCommandInitial() {
@@ -383,6 +384,9 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
                 txt += ',';
             }
             txt += this.flags[_i].ipAddress + ':' + String(this.flags[_i].clientPort);
+            if (_i + 1 === this.inputClusterSize) {
+                break;
+            }
         }
         return txt;
     }
@@ -444,6 +448,17 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
             cmd += ' \\' + `
     ` + '--debug';
         }
+
+        return cmd;
+    }
+
+    getEtcdctlCommandBash(flag: etcdFlag) {
+        let cmd = 'ETCDCTL_API=3 /tmp/test-etcd/etcdctl' + ' \\' + `
+    ` + '--endpoints' + ' ' + this.getAllClientEndpoints() + ' \\' + `
+    ` + '--cert' + ' ' + flag.clientCertFile + ' \\' + `
+    ` + '--key' + ' ' + flag.clientKeyFile + ' \\' + `
+    ` + '--cacert' + ' ' + flag.clientTrustedCAFile + ' \\' + `
+    ` + 'put foo bar';
 
         return cmd;
     }

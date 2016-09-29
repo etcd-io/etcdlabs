@@ -244,6 +244,7 @@
 							<pre class="code-dark">{{getEtcdCommandBash(flag)}}</pre>
 						</div>
 					</div>
+					<pre class="code-dark">{{getEtcdctlCommandBash(flags[0])}}</pre>
 					<br>
 				</template>
             </md-tab>
@@ -266,10 +267,6 @@
 					</p>
 					<p>
 						Here's how to run etcd with Kubernetes.
-					</p>
-					<p>
-						For completely managed etcd cluster, please check out <a routerLink="/doc/{{version.etcdVersionURL}}/kubernetes-controller"
-							class="normal-link">Kubernetes etcd controller</a>.
 					</p>
 
 					<br>
