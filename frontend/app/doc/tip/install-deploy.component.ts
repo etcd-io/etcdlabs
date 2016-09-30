@@ -347,11 +347,14 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
     getEtcdctlCommandBash(flag: etcdFlag) {
         let cmd = 'ETCDCTL_API=3 /tmp/test-etcd/etcdctl' + ' \\' + `
     ` + '--endpoints' + ' ' + this.getAllClientEndpoints() + ' \\' + `
-    ` + '--cert' + ' ' + flag.clientCertFile + ' \\' + `
+    `;
+        if (this.inputSecure) {
+            cmd += '--cert' + ' ' + flag.clientCertFile + ' \\' + `
     ` + '--key' + ' ' + flag.clientKeyFile + ' \\' + `
     ` + '--cacert' + ' ' + flag.clientTrustedCAFile + ' \\' + `
-    ` + 'put foo bar';
-
+    `;
+        }
+        cmd += 'put foo bar';
         return cmd;
     }
     ///////////////////////////////////////////////////
