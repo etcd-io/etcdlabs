@@ -49,21 +49,25 @@ func (c *Cluster) GetEmbed(i int) *embed.Etcd {
 	return c.embeds[i]
 }
 
-// GetClientEndpoints returns the client endpoints of the index.
-func (c *Cluster) GetClientEndpoints(i int) []string {
+// GetEndpoints returns the client endpoints.
+func (c *Cluster) GetEndpoints(i int, scheme bool) []string {
 	ups := c.cfgs[i].LCUrls
 	eps := make([]string, len(ups))
 	for j := range ups {
-		eps[j] = ups[j].Host // to omit scheme
+		if scheme {
+			eps[j] = ups[j].String()
+		} else {
+			eps[j] = ups[j].Host
+		}
 	}
 	return eps
 }
 
-// GetAllClientEndpoints returns all endpoints of clients.
-func (c *Cluster) GetAllClientEndpoints() []string {
+// GetEndpointsAll returns all endpoints of clients.
+func (c *Cluster) GetEndpointsAll(scheme bool) []string {
 	epm := make(map[string]struct{})
 	for i := 0; i < len(c.cfgs); i++ {
-		for _, ep := range c.GetClientEndpoints(i) {
+		for _, ep := range c.GetEndpoints(i, scheme) {
 			epm[ep] = struct{}{}
 		}
 	}

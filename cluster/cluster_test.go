@@ -53,7 +53,7 @@ func TestClusterStartNoTLS(t *testing.T) {
 	time.Sleep(time.Second)
 
 	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:   cl.GetAllClientEndpoints(),
+		Endpoints:   cl.GetEndpointsAll(false),
 		DialTimeout: 3 * time.Second,
 	})
 	if err != nil {
@@ -106,7 +106,7 @@ func TestClusterStartPeerTLSManual(t *testing.T) {
 	time.Sleep(time.Second)
 
 	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:   cl.GetAllClientEndpoints(),
+		Endpoints:   cl.GetEndpointsAll(false),
 		DialTimeout: 3 * time.Second,
 	})
 	if err != nil {
@@ -143,7 +143,7 @@ func TestClusterStartPeerTLSAuto(t *testing.T) {
 	time.Sleep(time.Second)
 
 	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:   cl.GetAllClientEndpoints(),
+		Endpoints:   cl.GetEndpointsAll(false),
 		DialTimeout: 3 * time.Second,
 	})
 	if err != nil {
@@ -185,7 +185,7 @@ func TestClusterStartClientTLSManual(t *testing.T) {
 		t.Fatal(err)
 	}
 	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:   cl.GetAllClientEndpoints(),
+		Endpoints:   cl.GetEndpointsAll(false),
 		DialTimeout: 3 * time.Second,
 		TLS:         tlsConfig,
 	})
@@ -227,7 +227,7 @@ func TestClusterStartClientTLSAuto(t *testing.T) {
 		t.Fatal(err)
 	}
 	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:   cl.GetAllClientEndpoints(),
+		Endpoints:   cl.GetEndpointsAll(false),
 		DialTimeout: 3 * time.Second,
 		TLS:         tlsConfig,
 	})
