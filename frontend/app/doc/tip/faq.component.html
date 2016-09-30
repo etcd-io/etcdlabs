@@ -105,7 +105,7 @@
             All etcd writes are replicated from leader to its followers. Entry is <i>committed</i> when it has been replicated in majority of cluster. Each read returns the value at the latest committed write. etcd provides two types of read consistency.
             Linearizable read (quorum read) that requires quorum to agreen on the value before returning to the client. Serializable read that does not go through consistency and returns from local node. Obviously serializable read should be faster but
             contain possibly stale data. In etcd v3.0.0, quorum read throughput is around 40,000 requests per second (qps), while serializable read is over 100,000 qps (2x faster). Quorum read is slower because it needs to issue a read query command,
-            and this command needs to get replicated as a log entry requiring disk I/O.
+            and this command needs to get replicated, which requires disk I/O.
         </p>
         <p>
             etcd v3.1+ implements <i>read index</i> mechanism described in Raft<sup>[1]</sup> paper, and now etcd quorum read is as fast as serializable read. This is how it works: Leader records its current committed index in <span class="code-light-snippet">readIndex</span>            field. Leader sends <span class="code-light-snippet">readIndex</span> to its followers. For followers, <span class="code-light-snippet">readIndex</span> is the largest committed index ever seen by any server because it is from leader and committed.
