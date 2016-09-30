@@ -23,9 +23,13 @@
         <div class="inner">
             <div class="block block-copy half">
                 <div class="faq-list-title">Distributed System</div>
-                <a href="/doc/{{version.etcdVersionURL}}/faq#consensus-algorithm" class="faq-list">Consensus algorithm in etcd?</a>
+                <a href="/doc/{{version.etcdVersionURL}}/faq#consensus-algorithm" class="faq-list">Consensus algorithm</a>
                 <br>
-                <a href="/doc/{{version.etcdVersionURL}}/faq#cap-theorem" class="faq-list">CAP theorem in etcd?</a>
+                <a href="/doc/{{version.etcdVersionURL}}/faq#cap-theorem" class="faq-list">CAP theorem</a>
+                <br>
+                <a href="/doc/{{version.etcdVersionURL}}/faq#consistency" class="faq-list">Consistency</a>
+                <br>
+                <a href="/doc/{{version.etcdVersionURL}}/faq#qget" class="faq-list">Quorum read</a>
                 <br>
             </div>
             <div class="block block-copy half">
@@ -42,11 +46,11 @@
         <br>
 
         <div id="consensus-algorithm"></div>
-        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#consensus-algorithm" class="faq-title">Consensus algorithm in etcd?</a></h2>
+        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#consensus-algorithm" class="faq-title">Consensus algorithm</a></h2>
         <p>
-            etcd uses Raft<sup>[1]</sup> consensus algorithm. It handles faulty processes in distributed computing systems, and keeps data consistent even when system loses one of its communications. Raft ensures safety, which means system never present
+            etcd uses Raft<sup>[1]</sup> consensus algorithm. It can handle faulty processes in distributed computing systems and keep data consistent even when system loses one of its communications. Raft ensures safety, which means system never present
             incorrect values under non-Byzantine failures, such as network partitions and delays. System is fully functional as long as any majority of servers can communicate with each other. Command completes as soon as quorum has responded, and minority
-            does not affect the overall performance
+            does not affect the overall performance.
         </p>
         <hr align="left" class="footer-top-line">
         <footer>
@@ -56,11 +60,11 @@
         <br><br>
 
         <div id="cap-theorem"></div>
-        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#cap-theorem" class="faq-title">CAP theorem in etcd?</a></h2>
+        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#cap-theorem" class="faq-title">CAP theorem</a></h2>
         <p>
-            CAP<sup>[1]</sup> represents <i>Consistency</i>, <i>Availability</i>, <i>Partition tolerance</i>: you can only pick 2 out of 3, it is impossible that a distributed computer system simultaneously satisfies them all. Since network partition
-            is not avoidable, you are left with either consitency or availability when partition happens. That is, systems with <i>A</i> and <i>P</i> are more tolerant of network faults, but possible to serve stale data. etcd chooses
-            <i>C</i> and <i>P</i> to achieve sequential consistency<sup>[2]</sup>.
+            CAP<sup>[1]</sup> represents <i>Consistency</i>, <i>Availability</i>, <i>Partition-tolerance</i>: you can only pick 2 out of 3, it is impossible that a distributed computer system simultaneously satisfies them all. Since network partition
+            is not avoidable, you are left with either consitency or availability when partition happens. That is, systems with <i>Availability</i> and <i>Partition-tolerance</i> are more tolerant of network faults, but possible to serve stale data. etcd
+            chooses <i>Consistency</i> and <i>Partition-tolerance</i> to achieve sequential consistency<sup>[2]</sup>.
         </p>
         <hr align="left" class="footer-top-line">
         <footer>
@@ -68,6 +72,48 @@
             ACM SIGACT News, volume 33, number 2, pages 51–59, 2002.
             <br> [2] Leslie Lamport: "<a href="http://research.microsoft.com/en-us/um/people/lamport/pubs/multi.pdf" target="_blank" class="footer-link">How to Make a Multiprocessor Computer That Correctly Executes Multiprocess Programs</a>," IEEE Trans.
             Comput. C-28,9, pages 690-691, September 1979.
+        </footer>
+        <br><br>
+
+        <div id="consistency"></div>
+        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#consistency" class="faq-title">Consistency</a></h2>
+        <p>
+            Linearizability<sup>[1]</sup> (also known as <i>strong, atomic consistency</i>) is an important requirement for implementing distributed locks. The basic idea is to make distributed nodes work like a single copy, with all operations being
+            atomic. etcd provides two types of read consistency: linearizable read (quorum read) requires quorum(majority) to agree on the value. Serializable read does not go through consensus protocol, served locally. Serializable read normally has
+            higher throughput possibly serving stale data, while linearizable read returns the latest value written.
+        </p>
+        <p>
+            etcd is not an eventually consistent database, where two different nodes can serve two different values (stale data). etcd achieves <b>sequential consistency</b><sup>[2]</sup>, where ordering of commands is preserverd for all clients. Some
+            claim that Dynamo-style<sup>[3]</sup> databases (e.g., Riak and Cassandra) can also achieve strong or sequential consistency by requiring quorum for reads and writes. This is not true. Last-write-wins<sup>[4]</sup> conflict resolution is not
+            linearizable when clock skew happens. Multiple concurrent writes to the same key may arrive in different order or at different nodes.
+        </p>
+        <hr align="left" class="footer-top-line">
+        <footer>
+            [1] Maurice P Herlihy and Jeannette M Wing: "<a href="http://www.cs.cornell.edu/andru/cs711/2002fa/reading/linearizability.pdf" target="_blank" class="footer-link">Linearizability: A Correctness Condition for Concurrent Objects</a>," ACM Transactions
+            on Programming Languages and Systems (TOPLAS), volume 12, number 3, pages 463–492, July 1990.
+            <br> [2] Hagit Attiya and Jennifer L Welch: "<a href="http://dl.acm.org/citation.cfm?id=176576" target="_blank" class="footer-link">Sequential Consistency versus Linearizability</a>," ACM Transactions on Computer Systems (TOCS), volume 12,
+            number 2, pages 91–122, May 1994.
+            <br> [3] Giuseppe DeCandia, Deniz Hastorun, Madan Jampani, et al.: "<a href="http://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf" target="_blank" class="footer-link">Dynamo: Amazon's Highly Available Key-Value Store</a>,"
+            at 21st ACM Symposium on Operating Sys‐ tems Principles (SOSP), October 2007.
+            <br> [4] Jonathan Ellis: "<a href="http://www.datastax.com/dev/blog/why-cassandra-doesnt-need-vector-clocks" target="_blank" class="footer-link">Why Cassandra doesn’t need vector clocks</a>," datastax.com, 2 September 2013.
+        </footer>
+        <br><br>
+
+        <div id="qget"></div>
+        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#qget" class="faq-title">Quorum read</a></h2>
+        <p>
+            All etcd writes are replicated from leader to its followers. Entry is <i>committed</i> when it has been replicated in majority of cluster. Each read returns the value at the latest committed write. etcd provides two types of read consistency.
+            Linearizable read (quorum read) that requires quorum to agreen on the value before returning to the client. Serializable read that does not go through consistency and returns from local node. Obviously serializable read should be faster but
+            contain possibly stale data. In etcd v3.0.0, quorum read throughput is around 40,000 requests per second (qps), while serializable read is over 100,000 qps (2x faster). Quorum read is slower because it needs to issue a read query command,
+            and this command needs to get replicated as a log entry requiring disk I/O.
+        </p>
+        <p>
+            etcd v3.1+ implements <i>read index</i> mechanism described in Raft<sup>[1]</sup> paper, and now etcd quorum read is as fast as serializable read. This is how it works: Leader records its current committed index in <span class="code-light-snippet">readIndex</span>            field. Leader sends <span class="code-light-snippet">readIndex</span> to its followers. For followers, <span class="code-light-snippet">readIndex</span> is the largest committed index ever seen by any server because it is from leader and committed.
+            Read queries as far as <span class="code-light-snippet">readIndex</span> is now served locally with linearizability. This is more efficient because it avoids synchronous disk writes still preserving the linearizability.
+        </p>
+        <hr align="left" class="footer-top-line">
+        <footer>
+            [1] Diego Ongaro: "<a href="https://ramcloud.stanford.edu/~ongaro/thesis.pdf" target="_blank" class="footer-link">Consensus: Bridging Theory and Practice</a>," Stanford University Ph.D. Dissertation, chapter 6, page 72, August 2014.
         </footer>
         <br><br>
 
