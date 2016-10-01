@@ -50,7 +50,7 @@ func testClusterStart(t *testing.T, cfg Config, scheme bool) {
 	time.Sleep(time.Second)
 
 	ccfg := clientv3.Config{
-		Endpoints:   cl.GetEndpointsAll(scheme),
+		Endpoints:   cl.EndpointsAll(scheme),
 		DialTimeout: 3 * time.Second,
 	}
 

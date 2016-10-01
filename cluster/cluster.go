@@ -44,13 +44,13 @@ func (c *Cluster) Config(i int) *embed.Config {
 	return c.cfgs[i]
 }
 
-// GetEmbed returns embed.Etcd of the index.
-func (c *Cluster) GetEmbed(i int) *embed.Etcd {
+// Embed returns embed.Etcd of the index.
+func (c *Cluster) Embed(i int) *embed.Etcd {
 	return c.embeds[i]
 }
 
-// GetEndpoints returns the client endpoints.
-func (c *Cluster) GetEndpoints(i int, scheme bool) []string {
+// Endpoints returns the client endpoints.
+func (c *Cluster) Endpoints(i int, scheme bool) []string {
 	ups := c.cfgs[i].LCUrls
 	eps := make([]string, len(ups))
 	for j := range ups {
@@ -63,11 +63,11 @@ func (c *Cluster) GetEndpoints(i int, scheme bool) []string {
 	return eps
 }
 
-// GetEndpointsAll returns all endpoints of clients.
-func (c *Cluster) GetEndpointsAll(scheme bool) []string {
+// EndpointsAll returns all endpoints of clients.
+func (c *Cluster) EndpointsAll(scheme bool) []string {
 	epm := make(map[string]struct{})
 	for i := 0; i < len(c.cfgs); i++ {
-		for _, ep := range c.GetEndpoints(i, scheme) {
+		for _, ep := range c.Endpoints(i, scheme) {
 			epm[ep] = struct{}{}
 		}
 	}
