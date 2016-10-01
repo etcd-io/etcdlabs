@@ -129,8 +129,8 @@ export class install_deploy_tip_Component extends parentComponent {
                 '/tmp/test-1.data',
                 this.inputSecure,
                 'localhost',
-                12379,
-                12380,
+                2379,
+                2380,
                 'test-token',
                 'new'
             ),
