@@ -145,7 +145,7 @@
         <h2><a href="/doc/{{version.etcdVersionURL}}/faq#best-deployment-practice" class="faq-title">Best deployment practice</a></h2>
         <p>
             It highly depends on production use case. Typically deploy 3- or 5-node cluster in a single data center<sup>[1]</sup>, and optionally
-            <a href="https://github.com/coreos/etcd/blob/master/etcdctl/doc/mirror_maker.md" target="_blank"><span class="code-light-snippet">mirror</span></a> the cluster to another data center. Or cluster can be distributed across multiple data centers.
+            <a href="https://github.com/coreos/etcd/blob/master/etcdctl/doc/mirror_maker.md" target="_blank"><span class="code-light-snippet">mirror</span></a> the cluster to another data center. Cluster can also be distributed across multiple data centers.
             This would require time parameter tuning due to higher latency.
         </p>
         <hr align="left" class="footer-top-line">
