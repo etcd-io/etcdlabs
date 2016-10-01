@@ -169,19 +169,15 @@
         <div id="etcd-consistency"></div>
         <h2><a href="/doc/{{version.etcdVersionURL}}/faq#etcd-consistency" class="faq-title">Consistency model in etcd</a></h2>
         <p>
-            Linearizability<sup>[1]</sup> (also known as <i>strong, atomic consistency</i>) is an important requirement for implementing distributed locks. The basic idea is to make distributed nodes work like a single copy, with all operations being
-            atomic. etcd provides two types of read consistency: linearizable (or <i>quorum</i>) read that requires majority to agree on the value before responding to client. Serializable read is returned from local node without going through consensus
-            protocol. Serializable read normally has higher throughput but possibly serving stale data, while linearizable read returns the latest value written.
+            Linearizability<sup>[1]</sup> (also known as <i>strong, atomic consistency</i>) is an important requirement for implementing distributed locks. The basic idea is to make distributed nodes work like a single copy, with all operations being atomic. etcd provides two types of read consistency: linearizable (or <i>quorum</i>) read that requires majority to agree on the value before responding to client. Serializable read is returned from local node without going through consensus protocol. Serializable read normally has higher throughput but possibly serving stale data, while linearizable read returns the latest value written.
         </p>
         <p>
-            In etcd v3.0, quorum read throughput is around 40,000 requests per second (QPS), whereas serializable read is over 100,000 QPS (2x faster). Quorum read is slower because it needs to issue a read query command, and this command gets replicated, costs disk
-            I/O. etcd v3.1 implements <i>read index</i> mechanism<sup>[2]</sup>. <b>etcd quorum read is now as fast as serializable read</b>: Leader records its current committed index in <span class="code-light-snippet">readIndex</span> field.
-            Leader sends <span class="code-light-snippet">readIndex</span> to its followers. For followers, <span class="code-light-snippet">readIndex</span> is the largest committed index ever seen by any server because it is from leader and committed.
-            Then read queries as far as <span class="code-light-snippet">readIndex</span> can be served locally without talking to other replicas but still with linearizability. This is more efficient because it avoids synchronous disk writes and still preserves the linearizability.
+            In etcd v3.0, quorum read throughput is around 40,000 requests per second (QPS), whereas serializable read is over 100,000 QPS (2x faster). Quorum read is slower because it needs to issue a read query command, and this command gets replicated, costs disk I/O. etcd v3.1 implements <i>read index</i> mechanism<sup>[2]</sup>. <b>etcd quorum read is now as fast as serializable read</b>: Leader records its current committed index in <span class="code-light-snippet">readIndex</span> field.
+            Leader sends <span class="code-light-snippet">readIndex</span> to its followers. For followers, <span class="code-light-snippet">readIndex</span> is the largest committed index ever seen by any server because it is from leader and committed. Then read queries as far as <span class="code-light-snippet">readIndex</span> can be served locally without talking to other replicas, but still with linearizability. This is more efficient because it avoids synchronous disk writes and still
+            preserves the linearizability.
         </p>
         <p>
-            etcd is not an eventually consistent database, where two different nodes can serve two different values (stale data). etcd achieves sequential consistency<sup>[3]</sup>, where ordering of commands is preserverd for all clients. Some claim
-            that Dynamo-style<sup>[4]</sup> databases (e.g., Riak and Cassandra) can also achieve strong or sequential consistency by requiring quorum for reads and writes. This is not true. Last-write-wins<sup>[5]</sup> conflict resolution is not linearizable
+            etcd is not an eventually consistent database, where two different nodes can serve two different values (stale data). etcd achieves sequential consistency<sup>[3]</sup>, where ordering of commands is preserverd for all clients. Some claim that Dynamo-style<sup>[4]</sup> databases (e.g., Riak and Cassandra) can also achieve strong or sequential consistency by requiring quorum for reads and writes. This is not true. Last-write-wins<sup>[5]</sup> conflict resolution is not linearizable
             when clock skew happens. Multiple concurrent writes to the same key may arrive in different order, different nodes.
         </p>
         <p>
@@ -220,16 +216,14 @@
         <div id="odd-cluster-size"></div>
         <h2><a href="/doc/{{version.etcdVersionURL}}/faq#odd-cluster-size" class="faq-title">Why odd number of cluster size?</a></h2>
         <p>
-            A quorum is the majority of nodes in a cluster. When <span class="code-light-snippet">n</span> is the cluster size, quorum is <span class="code-light-snippet">(n/2)+1</span>. 2 is the quorum both for <span class="code-light-snippet">3</span>            and <span class="code-light-snippet">4</span>. Since Raft cluster becomes unavailable if the quorum of nodes is unavailable, adding another node to 3-node cluster does not add any value in terms of fault tolerance. And adding 1 node to single-node
-            cluster increases the quorum size and causes leader election; if a wrong node were added by mistake, the cluster would lose its leader and not be able to make any progress. Always start with an odd number of nodes.
+            A quorum is the majority of nodes in a cluster. When <span class="code-light-snippet">n</span> is the cluster size, quorum is <span class="code-light-snippet">(n/2)+1</span>. 2 is the quorum both for <span class="code-light-snippet">3</span> and <span class="code-light-snippet">4</span>. Since Raft cluster becomes unavailable if the quorum of nodes is unavailable, adding another node to 3-node cluster does not add any value in terms of fault tolerance. And adding 1 node to single-node cluster increases the quorum size and causes leader election; if a wrong node were added by mistake, the cluster would lose its leader and not be able to make any progress. Always start with an odd number of nodes.
         </p>
         <br>
 
         <div id="max-cluster-size"></div>
         <h2><a href="/doc/{{version.etcdVersionURL}}/faq#max-cluster-size" class="faq-title">What is maximum cluster size?</a></h2>
         <p>
-            Theorectially, there is no hard limit. However, we recommend no more than 7 nodes. The more nodes cluster has, the more communication needs to happen, which would reduce overall performance. Google Chubby lock service<sup>[1]</sup>, which
-            is predecessor of etcd, typically runs 5 nodes in each cell.
+            Theorectially, there is no hard limit. However, we recommend no more than 7 nodes. The more nodes cluster has, the more communication needs to happen, which would reduce overall performance. Google Chubby lock service<sup>[1]</sup>, which is predecessor of etcd, typically runs 5 nodes in each cell.
         </p>
         <hr align="left" class="footer-top-line">
         <footer>
