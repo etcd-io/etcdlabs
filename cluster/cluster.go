@@ -174,16 +174,16 @@ func Start(ccfg Config) (c *Cluster, err error) {
 	}
 	wg.Wait()
 
-	plog.Printf("%d nodes are ready", ccfg.Size)
+	plog.Printf("started %d nodes (ready!)", ccfg.Size)
 	return c, nil
 }
 
 // Stop stops a node.
 func (c *Cluster) Stop(i int) {
+	plog.Printf("stopping %q", c.nodes[i].cfg.Name)
+
 	c.mu.Lock()
 	defer c.mu.Unlock()
-
-	plog.Warningf("stopping %q", c.nodes[i].cfg.Name)
 
 	if c.nodes[i].state == stateStopped {
 		plog.Warningf("%q is already stopped", c.nodes[i].cfg.Name)
@@ -197,7 +197,7 @@ func (c *Cluster) Stop(i int) {
 		}
 
 		more := c.updateInterval - it + 100*time.Millisecond
-		plog.Infof("rate-limiting stopping %q (sleeping %v)", c.nodes[i].cfg.Name, more)
+		plog.Printf("rate-limiting stopping %q (sleeping %v)", c.nodes[i].cfg.Name, more)
 
 		time.Sleep(more)
 	}
@@ -208,15 +208,15 @@ func (c *Cluster) Stop(i int) {
 	c.nodes[i].srv.Close()
 	<-c.nodes[i].srv.Err()
 
-	plog.Warningf("stopped %q", c.nodes[i].cfg.Name)
+	plog.Printf("stopped %q", c.nodes[i].cfg.Name)
 }
 
 // Restart restarts a node.
 func (c *Cluster) Restart(i int) error {
+	plog.Printf("restarting %q", c.nodes[i].cfg.Name)
+
 	c.mu.Lock()
 	defer c.mu.Unlock()
-
-	plog.Warningf("restarting %q", c.nodes[i].cfg.Name)
 
 	if c.nodes[i].state == stateStarted {
 		plog.Warningf("%q is already started", c.nodes[i].cfg.Name)
@@ -230,7 +230,7 @@ func (c *Cluster) Restart(i int) error {
 		}
 
 		more := c.updateInterval - it + 100*time.Millisecond
-		plog.Infof("rate-limiting restarting %q (sleeping %v)", c.nodes[i].cfg.Name, more)
+		plog.Printf("rate-limiting restarting %q (sleeping %v)", c.nodes[i].cfg.Name, more)
 
 		time.Sleep(more)
 	}
@@ -252,12 +252,14 @@ func (c *Cluster) Restart(i int) error {
 	c.nodes[i].state = stateStarted
 	c.nodes[i].lastUpdate = time.Now()
 
-	plog.Warningf("restarted %q", c.nodes[i].cfg.Name)
+	plog.Printf("restarted %q", c.nodes[i].cfg.Name)
 	return nil
 }
 
 // Shutdown stops all nodes and deletes all data directories.
 func (c *Cluster) Shutdown() {
+	plog.Println("shutting down all nodes")
+
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -282,6 +284,7 @@ func (c *Cluster) Shutdown() {
 	wg.Wait()
 
 	os.RemoveAll(c.rootDir)
+	plog.Printf("deleted %q (done!)", c.rootDir)
 }
 
 // AllEndpoints returns all endpoints of clients.
