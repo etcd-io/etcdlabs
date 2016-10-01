@@ -45,12 +45,6 @@ export class parentComponent {
     constructor() {
         this.getStartedItems = [
             new sidebarItem(
-                'Why',
-                'etcd use cases, when to use',
-                `/doc/${this.version.etcdVersionURL}/why`,
-                'no-text-decoration'
-            ),
-            new sidebarItem(
                 'Install, Deploy',
                 'set up etcd cluster: bare metal, virtual machine, Kubernetes',
                 `/doc/${this.version.etcdVersionURL}/install-deploy`,
@@ -62,15 +56,15 @@ export class parentComponent {
                 `/doc/${this.version.etcdVersionURL}/tutorials`,
                 'no-text-decoration'
             ),
-        ];
-
-        this.moreItems = [
             new sidebarItem(
                 'FAQ',
                 'frequently asked questions',
                 `/doc/${this.version.etcdVersionURL}/faq`,
                 'no-text-decoration'
             ),
+        ];
+
+        this.moreItems = [
             new sidebarItem(
                 'Performance',
                 'benchmark results, performance analysis',

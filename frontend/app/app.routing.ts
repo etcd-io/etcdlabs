@@ -9,7 +9,6 @@ import { HomeComponent } from './home/home.component';
 /doc
 */
 import { doc_tip_Component } from './doc/tip/doc.component';
-import { why_tip_Component } from './doc/tip/why.component';
 import { install_deploy_tip_Component } from './doc/tip/install-deploy.component';
 import { tutorials_tip_Component } from './doc/tip/tutorials.component';
 import { faq_tip_Component } from './doc/tip/faq.component';
@@ -45,7 +44,6 @@ const appRoutes: Routes = [
         path: 'doc/tip',
         children: [
             { path: '', component: doc_tip_Component },
-            { path: 'why', component: why_tip_Component },
             { path: 'install-deploy', component: install_deploy_tip_Component },
             { path: 'tutorials', component: tutorials_tip_Component },
             { path: 'faq', component: faq_tip_Component },
@@ -88,7 +86,6 @@ export const routedComponents = [
     HomeComponent,
 
     doc_tip_Component,
-    why_tip_Component,
     install_deploy_tip_Component,
     tutorials_tip_Component,
     faq_tip_Component,

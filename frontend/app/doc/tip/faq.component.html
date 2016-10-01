@@ -22,36 +22,52 @@
 
         <div class="inner">
             <div class="block block-copy half">
-                <div class="faq-list-title">Distributed System</div>
-                <a href="/doc/{{version.etcdVersionURL}}/faq#consensus-algorithm" class="faq-list">Consensus algorithm</a>
+
+                <div class="faq-list-title">etcd, Distributed System</div>
+                <a href="/doc/{{version.etcdVersionURL}}/faq#etcd" class="faq-list">What is etcd?</a>
                 <br>
-                <a href="/doc/{{version.etcdVersionURL}}/faq#cap-theorem" class="faq-list">CAP theorem</a>
+                <a href="/doc/{{version.etcdVersionURL}}/faq#etcd-to-use" class="faq-list">When to use etcd</a>
                 <br>
-                <a href="/doc/{{version.etcdVersionURL}}/faq#consistency" class="faq-list">Consistency</a>
+                <a href="/doc/{{version.etcdVersionURL}}/faq#etcd-not-to-use" class="faq-list">When not to use etcd</a>
                 <br>
+                <a href="/doc/{{version.etcdVersionURL}}/faq#etcd-consensus" class="faq-list">Consensus protocol in etcd</a>
+                <br>
+                <a href="/doc/{{version.etcdVersionURL}}/faq#etcd-cap" class="faq-list">CAP theorem in etcd</a>
+                <br>
+                <a href="/doc/{{version.etcdVersionURL}}/faq#etcd-consistency" class="faq-list">Consistency model in etcd</a>
+                <br>
+                <a href="/doc/{{version.etcdVersionURL}}/faq#etcd-use-case-coreos" class="faq-list">Production use: CoreOS</a>
+                <br>
+                <a href="/doc/{{version.etcdVersionURL}}/faq#etcd-use-case-kubernetes" class="faq-list">Production use: Kubernetes</a>
+                <br>
+
+            </div>
+            <div class="block block-copy half">
+
+                <div class="faq-list-title">Operation, Membership</div>
                 <a href="/doc/{{version.etcdVersionURL}}/faq#odd-cluster-size" class="faq-list">Why odd number of cluster size?</a>
                 <br>
                 <a href="/doc/{{version.etcdVersionURL}}/faq#max-cluster-size" class="faq-list">What is maximum cluster size?</a>
                 <br>
                 <a href="/doc/{{version.etcdVersionURL}}/faq#best-deployment-practice" class="faq-list">Best deployment practice</a>
                 <br>
-
-                <br>
-                <div class="faq-list-title">Membership</div>
                 <a href="/doc/{{version.etcdVersionURL}}/faq#remove-member-first" class="faq-list">Always remove first when replacing member?</a>
                 <br>
                 <a href="/doc/{{version.etcdVersionURL}}/faq#why-so-strict-about-membership-change" class="faq-list">Why so strict about membershp change?</a>
                 <br>
-            </div>
-            <div class="block block-copy half">
+
+                <br>
+
                 <div class="faq-list-title">Flags</div>
                 <a href="/doc/{{version.etcdVersionURL}}/faq#flag-client-urls" class="faq-list">listen-client-urls vs. advertise-client-urls</a>
                 <br>
 
                 <br>
+
                 <div class="faq-list-title">Errors, Warning</div>
                 <a href="/doc/{{version.etcdVersionURL}}/faq#apply-too-long-unavailable" class="faq-list">apply entries took too long, unavailable or misconfigured?</a>
                 <br>
+
             </div>
         </div>
 
@@ -59,8 +75,37 @@
         <hr>
         <br>
 
-        <div id="consensus-algorithm"></div>
-        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#consensus-algorithm" class="faq-title">Consensus algorithm</a></h2>
+        <div id="etcd"></div>
+        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#etcd" class="faq-title">What is etcd?</a></h2>
+        <p>
+            etcd is distributed reliable key-value store for the most critical data of a distributed system. It is distributed by replicating data to multiple machines, therefore highly available against single point of failures. Using the Raft<sup>[1]</sup>            consensus algorithms, etcd gracefully handles network partitions and machine failures, even leader failures. etcd is inspired by Google's Chubby<sup>[1]</sup> lock service.
+        </p>
+        <hr align="left" class="footer-top-line">
+        <footer>
+            [1] Mike Burrows: "<a href="http://static.googleusercontent.com/media/research.google.com/en//archive/chubby-osdi06.pdf" target="_blank" class="footer-link">The Chubby lock service for loosely-coupled distributed systems</a>," at 7th USENIX
+            Symposium on Operating System Design and Implementation (OSDI), November 2006.
+        </footer>
+        <br><br>
+
+        <div id="etcd-to-use"></div>
+        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#etcd-to-use" class="faq-title">When to use etcd</a></h2>
+        <p>
+            etcd is designed to store a small amount of meta-data in consistent, fault-tolerant way. Distributed systems use etcd as the root of scheduling, service discovery configuration. Distributed locks is implemented on top of etcd, used for master election
+            in other databases.
+        </p>
+        <br>
+
+        <div id="etcd-not-to-use"></div>
+        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#etcd-not-to-use" class="faq-title">When not to use etcd</a></h2>
+        <p>
+            etcd is designed for storing small chunks of mission critical data: configuration file, JSON, YAML, etc. etcd limits the size of request in 1.5MB (see <a href="https://github.com/coreos/etcd/blob/master/etcdserver/v3_server.go#L34-L38" target="_blank"
+                class="code-link">maxRequestBytes</a>). And default storage size limit is 2GB (see <a href="https://github.com/coreos/etcd/blob/master/mvcc/backend/backend.go#L46-L53" target="_blank" class="code-link">DefaultQuotaBytes</a>). These are the
+            tradeoffs that etcd makes for strong consistency. etcd might not be the option if an application requires higher availability or bigger storage size.
+        </p>
+        <br>
+
+        <div id="etcd-consensus"></div>
+        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#etcd-consensus" class="faq-title">Consensus protocol in etcd</a></h2>
         <p>
             etcd uses Raft<sup>[1]</sup> consensus algorithm. It keeps data consistent even if a cluster has faulty process or loses one of its communications. Raft safety guarantees that system never returns incorrect value under network partitions and
             delays (or <i>non-Byzantine failures</i>). Raft is fully functional as long as any majority of servers can communicate with each other. And command completes as soon as quorum responds; overall performance is not affected by the minority.
@@ -72,24 +117,57 @@
         </footer>
         <br><br>
 
-        <div id="cap-theorem"></div>
-        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#cap-theorem" class="faq-title">CAP theorem</a></h2>
+        <div id="etcd-cap"></div>
+        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#etcd-cap" class="faq-title">CAP theorem in etcd</a></h2>
         <p>
             CAP<sup>[1]</sup> represents <i>Consistency</i>, <i>Availability</i>, <i>Partition-tolerance</i>: you can only pick 2 out of 3, it is impossible that a distributed computer system simultaneously satisfies them all. Since network partition
             is not avoidable, you are left with either consitency or availability when partition happens. System with <i>availability</i> and <i>partition-tolerance</i> is more tolerant of network faults, but possible to serve stale data. etcd chooses
-            <i>consistency</i> and <i>partition-tolerance</i> for sequential consistency<sup>[2]</sup>.
+            <i>consistency</i> and <i>partition-tolerance</i>.
         </p>
+        <section class="features">
+            <div class="inner">
+                <div class="feature-grid">
+                    <div class="table-row">
+                        <div class="feature">
+                            <h3>Consistent</h3>
+                            <p>
+                                etcd is not an eventually consistent database, where two different nodes can serve two different values (stale data). etcd provides <b>linearizable writes and reads</b><sup>[2]</sup> with <b>sequential consistency</b><sup>[3]</sup>.
+                                When write completes, all etcd clients would read the same, <i>most recent and up-to-date</i>, value.
+                            </p>
+                        </div>
+
+                        <div class="feature">
+                            <h3>Partition Tolerant</h3>
+                            <p>
+                                etcd continues to operate under transient network faults, where message is not delivered or gets delayed. Network glitches are very common in practice, and <b>no system is immune</b> from network faults<sup>[4]</sup>.
+                            </p>
+                        </div>
+
+                        <div class="feature">
+                            <h3>Highly Available</h3>
+                            <p>
+                                etcd is <i>highly</i> available, choosing <b>consistency</b> over availability when <b>network partitioned</b>. etcd can make progress as long as majority of servers are available. For example, 5-node etcd cluster tolerates
+                                up to 2 nodes being down, as long as 3 are up.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
         <hr align="left" class="footer-top-line">
         <footer>
             [1] Seth Gilbert and Nancy Lynch: "<a href="https://pdfs.semanticscholar.org/24ce/ce61e2128780072bc58f90b8ba47f624bc27.pdf" target="_blank" class="footer-link">Brewer's Conjecture and the Feasibility of Consistent, Available, Partition-Tolerant Web Services</a>,"
             ACM SIGACT News, volume 33, number 2, pages 51–59, 2002.
-            <br> [2] Leslie Lamport: "<a href="http://research.microsoft.com/en-us/um/people/lamport/pubs/multi.pdf" target="_blank" class="footer-link">How to Make a Multiprocessor Computer That Correctly Executes Multiprocess Programs</a>," IEEE Trans.
-            Comput. C-28,9, pages 690-691, September 1979.
+            <br> [2] Maurice P Herlihy and Jeannette M Wing: "<a href="http://www.cs.cornell.edu/andru/cs711/2002fa/reading/linearizability.pdf" target="_blank" class="footer-link">Linearizability: A Correctness Condition for Concurrent Objects</a>,"
+            ACM Transactions on Programming Languages and Systems (TOPLAS), volume 12, number 3, pages 463–492, July 1990.
+            <br> [3] Hagit Attiya and Jennifer L Welch: "<a href="http://dl.acm.org/citation.cfm?id=176576" target="_blank" class="footer-link">Sequential Consistency versus Linearizability</a>," ACM Transactions on Computer Systems (TOCS), volume 12,
+            number 2, pages 91–122, May 1994.
+            <br> [4] Peter Bailis and Kyle Kingsbury: "<a href="http://queue.acm.org/detail.cfm?id=2655736" target="_blank" class="footer-link">The Network is Reliable</a>," ACM Queue, volume 12, number 7, July 2014.
         </footer>
         <br><br>
 
-        <div id="consistency"></div>
-        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#consistency" class="faq-title">Consistency</a></h2>
+        <div id="etcd-consistency"></div>
+        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#etcd-consistency" class="faq-title">Consistency model in etcd</a></h2>
         <p>
             Linearizability<sup>[1]</sup> (also known as <i>strong, atomic consistency</i>) is an important requirement for implementing distributed locks. The basic idea is to make distributed nodes work like a single copy, with all operations being
             atomic. etcd provides two types of read consistency: linearizable (or <i>quorum</i>) read that requires majority to agree on the value before responding to client. Serializable read is returned from local node without going through consensus
@@ -97,15 +175,17 @@
         </p>
         <p>
             In etcd v3.0, quorum read throughput is around 40,000 requests per second (QPS), whereas serializable read is over 100,000 QPS (2x faster). Quorum read is slower because it needs to issue a read query command, and this command gets replicated, costs disk
-            I/O. etcd v3.1 implements <i>read index</i> mechanism<sup>[2]</sup>. etcd quorum read is now as fast as serializable read: Leader records its current committed index in <span class="code-light-snippet">readIndex</span> field. Leader
-            sends <span class="code-light-snippet">readIndex</span> to its followers. For followers, <span class="code-light-snippet">readIndex</span> is the largest committed index ever seen by any server because it is from leader and committed. Then
-            read queries as far as <span class="code-light-snippet">readIndex</span> can be served locally with linearizability. This is more efficient because it avoids synchronous disk writes and still preserves the linearizability.
+            I/O. etcd v3.1 implements <i>read index</i> mechanism<sup>[2]</sup>. <b>etcd quorum read is now as fast as serializable read</b>: Leader records its current committed index in <span class="code-light-snippet">readIndex</span> field.
+            Leader sends <span class="code-light-snippet">readIndex</span> to its followers. For followers, <span class="code-light-snippet">readIndex</span> is the largest committed index ever seen by any server because it is from leader and committed.
+            Then read queries as far as <span class="code-light-snippet">readIndex</span> can be served locally without talking to other replicas but still with linearizability. This is more efficient because it avoids synchronous disk writes and still preserves the linearizability.
         </p>
         <p>
             etcd is not an eventually consistent database, where two different nodes can serve two different values (stale data). etcd achieves sequential consistency<sup>[3]</sup>, where ordering of commands is preserverd for all clients. Some claim
             that Dynamo-style<sup>[4]</sup> databases (e.g., Riak and Cassandra) can also achieve strong or sequential consistency by requiring quorum for reads and writes. This is not true. Last-write-wins<sup>[5]</sup> conflict resolution is not linearizable
-            when clock skew happens. Multiple concurrent writes to the same key may arrive in different order, different nodes. All etcd writes are replicated through its leader to followers. Entry is <i>committed</i> when replicated in majority of cluster.
-            Each read returns the value at the latest committed write.
+            when clock skew happens. Multiple concurrent writes to the same key may arrive in different order, different nodes.
+        </p>
+        <p>
+            All etcd writes go to leader, and then are fowarded to followers. Entry is <i>committed</i> when replicated in majority of cluster. Each node will apply this in the same order.
         </p>
         <hr align="left" class="footer-top-line">
         <footer>
@@ -120,11 +200,28 @@
         </footer>
         <br><br>
 
+
+        <div id="etcd-use-case-coreos"></div>
+        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#etcd-use-case-coreos" class="faq-title">Production use: CoreOS</a></h2>
+        <p>
+            Application running on <a href="https://coreos.com/why/" target="_blank" class="normal-link">CoreOS</a> gets automatic, no-downtime Linux kernel updates. CoreOS uses
+            <a href="https://github.com/coreos/locksmith" target="_blank" class="normal-link">locksmith</a> to coordinate updates. locksmith stores semephore values in etcd to ensure that only subset of cluster are rebooting at any given time.
+        </p>
+        <br>
+
+        <div id="etcd-use-case-kubernetes"></div>
+        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#etcd-use-case-kubernetes" class="faq-title">Production use: Kubernetes</a></h2>
+        <p>
+            <a href="http://kubernetes.io/docs/whatisk8s/" target="_blank" class="normal-link">Kubernetes</a> needs configuration storage for service discovery and cluster management. Kubernetes API server writes persistent cluster states in etcd. And
+            uses etcd watch API to get notified whenever changes happen. Consistency is the key to ensure that services correctly schedule and operatate.
+        </p>
+        <br>
+
         <div id="odd-cluster-size"></div>
         <h2><a href="/doc/{{version.etcdVersionURL}}/faq#odd-cluster-size" class="faq-title">Why odd number of cluster size?</a></h2>
         <p>
             A quorum is the majority of nodes in a cluster. When <span class="code-light-snippet">n</span> is the cluster size, quorum is <span class="code-light-snippet">(n/2)+1</span>. 2 is the quorum both for <span class="code-light-snippet">3</span>            and <span class="code-light-snippet">4</span>. Since Raft cluster becomes unavailable if the quorum of nodes is unavailable, adding another node to 3-node cluster does not add any value in terms of fault tolerance. And adding 1 node to single-node
-            cluster increases the quorum size and causes leader election; if a wrong node were added by mistake, the cluster would not be able to make any progress after losing its leader. Always start with an odd number of nodes.
+            cluster increases the quorum size and causes leader election; if a wrong node were added by mistake, the cluster would lose its leader and not be able to make any progress. Always start with an odd number of nodes.
         </p>
         <br>
 
@@ -213,8 +310,9 @@
         <h2><a href="/doc/{{version.etcdVersionURL}}/faq#apply-too-long-unavailable" class="faq-title">apply entries took too long, unavailable or misconfigured?</a></h2>
         <p>
             Please evaluate the workload before using etcd in production. etcd is for most critical data in software stack<sup>[1]</sup>. It is highly recommended to allocate dedidate disk for etcd process. etcd does a lot of I/O to replicate Write-Ahead-Log
-            and key-value data on disk. If etcd is run on slow disk (e.g. HDD or overloaded drive), it would print out warnings of <span class="code-light-snippet">apply entries took too long</span> or <span class="code-light-snippet">unavailable or misconfigured</span>.
-            This indicates that the etcd cluster is overloaded, which in many cases, leads to leader election and halted cluster.
+            and key-value data on disk. If etcd is run on slow disk (e.g. HDD or overloaded drive), it would print out warnings of
+            <span class="code-light-snippet">apply entries took too long</span> or <span class="code-light-snippet">unavailable or misconfigured</span>. This indicates that the etcd cluster is overloaded, which in many cases, leads to leader election
+            and halted cluster.
         </p>
         <hr align="left" class="footer-top-line">
         <footer>
