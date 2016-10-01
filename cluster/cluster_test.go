@@ -33,35 +33,50 @@ var testTLSInfo = transport.TLSInfo{
 	ClientCertAuth: true,
 }
 
-func TestClusterStartNoTLS(t *testing.T) {
+func testClusterStart(t *testing.T, cfg Config, scheme bool) {
 	dir, err := ioutil.TempDir(os.TempDir(), "cluster-test")
 	if err != nil {
 		t.Fatal(err)
 	}
+	cfg.RootDir = dir
 
-	cfg := Config{
-		Size:     3,
-		RootDir:  dir,
-		RootPort: 1379,
-	}
 	cl, err := Start(cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer cl.Shutdown()
 
 	// wait until cluster is ready
 	time.Sleep(time.Second)
 
-	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:   cl.GetEndpointsAll(false),
+	ccfg := clientv3.Config{
+		Endpoints:   cl.GetEndpointsAll(scheme),
 		DialTimeout: 3 * time.Second,
-	})
+	}
+
+	switch {
+	case !cfg.ClientTLSInfo.Empty():
+		tlsConfig, err := cfg.ClientTLSInfo.ClientConfig()
+		if err != nil {
+			t.Fatal(err)
+		}
+		ccfg.TLS = tlsConfig
+
+	case !cl.cfgs[0].ClientTLSInfo.Empty():
+		tlsConfig, err := cl.cfgs[0].ClientTLSInfo.ClientConfig()
+		if err != nil {
+			t.Fatal(err)
+		}
+		ccfg.TLS = tlsConfig
+	}
+
+	cli, err := clientv3.New(ccfg)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer cli.Close()
-	_, err = cli.Put(context.TODO(), "foo", "bar")
-	if err != nil {
+
+	if _, err = cli.Put(context.TODO(), "foo", "bar"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -79,166 +94,32 @@ func TestClusterStartNoTLS(t *testing.T) {
 	if !bytes.Equal(resp.Kvs[0].Value, []byte("bar")) {
 		t.Fatalf("value expected 'bar', got %q", resp.Kvs[0].Key)
 	}
+}
 
-	cl.Shutdown()
+func TestClusterStartNoTLS(t *testing.T) {
+	testClusterStart(t, Config{Size: 3, RootPort: 1379}, false)
 }
 
 func TestClusterStartPeerTLSManual(t *testing.T) {
-	dir, err := ioutil.TempDir(os.TempDir(), "cluster-test")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	cfg := Config{
-		Size:     3,
-		RootDir:  dir,
-		RootPort: 2379,
-
-		PeerAutoTLS: false,
-		PeerTLSInfo: testTLSInfo,
-	}
-	cl, err := Start(cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// wait until cluster is ready
-	time.Sleep(time.Second)
-
-	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:   cl.GetEndpointsAll(false),
-		DialTimeout: 3 * time.Second,
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer cli.Close()
-	_, err = cli.Put(context.TODO(), "foo", "bar")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	cl.Shutdown()
+	testClusterStart(t, Config{Size: 3, RootPort: 2379, PeerTLSInfo: testTLSInfo}, false)
 }
 
 func TestClusterStartPeerTLSAuto(t *testing.T) {
-	dir, err := ioutil.TempDir(os.TempDir(), "cluster-test")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	cfg := Config{
-		Size:     3,
-		RootDir:  dir,
-		RootPort: 3379,
-
-		PeerAutoTLS: true,
-	}
-	cl, err := Start(cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// wait until cluster is ready
-	time.Sleep(time.Second)
-
-	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:   cl.GetEndpointsAll(false),
-		DialTimeout: 3 * time.Second,
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer cli.Close()
-	_, err = cli.Put(context.TODO(), "foo", "bar")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	cl.Shutdown()
+	testClusterStart(t, Config{Size: 3, RootPort: 3379, PeerAutoTLS: true}, false)
 }
 
 func TestClusterStartClientTLSManual(t *testing.T) {
-	dir, err := ioutil.TempDir(os.TempDir(), "cluster-test")
-	if err != nil {
-		t.Fatal(err)
-	}
+	testClusterStart(t, Config{Size: 3, RootPort: 4379, ClientTLSInfo: testTLSInfo}, false)
+}
 
-	cfg := Config{
-		Size:     1,
-		RootDir:  dir,
-		RootPort: 4379,
-
-		ClientAutoTLS: false,
-		ClientTLSInfo: testTLSInfo,
-	}
-	cl, err := Start(cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// wait until cluster is ready
-	time.Sleep(time.Second)
-
-	tlsConfig, err := testTLSInfo.ClientConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
-	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:   cl.GetEndpointsAll(false),
-		DialTimeout: 3 * time.Second,
-		TLS:         tlsConfig,
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer cli.Close()
-	_, err = cli.Put(context.TODO(), "foo", "bar")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	cl.Shutdown()
+func TestClusterStartClientTLSManualScheme(t *testing.T) {
+	testClusterStart(t, Config{Size: 3, RootPort: 5379, ClientTLSInfo: testTLSInfo}, true)
 }
 
 func TestClusterStartClientTLSAuto(t *testing.T) {
-	dir, err := ioutil.TempDir(os.TempDir(), "cluster-test")
-	if err != nil {
-		t.Fatal(err)
-	}
+	testClusterStart(t, Config{Size: 3, RootPort: 6379, ClientAutoTLS: true}, false)
+}
 
-	cfg := Config{
-		Size:     1,
-		RootDir:  dir,
-		RootPort: 5379,
-
-		ClientAutoTLS: true,
-	}
-	cl, err := Start(cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// wait until cluster is ready
-	time.Sleep(time.Second)
-
-	tlsConfig, err := cl.cfgs[0].ClientTLSInfo.ClientConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
-	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:   cl.GetEndpointsAll(false),
-		DialTimeout: 3 * time.Second,
-		TLS:         tlsConfig,
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer cli.Close()
-	_, err = cli.Put(context.TODO(), "foo", "bar")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	cl.Shutdown()
+func TestClusterStartClientTLSAutoScheme(t *testing.T) {
+	testClusterStart(t, Config{Size: 3, RootPort: 7379, ClientAutoTLS: true}, true)
 }

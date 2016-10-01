@@ -17,5 +17,5 @@ package cluster
 import "github.com/coreos/pkg/capnslog"
 
 func init() {
-	capnslog.SetGlobalLogLevel(capnslog.INFO)
+	capnslog.SetGlobalLogLevel(capnslog.CRITICAL)
 }
