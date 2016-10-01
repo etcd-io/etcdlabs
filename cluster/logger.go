@@ -16,6 +16,4 @@ package cluster
 
 import "github.com/coreos/pkg/capnslog"
 
-func init() {
-	capnslog.SetGlobalLogLevel(capnslog.INFO)
-}
+var plog = capnslog.NewPackageLogger("github.com/coreos/etcdlabs", "cluster")
