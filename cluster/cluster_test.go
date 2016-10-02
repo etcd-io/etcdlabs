@@ -113,28 +113,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 	}
 	defer cl.Shutdown()
 
-	ccfg := clientv3.Config{
-		Endpoints:   cl.AllEndpoints(scheme),
-		DialTimeout: 3 * time.Second,
-	}
-
-	switch {
-	case !cfg.ClientTLSInfo.Empty():
-		tlsConfig, err := cfg.ClientTLSInfo.ClientConfig()
-		if err != nil {
-			t.Fatal(err)
-		}
-		ccfg.TLS = tlsConfig
-
-	case !cl.nodes[0].cfg.ClientTLSInfo.Empty():
-		tlsConfig, err := cl.nodes[0].cfg.ClientTLSInfo.ClientConfig()
-		if err != nil {
-			t.Fatal(err)
-		}
-		ccfg.TLS = tlsConfig
-	}
-
-	cli, err := clientv3.New(ccfg)
+	cli, err := cl.Client(0, scheme, true, 3*time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -158,7 +137,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 		time.Sleep(time.Second)
 	}
 
-	cli, err = clientv3.New(ccfg)
+	cli, err = cl.Client(0, scheme, true, 3*time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}

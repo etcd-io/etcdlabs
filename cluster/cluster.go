@@ -177,7 +177,7 @@ func Start(ccfg Config) (c *Cluster, err error) {
 	}
 	wg.Wait()
 
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(time.Second)
 
 	plog.Print("checking leader")
 	errc := make(chan error)
@@ -252,6 +252,39 @@ func Start(ccfg Config) (c *Cluster, err error) {
 
 	plog.Printf("successfully started %d nodes", ccfg.Size)
 	return c, nil
+}
+
+// Client creates the client.
+func (c *Cluster) Client(i int, scheme, allEndpoints bool, dialTimeout time.Duration) (*clientv3.Client, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	eps := []string{c.nodes[i].cfg.LCUrls[0].Host}
+	if allEndpoints {
+		eps = c.allEndpoints(scheme)
+	}
+	ccfg := clientv3.Config{
+		Endpoints:   eps,
+		DialTimeout: dialTimeout,
+	}
+
+	switch {
+	case !c.nodes[i].cfg.ClientTLSInfo.Empty():
+		tlsConfig, err := c.nodes[i].cfg.ClientTLSInfo.ClientConfig()
+		if err != nil {
+			return nil, err
+		}
+		ccfg.TLS = tlsConfig
+
+	case !c.nodes[i].cfg.ClientTLSInfo.Empty():
+		tlsConfig, err := c.nodes[i].cfg.ClientTLSInfo.ClientConfig()
+		if err != nil {
+			return nil, err
+		}
+		ccfg.TLS = tlsConfig
+	}
+
+	return clientv3.New(ccfg)
 }
 
 // Stop stops a node.
@@ -368,6 +401,10 @@ func (c *Cluster) AllEndpoints(scheme bool) []string {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
+	return c.allEndpoints(scheme)
+}
+
+func (c *Cluster) allEndpoints(scheme bool) []string {
 	eps := make([]string, c.size)
 	for i := 0; i < c.size; i++ {
 		if scheme {
