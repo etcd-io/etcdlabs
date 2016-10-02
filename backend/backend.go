@@ -16,10 +16,16 @@ package backend
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
+	"sync"
 	"time"
+
+	"github.com/coreos/etcdlabs/cluster"
 )
 
 // ContextHandler handles ServeHTTP with context.
@@ -47,8 +53,17 @@ func (ca *ContextAdapter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+// Server warps http.Server.
+type Server struct {
+	mu         sync.RWMutex
+	addr       string
+	httpServer *http.Server
+	stopc      chan struct{}
+	donec      chan struct{}
+}
+
 // StartServer starts a backend webserver with stoppable listener.
-func StartServer(port int) (chan<- struct{}, error) {
+func StartServer(port int) (*Server, error) {
 	rootContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -70,33 +85,100 @@ func StartServer(port int) (chan<- struct{}, error) {
 
 	addr := fmt.Sprintf("http://localhost:%d", port)
 	plog.Infof("started serving %q", addr)
+	srv := &Server{
+		addr:       addr,
+		httpServer: &http.Server{Addr: addr, Handler: mainRouter},
+		stopc:      stopc,
+		donec:      make(chan struct{}),
+	}
 
 	go func() {
 		defer func() {
+			globalCache.mu.Lock()
+			defer globalCache.mu.Unlock()
+
+			if globalCache.cluster != nil {
+				plog.Println("shutting down cluster")
+				globalCache.cluster.Shutdown()
+			}
+
 			if err := recover(); err != nil {
 				plog.Errorf("etcd-play error (%v)", err)
 				os.Exit(0)
 			}
+
+			close(srv.donec)
 		}()
-		srv := &http.Server{Addr: addr, Handler: mainRouter}
-		if err := srv.Serve(ln); err != nil && err != ErrListenerStopped {
+
+		if err := srv.httpServer.Serve(ln); err != nil && err != ErrListenerStopped {
 			plog.Panic(err)
 		}
 	}()
 
-	return stopc, nil
+	return srv, nil
 }
 
-type key int
+// Stop stops the server.
+func (srv *Server) Stop() {
+	srv.mu.Lock()
+	defer srv.mu.Unlock()
 
-const userKey key = 0
+	if srv.httpServer == nil {
+		return
+	}
+
+	plog.Warningf("stopping %s", srv.addr)
+	close(srv.stopc)
+	<-srv.donec
+
+	srv.httpServer = nil
+	plog.Warningf("stopped %s", srv.addr)
+}
+
+var (
+	muRootPort sync.Mutex
+	rootPort   = 2379
+)
 
 func startHandler(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
-	// user := ctx.Value(userKey).(*string)
-	// userID := *user
-
 	switch req.Method {
 	case "GET":
+		globalCache.mu.Lock()
+		defer globalCache.mu.Unlock()
+
+		if globalCache.cluster != nil {
+			return nil
+		}
+
+		muRootPort.Lock()
+		port := rootPort
+		rootPort += 20
+		muRootPort.Unlock()
+
+		dir, err := ioutil.TempDir(os.TempDir(), "backend-cluster")
+		if err != nil {
+			return err
+		}
+		cfg := cluster.Config{
+			Size:          5,
+			RootDir:       dir,
+			RootPort:      port,
+			ClientAutoTLS: true,
+		}
+		cl, err := cluster.Start(cfg)
+		if err != nil {
+			return err
+		}
+		globalCache.cluster = cl
+
+		resp := struct {
+			Message string
+		}{
+			fmt.Sprintf("etcd cluster: %s", strings.Join(cl.AllEndpoints(true), ", ")),
+		}
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			return err
+		}
 
 	default:
 		http.Error(w, "Method Not Allowed", 405)
@@ -106,5 +188,12 @@ func startHandler(ctx context.Context, w http.ResponseWriter, req *http.Request)
 }
 
 func serverStatusHandler(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
+	switch req.Method {
+	case "GET":
+
+	default:
+		http.Error(w, "Method Not Allowed", 405)
+	}
+
 	return nil
 }

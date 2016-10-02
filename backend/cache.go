@@ -15,42 +15,14 @@
 package backend
 
 import (
-	"fmt"
-	"io/ioutil"
-	"net/http"
 	"sync"
-	"testing"
-	"time"
+
+	"github.com/coreos/etcdlabs/cluster"
 )
 
-var (
-	muTestBasePort sync.Mutex
-	testBasePort   = 8080
-)
-
-func Test_StartServer(t *testing.T) {
-	muTestBasePort.Lock()
-	port := testBasePort
-	testBasePort++
-	muTestBasePort.Unlock()
-
-	srv, err := StartServer(port)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	resp, err := http.Get(srv.addr + "/start")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer resp.Body.Close()
-	b, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		t.Fatal(err)
-	}
-	fmt.Println(string(b))
-
-	time.Sleep(time.Second)
-
-	srv.Stop()
+type cache struct {
+	mu      sync.RWMutex
+	cluster *cluster.Cluster
 }
+
+var globalCache = &cache{}
