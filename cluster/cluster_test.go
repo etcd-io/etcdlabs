@@ -158,10 +158,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 		t.Fatalf("value expected 'bar', got %q", resp.Kvs[0].Key)
 	}
 
-	err = c.UpdateNodeStatus()
-	if err != nil {
-		t.Fatal(err)
-	}
+	time.Sleep(time.Second)
 
 	for i, st := range c.AllNodeStatus() {
 		fmt.Printf("%s: %+v\n", c.nodes[i].cfg.Name, st)

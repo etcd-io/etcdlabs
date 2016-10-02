@@ -68,8 +68,10 @@ type Cluster struct {
 	mu             sync.RWMutex
 	rootDir        string
 	size           int
-	nodes          []*node
 	updateInterval time.Duration
+	nodes          []*node
+	stopc          chan struct{} // to signal updateNodeStatus
+	donec          chan struct{} // after stopping updateNodeStatus
 }
 
 // Config defines etcd local cluster Configuration.
@@ -101,8 +103,10 @@ func Start(ccfg Config) (c *Cluster, err error) {
 	c = &Cluster{
 		rootDir:        ccfg.RootDir,
 		size:           ccfg.Size,
-		nodes:          make([]*node, ccfg.Size),
 		updateInterval: ccfg.UpdateInterval,
+		nodes:          make([]*node, ccfg.Size),
+		stopc:          make(chan struct{}),
+		donec:          make(chan struct{}),
 	}
 
 	if !existFileOrDir(ccfg.RootDir) {
@@ -254,16 +258,34 @@ func Start(ccfg Config) (c *Cluster, err error) {
 		}
 	}
 
+	defer func() {
+		go func() {
+			for {
+				select {
+				case <-c.stopc:
+					plog.Println("exiting updateNodeStatus loop")
+					close(c.donec)
+					return
+
+				case <-time.After(time.Second):
+					if uerr := c.updateNodeStatus(); uerr != nil {
+						plog.Warning("updateNodeStatus error:", uerr)
+					}
+				}
+			}
+		}()
+	}()
+
 	plog.Printf("successfully started %d nodes", ccfg.Size)
 	return c, nil
 }
 
 // Stop stops a node.
 func (c *Cluster) Stop(i int) {
-	plog.Printf("stopping %s", c.nodes[i].cfg.Name)
-
 	c.mu.Lock()
 	defer c.mu.Unlock()
+
+	plog.Printf("stopping %s", c.nodes[i].cfg.Name)
 
 	if c.nodes[i].status.State == NoNodeStatus {
 		plog.Warningf("%s is already stopped", c.nodes[i].cfg.Name)
@@ -294,10 +316,10 @@ func (c *Cluster) Stop(i int) {
 
 // Restart restarts a node.
 func (c *Cluster) Restart(i int) error {
-	plog.Printf("restarting %s", c.nodes[i].cfg.Name)
-
 	c.mu.Lock()
 	defer c.mu.Unlock()
+
+	plog.Printf("restarting %s", c.nodes[i].cfg.Name)
 
 	if c.nodes[i].status.State != NoNodeStatus {
 		plog.Warningf("%s is already started", c.nodes[i].cfg.Name)
@@ -340,11 +362,14 @@ func (c *Cluster) Restart(i int) error {
 
 // Shutdown stops all nodes and deletes all data directories.
 func (c *Cluster) Shutdown() {
-	plog.Println("shutting down all nodes")
+	// stopping updateNodeStatus
+	close(c.stopc)
+	<-c.donec
 
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
+	plog.Println("shutting down all nodes")
 	var wg sync.WaitGroup
 	wg.Add(c.size)
 	for i := 0; i < c.size; i++ {
@@ -370,14 +395,6 @@ func (c *Cluster) Shutdown() {
 	plog.Printf("deleted %s (done!)", c.rootDir)
 }
 
-// AllEndpoints returns all endpoints of clients.
-func (c *Cluster) AllEndpoints(scheme bool) []string {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
-	return c.allEndpoints(scheme)
-}
-
 func (c *Cluster) allEndpoints(scheme bool) []string {
 	eps := make([]string, c.size)
 	for i := 0; i < c.size; i++ {
@@ -390,13 +407,12 @@ func (c *Cluster) allEndpoints(scheme bool) []string {
 	return eps
 }
 
-// Client creates the client.
-func (c *Cluster) Client(i int, scheme, allEndpoints bool, dialTimeout time.Duration) (*clientv3.Client, error) {
+// AllEndpoints returns all endpoints of clients.
+func (c *Cluster) AllEndpoints(scheme bool) []string {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	cli, _, err := c.client(i, scheme, allEndpoints, dialTimeout)
-	return cli, err
+	return c.allEndpoints(scheme)
 }
 
 func (c *Cluster) client(i int, scheme, allEndpoints bool, dialTimeout time.Duration) (*clientv3.Client, *tls.Config, error) {
@@ -429,18 +445,27 @@ func (c *Cluster) client(i int, scheme, allEndpoints bool, dialTimeout time.Dura
 	return cli, ccfg.TLS, err
 }
 
-// UpdateNodeStatus updates NodeStatus of all nodes.
-func (c *Cluster) UpdateNodeStatus() error {
-	plog.Println("updating node status")
-
+// Client creates the client.
+func (c *Cluster) Client(i int, scheme, allEndpoints bool, dialTimeout time.Duration) (*clientv3.Client, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
+	cli, _, err := c.client(i, scheme, allEndpoints, dialTimeout)
+	return cli, err
+}
+
+func (c *Cluster) updateNodeStatus() error {
+	plog.Println("updating node status")
 	errc := make(chan error)
 	for i := 0; i < c.size; i++ {
 		go func(i int) {
 			if c.nodes[i] == nil {
 				errc <- fmt.Errorf("c.nodes[%d] is nil", i)
+				return
+			}
+
+			if c.nodes[i].status.State == NoNodeStatus {
+				plog.Printf("%s is stopped (skipping updateNodeStatus)", c.nodes[i].cfg.Name)
 				return
 			}
 
@@ -507,6 +532,7 @@ func (c *Cluster) UpdateNodeStatus() error {
 			close(errc)
 		}
 	}
+	plog.Println("updated node status")
 
 	return nil
 }
