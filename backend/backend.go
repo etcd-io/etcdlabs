@@ -94,14 +94,6 @@ func StartServer(port int) (*Server, error) {
 
 	go func() {
 		defer func() {
-			globalCache.mu.Lock()
-			defer globalCache.mu.Unlock()
-
-			if globalCache.cluster != nil {
-				plog.Println("shutting down cluster")
-				globalCache.cluster.Shutdown()
-			}
-
 			if err := recover(); err != nil {
 				plog.Errorf("etcd-play error (%v)", err)
 				os.Exit(0)
@@ -118,21 +110,31 @@ func StartServer(port int) (*Server, error) {
 	return srv, nil
 }
 
-// Stop stops the server.
+// Stop stops the server. Useful for testing.
 func (srv *Server) Stop() {
 	srv.mu.Lock()
-	defer srv.mu.Unlock()
 
 	if srv.httpServer == nil {
+		srv.mu.Unlock()
 		return
 	}
 
 	plog.Warningf("stopping %s", srv.addr)
 	close(srv.stopc)
 	<-srv.donec
-
 	srv.httpServer = nil
 	plog.Warningf("stopped %s", srv.addr)
+
+	srv.mu.Unlock()
+
+	globalCache.mu.Lock()
+	plog.Warning("stopping cluster")
+	if globalCache.cluster != nil {
+		globalCache.cluster.Shutdown()
+	}
+	globalCache.cluster = nil
+	plog.Warning("stopped cluster %s")
+	globalCache.mu.Unlock()
 }
 
 var (
