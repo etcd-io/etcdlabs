@@ -78,11 +78,13 @@
         <div id="etcd"></div>
         <h2><a href="/doc/{{version.etcdVersionURL}}/faq#etcd" class="faq-title">What is etcd?</a></h2>
         <p>
-            etcd is distributed reliable key-value store for the most critical data of a distributed system. It is distributed by replicating data to multiple machines, therefore highly available against single point of failures. Using the Raft<sup>[1]</sup>            consensus algorithms, etcd gracefully handles network partitions and machine failures, even leader failures. etcd is inspired by Google's Chubby<sup>[1]</sup> lock service.
+            etcd is distributed reliable key-value store for the most critical data of a distributed system. It is distributed by replicating data to multiple machines, therefore highly available against single point of failures. Using the Raft<sup>[1]</sup>            consensus algorithms, etcd gracefully handles network partitions and machine failures, even leader failures. etcd is inspired by Google's Chubby<sup>[2]</sup> lock service.
         </p>
         <hr align="left" class="footer-top-line">
         <footer>
-            [1] Mike Burrows: "<a href="http://static.googleusercontent.com/media/research.google.com/en//archive/chubby-osdi06.pdf" target="_blank" class="footer-link">The Chubby lock service for loosely-coupled distributed systems</a>," at 7th USENIX
+            [1] Diego Ongaro and John K Ousterhout: "<a href="https://raft.github.io/raft.pdf" target="_blank" class="footer-link">In Search of an Understandable Consensus Algorithm (Extended Version)</a>," at USENIX Annual Technical Conference (ATC),
+            June 2014.
+            <br> [2] Mike Burrows: "<a href="http://static.googleusercontent.com/media/research.google.com/en//archive/chubby-osdi06.pdf" target="_blank" class="footer-link">The Chubby lock service for loosely-coupled distributed systems</a>," at 7th USENIX
             Symposium on Operating System Design and Implementation (OSDI), November 2006.
         </footer>
         <br><br>
