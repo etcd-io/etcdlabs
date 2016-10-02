@@ -173,6 +173,8 @@ func startHandler(ctx context.Context, w http.ResponseWriter, req *http.Request)
 		}
 		globalCache.cluster = cl
 
+		// TODO: periodic NodeStatus update in background
+
 		resp := struct {
 			Message string
 		}{
@@ -192,6 +194,7 @@ func startHandler(ctx context.Context, w http.ResponseWriter, req *http.Request)
 func serverStatusHandler(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
 	switch req.Method {
 	case "GET":
+		// TODO: serve NodeStatus from globalCache.cluster
 
 	default:
 		http.Error(w, "Method Not Allowed", 405)
