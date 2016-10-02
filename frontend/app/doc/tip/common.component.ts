@@ -52,8 +52,14 @@ export class parentComponent {
             ),
             new sidebarItem(
                 'Tutorials',
-                'etcdctl, client requests, basic operations',
+                'etcdctl, client: write, read, watch, lock, election',
                 `/doc/${this.version.etcdVersionURL}/tutorials`,
+                'no-text-decoration'
+            ),
+            new sidebarItem(
+                'Tutorials (Advanced)',
+                'membership, maintenance, backup',
+                `/doc/${this.version.etcdVersionURL}/tutorials-advanced`,
                 'no-text-decoration'
             ),
             new sidebarItem(

@@ -11,6 +11,7 @@ import { HomeComponent } from './home/home.component';
 import { doc_tip_Component } from './doc/tip/doc.component';
 import { install_deploy_tip_Component } from './doc/tip/install-deploy.component';
 import { tutorials_tip_Component } from './doc/tip/tutorials.component';
+import { tutorials_advanced_tip_Component } from './doc/tip/tutorials-advanced.component';
 import { faq_tip_Component } from './doc/tip/faq.component';
 import { performance_tip_Component } from './doc/tip/performance.component';
 import { reliability_tip_Component } from './doc/tip/reliability.component';
@@ -46,6 +47,7 @@ const appRoutes: Routes = [
             { path: '', component: doc_tip_Component },
             { path: 'install-deploy', component: install_deploy_tip_Component },
             { path: 'tutorials', component: tutorials_tip_Component },
+            { path: 'tutorials-advanced', component: tutorials_advanced_tip_Component },
             { path: 'faq', component: faq_tip_Component },
             { path: 'performance', component: performance_tip_Component },
             { path: 'reliability', component: reliability_tip_Component },
@@ -88,6 +90,7 @@ export const routedComponents = [
     doc_tip_Component,
     install_deploy_tip_Component,
     tutorials_tip_Component,
+    tutorials_advanced_tip_Component,
     faq_tip_Component,
     performance_tip_Component,
     reliability_tip_Component,
