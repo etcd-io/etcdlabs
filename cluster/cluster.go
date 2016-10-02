@@ -514,11 +514,11 @@ func (c *Cluster) UpdateNodeStatus() error {
 // AllNodeStatus returns all node status.
 func (c *Cluster) AllNodeStatus() []NodeStatus {
 	c.mu.RLock()
-	defer c.mu.RUnlock()
-
 	st := make([]NodeStatus, c.size)
 	for i := range c.nodes {
 		st[i] = c.nodes[i].status
 	}
+	c.mu.RUnlock()
+
 	return st
 }
