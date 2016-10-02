@@ -37,18 +37,17 @@ import (
 	"github.com/gyuho/db/pkg/types"
 )
 
-// nodeState defines current Node state.
-type nodeState uint8
-
 const (
-	stateNone nodeState = iota
-	stateStarted
-	stateStopped
+	// NoNodeStatus is node status before start or after stop.
+	NoNodeStatus       = "Stopped"
+	FollowerNodeStatus = "Follower"
+	LeaderNodeStatus   = "Leader"
 )
 
 // NodeStatus defines node status information.
 type NodeStatus struct {
 	ID        string
+	IsLeader  bool
 	State     string
 	DBSize    uint64
 	DBSizeTxt string
@@ -59,7 +58,6 @@ type NodeStatus struct {
 type node struct {
 	srv        *embed.Etcd
 	cfg        *embed.Config
-	state      nodeState
 	lastUpdate time.Time
 	status     NodeStatus
 }
@@ -67,7 +65,7 @@ type node struct {
 // Cluster contains all embedded etcd nodes in the same cluster.
 // Configuration is meant to be auto-generated.
 type Cluster struct {
-	mu             sync.Mutex
+	mu             sync.RWMutex
 	rootDir        string
 	size           int
 	nodes          []*node
@@ -150,7 +148,7 @@ func Start(ccfg Config) (c *Cluster, err error) {
 		cfg.PeerAutoTLS = ccfg.PeerAutoTLS
 		cfg.PeerTLSInfo = ccfg.PeerTLSInfo
 
-		c.nodes[i] = &node{cfg: cfg}
+		c.nodes[i] = &node{cfg: cfg, status: NodeStatus{IsLeader: false, State: NoNodeStatus}}
 
 		startPort += 2
 	}
@@ -186,8 +184,9 @@ func Start(ccfg Config) (c *Cluster, err error) {
 
 			<-c.nodes[i].srv.Server.ReadyNotify()
 
-			c.nodes[i].state = stateStarted
 			c.nodes[i].lastUpdate = time.Now()
+			c.nodes[i].status.State = FollowerNodeStatus
+			c.nodes[i].status.IsLeader = false
 
 			plog.Printf("started %s (client %s, peer %s)", c.nodes[i].cfg.Name, c.nodes[i].cfg.LCUrls[0].String(), c.nodes[i].cfg.LPUrls[0].String())
 		}(i)
@@ -216,13 +215,25 @@ func Start(ccfg Config) (c *Cluster, err error) {
 					continue
 				}
 
+				c.nodes[i].status.ID = types.ID(resp.Header.MemberId).String()
+
 				if resp.Leader == uint64(0) {
 					plog.Printf("%s %s has no leader yet", c.nodes[i].cfg.Name, types.ID(resp.Header.MemberId))
+					c.nodes[i].status.IsLeader = false
+					c.nodes[i].status.State = FollowerNodeStatus
+
 					time.Sleep(time.Second)
 					continue
 				}
 
 				plog.Printf("%s %s has leader %s", c.nodes[i].cfg.Name, types.ID(resp.Header.MemberId), types.ID(resp.Leader))
+				c.nodes[i].status.IsLeader = resp.Leader == resp.Header.MemberId
+				if c.nodes[i].status.IsLeader {
+					c.nodes[i].status.State = LeaderNodeStatus
+				} else {
+					c.nodes[i].status.State = FollowerNodeStatus
+				}
+
 				break
 			}
 
@@ -254,7 +265,7 @@ func (c *Cluster) Stop(i int) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	if c.nodes[i].state == stateStopped {
+	if c.nodes[i].status.State == NoNodeStatus {
 		plog.Warningf("%s is already stopped", c.nodes[i].cfg.Name)
 		return
 	}
@@ -271,8 +282,9 @@ func (c *Cluster) Stop(i int) {
 		time.Sleep(more)
 	}
 
-	c.nodes[i].state = stateStopped
 	c.nodes[i].lastUpdate = time.Now()
+	c.nodes[i].status.IsLeader = false
+	c.nodes[i].status.State = NoNodeStatus
 
 	c.nodes[i].srv.Close()
 	<-c.nodes[i].srv.Err()
@@ -287,7 +299,7 @@ func (c *Cluster) Restart(i int) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	if c.nodes[i].state == stateStarted {
+	if c.nodes[i].status.State != NoNodeStatus {
 		plog.Warningf("%s is already started", c.nodes[i].cfg.Name)
 		return nil
 	}
@@ -318,8 +330,9 @@ func (c *Cluster) Restart(i int) error {
 
 	<-c.nodes[i].srv.Server.ReadyNotify()
 
-	c.nodes[i].state = stateStarted
 	c.nodes[i].lastUpdate = time.Now()
+	c.nodes[i].status.IsLeader = false
+	c.nodes[i].status.State = FollowerNodeStatus
 
 	plog.Printf("restarted %s", c.nodes[i].cfg.Name)
 	return nil
@@ -338,13 +351,14 @@ func (c *Cluster) Shutdown() {
 		go func(i int) {
 			defer wg.Done()
 
-			if c.nodes[i].state == stateStopped {
+			if c.nodes[i].status.State == NoNodeStatus {
 				plog.Warningf("%s is already stopped", c.nodes[i].cfg.Name)
 				return
 			}
 
-			c.nodes[i].state = stateStopped
 			c.nodes[i].lastUpdate = time.Now()
+			c.nodes[i].status.IsLeader = false
+			c.nodes[i].status.State = NoNodeStatus
 
 			c.nodes[i].srv.Close()
 			<-c.nodes[i].srv.Err()
@@ -445,14 +459,14 @@ func (c *Cluster) UpdateNodeStatus() error {
 				return
 			}
 
-			st := "follower"
+			isLeader, state := false, FollowerNodeStatus
 			if resp.Header.MemberId == resp.Leader {
-				st = "leader"
+				isLeader, state = true, LeaderNodeStatus
 			}
 			status := NodeStatus{
-				ID:    types.ID(resp.Header.MemberId).String(),
-				State: st,
-
+				ID:        types.ID(resp.Header.MemberId).String(),
+				IsLeader:  isLeader,
+				State:     state,
 				DBSize:    uint64(resp.DbSize),
 				DBSizeTxt: humanize.Bytes(uint64(resp.DbSize)),
 			}
@@ -497,10 +511,14 @@ func (c *Cluster) UpdateNodeStatus() error {
 	return nil
 }
 
-// NodeStatus returns the node status.
-func (c *Cluster) NodeStatus(i int) NodeStatus {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+// AllNodeStatus returns all node status.
+func (c *Cluster) AllNodeStatus() []NodeStatus {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
-	return c.nodes[i].status
+	st := make([]NodeStatus, c.size)
+	for i := range c.nodes {
+		st[i] = c.nodes[i].status
+	}
+	return st
 }

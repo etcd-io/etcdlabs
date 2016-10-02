@@ -163,7 +163,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 		t.Fatal(err)
 	}
 
-	for i := 0; i < c.size; i++ {
-		fmt.Println(c.NodeStatus(i))
+	for i, st := range c.AllNodeStatus() {
+		fmt.Printf("%s: %+v\n", c.nodes[i].cfg.Name, st)
 	}
 }
