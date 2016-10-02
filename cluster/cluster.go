@@ -15,6 +15,7 @@
 package cluster
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 	"os"
@@ -23,8 +24,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/embed"
 	"github.com/coreos/etcd/pkg/transport"
+	"github.com/gyuho/db/pkg/types"
 )
 
 // nodeState defines current Node state.
@@ -74,7 +77,7 @@ var minUpdateInterval = time.Second
 
 // Start starts embedded etcd cluster.
 func Start(ccfg Config) (c *Cluster, err error) {
-	plog.Printf("starting %d nodes (root directory %q, root port :%d)", ccfg.Size, ccfg.RootDir, ccfg.RootPort)
+	plog.Printf("starting %d nodes (root directory %s, root port :%d)", ccfg.Size, ccfg.RootDir, ccfg.RootPort)
 
 	if ccfg.UpdateInterval < minUpdateInterval {
 		ccfg.UpdateInterval = minUpdateInterval
@@ -169,24 +172,97 @@ func Start(ccfg Config) (c *Cluster, err error) {
 			c.nodes[i].state = stateStarted
 			c.nodes[i].lastUpdate = time.Now()
 
-			plog.Printf("started %q (client %s, peer %s)", c.nodes[i].cfg.Name, c.nodes[i].cfg.LCUrls[0].String(), c.nodes[i].cfg.LPUrls[0].String())
+			plog.Printf("started %s (client %s, peer %s)", c.nodes[i].cfg.Name, c.nodes[i].cfg.LCUrls[0].String(), c.nodes[i].cfg.LPUrls[0].String())
 		}(i)
 	}
 	wg.Wait()
 
-	plog.Printf("started %d nodes (ready!)", ccfg.Size)
+	time.Sleep(500 * time.Millisecond)
+
+	plog.Print("checking leader")
+	errc := make(chan error)
+	for _, nd := range c.nodes {
+		go func(n *node) {
+			ep := n.cfg.LCUrls[0].Host
+			ccfg := clientv3.Config{
+				Endpoints:   []string{ep},
+				DialTimeout: 3 * time.Second,
+			}
+
+			switch {
+			case !n.cfg.ClientTLSInfo.Empty():
+				tlsConfig, err := n.cfg.ClientTLSInfo.ClientConfig()
+				if err != nil {
+					errc <- err
+					return
+				}
+				ccfg.TLS = tlsConfig
+
+			case !n.cfg.ClientTLSInfo.Empty():
+				tlsConfig, err := n.cfg.ClientTLSInfo.ClientConfig()
+				if err != nil {
+					errc <- err
+					return
+				}
+				ccfg.TLS = tlsConfig
+			}
+
+			for {
+				cli, err := clientv3.New(ccfg)
+				if err != nil {
+					plog.Warning(err)
+					continue
+				}
+				defer cli.Close()
+
+				ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+				resp, err := cli.Status(ctx, ep)
+				cancel()
+				if err != nil {
+					plog.Warning(err)
+					continue
+				}
+
+				if resp.Leader == uint64(0) {
+					plog.Printf("%s %s has no leader yet", n.cfg.Name, types.ID(resp.Header.MemberId))
+					time.Sleep(500 * time.Millisecond)
+					continue
+				}
+
+				plog.Printf("%s %s has leader %s", n.cfg.Name, types.ID(resp.Header.MemberId), types.ID(resp.Leader))
+				break
+			}
+
+			errc <- nil
+		}(nd)
+	}
+
+	cn := 0
+	for err := range errc {
+		if err != nil {
+			plog.Warning(err)
+			return nil, err
+		}
+
+		cn++
+		if cn == c.size {
+			close(errc)
+		}
+	}
+
+	plog.Printf("successfully started %d nodes", ccfg.Size)
 	return c, nil
 }
 
 // Stop stops a node.
 func (c *Cluster) Stop(i int) {
-	plog.Printf("stopping %q", c.nodes[i].cfg.Name)
+	plog.Printf("stopping %s", c.nodes[i].cfg.Name)
 
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
 	if c.nodes[i].state == stateStopped {
-		plog.Warningf("%q is already stopped", c.nodes[i].cfg.Name)
+		plog.Warningf("%s is already stopped", c.nodes[i].cfg.Name)
 		return
 	}
 
@@ -197,7 +273,7 @@ func (c *Cluster) Stop(i int) {
 		}
 
 		more := c.updateInterval - it + 100*time.Millisecond
-		plog.Printf("rate-limiting stopping %q (sleeping %v)", c.nodes[i].cfg.Name, more)
+		plog.Printf("rate-limiting stopping %s (sleeping %v)", c.nodes[i].cfg.Name, more)
 
 		time.Sleep(more)
 	}
@@ -208,18 +284,18 @@ func (c *Cluster) Stop(i int) {
 	c.nodes[i].srv.Close()
 	<-c.nodes[i].srv.Err()
 
-	plog.Printf("stopped %q", c.nodes[i].cfg.Name)
+	plog.Printf("stopped %s", c.nodes[i].cfg.Name)
 }
 
 // Restart restarts a node.
 func (c *Cluster) Restart(i int) error {
-	plog.Printf("restarting %q", c.nodes[i].cfg.Name)
+	plog.Printf("restarting %s", c.nodes[i].cfg.Name)
 
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
 	if c.nodes[i].state == stateStarted {
-		plog.Warningf("%q is already started", c.nodes[i].cfg.Name)
+		plog.Warningf("%s is already started", c.nodes[i].cfg.Name)
 		return nil
 	}
 
@@ -230,7 +306,7 @@ func (c *Cluster) Restart(i int) error {
 		}
 
 		more := c.updateInterval - it + 100*time.Millisecond
-		plog.Printf("rate-limiting restarting %q (sleeping %v)", c.nodes[i].cfg.Name, more)
+		plog.Printf("rate-limiting restarting %s (sleeping %v)", c.nodes[i].cfg.Name, more)
 
 		time.Sleep(more)
 	}
@@ -252,7 +328,7 @@ func (c *Cluster) Restart(i int) error {
 	c.nodes[i].state = stateStarted
 	c.nodes[i].lastUpdate = time.Now()
 
-	plog.Printf("restarted %q", c.nodes[i].cfg.Name)
+	plog.Printf("restarted %s", c.nodes[i].cfg.Name)
 	return nil
 }
 
@@ -270,7 +346,7 @@ func (c *Cluster) Shutdown() {
 			defer wg.Done()
 
 			if c.nodes[i].state == stateStopped {
-				plog.Warningf("%q is already stopped", c.nodes[i].cfg.Name)
+				plog.Warningf("%s is already stopped", c.nodes[i].cfg.Name)
 				return
 			}
 
@@ -284,7 +360,7 @@ func (c *Cluster) Shutdown() {
 	wg.Wait()
 
 	os.RemoveAll(c.rootDir)
-	plog.Printf("deleted %q (done!)", c.rootDir)
+	plog.Printf("deleted %s (done!)", c.rootDir)
 }
 
 // AllEndpoints returns all endpoints of clients.

@@ -113,9 +113,6 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 	}
 	defer cl.Shutdown()
 
-	// wait until cluster is ready
-	time.Sleep(time.Second)
-
 	ccfg := clientv3.Config{
 		Endpoints:   cl.AllEndpoints(scheme),
 		DialTimeout: 3 * time.Second,
