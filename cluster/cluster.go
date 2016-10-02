@@ -16,6 +16,7 @@ package cluster
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"net/url"
 	"os"
@@ -24,9 +25,15 @@ import (
 	"sync"
 	"time"
 
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/embed"
+	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
 	"github.com/coreos/etcd/pkg/transport"
+
+	humanize "github.com/dustin/go-humanize"
 	"github.com/gyuho/db/pkg/types"
 )
 
@@ -39,12 +46,22 @@ const (
 	stateStopped
 )
 
+// NodeStatus defines node status information.
+type NodeStatus struct {
+	ID        string
+	State     string
+	DBSize    uint64
+	DBSizeTxt string
+	Hash      int
+}
+
 // node contains *embed.Etcd and its state.
 type node struct {
 	srv        *embed.Etcd
 	cfg        *embed.Config
 	state      nodeState
 	lastUpdate time.Time
+	status     NodeStatus
 }
 
 // Cluster contains all embedded etcd nodes in the same cluster.
@@ -163,7 +180,7 @@ func Start(ccfg Config) (c *Cluster, err error) {
 
 	var wg sync.WaitGroup
 	wg.Add(c.size)
-	for i := range c.nodes {
+	for i := 0; i < c.size; i++ {
 		go func(i int) {
 			defer wg.Done()
 
@@ -181,10 +198,10 @@ func Start(ccfg Config) (c *Cluster, err error) {
 
 	plog.Print("checking leader")
 	errc := make(chan error)
-	for i := range c.nodes {
+	for i := 0; i < c.size; i++ {
 		go func(i int) {
 			for {
-				cli, err := c.client(i, false, false, 3*time.Second)
+				cli, _, err := c.client(i, false, false, 3*time.Second)
 				if err != nil {
 					plog.Warning(err)
 					continue
@@ -228,42 +245,6 @@ func Start(ccfg Config) (c *Cluster, err error) {
 
 	plog.Printf("successfully started %d nodes", ccfg.Size)
 	return c, nil
-}
-
-// Client creates the client.
-func (c *Cluster) Client(i int, scheme, allEndpoints bool, dialTimeout time.Duration) (*clientv3.Client, error) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	return c.client(i, scheme, allEndpoints, dialTimeout)
-}
-
-func (c *Cluster) client(i int, scheme, allEndpoints bool, dialTimeout time.Duration) (*clientv3.Client, error) {
-	eps := []string{c.nodes[i].cfg.LCUrls[0].Host}
-	if allEndpoints {
-		eps = c.allEndpoints(scheme)
-	}
-	ccfg := clientv3.Config{
-		Endpoints:   eps,
-		DialTimeout: dialTimeout,
-	}
-
-	switch {
-	case !c.nodes[i].cfg.ClientTLSInfo.Empty():
-		tlsConfig, err := c.nodes[i].cfg.ClientTLSInfo.ClientConfig()
-		if err != nil {
-			return nil, err
-		}
-		ccfg.TLS = tlsConfig
-
-	case !c.nodes[i].cfg.ClientTLSInfo.Empty():
-		tlsConfig, err := c.nodes[i].cfg.ClientTLSInfo.ClientConfig()
-		if err != nil {
-			return nil, err
-		}
-		ccfg.TLS = tlsConfig
-	}
-
-	return clientv3.New(ccfg)
 }
 
 // Stop stops a node.
@@ -353,7 +334,7 @@ func (c *Cluster) Shutdown() {
 
 	var wg sync.WaitGroup
 	wg.Add(c.size)
-	for i := range c.nodes {
+	for i := 0; i < c.size; i++ {
 		go func(i int) {
 			defer wg.Done()
 
@@ -393,4 +374,133 @@ func (c *Cluster) allEndpoints(scheme bool) []string {
 		}
 	}
 	return eps
+}
+
+// Client creates the client.
+func (c *Cluster) Client(i int, scheme, allEndpoints bool, dialTimeout time.Duration) (*clientv3.Client, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	cli, _, err := c.client(i, scheme, allEndpoints, dialTimeout)
+	return cli, err
+}
+
+func (c *Cluster) client(i int, scheme, allEndpoints bool, dialTimeout time.Duration) (*clientv3.Client, *tls.Config, error) {
+	eps := []string{c.nodes[i].cfg.LCUrls[0].Host}
+	if allEndpoints {
+		eps = c.allEndpoints(scheme)
+	}
+	ccfg := clientv3.Config{
+		Endpoints:   eps,
+		DialTimeout: dialTimeout,
+	}
+
+	switch {
+	case !c.nodes[i].cfg.ClientTLSInfo.Empty():
+		tlsConfig, err := c.nodes[i].cfg.ClientTLSInfo.ClientConfig()
+		if err != nil {
+			return nil, nil, err
+		}
+		ccfg.TLS = tlsConfig
+
+	case !c.nodes[i].cfg.ClientTLSInfo.Empty():
+		tlsConfig, err := c.nodes[i].cfg.ClientTLSInfo.ClientConfig()
+		if err != nil {
+			return nil, nil, err
+		}
+		ccfg.TLS = tlsConfig
+	}
+
+	cli, err := clientv3.New(ccfg)
+	return cli, ccfg.TLS, err
+}
+
+// UpdateNodeStatus updates NodeStatus of all nodes.
+func (c *Cluster) UpdateNodeStatus() error {
+	plog.Println("updating node status")
+
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	errc := make(chan error)
+	for i := 0; i < c.size; i++ {
+		go func(i int) {
+			if c.nodes[i] == nil {
+				errc <- fmt.Errorf("c.nodes[%d] is nil", i)
+				return
+			}
+
+			cli, tlsConfig, err := c.client(i, false, false, 3*time.Second)
+			if err != nil {
+				errc <- err
+				return
+			}
+			defer cli.Close()
+
+			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+			resp, err := cli.Status(ctx, c.nodes[i].cfg.LCUrls[0].Host)
+			cancel()
+			if err != nil {
+				errc <- err
+				return
+			}
+
+			st := "follower"
+			if resp.Header.MemberId == resp.Leader {
+				st = "leader"
+			}
+			status := NodeStatus{
+				ID:    types.ID(resp.Header.MemberId).String(),
+				State: st,
+
+				DBSize:    uint64(resp.DbSize),
+				DBSizeTxt: humanize.Bytes(uint64(resp.DbSize)),
+			}
+
+			conn, err := grpc.Dial(c.nodes[i].cfg.LCUrls[0].Host, grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)), grpc.WithTimeout(3*time.Second))
+			if err != nil {
+				errc <- err
+				return
+			}
+			defer conn.Close()
+
+			mc := pb.NewMaintenanceClient(conn)
+			ctx, cancel = context.WithTimeout(context.Background(), 3*time.Second)
+			var hresp *pb.HashResponse
+			hresp, err = mc.Hash(ctx, &pb.HashRequest{})
+			cancel()
+			if err != nil {
+				errc <- err
+				return
+			}
+			status.Hash = int(hresp.Hash)
+
+			c.nodes[i].status = status
+
+			errc <- nil
+		}(i)
+	}
+
+	cn := 0
+	for err := range errc {
+		if err != nil {
+			plog.Warning(err)
+			return err
+		}
+
+		cn++
+		if cn == c.size {
+			close(errc)
+		}
+	}
+
+	return nil
+}
+
+// NodeStatus returns the node status.
+func (c *Cluster) NodeStatus(i int) NodeStatus {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	return c.nodes[i].status
 }

@@ -17,6 +17,7 @@ package cluster
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"sync"
@@ -107,13 +108,13 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 	basePort += 10
 	bmu.Unlock()
 
-	cl, err := Start(cfg)
+	c, err := Start(cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer cl.Shutdown()
+	defer c.Shutdown()
 
-	cli, err := cl.Client(0, scheme, true, 3*time.Second)
+	cli, err := c.Client(0, scheme, true, 3*time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -128,16 +129,16 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 	time.Sleep(time.Second)
 
 	if stopRecover {
-		cl.Stop(0)
+		c.Stop(0)
 		time.Sleep(time.Second)
 
-		if err = cl.Restart(0); err != nil {
+		if err = c.Restart(0); err != nil {
 			t.Fatal(err)
 		}
 		time.Sleep(time.Second)
 	}
 
-	cli, err = cl.Client(0, scheme, true, 3*time.Second)
+	cli, err = c.Client(0, scheme, true, 3*time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -155,5 +156,14 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 	}
 	if !bytes.Equal(resp.Kvs[0].Value, []byte("bar")) {
 		t.Fatalf("value expected 'bar', got %q", resp.Kvs[0].Key)
+	}
+
+	err = c.UpdateNodeStatus()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for i := 0; i < c.size; i++ {
+		fmt.Println(c.NodeStatus(i))
 	}
 }
