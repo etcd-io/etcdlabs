@@ -181,34 +181,10 @@ func Start(ccfg Config) (c *Cluster, err error) {
 
 	plog.Print("checking leader")
 	errc := make(chan error)
-	for _, nd := range c.nodes {
-		go func(n *node) {
-			ep := n.cfg.LCUrls[0].Host
-			ccfg := clientv3.Config{
-				Endpoints:   []string{ep},
-				DialTimeout: 3 * time.Second,
-			}
-
-			switch {
-			case !n.cfg.ClientTLSInfo.Empty():
-				tlsConfig, err := n.cfg.ClientTLSInfo.ClientConfig()
-				if err != nil {
-					errc <- err
-					return
-				}
-				ccfg.TLS = tlsConfig
-
-			case !n.cfg.ClientTLSInfo.Empty():
-				tlsConfig, err := n.cfg.ClientTLSInfo.ClientConfig()
-				if err != nil {
-					errc <- err
-					return
-				}
-				ccfg.TLS = tlsConfig
-			}
-
+	for i := range c.nodes {
+		go func(i int) {
 			for {
-				cli, err := clientv3.New(ccfg)
+				cli, err := c.client(i, false, false, 3*time.Second)
 				if err != nil {
 					plog.Warning(err)
 					continue
@@ -216,7 +192,7 @@ func Start(ccfg Config) (c *Cluster, err error) {
 				defer cli.Close()
 
 				ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-				resp, err := cli.Status(ctx, ep)
+				resp, err := cli.Status(ctx, c.nodes[i].cfg.LCUrls[0].Host)
 				cancel()
 				if err != nil {
 					plog.Warning(err)
@@ -224,17 +200,17 @@ func Start(ccfg Config) (c *Cluster, err error) {
 				}
 
 				if resp.Leader == uint64(0) {
-					plog.Printf("%s %s has no leader yet", n.cfg.Name, types.ID(resp.Header.MemberId))
-					time.Sleep(500 * time.Millisecond)
+					plog.Printf("%s %s has no leader yet", c.nodes[i].cfg.Name, types.ID(resp.Header.MemberId))
+					time.Sleep(time.Second)
 					continue
 				}
 
-				plog.Printf("%s %s has leader %s", n.cfg.Name, types.ID(resp.Header.MemberId), types.ID(resp.Leader))
+				plog.Printf("%s %s has leader %s", c.nodes[i].cfg.Name, types.ID(resp.Header.MemberId), types.ID(resp.Leader))
 				break
 			}
 
 			errc <- nil
-		}(nd)
+		}(i)
 	}
 
 	cn := 0
@@ -258,7 +234,10 @@ func Start(ccfg Config) (c *Cluster, err error) {
 func (c *Cluster) Client(i int, scheme, allEndpoints bool, dialTimeout time.Duration) (*clientv3.Client, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
+	return c.client(i, scheme, allEndpoints, dialTimeout)
+}
 
+func (c *Cluster) client(i int, scheme, allEndpoints bool, dialTimeout time.Duration) (*clientv3.Client, error) {
 	eps := []string{c.nodes[i].cfg.LCUrls[0].Host}
 	if allEndpoints {
 		eps = c.allEndpoints(scheme)
