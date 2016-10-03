@@ -557,15 +557,7 @@ func (c *Cluster) Client(i int, scheme, allEndpoints bool, dialTimeout time.Dura
 		DialTimeout: dialTimeout,
 	}
 
-	switch {
-	case !c.nodes[i].cfg.ClientTLSInfo.Empty():
-		tlsConfig, err := c.nodes[i].cfg.ClientTLSInfo.ClientConfig()
-		if err != nil {
-			return nil, nil, err
-		}
-		ccfg.TLS = tlsConfig
-
-	case !c.nodes[i].cfg.ClientTLSInfo.Empty():
+	if !c.nodes[i].cfg.ClientTLSInfo.Empty() {
 		tlsConfig, err := c.nodes[i].cfg.ClientTLSInfo.ClientConfig()
 		if err != nil {
 			return nil, nil, err
