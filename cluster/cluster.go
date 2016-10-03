@@ -65,16 +65,17 @@ type node struct {
 	srv              *embed.Etcd
 	cfg              *embed.Config
 	stoppedStartedAt time.Time
-	status           NodeStatus
+
+	statusLock sync.RWMutex
+	status     NodeStatus
 }
 
 // Cluster contains all embedded etcd nodes in the same cluster.
 // Configuration is meant to be auto-generated.
 type Cluster struct {
-	// opmu blocks Stop, Restart, Shutdown.
-	opmu sync.Mutex
+	// opLock blocks Stop, Restart, Shutdown.
+	opLock sync.Mutex
 
-	mu                sync.RWMutex
 	rootDir           string
 	size              int
 	stopStartInterval time.Duration
@@ -100,7 +101,7 @@ type Config struct {
 	StopStartInterval time.Duration
 }
 
-var minStopStartInterval = time.Second
+var minStopStartInterval = 2 * time.Second
 
 // Start starts embedded etcd cluster.
 func Start(ccfg Config) (c *Cluster, err error) {
@@ -269,6 +270,9 @@ func Start(ccfg Config) (c *Cluster, err error) {
 	}
 
 	defer func() {
+		// update once at first
+		c.updateNodeStatus()
+
 		go func() {
 			for {
 				select {
@@ -290,18 +294,18 @@ func Start(ccfg Config) (c *Cluster, err error) {
 
 // Stop stops a node.
 func (c *Cluster) Stop(i int) {
-	c.opmu.Lock()
-	defer c.opmu.Unlock()
+	c.opLock.Lock()
+	defer c.opLock.Unlock()
 
 	plog.Printf("stopping %s", c.nodes[i].cfg.Name)
 
-	c.mu.Lock()
+	c.nodes[i].statusLock.RLock()
 	if c.nodes[i].status.State == NoNodeStatus {
 		plog.Warningf("%s is already stopped", c.nodes[i].cfg.Name)
-		c.mu.Unlock()
+		c.nodes[i].statusLock.RUnlock()
 		return
 	}
-	c.mu.Unlock()
+	c.nodes[i].statusLock.RUnlock()
 
 	for {
 		it := time.Since(c.nodes[i].stoppedStartedAt)
@@ -314,15 +318,15 @@ func (c *Cluster) Stop(i int) {
 
 		time.Sleep(more)
 	}
-
-	c.mu.Lock()
 	c.nodes[i].stoppedStartedAt = time.Now()
+
+	c.nodes[i].statusLock.Lock()
 	c.nodes[i].status.IsLeader = false
 	c.nodes[i].status.State = NoNodeStatus
 	c.nodes[i].status.DBSize = 0
 	c.nodes[i].status.DBSizeTxt = ""
 	c.nodes[i].status.Hash = 0
-	c.mu.Unlock()
+	c.nodes[i].statusLock.Unlock()
 
 	c.nodes[i].srv.Close()
 	<-c.nodes[i].srv.Err()
@@ -332,18 +336,18 @@ func (c *Cluster) Stop(i int) {
 
 // Restart restarts a node.
 func (c *Cluster) Restart(i int) error {
-	c.opmu.Lock()
-	defer c.opmu.Unlock()
+	c.opLock.Lock()
+	defer c.opLock.Unlock()
 
 	plog.Printf("restarting %s", c.nodes[i].cfg.Name)
 
-	c.mu.Lock()
-	state := c.nodes[i].status.State
-	c.mu.Unlock()
-	if state != NoNodeStatus {
+	c.nodes[i].statusLock.RLock()
+	if c.nodes[i].status.State != NoNodeStatus {
 		plog.Warningf("%s is already started", c.nodes[i].cfg.Name)
+		c.nodes[i].statusLock.RUnlock()
 		return nil
 	}
+	c.nodes[i].statusLock.RUnlock()
 
 	for {
 		it := time.Since(c.nodes[i].stoppedStartedAt)
@@ -370,12 +374,12 @@ func (c *Cluster) Restart(i int) error {
 	c.nodes[i].cfg = &nc
 
 	<-c.nodes[i].srv.Server.ReadyNotify()
-
-	c.mu.Lock()
 	c.nodes[i].stoppedStartedAt = time.Now()
+
+	c.nodes[i].statusLock.Lock()
 	c.nodes[i].status.IsLeader = false
 	c.nodes[i].status.State = FollowerNodeStatus
-	c.mu.Unlock()
+	c.nodes[i].statusLock.Unlock()
 
 	plog.Printf("restarted %s", c.nodes[i].cfg.Name)
 	return nil
@@ -386,8 +390,8 @@ func (c *Cluster) Shutdown() {
 	close(c.stopc) // stopping updateNodeStatus
 	<-c.donec      // wait until it returns
 
-	c.opmu.Lock()
-	defer c.opmu.Unlock()
+	c.opLock.Lock()
+	defer c.opLock.Unlock()
 
 	plog.Println("shutting down all nodes")
 	var wg sync.WaitGroup
@@ -400,8 +404,8 @@ func (c *Cluster) Shutdown() {
 				plog.Warningf("%s is already stopped", c.nodes[i].cfg.Name)
 				return
 			}
-
 			c.nodes[i].stoppedStartedAt = time.Now()
+
 			c.nodes[i].status.IsLeader = false
 			c.nodes[i].status.State = NoNodeStatus
 			c.nodes[i].status.DBSize = 0
@@ -435,13 +439,13 @@ func (c *Cluster) updateNodeStatus() {
 
 			cli, tlsConfig, err := c.Client(i, false, false, 3*time.Second)
 			if err != nil {
-				c.mu.Lock()
+				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.State = NoNodeStatus
 				c.nodes[i].status.IsLeader = false
 				c.nodes[i].status.DBSize = 0
 				c.nodes[i].status.DBSizeTxt = ""
 				c.nodes[i].status.Hash = 0
-				c.mu.Unlock()
+				c.nodes[i].statusLock.Unlock()
 
 				errc <- err
 				return
@@ -452,13 +456,13 @@ func (c *Cluster) updateNodeStatus() {
 			resp, err := cli.Status(ctx, c.nodes[i].cfg.LCUrls[0].Host)
 			cancel()
 			if err != nil {
-				c.mu.Lock()
+				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.State = NoNodeStatus
 				c.nodes[i].status.IsLeader = false
 				c.nodes[i].status.DBSize = 0
 				c.nodes[i].status.DBSizeTxt = ""
 				c.nodes[i].status.Hash = 0
-				c.mu.Unlock()
+				c.nodes[i].statusLock.Unlock()
 
 				errc <- err
 				return
@@ -480,13 +484,13 @@ func (c *Cluster) updateNodeStatus() {
 
 			conn, err := grpc.Dial(c.nodes[i].cfg.LCUrls[0].Host, grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)), grpc.WithTimeout(3*time.Second))
 			if err != nil {
-				c.mu.Lock()
+				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.State = NoNodeStatus
 				c.nodes[i].status.IsLeader = false
 				c.nodes[i].status.DBSize = 0
 				c.nodes[i].status.DBSizeTxt = ""
 				c.nodes[i].status.Hash = 0
-				c.mu.Unlock()
+				c.nodes[i].statusLock.Unlock()
 
 				errc <- err
 				return
@@ -499,22 +503,22 @@ func (c *Cluster) updateNodeStatus() {
 			hresp, err = mc.Hash(ctx, &pb.HashRequest{})
 			cancel()
 			if err != nil {
-				c.mu.Lock()
+				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.State = NoNodeStatus
 				c.nodes[i].status.IsLeader = false
 				c.nodes[i].status.DBSize = 0
 				c.nodes[i].status.DBSizeTxt = ""
 				c.nodes[i].status.Hash = 0
-				c.mu.Unlock()
+				c.nodes[i].statusLock.Unlock()
 
 				errc <- err
 				return
 			}
 			status.Hash = int(hresp.Hash)
 
-			c.mu.Lock()
+			c.nodes[i].statusLock.Lock()
 			c.nodes[i].status = status
-			c.mu.Unlock()
+			c.nodes[i].statusLock.Unlock()
 
 			errc <- nil
 		}(i)
