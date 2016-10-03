@@ -104,7 +104,7 @@
         <p>
             etcd is designed for storing small chunks of mission critical data: configuration file, JSON, YAML, etc. etcd limits the size of request in 1.5MB (see <a href="https://github.com/coreos/etcd/blob/master/etcdserver/v3_server.go#L34-L38" target="_blank"
                 class="code-link">maxRequestBytes</a>). And default storage size limit is 2GB (see <a href="https://github.com/coreos/etcd/blob/master/mvcc/backend/backend.go#L46-L53" target="_blank" class="code-link">DefaultQuotaBytes</a>). These are the
-            tradeoffs that etcd makes for strong consistency. etcd might not be the option if an application requires higher availability or bigger storage size.
+            tradeoffs that etcd makes for strong consistency. etcd supports range queries on keys, with multi-versioned history. However, etcd is not a relational SQL database.
         </p>
         <br>
 
@@ -185,9 +185,9 @@
             preserves the linearizability.
         </p>
         <p>
-            etcd is not an eventually consistent database, where two different nodes can serve two different values (stale data). etcd achieves sequential consistency<sup>[3]</sup>, where ordering of commands is preserverd for all clients. Some claim
-            that Dynamo-style<sup>[4]</sup> databases (e.g., Riak and Cassandra) can also achieve strong or sequential consistency by requiring quorum for reads and writes. This is not true. Last-write-wins<sup>[5]</sup> conflict resolution is not linearizable
-            when clock skew happens. Multiple concurrent writes to the same key may arrive in different order, different nodes.
+            etcd is not an eventually consistent database, where two different nodes can serve two different values (stale data). <b>etcd achieves sequential consistency</b><sup>[3]</sup>, where ordering of commands is preserverd for all clients. Some
+            claim that Dynamo-style<sup>[4]</sup> databases (e.g., Riak and Cassandra) can also achieve strong or sequential consistency by requiring quorum for reads and writes. This is not true. Last-write-wins<sup>[5]</sup> conflict resolution is not
+            linearizable when clock skew happens. Multiple concurrent writes to the same key may arrive in different order, different nodes. Committed transactions can be lost by the later writes before the record gets replicated (i.e., not durable).
         </p>
         <p>
             All etcd writes go to leader, then fowarded to followers. Entry is <i>committed</i> when replicated in majority of cluster. Each command is applied in the same order.
@@ -301,7 +301,7 @@
         <h2><a href="/doc/{{version.etcdVersionURL}}/faq#flag-client-urls" class="faq-title">listen-client-urls vs. advertise-client-urls</a></h2>
         <p>
             <span class="code-light-snippet">listen-client-urls</span> is the list of URLs to listen on for client requests. etcd clients use this as request endpoints. <span class="code-light-snippet">advertise-client-urls</span> is the list of client
-            URLs to advertise to other members, proxies, clients of the cluster. A common mistake is setting <span class="code-light-snippet">advertise-client-urls</span> to localhost or default host. Please note that <span class="code-light-snippet">advertise-client-urls</span>            is the list of endpoitns for remote clients or traffic. And <span class="code-light-snippet">advertise-client-urls</span> is the interface that etcd server uses to listen for client requests. or example if you run etcd on a server with IP's
+            URLs to advertise to other members, proxies, clients of the cluster. A common mistake is setting <span class="code-light-snippet">advertise-client-urls</span> to localhost or default host. Please note that <span class="code-light-snippet">advertise-client-urls</span>            is the list of endpoitns for remote clients or traffic. And <span class="code-light-snippet">advertise-client-urls</span> is the interface that etcd server uses to listen for client requests. For example if you run etcd on a server with IP's
             <span class="code-light-snippet">1.2.3.4</span> and <span class="code-light-snippet">4.5.6.7</span> but only want to serve client requests through <span class="code-light-snippet">1.2.3.4:2379</span>, you'd pass <span class="code-light-snippet">--advertise-client-urls=http://1.2.3.4:2379</span>            to etcd. What is the difference of <span class="code-light-snippet">listen-client-urls</span> and <span class="code-light-snippet">advertise-client-urls</span> then? Suppose etcd is listening on <span class="code-light-snippet">127.0.0.1</span>            and a public IP <span class="code-light-snippet">1.2.3.4</span>. If it advertises <span class="code-light-snippet">127.0.0.1</span> and <span class="code-light-snippet">1.2.3.4</span> then clients that synchronize their endpoints with the
             cluster will try to connect to the cluster through <span class="code-light-snippet">127.0.0.1</span> in addition to <span class="code-light-snippet">1.2.3.4</span>.
         </p>
