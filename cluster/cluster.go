@@ -148,7 +148,7 @@ func Start(ccfg Config) (c *Cluster, err error) {
 	for i := 0; i < ccfg.Size; i++ {
 		cfg := embed.NewConfig()
 
-		cfg.Name = fmt.Sprintf("name%d", i)
+		cfg.Name = fmt.Sprintf("node-%d", i)
 		cfg.Dir = filepath.Join(ccfg.RootDir, cfg.Name+".etcd")
 		cfg.WalDir = filepath.Join(cfg.Dir, "wal")
 
