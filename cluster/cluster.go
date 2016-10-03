@@ -39,9 +39,11 @@ import (
 
 const (
 	// NoNodeStatus is node status before start or after stop.
-	NoNodeStatus       = "Stopped"
+	NoNodeStatus = "Stopped"
+	// FollowerNodeStatus is follower in Raft.
 	FollowerNodeStatus = "Follower"
-	LeaderNodeStatus   = "Leader"
+	// LeaderNodeStatus is leader in Raft.
+	LeaderNodeStatus = "Leader"
 )
 
 // NodeStatus defines node status information.
@@ -65,13 +67,17 @@ type node struct {
 // Cluster contains all embedded etcd nodes in the same cluster.
 // Configuration is meant to be auto-generated.
 type Cluster struct {
+	// opmu blocks Stop, Restart, Shutdown.
+	opmu sync.Mutex
+
 	mu             sync.RWMutex
 	rootDir        string
 	size           int
 	updateInterval time.Duration
 	nodes          []*node
-	stopc          chan struct{} // to signal updateNodeStatus
-	donec          chan struct{} // after stopping updateNodeStatus
+
+	stopc chan struct{} // to signal updateNodeStatus
+	donec chan struct{} // after stopping updateNodeStatus
 }
 
 // Config defines etcd local cluster Configuration.
@@ -204,7 +210,7 @@ func Start(ccfg Config) (c *Cluster, err error) {
 	for i := 0; i < c.size; i++ {
 		go func(i int) {
 			for {
-				cli, _, err := c.client(i, false, false, 3*time.Second)
+				cli, _, err := c.Client(i, false, false, 3*time.Second)
 				if err != nil {
 					plog.Warning(err)
 					continue
@@ -268,9 +274,7 @@ func Start(ccfg Config) (c *Cluster, err error) {
 					return
 
 				case <-time.After(time.Second):
-					if uerr := c.updateNodeStatus(); uerr != nil {
-						plog.Warning("updateNodeStatus error:", uerr)
-					}
+					c.updateNodeStatus()
 				}
 			}
 		}()
@@ -282,12 +286,15 @@ func Start(ccfg Config) (c *Cluster, err error) {
 
 // Stop stops a node.
 func (c *Cluster) Stop(i int) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.opmu.Lock()
+	defer c.opmu.Unlock()
 
 	plog.Printf("stopping %s", c.nodes[i].cfg.Name)
 
-	if c.nodes[i].status.State == NoNodeStatus {
+	c.mu.Lock()
+	state := c.nodes[i].status.State
+	c.mu.Unlock()
+	if state == NoNodeStatus {
 		plog.Warningf("%s is already stopped", c.nodes[i].cfg.Name)
 		return
 	}
@@ -304,9 +311,14 @@ func (c *Cluster) Stop(i int) {
 		time.Sleep(more)
 	}
 
+	c.mu.Lock()
 	c.nodes[i].lastUpdate = time.Now()
 	c.nodes[i].status.IsLeader = false
 	c.nodes[i].status.State = NoNodeStatus
+	c.nodes[i].status.DBSize = 0
+	c.nodes[i].status.DBSizeTxt = ""
+	c.nodes[i].status.Hash = 0
+	c.mu.Unlock()
 
 	c.nodes[i].srv.Close()
 	<-c.nodes[i].srv.Err()
@@ -316,12 +328,15 @@ func (c *Cluster) Stop(i int) {
 
 // Restart restarts a node.
 func (c *Cluster) Restart(i int) error {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.opmu.Lock()
+	defer c.opmu.Unlock()
 
 	plog.Printf("restarting %s", c.nodes[i].cfg.Name)
 
-	if c.nodes[i].status.State != NoNodeStatus {
+	c.mu.Lock()
+	state := c.nodes[i].status.State
+	c.mu.Unlock()
+	if state != NoNodeStatus {
 		plog.Warningf("%s is already started", c.nodes[i].cfg.Name)
 		return nil
 	}
@@ -352,9 +367,11 @@ func (c *Cluster) Restart(i int) error {
 
 	<-c.nodes[i].srv.Server.ReadyNotify()
 
+	c.mu.Lock()
 	c.nodes[i].lastUpdate = time.Now()
 	c.nodes[i].status.IsLeader = false
 	c.nodes[i].status.State = FollowerNodeStatus
+	c.mu.Unlock()
 
 	plog.Printf("restarted %s", c.nodes[i].cfg.Name)
 	return nil
@@ -362,12 +379,11 @@ func (c *Cluster) Restart(i int) error {
 
 // Shutdown stops all nodes and deletes all data directories.
 func (c *Cluster) Shutdown() {
-	// stopping updateNodeStatus
-	close(c.stopc)
-	<-c.donec
+	close(c.stopc) // stopping updateNodeStatus
+	<-c.donec      // wait until it returns
 
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.opmu.Lock()
+	defer c.opmu.Unlock()
 
 	plog.Println("shutting down all nodes")
 	var wg sync.WaitGroup
@@ -384,6 +400,9 @@ func (c *Cluster) Shutdown() {
 			c.nodes[i].lastUpdate = time.Now()
 			c.nodes[i].status.IsLeader = false
 			c.nodes[i].status.State = NoNodeStatus
+			c.nodes[i].status.DBSize = 0
+			c.nodes[i].status.DBSizeTxt = ""
+			c.nodes[i].status.Hash = 0
 
 			c.nodes[i].srv.Close()
 			<-c.nodes[i].srv.Err()
@@ -392,10 +411,126 @@ func (c *Cluster) Shutdown() {
 	wg.Wait()
 
 	os.RemoveAll(c.rootDir)
-	plog.Printf("deleted %s (done!)", c.rootDir)
+	plog.Printf("successfully shutdown cluster (deleted %s)", c.rootDir)
 }
 
-func (c *Cluster) allEndpoints(scheme bool) []string {
+func (c *Cluster) updateNodeStatus() {
+	plog.Println("updating node status")
+	errc := make(chan error)
+	for i := 0; i < c.size; i++ {
+		go func(i int) {
+			if c.nodes[i] == nil {
+				errc <- fmt.Errorf("c.nodes[%d] is nil", i)
+				return
+			}
+
+			if c.nodes[i].status.State == NoNodeStatus {
+				plog.Printf("%s is stopped (skipping updateNodeStatus)", c.nodes[i].cfg.Name)
+				return
+			}
+
+			cli, tlsConfig, err := c.Client(i, false, false, 3*time.Second)
+			if err != nil {
+				c.mu.Lock()
+				c.nodes[i].status.State = NoNodeStatus
+				c.nodes[i].status.IsLeader = false
+				c.nodes[i].status.DBSize = 0
+				c.nodes[i].status.DBSizeTxt = ""
+				c.nodes[i].status.Hash = 0
+				c.mu.Unlock()
+
+				errc <- err
+				return
+			}
+			defer cli.Close()
+
+			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+			resp, err := cli.Status(ctx, c.nodes[i].cfg.LCUrls[0].Host)
+			cancel()
+			if err != nil {
+				c.mu.Lock()
+				c.nodes[i].status.State = NoNodeStatus
+				c.nodes[i].status.IsLeader = false
+				c.nodes[i].status.DBSize = 0
+				c.nodes[i].status.DBSizeTxt = ""
+				c.nodes[i].status.Hash = 0
+				c.mu.Unlock()
+
+				errc <- err
+				return
+			}
+
+			isLeader, state := false, FollowerNodeStatus
+			if resp.Header.MemberId == resp.Leader {
+				isLeader, state = true, LeaderNodeStatus
+			}
+			status := NodeStatus{
+				ID:        types.ID(resp.Header.MemberId).String(),
+				IsLeader:  isLeader,
+				State:     state,
+				DBSize:    uint64(resp.DbSize),
+				DBSizeTxt: humanize.Bytes(uint64(resp.DbSize)),
+			}
+
+			conn, err := grpc.Dial(c.nodes[i].cfg.LCUrls[0].Host, grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)), grpc.WithTimeout(3*time.Second))
+			if err != nil {
+				c.mu.Lock()
+				c.nodes[i].status.State = NoNodeStatus
+				c.nodes[i].status.IsLeader = false
+				c.nodes[i].status.DBSize = 0
+				c.nodes[i].status.DBSizeTxt = ""
+				c.nodes[i].status.Hash = 0
+				c.mu.Unlock()
+
+				errc <- err
+				return
+			}
+			defer conn.Close()
+
+			mc := pb.NewMaintenanceClient(conn)
+			ctx, cancel = context.WithTimeout(context.Background(), 3*time.Second)
+			var hresp *pb.HashResponse
+			hresp, err = mc.Hash(ctx, &pb.HashRequest{})
+			cancel()
+			if err != nil {
+				c.mu.Lock()
+				c.nodes[i].status.State = NoNodeStatus
+				c.nodes[i].status.IsLeader = false
+				c.nodes[i].status.DBSize = 0
+				c.nodes[i].status.DBSizeTxt = ""
+				c.nodes[i].status.Hash = 0
+				c.mu.Unlock()
+
+				errc <- err
+				return
+			}
+			status.Hash = int(hresp.Hash)
+
+			c.mu.Lock()
+			c.nodes[i].status = status
+			c.mu.Unlock()
+
+			errc <- nil
+		}(i)
+	}
+
+	cn := 0
+	for err := range errc {
+		if err != nil {
+			plog.Warning(err)
+		}
+
+		cn++
+		if cn == c.size {
+			close(errc)
+		}
+	}
+	plog.Println("updated node status")
+	return
+}
+
+// AllEndpoints returns all endpoints of clients.
+func (c *Cluster) AllEndpoints(scheme bool) []string {
 	eps := make([]string, c.size)
 	for i := 0; i < c.size; i++ {
 		if scheme {
@@ -407,18 +542,15 @@ func (c *Cluster) allEndpoints(scheme bool) []string {
 	return eps
 }
 
-// AllEndpoints returns all endpoints of clients.
-func (c *Cluster) AllEndpoints(scheme bool) []string {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
-	return c.allEndpoints(scheme)
-}
-
-func (c *Cluster) client(i int, scheme, allEndpoints bool, dialTimeout time.Duration) (*clientv3.Client, *tls.Config, error) {
-	eps := []string{c.nodes[i].cfg.LCUrls[0].Host}
+// Client creates the client.
+func (c *Cluster) Client(i int, scheme, allEndpoints bool, dialTimeout time.Duration) (*clientv3.Client, *tls.Config, error) {
+	ep := c.nodes[i].cfg.LCUrls[0].Host
+	if scheme {
+		ep = c.nodes[i].cfg.LCUrls[0].String()
+	}
+	eps := []string{ep}
 	if allEndpoints {
-		eps = c.allEndpoints(scheme)
+		eps = c.AllEndpoints(scheme)
 	}
 	ccfg := clientv3.Config{
 		Endpoints:   eps,
@@ -445,106 +577,11 @@ func (c *Cluster) client(i int, scheme, allEndpoints bool, dialTimeout time.Dura
 	return cli, ccfg.TLS, err
 }
 
-// Client creates the client.
-func (c *Cluster) Client(i int, scheme, allEndpoints bool, dialTimeout time.Duration) (*clientv3.Client, error) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
-	cli, _, err := c.client(i, scheme, allEndpoints, dialTimeout)
-	return cli, err
-}
-
-func (c *Cluster) updateNodeStatus() error {
-	plog.Println("updating node status")
-	errc := make(chan error)
-	for i := 0; i < c.size; i++ {
-		go func(i int) {
-			if c.nodes[i] == nil {
-				errc <- fmt.Errorf("c.nodes[%d] is nil", i)
-				return
-			}
-
-			if c.nodes[i].status.State == NoNodeStatus {
-				plog.Printf("%s is stopped (skipping updateNodeStatus)", c.nodes[i].cfg.Name)
-				return
-			}
-
-			cli, tlsConfig, err := c.client(i, false, false, 3*time.Second)
-			if err != nil {
-				errc <- err
-				return
-			}
-			defer cli.Close()
-
-			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-			resp, err := cli.Status(ctx, c.nodes[i].cfg.LCUrls[0].Host)
-			cancel()
-			if err != nil {
-				errc <- err
-				return
-			}
-
-			isLeader, state := false, FollowerNodeStatus
-			if resp.Header.MemberId == resp.Leader {
-				isLeader, state = true, LeaderNodeStatus
-			}
-			status := NodeStatus{
-				ID:        types.ID(resp.Header.MemberId).String(),
-				IsLeader:  isLeader,
-				State:     state,
-				DBSize:    uint64(resp.DbSize),
-				DBSizeTxt: humanize.Bytes(uint64(resp.DbSize)),
-			}
-
-			conn, err := grpc.Dial(c.nodes[i].cfg.LCUrls[0].Host, grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)), grpc.WithTimeout(3*time.Second))
-			if err != nil {
-				errc <- err
-				return
-			}
-			defer conn.Close()
-
-			mc := pb.NewMaintenanceClient(conn)
-			ctx, cancel = context.WithTimeout(context.Background(), 3*time.Second)
-			var hresp *pb.HashResponse
-			hresp, err = mc.Hash(ctx, &pb.HashRequest{})
-			cancel()
-			if err != nil {
-				errc <- err
-				return
-			}
-			status.Hash = int(hresp.Hash)
-
-			c.nodes[i].status = status
-
-			errc <- nil
-		}(i)
-	}
-
-	cn := 0
-	for err := range errc {
-		if err != nil {
-			plog.Warning(err)
-			return err
-		}
-
-		cn++
-		if cn == c.size {
-			close(errc)
-		}
-	}
-	plog.Println("updated node status")
-
-	return nil
-}
-
 // AllNodeStatus returns all node status.
 func (c *Cluster) AllNodeStatus() []NodeStatus {
-	c.mu.RLock()
 	st := make([]NodeStatus, c.size)
 	for i := range c.nodes {
 		st[i] = c.nodes[i].status
 	}
-	c.mu.RUnlock()
-
 	return st
 }
