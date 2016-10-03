@@ -1,3 +1,142 @@
 .play-group {
     padding: 30px;
 }
+
+
+/*Reference https://www.tensorflow.org*/
+
+body {
+    font-family: 'Roboto', Helvetica, sans-serif;
+    font-weight: 300;
+    color: #000
+}
+
+section.features .feature-grid {
+    display: table;
+    border-collapse: collapse
+}
+
+section.features .feature-grid .table-row {
+    display: table-row
+}
+
+@media screen and (min-width: 960px) {
+    section.features .feature-grid .table-row:nth-child(1) .feature:nth-of-type(1) {
+        border-right: 1px solid #eceff1
+    }
+}
+
+@media screen and (min-width: 960px) {
+    section.features .feature-grid .table-row:nth-child(1) .feature:nth-of-type(2) {
+        border-right: 1px solid #eceff1
+    }
+}
+
+@media screen and (min-width: 960px) {
+    section.features .feature-grid .table-row:nth-child(2) .feature:nth-of-type(1) {
+        border-right: 1px solid #eceff1
+    }
+}
+
+@media screen and (min-width: 960px) {
+    section.features .feature-grid .table-row:nth-child(2) .feature:nth-of-type(2) {
+        border-right: 1px solid #eceff1
+    }
+}
+
+section.features .feature-grid .feature {
+    padding: 10px 5px;
+    text-align: center;
+    vertical-align: top
+}
+
+@media screen and (min-width: 960px) {
+    section.features .feature-grid .feature {
+        display: table-cell;
+        width: 33.33%;
+        padding: 45px
+    }
+}
+
+section.features .feature-grid .feature h3 {
+    margin-bottom: 5px
+}
+
+section.features .feature-grid .feature p {
+    font-size: .875rem;
+    line-height: 1.5rem;
+    color: #000
+}
+
+.inner {
+    max-width: 1170px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 5px
+}
+
+.inner::after {
+    clear: both;
+    content: "";
+    display: table
+}
+
+@media screen and (min-width: 768px) {
+    .inner {
+        padding: 0 10px
+    }
+}
+
+section {
+    padding: 10px 0
+}
+
+@media screen and (min-width: 768px) {
+    section {
+        padding: 10px 0
+    }
+}
+
+@media screen and (min-width: 768px) {
+    .block.half {
+        margin-top: 0
+    }
+}
+
+@media screen and (min-width: 768px) {
+    .block-copy.half {
+        float: left;
+        display: block;
+        margin-right: 4.34783%;
+        width: 47.82609%
+    }
+    .block-copy.half:last-child {
+        margin-right: 0
+    }
+}
+
+.block-copy p {
+    margin-top: 15px;
+    line-height: 1.75rem;
+    color: #000
+}
+
+@media screen and (min-width: 768px) {
+    section.more-about .inner {
+        display: table;
+        max-width: 1100px
+    }
+}
+
+@media screen and (min-width: 768px) {
+    section.more-about .inner .block-copy {
+        float: left;
+        display: block;
+        margin-right: 4.34783%;
+        width: 47.82609%;
+        padding-right: 35px
+    }
+    section.more-about .inner .block-copy:last-child {
+        margin-right: 0
+    }
+}
