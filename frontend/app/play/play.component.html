@@ -3,41 +3,41 @@
     <div class="inner">
         <div class="block block-copy half">
             <svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="border: 0px solid black" width="500" height="400">
-				<circle id="ring" cx="270" cy="210" r="110" style="fill: #F5F5F5"></circle>
+				<circle id="ring" cx="230" cy="210" r="110" style="fill: #F5F5F5"></circle>
 				<g id="servers">
-					<g id="node-1" style="fill: #B3E5FC" tabindex="0" title="node-1">
-						<text x="245" y="50">node-1</text>
-						<text x="250" y="67" font-size="11" id="node-1-id">(Hash: 0)</text>
-						<a>
-							<circle cx="270" cy="100" r="25"></circle>
+					<g id="node1" style="fill: #B3E5FC" tabindex="0" title="node1">
+						<text x="213" y="50" font-size="13">node1</text>
+						<text x="210" y="67" font-size="11" id="node1-id">(Hash: 0)</text>
+						<a (click)="selectTab(2)">
+							<circle cx="230" cy="100" r="25"></circle>
 						</a>
 					</g>
-					<g id="node-2" style="fill: #B3E5FC" tabindex="0" title="node-2">
-						<text x="395" y="160">node-2</text>
-						<text x="400" y="177" font-size="11" id="node-2-id">(Hash: 0)</text>
-						<a>
-							<circle cx="370" cy="180" r="25"></circle>
+					<g id="node2" style="fill: #B3E5FC" tabindex="0" title="node2">
+						<text x="355" y="160" font-size="13">node2</text>
+						<text x="360" y="177" font-size="11" id="node2-id">(Hash: 0)</text>
+						<a (click)="selectTab(3)">
+							<circle cx="330" cy="180" r="25"></circle>
 						</a>
 					</g>
-					<g id="node-3" style="fill: #B3E5FC" tabindex="0" title="node-3">
-						<text x="360" y="320">node-3</text>
-						<text x="342" y="337" font-size="11" id="node-3-id">(Hash: 0)</text>
-						<a>
-							<circle cx="335" cy="295" r="25"></circle>
+					<g id="node3" style="fill: #B3E5FC" tabindex="0" title="node3">
+						<text x="320" y="320" font-size="13">node3</text>
+						<text x="302" y="337" font-size="11" id="node3-id">(Hash: 0)</text>
+						<a (click)="selectTab(4)">
+							<circle cx="295" cy="295" r="25"></circle>
 						</a>
 					</g>
-					<g id="node-4" style="fill: #B3E5FC" tabindex="0" title="node-4">
-						<text x="120" y="320">node-4</text>
-						<text x="120" y="337" font-size="11" id="node-4-id">(Hash: 0)</text>
-						<a>
-							<circle cx="200" cy="295" r="25"></circle>
+					<g id="node4" style="fill: #B3E5FC" tabindex="0" title="node4">
+						<text x="80" y="320" font-size="13">node4</text>
+						<text x="80" y="337" font-size="11" id="node4-id">(Hash: 0)</text>
+						<a (click)="selectTab(5)">
+							<circle cx="160" cy="295" r="25"></circle>
 						</a>
 					</g>
-					<g id="node-5" style="fill: #B3E5FC" tabindex="0" title="node-5">
-						<text x="82" y="173">node-5</text>
-						<text x="87" y="150" font-size="11" id="node-5-id">(Hash: 0)</text>
-						<a>
-							<circle cx="165" cy="180" r="25"></circle>
+					<g id="node5" style="fill: #B3E5FC" tabindex="0" title="node5">
+						<text x="42" y="173" font-size="13">node5</text>
+						<text x="47" y="150" font-size="11" id="node5-id">(Hash: 0)</text>
+						<a (click)="selectTab(6)">
+							<circle cx="125" cy="180" r="25"></circle>
 						</a>
 					</g>
 				</g>
@@ -45,24 +45,52 @@
         </div>
 
         <div class="block block-copy half">
-            <md-tab-group>
+            <md-tab-group [(selectedIndex)]="selectedTab">
 
                 <md-tab>
-                    <template md-tab-label>Write</template>
+                    <template md-tab-label><b>Write</b></template>
                     <template md-tab-content>
-						<p>Hello World! Write!</p>
-
-						<!--<md-dialog #alert>
-							Clicking the button will close this dialog
-							<md-dialog-actions ok="Got It"></md-dialog-actions>
-						</md-dialog>
-						<button md-button (click)="alert.show()">Open Dialog</button>-->
-
+						<p>Hello World! Read!</p>
 					</template>
                 </md-tab>
 
                 <md-tab>
-                    <template md-tab-label>Read</template>
+                    <template md-tab-label><b>Read</b></template>
+                    <template md-tab-content>
+						<p>Hello World! Read!</p>
+					</template>
+                </md-tab>
+
+                <md-tab>
+                    <template md-tab-label>node1</template>
+                    <template md-tab-content>
+						<p>Hello World! Write!</p>
+					</template>
+                </md-tab>
+
+                <md-tab>
+                    <template md-tab-label>node2</template>
+                    <template md-tab-content>
+						<p>Hello World! Read!</p>
+					</template>
+                </md-tab>
+
+                <md-tab>
+                    <template md-tab-label>node3</template>
+                    <template md-tab-content>
+						<p>Hello World! Write!</p>
+					</template>
+                </md-tab>
+
+                <md-tab>
+                    <template md-tab-label>node4</template>
+                    <template md-tab-content>
+						<p>Hello World! Read!</p>
+					</template>
+                </md-tab>
+
+                <md-tab>
+                    <template md-tab-label>node5</template>
                     <template md-tab-content>
 						<p>Hello World! Read!</p>
 					</template>
@@ -74,7 +102,7 @@
 
     <h3 id="log">Log</h3>
     <div id="log-box" class="log-box">
-        <div id="log-output">
+        <div id="log-output ">
         </div>
     </div>
 </div>

@@ -2,11 +2,6 @@
     padding: 30px;
 }
 
-.sub-header {
-    padding-bottom: 10px;
-    border-bottom: 1px solid #eee;
-}
-
 .log-box {
     padding-top: 10px;
     padding-left: 5px;
@@ -21,6 +16,12 @@
     font-size: 13px;
     font-style: normal;
     font-variant: normal;
+}
+
+/deep/ .md-tab-label {
+    text-align: center;
+    /*decrease width of md-tab labels*/
+    min-width: 20px !important;
 }
 
 
