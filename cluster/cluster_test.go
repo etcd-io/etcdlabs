@@ -17,6 +17,7 @@ package cluster
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"sync"
@@ -107,37 +108,13 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 	basePort += 10
 	bmu.Unlock()
 
-	cl, err := Start(cfg)
+	c, err := Start(cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer cl.Shutdown()
+	defer c.Shutdown()
 
-	// wait until cluster is ready
-	time.Sleep(time.Second)
-
-	ccfg := clientv3.Config{
-		Endpoints:   cl.AllEndpoints(scheme),
-		DialTimeout: 3 * time.Second,
-	}
-
-	switch {
-	case !cfg.ClientTLSInfo.Empty():
-		tlsConfig, err := cfg.ClientTLSInfo.ClientConfig()
-		if err != nil {
-			t.Fatal(err)
-		}
-		ccfg.TLS = tlsConfig
-
-	case !cl.nodes[0].cfg.ClientTLSInfo.Empty():
-		tlsConfig, err := cl.nodes[0].cfg.ClientTLSInfo.ClientConfig()
-		if err != nil {
-			t.Fatal(err)
-		}
-		ccfg.TLS = tlsConfig
-	}
-
-	cli, err := clientv3.New(ccfg)
+	cli, err := c.Client(0, scheme, true, 3*time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -152,16 +129,16 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 	time.Sleep(time.Second)
 
 	if stopRecover {
-		cl.Stop(0)
+		c.Stop(0)
 		time.Sleep(time.Second)
 
-		if err = cl.Restart(0); err != nil {
+		if err = c.Restart(0); err != nil {
 			t.Fatal(err)
 		}
 		time.Sleep(time.Second)
 	}
 
-	cli, err = clientv3.New(ccfg)
+	cli, err = c.Client(0, scheme, true, 3*time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -179,5 +156,11 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 	}
 	if !bytes.Equal(resp.Kvs[0].Value, []byte("bar")) {
 		t.Fatalf("value expected 'bar', got %q", resp.Kvs[0].Key)
+	}
+
+	time.Sleep(time.Second)
+
+	for i, st := range c.AllNodeStatus() {
+		fmt.Printf("%s: %+v\n", c.nodes[i].cfg.Name, st)
 	}
 }
