@@ -207,9 +207,21 @@ type ServerStatus struct {
 func serverStatusHandler(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
 	switch req.Method {
 	case "GET":
-		globalClusterMu.RLock()
-		statuses := globalCluster.AllNodeStatus()
-		globalClusterMu.RUnlock()
+		var statuses []cluster.NodeStatus
+
+		if globalCluster != nil {
+			globalClusterMu.RLock()
+			statuses = globalCluster.AllNodeStatus()
+			globalClusterMu.RUnlock()
+		} else {
+			statuses = make([]cluster.NodeStatus, 5)
+			for i := range statuses {
+				statuses[i] = cluster.NodeStatus{
+					Name:  fmt.Sprintf("name%d", i),
+					State: cluster.NoNodeStatus,
+				}
+			}
+		}
 
 		ss := ServerStatus{
 			ServerUptime: humanize.Time(startTime),
