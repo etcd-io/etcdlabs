@@ -1,6 +1,7 @@
 import {NgModule, ApplicationRef} from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
 import {FormsModule}   from '@angular/forms';
+import {HttpModule, JsonpModule}    from '@angular/http';
 
 import {MdButtonToggleModule} from '@angular2-material/button-toggle/button-toggle';
 import {MdButtonModule} from '@angular2-material/button/button';
@@ -32,6 +33,8 @@ import {routing, routedComponents} from './app.routing';
   imports: [
     BrowserModule,
     FormsModule,
+    HttpModule,
+    JsonpModule,
     MdButtonModule.forRoot(),
     MdButtonToggleModule.forRoot(),
     MdCardModule.forRoot(),
