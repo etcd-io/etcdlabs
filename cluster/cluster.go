@@ -62,10 +62,10 @@ type NodeStatus struct {
 
 // node contains *embed.Etcd and its state.
 type node struct {
-	srv                *embed.Etcd
-	cfg                *embed.Config
-	stoppedOrStartedAt time.Time
-	status             NodeStatus
+	srv              *embed.Etcd
+	cfg              *embed.Config
+	stoppedStartedAt time.Time
+	status           NodeStatus
 }
 
 // Cluster contains all embedded etcd nodes in the same cluster.
@@ -74,11 +74,11 @@ type Cluster struct {
 	// opmu blocks Stop, Restart, Shutdown.
 	opmu sync.Mutex
 
-	mu             sync.RWMutex
-	rootDir        string
-	size           int
-	updateInterval time.Duration
-	nodes          []*node
+	mu                sync.RWMutex
+	rootDir           string
+	size              int
+	stopStartInterval time.Duration
+	nodes             []*node
 
 	stopc chan struct{} // to signal updateNodeStatus
 	donec chan struct{} // after stopping updateNodeStatus
@@ -95,28 +95,28 @@ type Config struct {
 	PeerTLSInfo   transport.TLSInfo
 	PeerAutoTLS   bool
 
-	// UpdateInterval is the minimum duration to allow updates on nodes.
+	// StopStartInterval is the minimum duration to allow updates on nodes.
 	// This is to rate limit the nodes stop and restart operations.
-	UpdateInterval time.Duration
+	StopStartInterval time.Duration
 }
 
-var minUpdateInterval = time.Second
+var minStopStartInterval = time.Second
 
 // Start starts embedded etcd cluster.
 func Start(ccfg Config) (c *Cluster, err error) {
 	plog.Printf("starting %d nodes (root directory %s, root port :%d)", ccfg.Size, ccfg.RootDir, ccfg.RootPort)
 
-	if ccfg.UpdateInterval < minUpdateInterval {
-		ccfg.UpdateInterval = minUpdateInterval
+	if ccfg.StopStartInterval < minStopStartInterval {
+		ccfg.StopStartInterval = minStopStartInterval
 	}
 
 	c = &Cluster{
-		rootDir:        ccfg.RootDir,
-		size:           ccfg.Size,
-		updateInterval: ccfg.UpdateInterval,
-		nodes:          make([]*node, ccfg.Size),
-		stopc:          make(chan struct{}),
-		donec:          make(chan struct{}),
+		rootDir:           ccfg.RootDir,
+		size:              ccfg.Size,
+		stopStartInterval: ccfg.StopStartInterval,
+		nodes:             make([]*node, ccfg.Size),
+		stopc:             make(chan struct{}),
+		donec:             make(chan struct{}),
 	}
 
 	if !existFileOrDir(ccfg.RootDir) {
@@ -198,7 +198,7 @@ func Start(ccfg Config) (c *Cluster, err error) {
 
 			<-c.nodes[i].srv.Server.ReadyNotify()
 
-			c.nodes[i].stoppedOrStartedAt = time.Now()
+			c.nodes[i].stoppedStartedAt = time.Now()
 			c.nodes[i].status.State = FollowerNodeStatus
 			c.nodes[i].status.IsLeader = false
 
@@ -304,19 +304,19 @@ func (c *Cluster) Stop(i int) {
 	c.mu.Unlock()
 
 	for {
-		it := time.Since(c.nodes[i].stoppedOrStartedAt)
-		if it > c.updateInterval {
+		it := time.Since(c.nodes[i].stoppedStartedAt)
+		if it > c.stopStartInterval {
 			break
 		}
 
-		more := c.updateInterval - it + 100*time.Millisecond
+		more := c.stopStartInterval - it + 100*time.Millisecond
 		plog.Printf("rate-limiting stopping %s (sleeping %v)", c.nodes[i].cfg.Name, more)
 
 		time.Sleep(more)
 	}
 
 	c.mu.Lock()
-	c.nodes[i].stoppedOrStartedAt = time.Now()
+	c.nodes[i].stoppedStartedAt = time.Now()
 	c.nodes[i].status.IsLeader = false
 	c.nodes[i].status.State = NoNodeStatus
 	c.nodes[i].status.DBSize = 0
@@ -346,12 +346,12 @@ func (c *Cluster) Restart(i int) error {
 	}
 
 	for {
-		it := time.Since(c.nodes[i].stoppedOrStartedAt)
-		if it > c.updateInterval {
+		it := time.Since(c.nodes[i].stoppedStartedAt)
+		if it > c.stopStartInterval {
 			break
 		}
 
-		more := c.updateInterval - it + 100*time.Millisecond
+		more := c.stopStartInterval - it + 100*time.Millisecond
 		plog.Printf("rate-limiting restarting %s (sleeping %v)", c.nodes[i].cfg.Name, more)
 
 		time.Sleep(more)
@@ -372,7 +372,7 @@ func (c *Cluster) Restart(i int) error {
 	<-c.nodes[i].srv.Server.ReadyNotify()
 
 	c.mu.Lock()
-	c.nodes[i].stoppedOrStartedAt = time.Now()
+	c.nodes[i].stoppedStartedAt = time.Now()
 	c.nodes[i].status.IsLeader = false
 	c.nodes[i].status.State = FollowerNodeStatus
 	c.mu.Unlock()
@@ -401,7 +401,7 @@ func (c *Cluster) Shutdown() {
 				return
 			}
 
-			c.nodes[i].stoppedOrStartedAt = time.Now()
+			c.nodes[i].stoppedStartedAt = time.Now()
 			c.nodes[i].status.IsLeader = false
 			c.nodes[i].status.State = NoNodeStatus
 			c.nodes[i].status.DBSize = 0
