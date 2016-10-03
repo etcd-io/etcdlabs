@@ -2,6 +2,27 @@
     padding: 30px;
 }
 
+.sub-header {
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.log-box {
+    padding-top: 10px;
+    padding-left: 5px;
+    border: 1px solid black;
+    height: 500px;
+    overflow: scroll;
+}
+
+#log-box {
+    font-family: 'Roboto', Helvetica, sans-serif;
+    font-weight: 300;
+    font-size: 13px;
+    font-style: normal;
+    font-variant: normal;
+}
+
 
 /*Reference https://www.tensorflow.org*/
 
