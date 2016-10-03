@@ -154,6 +154,11 @@ func StartServer(port int) (*Server, error) {
 	return srv, nil
 }
 
+// StopNotify returns receive-only stop channel to notify the server has stopped.
+func (srv *Server) StopNotify() <-chan struct{} {
+	return srv.stopc
+}
+
 // Stop stops the server. Useful for testing.
 func (srv *Server) Stop() {
 	plog.Warningf("stopping server %s", srv.addrURL.String())

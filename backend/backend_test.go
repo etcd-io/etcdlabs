@@ -43,7 +43,6 @@ func Test_StartServer(t *testing.T) {
 
 	// wait until first server status update
 	time.Sleep(2 * time.Second)
-
 	{
 		resp, err := http.Get(srv.addrURL.String() + "/server-status")
 		if err != nil {
