@@ -93,14 +93,21 @@ type Server struct {
 	mu         sync.RWMutex
 	addr       string
 	httpServer *http.Server
+
+	rootCancel func()
 	stopc      chan struct{}
 	donec      chan struct{}
 }
 
 // StartServer starts a backend webserver with stoppable listener.
 func StartServer(port int) (*Server, error) {
-	rootContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	stopc := make(chan struct{})
+	ln, err := NewListenerStoppable("http", fmt.Sprintf("localhost:%d", port), nil, stopc)
+	if err != nil {
+		return nil, err
+	}
+
+	rootContext, rootCancel := context.WithTimeout(context.Background(), 10*time.Second)
 
 	mainRouter := http.NewServeMux()
 	mainRouter.Handle("/server-status", &ContextAdapter{
@@ -108,17 +115,13 @@ func StartServer(port int) (*Server, error) {
 		handler: ContextHandlerFunc(serverStatusHandler),
 	})
 
-	stopc := make(chan struct{})
-	ln, err := NewListenerStoppable("http", fmt.Sprintf("localhost:%d", port), nil, stopc)
-	if err != nil {
-		return nil, err
-	}
-
 	addr := fmt.Sprintf("http://localhost:%d", port)
 	plog.Infof("started server %s", addr)
 	srv := &Server{
 		addr:       addr,
 		httpServer: &http.Server{Addr: addr, Handler: mainRouter},
+
+		rootCancel: rootCancel,
 		stopc:      stopc,
 		donec:      make(chan struct{}),
 	}
@@ -129,6 +132,7 @@ func StartServer(port int) (*Server, error) {
 				plog.Errorf("etcd-play error (%v)", err)
 				os.Exit(0)
 			}
+			srv.rootCancel()
 			close(srv.donec)
 		}()
 
@@ -136,7 +140,6 @@ func StartServer(port int) (*Server, error) {
 			plog.Panic(err)
 		}
 	}()
-
 	return srv, nil
 }
 
