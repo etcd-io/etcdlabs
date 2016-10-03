@@ -328,6 +328,7 @@ func (c *Cluster) Stop(i int) {
 	c.nodes[i].status.Hash = 0
 	c.nodes[i].statusLock.Unlock()
 
+	c.nodes[i].srv.Server.HardStop()
 	c.nodes[i].srv.Close()
 	<-c.nodes[i].srv.Err()
 
@@ -412,6 +413,7 @@ func (c *Cluster) Shutdown() {
 			c.nodes[i].status.DBSizeTxt = ""
 			c.nodes[i].status.Hash = 0
 
+			c.nodes[i].srv.Server.HardStop()
 			c.nodes[i].srv.Close()
 			<-c.nodes[i].srv.Err()
 		}(i)
