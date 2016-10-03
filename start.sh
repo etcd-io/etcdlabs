@@ -14,4 +14,3 @@ sleep 3s
 printf "\n"
 echo "starting frontend"
 npm start
-

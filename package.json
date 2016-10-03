@@ -4,7 +4,7 @@
     "license": "MIT",
     "angular-cli": {},
     "scripts": {
-        "start": "ng serve --host 0.0.0.0",
+        "start": "ng serve --host 0.0.0.0 --proxy-config proxy.config.json",
         "lint": "tslint \"frontend/**/*.ts\"",
         "test": "ng test",
         "pree2e": "webdriver-manager update",

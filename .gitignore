@@ -26,3 +26,7 @@ testem.log
 
 #System Files
 .DS_Store
+
+# log file
+etcdlabs.log
+
