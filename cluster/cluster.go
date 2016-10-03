@@ -148,7 +148,7 @@ func Start(ccfg Config) (c *Cluster, err error) {
 	for i := 0; i < ccfg.Size; i++ {
 		cfg := embed.NewConfig()
 
-		cfg.Name = fmt.Sprintf("node-%d", i)
+		cfg.Name = fmt.Sprintf("node-%d", i+1)
 		cfg.Dir = filepath.Join(ccfg.RootDir, cfg.Name+".etcd")
 		cfg.WalDir = filepath.Join(cfg.Dir, "wal")
 
@@ -537,6 +537,15 @@ func (c *Cluster) updateNodeStatus() {
 	}
 	plog.Println("updated node status")
 	return
+}
+
+// AllConfigs returns all configurations.
+func (c *Cluster) AllConfigs() []embed.Config {
+	cs := make([]embed.Config, c.size)
+	for i := range c.nodes {
+		cs[i] = *c.nodes[i].cfg
+	}
+	return cs
 }
 
 // AllEndpoints returns all endpoints of clients.
