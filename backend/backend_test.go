@@ -21,6 +21,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/coreos/pkg/capnslog"
 )
 
 var (
@@ -43,14 +45,30 @@ func Test_StartServer(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
 	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		resp.Body.Close()
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	fmt.Println("'/start' response:", string(b))
+
+	// wait until first server status update
+	time.Sleep(2 * time.Second)
+
+	resp, err = http.Get(srv.addr + "/server-status")
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println(string(b))
+	b, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		resp.Body.Close()
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	fmt.Println("'/server-status' response:", string(b))
 
-	time.Sleep(time.Second)
-
+	capnslog.SetGlobalLogLevel(capnslog.CRITICAL)
+	defer capnslog.SetGlobalLogLevel(testLogLevel)
 	srv.Stop()
 }

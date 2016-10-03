@@ -14,15 +14,10 @@
 
 package backend
 
-import (
-	"sync"
+import "github.com/coreos/pkg/capnslog"
 
-	"github.com/coreos/etcdlabs/cluster"
-)
+var testLogLevel = capnslog.INFO
 
-type cache struct {
-	mu      sync.RWMutex
-	cluster *cluster.Cluster
+func init() {
+	capnslog.SetGlobalLogLevel(testLogLevel)
 }
-
-var globalCache = &cache{}

@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/coreos/etcdlabs/cluster"
+	humanize "github.com/dustin/go-humanize"
 )
 
 // ContextHandler handles ServeHTTP with context.
@@ -84,7 +85,7 @@ func StartServer(port int) (*Server, error) {
 	}
 
 	addr := fmt.Sprintf("http://localhost:%d", port)
-	plog.Infof("started serving %q", addr)
+	plog.Infof("started server %s", addr)
 	srv := &Server{
 		addr:       addr,
 		httpServer: &http.Server{Addr: addr, Handler: mainRouter},
@@ -98,7 +99,6 @@ func StartServer(port int) (*Server, error) {
 				plog.Errorf("etcd-play error (%v)", err)
 				os.Exit(0)
 			}
-
 			close(srv.donec)
 		}()
 
@@ -110,52 +110,28 @@ func StartServer(port int) (*Server, error) {
 	return srv, nil
 }
 
-// Stop stops the server. Useful for testing.
-func (srv *Server) Stop() {
-	srv.mu.Lock()
-
-	if srv.httpServer == nil {
-		srv.mu.Unlock()
-		return
-	}
-
-	plog.Warningf("stopping %s", srv.addr)
-	close(srv.stopc)
-	<-srv.donec
-	srv.httpServer = nil
-	plog.Warningf("stopped %s", srv.addr)
-
-	srv.mu.Unlock()
-
-	globalCache.mu.Lock()
-	plog.Warning("stopping cluster")
-	if globalCache.cluster != nil {
-		globalCache.cluster.Shutdown()
-	}
-	globalCache.cluster = nil
-	plog.Warning("stopped cluster %s")
-	globalCache.mu.Unlock()
-}
-
 var (
-	muRootPort sync.Mutex
+	globalClusterMu sync.RWMutex
+	globalCluster   *cluster.Cluster
+
+	rootPortMu sync.Mutex
 	rootPort   = 2379
 )
 
 func startHandler(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
 	switch req.Method {
 	case "GET":
-		globalCache.mu.Lock()
-		defer globalCache.mu.Unlock()
+		globalClusterMu.Lock()
+		defer globalClusterMu.Unlock()
 
-		if globalCache.cluster != nil {
+		if globalCluster != nil {
 			return nil
 		}
 
-		muRootPort.Lock()
+		rootPortMu.Lock()
 		port := rootPort
 		rootPort += 20
-		muRootPort.Unlock()
+		rootPortMu.Unlock()
 
 		dir, err := ioutil.TempDir(os.TempDir(), "backend-cluster")
 		if err != nil {
@@ -171,7 +147,7 @@ func startHandler(ctx context.Context, w http.ResponseWriter, req *http.Request)
 		if err != nil {
 			return err
 		}
-		globalCache.cluster = cl
+		globalCluster = cl
 
 		resp := struct {
 			Message string
@@ -189,16 +165,59 @@ func startHandler(ctx context.Context, w http.ResponseWriter, req *http.Request)
 	return nil
 }
 
+// Stop stops the server. Useful for testing.
+func (srv *Server) Stop() {
+	srv.mu.Lock()
+
+	if srv.httpServer == nil {
+		srv.mu.Unlock()
+		return
+	}
+
+	plog.Warningf("stopping server %s", srv.addr)
+	close(srv.stopc)
+	<-srv.donec
+	srv.httpServer = nil
+	srv.mu.Unlock()
+	plog.Warningf("stopped server %s", srv.addr)
+
+	plog.Warning("stopping cluster")
+	globalClusterMu.Lock()
+	if globalCluster != nil {
+		globalCluster.Shutdown()
+		globalCluster = nil
+	}
+	globalClusterMu.Unlock()
+	plog.Warning("stopped cluster")
+}
+
+var (
+	uptimeScale = time.Second
+	startTime   = time.Now().Round(uptimeScale)
+)
+
+// ServerStatus defines server status.
+type ServerStatus struct {
+	// ServerUptime is the duration since last deploy.
+	ServerUptime string `json:"server-uptime"`
+	// NodeStatuses contains all node statuses.
+	NodeStatuses []cluster.NodeStatus `json:"node-statuses"`
+}
+
 func serverStatusHandler(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
 	switch req.Method {
 	case "GET":
-		globalCache.mu.RLock()
-		defer globalCache.mu.RUnlock()
+		globalClusterMu.RLock()
+		statuses := globalCluster.AllNodeStatus()
+		globalClusterMu.RUnlock()
 
-		st := globalCache.cluster.AllNodeStatus()
-		fmt.Println(st)
-
-		// TODO: serve NodeStatus from globalCache.cluster
+		ss := ServerStatus{
+			ServerUptime: humanize.Time(startTime),
+			NodeStatuses: statuses,
+		}
+		if err := json.NewEncoder(w).Encode(ss); err != nil {
+			return err
+		}
 
 	default:
 		http.Error(w, "Method Not Allowed", 405)
