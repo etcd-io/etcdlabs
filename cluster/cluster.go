@@ -62,10 +62,10 @@ type NodeStatus struct {
 
 // node contains *embed.Etcd and its state.
 type node struct {
-	srv        *embed.Etcd
-	cfg        *embed.Config
-	lastUpdate time.Time
-	status     NodeStatus
+	srv                *embed.Etcd
+	cfg                *embed.Config
+	stoppedOrStartedAt time.Time
+	status             NodeStatus
 }
 
 // Cluster contains all embedded etcd nodes in the same cluster.
@@ -198,7 +198,7 @@ func Start(ccfg Config) (c *Cluster, err error) {
 
 			<-c.nodes[i].srv.Server.ReadyNotify()
 
-			c.nodes[i].lastUpdate = time.Now()
+			c.nodes[i].stoppedOrStartedAt = time.Now()
 			c.nodes[i].status.State = FollowerNodeStatus
 			c.nodes[i].status.IsLeader = false
 
@@ -304,7 +304,7 @@ func (c *Cluster) Stop(i int) {
 	c.mu.Unlock()
 
 	for {
-		it := time.Since(c.nodes[i].lastUpdate)
+		it := time.Since(c.nodes[i].stoppedOrStartedAt)
 		if it > c.updateInterval {
 			break
 		}
@@ -316,7 +316,7 @@ func (c *Cluster) Stop(i int) {
 	}
 
 	c.mu.Lock()
-	c.nodes[i].lastUpdate = time.Now()
+	c.nodes[i].stoppedOrStartedAt = time.Now()
 	c.nodes[i].status.IsLeader = false
 	c.nodes[i].status.State = NoNodeStatus
 	c.nodes[i].status.DBSize = 0
@@ -346,7 +346,7 @@ func (c *Cluster) Restart(i int) error {
 	}
 
 	for {
-		it := time.Since(c.nodes[i].lastUpdate)
+		it := time.Since(c.nodes[i].stoppedOrStartedAt)
 		if it > c.updateInterval {
 			break
 		}
@@ -372,7 +372,7 @@ func (c *Cluster) Restart(i int) error {
 	<-c.nodes[i].srv.Server.ReadyNotify()
 
 	c.mu.Lock()
-	c.nodes[i].lastUpdate = time.Now()
+	c.nodes[i].stoppedOrStartedAt = time.Now()
 	c.nodes[i].status.IsLeader = false
 	c.nodes[i].status.State = FollowerNodeStatus
 	c.mu.Unlock()
@@ -401,7 +401,7 @@ func (c *Cluster) Shutdown() {
 				return
 			}
 
-			c.nodes[i].lastUpdate = time.Now()
+			c.nodes[i].stoppedOrStartedAt = time.Now()
 			c.nodes[i].status.IsLeader = false
 			c.nodes[i].status.State = NoNodeStatus
 			c.nodes[i].status.DBSize = 0
