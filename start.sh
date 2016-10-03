@@ -7,7 +7,7 @@ go install -v
 
 printf "\n"
 echo "running backend etcdlabs"
-nohup etcdlabs >> ./etcdlabs.log 2>&1 &
+nohup etcdlabs >> $HOME/etcdlabs.log 2>&1 &
 
 sleep 3s
 
