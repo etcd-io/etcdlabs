@@ -28,6 +28,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcdlabs/cluster"
 	humanize "github.com/dustin/go-humanize"
 )
@@ -114,12 +115,10 @@ func StartServer(port int) (*Server, error) {
 	rootContext, rootCancel := context.WithTimeout(context.Background(), 10*time.Second)
 
 	mainRouter := http.NewServeMux()
-
 	mainRouter.Handle("/server-status", &ContextAdapter{
 		ctx:     rootContext,
 		handler: ContextHandlerFunc(serverStatusHandler),
 	})
-
 	for _, cfg := range globalCluster.AllConfigs() {
 		ph := fmt.Sprintf("/client/%s", cfg.Name)
 		mainRouter.Handle(ph, &ContextAdapter{
@@ -129,11 +128,10 @@ func StartServer(port int) (*Server, error) {
 	}
 
 	addrURL := url.URL{Scheme: "http", Host: fmt.Sprintf("localhost:%d", port)}
-	plog.Infof("started server %s", addrURL)
+	plog.Infof("started server %s", addrURL.String())
 	srv := &Server{
 		addrURL:    addrURL,
 		httpServer: &http.Server{Addr: addrURL.String(), Handler: mainRouter},
-
 		rootCancel: rootCancel,
 		stopc:      stopc,
 		donec:      make(chan struct{}),
@@ -158,7 +156,7 @@ func StartServer(port int) (*Server, error) {
 
 // Stop stops the server. Useful for testing.
 func (srv *Server) Stop() {
-	plog.Warningf("stopping server %s", srv.addrURL)
+	plog.Warningf("stopping server %s", srv.addrURL.String())
 	srv.mu.Lock()
 	if srv.httpServer == nil {
 		srv.mu.Unlock()
@@ -168,7 +166,7 @@ func (srv *Server) Stop() {
 	<-srv.donec
 	srv.httpServer = nil
 	srv.mu.Unlock()
-	plog.Warningf("stopped server %s", srv.addrURL)
+	plog.Warningf("stopped server %s", srv.addrURL.String())
 
 	plog.Warning("stopping cluster")
 	globalCluster.Shutdown()
@@ -207,20 +205,17 @@ func serverStatusHandler(ctx context.Context, w http.ResponseWriter, req *http.R
 	return nil
 }
 
-// ClientPutResponse translates client's PUT response in frontend-friendly format.
-type ClientPutResponse struct {
-	Success bool   `json:"success"`
-	Error   string `json:"error"`
-	Key     string `json:"key"`
-	Value   string `json:"value"`
+// KeyValue defines key-value pair.
+type KeyValue struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
 }
 
-// ClientGetResponse translates client's GET response in frontend-friendly format.
-type ClientGetResponse struct {
-	Success bool     `json:"success"`
-	Error   string   `json:"error"`
-	Key     string   `json:"key"`
-	Values  []string `json:"values"`
+// ClientResponse translates client's GET response in frontend-friendly format.
+type ClientResponse struct {
+	Success   bool       `json:"success"`
+	Error     string     `json:"error"`
+	KeyValues []KeyValue `json:"kvs"`
 }
 
 func clientHandler(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
@@ -236,44 +231,47 @@ func clientHandler(ctx context.Context, w http.ResponseWriter, req *http.Request
 		return err
 	}
 
+	// TODO: parse HTML form
+	resp := ClientResponse{
+		Success: true,
+		Error:   "",
+	}
+
 	switch req.Method {
-	case "PUT":
-		// TODO: parse HTML form
-		resp := ClientPutResponse{
-			Success: true,
-			Error:   "",
-			Key:     "foo",
-			Value:   "bar",
+	case "POST": // stress
+		resp.KeyValues = multiRandKeyValues(5, 3, "foo", "bar")
+		for _, kv := range resp.KeyValues {
+			if _, err := cli.Put(ctx, kv.Key, kv.Value); err != nil {
+				resp.Success = false
+				resp.Error = err.Error()
+				break
+			}
 		}
-
-		if _, err := cli.Put(ctx, "foo", "bar"); err != nil {
-			resp.Success = false
-			resp.Error = err.Error()
-		}
-
 		if err := json.NewEncoder(w).Encode(resp); err != nil {
 			return err
 		}
 
-	case "GET":
-		// TODO: parse HTML form
-		resp := ClientGetResponse{
-			Success: true,
-			Error:   "",
-			Key:     "foo",
+	case "PUT": // write
+		resp.KeyValues = []KeyValue{{Key: "foo", Value: "bar"}}
+		if _, err := cli.Put(ctx, "foo", "bar"); err != nil {
+			resp.Success = false
+			resp.Error = err.Error()
+		}
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			return err
 		}
 
-		if gresp, err := cli.Get(ctx, "foo"); err != nil {
+	case "GET": // read
+		if gresp, err := cli.Get(ctx, "foo", clientv3.WithPrefix()); err != nil {
 			resp.Success = false
 			resp.Error = err.Error()
 		} else {
-			vs := make([]string, len(gresp.Kvs))
-			for i := range vs {
-				vs[i] = string(gresp.Kvs[i].Value)
+			resp.KeyValues = make([]KeyValue, len(gresp.Kvs))
+			for i := range gresp.Kvs {
+				resp.KeyValues[i].Key = string(gresp.Kvs[i].Key)
+				resp.KeyValues[i].Value = string(gresp.Kvs[i].Value)
 			}
-			resp.Values = vs
 		}
-
 		if err := json.NewEncoder(w).Encode(resp); err != nil {
 			return err
 		}
