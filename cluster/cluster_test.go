@@ -26,6 +26,7 @@ import (
 
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/pkg/transport"
+	"github.com/coreos/pkg/capnslog"
 )
 
 var testTLS = transport.TLSInfo{
@@ -112,7 +113,11 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer c.Shutdown()
+	defer func() {
+		capnslog.SetGlobalLogLevel(capnslog.CRITICAL)
+		defer capnslog.SetGlobalLogLevel(testLogLevel)
+		c.Shutdown()
+	}()
 
 	cli, _, err := c.Client(0, scheme, true, 3*time.Second)
 	if err != nil {

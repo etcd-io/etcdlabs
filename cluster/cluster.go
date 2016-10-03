@@ -48,12 +48,16 @@ const (
 
 // NodeStatus defines node status information.
 type NodeStatus struct {
-	ID        string
-	IsLeader  bool
-	State     string
-	DBSize    uint64
-	DBSizeTxt string
-	Hash      int
+	Name     string `json:"name"`
+	ID       string `json:"id"`
+	Endpoint string `json:"endpoint"`
+
+	IsLeader bool   `json:"is-leader"`
+	State    string `json:"state"`
+
+	DBSize    uint64 `json:"db-size"`
+	DBSizeTxt string `json:"db-size-txt"`
+	Hash      int    `json:"hash"`
 }
 
 // node contains *embed.Etcd and its state.
@@ -158,7 +162,7 @@ func Start(ccfg Config) (c *Cluster, err error) {
 		cfg.PeerAutoTLS = ccfg.PeerAutoTLS
 		cfg.PeerTLSInfo = ccfg.PeerTLSInfo
 
-		c.nodes[i] = &node{cfg: cfg, status: NodeStatus{IsLeader: false, State: NoNodeStatus}}
+		c.nodes[i] = &node{cfg: cfg, status: NodeStatus{Name: cfg.Name, Endpoint: clientURL.String(), IsLeader: false, State: NoNodeStatus}}
 
 		startPort += 2
 	}
@@ -292,12 +296,12 @@ func (c *Cluster) Stop(i int) {
 	plog.Printf("stopping %s", c.nodes[i].cfg.Name)
 
 	c.mu.Lock()
-	state := c.nodes[i].status.State
-	c.mu.Unlock()
-	if state == NoNodeStatus {
+	if c.nodes[i].status.State == NoNodeStatus {
 		plog.Warningf("%s is already stopped", c.nodes[i].cfg.Name)
+		c.mu.Unlock()
 		return
 	}
+	c.mu.Unlock()
 
 	for {
 		it := time.Since(c.nodes[i].lastUpdate)
@@ -465,7 +469,9 @@ func (c *Cluster) updateNodeStatus() {
 				isLeader, state = true, LeaderNodeStatus
 			}
 			status := NodeStatus{
+				Name:      c.nodes[i].cfg.Name,
 				ID:        types.ID(resp.Header.MemberId).String(),
+				Endpoint:  c.nodes[i].cfg.LCUrls[0].String(),
 				IsLeader:  isLeader,
 				State:     state,
 				DBSize:    uint64(resp.DbSize),
