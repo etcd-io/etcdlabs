@@ -61,7 +61,7 @@ func Test_StartServer(t *testing.T) {
 	time.Sleep(time.Second)
 	{
 		tu := srv.addrURL
-		tu.Path = "/client/node-1"
+		tu.Path = "/client/node1"
 		resp, err := http.Post(tu.String(), "", nil)
 		if err != nil {
 			t.Fatal(err)
@@ -72,13 +72,13 @@ func Test_StartServer(t *testing.T) {
 			t.Fatal(err)
 		}
 		resp.Body.Close()
-		fmt.Println("'/client/node-1' POST response:", string(b))
+		fmt.Println("'/client/node1' POST response:", string(b))
 	}
 
 	time.Sleep(2 * time.Second)
 	{
 		tu := srv.addrURL
-		tu.Path = "/client/node-2"
+		tu.Path = "/client/node2"
 		req := &http.Request{Method: "PUT", URL: &tu}
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
@@ -90,12 +90,12 @@ func Test_StartServer(t *testing.T) {
 			t.Fatal(err)
 		}
 		resp.Body.Close()
-		fmt.Println("'/client/node-2' PUT response:", string(b))
+		fmt.Println("'/client/node2' PUT response:", string(b))
 	}
 
 	time.Sleep(2 * time.Second)
 	{
-		resp, err := http.Get(srv.addrURL.String() + "/client/node-3")
+		resp, err := http.Get(srv.addrURL.String() + "/client/node3")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -105,7 +105,7 @@ func Test_StartServer(t *testing.T) {
 			t.Fatal(err)
 		}
 		resp.Body.Close()
-		fmt.Println("'/client/node-3' GET response:", string(b))
+		fmt.Println("'/client/node3' GET response:", string(b))
 	}
 
 	capnslog.SetGlobalLogLevel(capnslog.CRITICAL)
