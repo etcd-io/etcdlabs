@@ -44,17 +44,52 @@ func Test_StartServer(t *testing.T) {
 	// wait until first server status update
 	time.Sleep(2 * time.Second)
 
-	resp, err := http.Get(srv.addr + "/server-status")
-	if err != nil {
-		t.Fatal(err)
-	}
-	b, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
+	{
+		resp, err := http.Get(srv.addrURL.String() + "/server-status")
+		if err != nil {
+			t.Fatal(err)
+		}
+		b, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			resp.Body.Close()
+			t.Fatal(err)
+		}
 		resp.Body.Close()
-		t.Fatal(err)
+		fmt.Println("'/server-status' response:", string(b))
 	}
-	resp.Body.Close()
-	fmt.Println("'/server-status' response:", string(b))
+
+	time.Sleep(time.Second)
+	{
+		tu := srv.addrURL
+		tu.Path = "/client/node-1"
+		req := &http.Request{Method: "PUT", URL: &tu}
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		b, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			resp.Body.Close()
+			t.Fatal(err)
+		}
+		resp.Body.Close()
+		fmt.Println("'/client/node-1' response:", string(b))
+	}
+
+	time.Sleep(time.Second)
+	{
+		resp, err := http.Get(srv.addrURL.String() + "/client/node-3")
+		if err != nil {
+			t.Fatal(err)
+		}
+		b, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			resp.Body.Close()
+			t.Fatal(err)
+		}
+		resp.Body.Close()
+		fmt.Println("'/client/node-3' response:", string(b))
+	}
 
 	capnslog.SetGlobalLogLevel(capnslog.CRITICAL)
 	defer capnslog.SetGlobalLogLevel(testLogLevel)

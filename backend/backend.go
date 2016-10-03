@@ -20,7 +20,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
+	"path"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -91,7 +95,7 @@ func init() {
 // Server warps http.Server.
 type Server struct {
 	mu         sync.RWMutex
-	addr       string
+	addrURL    url.URL
 	httpServer *http.Server
 
 	rootCancel func()
@@ -110,16 +114,25 @@ func StartServer(port int) (*Server, error) {
 	rootContext, rootCancel := context.WithTimeout(context.Background(), 10*time.Second)
 
 	mainRouter := http.NewServeMux()
+
 	mainRouter.Handle("/server-status", &ContextAdapter{
 		ctx:     rootContext,
 		handler: ContextHandlerFunc(serverStatusHandler),
 	})
 
-	addr := fmt.Sprintf("http://localhost:%d", port)
-	plog.Infof("started server %s", addr)
+	for _, cfg := range globalCluster.AllConfigs() {
+		ph := fmt.Sprintf("/client/%s", cfg.Name)
+		mainRouter.Handle(ph, &ContextAdapter{
+			ctx:     rootContext,
+			handler: ContextHandlerFunc(clientHandler),
+		})
+	}
+
+	addrURL := url.URL{Scheme: "http", Host: fmt.Sprintf("localhost:%d", port)}
+	plog.Infof("started server %s", addrURL)
 	srv := &Server{
-		addr:       addr,
-		httpServer: &http.Server{Addr: addr, Handler: mainRouter},
+		addrURL:    addrURL,
+		httpServer: &http.Server{Addr: addrURL.String(), Handler: mainRouter},
 
 		rootCancel: rootCancel,
 		stopc:      stopc,
@@ -145,7 +158,7 @@ func StartServer(port int) (*Server, error) {
 
 // Stop stops the server. Useful for testing.
 func (srv *Server) Stop() {
-	plog.Warningf("stopping server %s", srv.addr)
+	plog.Warningf("stopping server %s", srv.addrURL)
 	srv.mu.Lock()
 	if srv.httpServer == nil {
 		srv.mu.Unlock()
@@ -155,7 +168,7 @@ func (srv *Server) Stop() {
 	<-srv.donec
 	srv.httpServer = nil
 	srv.mu.Unlock()
-	plog.Warningf("stopped server %s", srv.addr)
+	plog.Warningf("stopped server %s", srv.addrURL)
 
 	plog.Warning("stopping cluster")
 	globalCluster.Shutdown()
@@ -184,6 +197,84 @@ func serverStatusHandler(ctx context.Context, w http.ResponseWriter, req *http.R
 			NodeStatuses: globalCluster.AllNodeStatus(),
 		}
 		if err := json.NewEncoder(w).Encode(ss); err != nil {
+			return err
+		}
+
+	default:
+		http.Error(w, "Method Not Allowed", 405)
+	}
+
+	return nil
+}
+
+// ClientPutResponse translates client's PUT response in frontend-friendly format.
+type ClientPutResponse struct {
+	Success bool   `json:"success"`
+	Error   string `json:"error"`
+	Key     string `json:"key"`
+	Value   string `json:"value"`
+}
+
+// ClientGetResponse translates client's GET response in frontend-friendly format.
+type ClientGetResponse struct {
+	Success bool     `json:"success"`
+	Error   string   `json:"error"`
+	Key     string   `json:"key"`
+	Values  []string `json:"values"`
+}
+
+func clientHandler(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
+	// TODO: rate limit
+
+	ns := strings.Replace(path.Base(req.URL.Path), "node-", "", -1)
+	idx, err := strconv.Atoi(ns)
+	if err != nil {
+		return err
+	}
+	cli, _, err := globalCluster.Client(idx, false, false, 3*time.Second)
+	if err != nil {
+		return err
+	}
+
+	switch req.Method {
+	case "PUT":
+		// TODO: parse HTML form
+		resp := ClientPutResponse{
+			Success: true,
+			Error:   "",
+			Key:     "foo",
+			Value:   "bar",
+		}
+
+		if _, err := cli.Put(ctx, "foo", "bar"); err != nil {
+			resp.Success = false
+			resp.Error = err.Error()
+		}
+
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			return err
+		}
+
+	case "GET":
+		// TODO: parse HTML form
+		resp := ClientGetResponse{
+			Success: true,
+			Error:   "",
+			Key:     "foo",
+		}
+
+		if gresp, err := cli.Get(ctx, "foo"); err != nil {
+			resp.Success = false
+			resp.Error = err.Error()
+		} else {
+			vs := make([]string, len(gresp.Kvs))
+			for i := range vs {
+				vs[i] = string(gresp.Kvs[i].Value)
+			}
+			resp.Values = vs
+		}
+
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
 			return err
 		}
 
