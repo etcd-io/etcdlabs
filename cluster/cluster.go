@@ -292,6 +292,11 @@ func Start(ccfg Config) (c *Cluster, err error) {
 	return c, nil
 }
 
+// StopNotify returns receive-only stop channel to notify the cluster has stopped.
+func (c *Cluster) StopNotify() <-chan struct{} {
+	return c.stopc
+}
+
 // Stop stops a node.
 func (c *Cluster) Stop(i int) {
 	c.opLock.Lock()
@@ -425,7 +430,6 @@ func (c *Cluster) Shutdown() {
 }
 
 func (c *Cluster) updateNodeStatus() {
-	plog.Println("updating node status")
 	errc := make(chan error)
 	for i := 0; i < c.size; i++ {
 		go func(i int) {
@@ -529,7 +533,7 @@ func (c *Cluster) updateNodeStatus() {
 	cn := 0
 	for err := range errc {
 		if err != nil {
-			plog.Warning(err)
+			plog.Warning("updateNodeStatus error:", err)
 		}
 
 		cn++
@@ -537,7 +541,6 @@ func (c *Cluster) updateNodeStatus() {
 			close(errc)
 		}
 	}
-	plog.Println("updated node status")
 	return
 }
 
