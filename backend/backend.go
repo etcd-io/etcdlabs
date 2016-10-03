@@ -21,7 +21,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"strings"
 	"sync"
 	"time"
 
@@ -54,6 +53,41 @@ func (ca *ContextAdapter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+var (
+	rootPortMu sync.Mutex
+	rootPort   = 2379
+)
+
+func startCluster() (*cluster.Cluster, error) {
+	rootPortMu.Lock()
+	port := rootPort
+	rootPort += 10 // for testing
+	rootPortMu.Unlock()
+
+	dir, err := ioutil.TempDir(os.TempDir(), "backend-cluster")
+	if err != nil {
+		return nil, err
+	}
+
+	cfg := cluster.Config{
+		Size:          5,
+		RootDir:       dir,
+		RootPort:      port,
+		ClientAutoTLS: true,
+	}
+	return cluster.Start(cfg)
+}
+
+var globalCluster *cluster.Cluster
+
+func init() {
+	c, err := startCluster()
+	if err != nil {
+		plog.Panic(err)
+	}
+	globalCluster = c
+}
+
 // Server warps http.Server.
 type Server struct {
 	mu         sync.RWMutex
@@ -69,10 +103,6 @@ func StartServer(port int) (*Server, error) {
 	defer cancel()
 
 	mainRouter := http.NewServeMux()
-	mainRouter.Handle("/start", &ContextAdapter{
-		ctx:     rootContext,
-		handler: ContextHandlerFunc(startHandler),
-	})
 	mainRouter.Handle("/server-status", &ContextAdapter{
 		ctx:     rootContext,
 		handler: ContextHandlerFunc(serverStatusHandler),
@@ -110,71 +140,14 @@ func StartServer(port int) (*Server, error) {
 	return srv, nil
 }
 
-var (
-	globalClusterMu sync.RWMutex
-	globalCluster   *cluster.Cluster
-
-	rootPortMu sync.Mutex
-	rootPort   = 2379
-)
-
-func startHandler(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
-	switch req.Method {
-	case "GET":
-		globalClusterMu.Lock()
-		defer globalClusterMu.Unlock()
-
-		if globalCluster != nil {
-			return nil
-		}
-
-		rootPortMu.Lock()
-		port := rootPort
-		rootPort += 20
-		rootPortMu.Unlock()
-
-		dir, err := ioutil.TempDir(os.TempDir(), "backend-cluster")
-		if err != nil {
-			return err
-		}
-		cfg := cluster.Config{
-			Size:          5,
-			RootDir:       dir,
-			RootPort:      port,
-			ClientAutoTLS: true,
-		}
-		cl, err := cluster.Start(cfg)
-		if err != nil {
-			return err
-		}
-		globalCluster = cl
-
-		resp := struct {
-			Message string
-		}{
-			fmt.Sprintf("etcd cluster: %s", strings.Join(cl.AllEndpoints(true), ", ")),
-		}
-		if err := json.NewEncoder(w).Encode(resp); err != nil {
-			return err
-		}
-
-	default:
-		http.Error(w, "Method Not Allowed", 405)
-	}
-
-	return nil
-}
-
 // Stop stops the server. Useful for testing.
 func (srv *Server) Stop() {
+	plog.Warningf("stopping server %s", srv.addr)
 	srv.mu.Lock()
-
 	if srv.httpServer == nil {
 		srv.mu.Unlock()
 		return
 	}
-
-	plog.Warningf("stopping server %s", srv.addr)
 	close(srv.stopc)
 	<-srv.donec
 	srv.httpServer = nil
@@ -182,12 +155,8 @@ func (srv *Server) Stop() {
 	plog.Warningf("stopped server %s", srv.addr)
 
 	plog.Warning("stopping cluster")
-	globalClusterMu.Lock()
-	if globalCluster != nil {
-		globalCluster.Shutdown()
-		globalCluster = nil
-	}
-	globalClusterMu.Unlock()
+	globalCluster.Shutdown()
+	globalCluster = nil
 	plog.Warning("stopped cluster")
 }
 
@@ -207,25 +176,9 @@ type ServerStatus struct {
 func serverStatusHandler(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
 	switch req.Method {
 	case "GET":
-		var statuses []cluster.NodeStatus
-
-		if globalCluster != nil {
-			globalClusterMu.RLock()
-			statuses = globalCluster.AllNodeStatus()
-			globalClusterMu.RUnlock()
-		} else {
-			statuses = make([]cluster.NodeStatus, 5)
-			for i := range statuses {
-				statuses[i] = cluster.NodeStatus{
-					Name:  fmt.Sprintf("name%d", i),
-					State: cluster.NoNodeStatus,
-				}
-			}
-		}
-
 		ss := ServerStatus{
 			ServerUptime: humanize.Time(startTime),
-			NodeStatuses: statuses,
+			NodeStatuses: globalCluster.AllNodeStatus(),
 		}
 		if err := json.NewEncoder(w).Encode(ss); err != nil {
 			return err
