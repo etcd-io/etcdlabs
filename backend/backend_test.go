@@ -24,15 +24,15 @@ import (
 )
 
 var (
-	muTestBasePort sync.Mutex
-	testBasePort   = 8080
+	testMu       sync.Mutex
+	testBasePort = 8080
 )
 
 func Test_StartServer(t *testing.T) {
-	muTestBasePort.Lock()
+	testMu.Lock()
 	port := testBasePort
 	testBasePort++
-	muTestBasePort.Unlock()
+	testMu.Unlock()
 
 	srv, err := StartServer(port)
 	if err != nil {
