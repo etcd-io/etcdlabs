@@ -422,7 +422,7 @@ BRANCH_NAME=${this.inputGitBranch}
         return `go get -v github.com/cloudflare/cfssl/cmd/cfssl
 go get -v github.com/cloudflare/cfssl/cmd/cfssljson
 
-rm -rf /tmp/certs && mkdir -p /tmp/certs`;
+rm -rf /tmp/test-certs && mkdir -p /tmp/test-certs`;
     }
 
     getCFSSLCommandRootCA() {
