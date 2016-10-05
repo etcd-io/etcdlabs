@@ -1,24 +1,24 @@
 import { Component, OnInit } from '@angular/core';
-import { NodeStatus, NodeStatusService } from './node-status.service';
+import { ServerStatus, ServerStatusService } from './server-status.service';
 
 @Component({
   selector: 'app-play',
   templateUrl: 'play.component.html',
   styleUrls: ['play.component.css'],
-  providers: [NodeStatusService],
+  providers: [ServerStatusService],
 })
 export class PlayComponent implements OnInit {
   selectedTab: number;
 
-  nodeStatuses: NodeStatus[];
+  serverStatus: ServerStatus;
   errorMessage: string;
 
-  constructor(private nodeStatusService: NodeStatusService) {
+  constructor(private serverService: ServerStatusService) {
     this.selectedTab = 3;
   }
 
   ngOnInit(): void {
-    this.nodeStatuses = this.nodeStatusService.fetchNodeStatus();
+    this.serverStatus = this.serverService.serverStatus;
   }
 
   selectTab(num: number) {
@@ -28,22 +28,26 @@ export class PlayComponent implements OnInit {
   clickStop() {
     let displayDate = new Date().toTimeString();
     let nodeIndex = this.selectedTab - 3;
-    this.nodeStatuses[nodeIndex].Status = 'Requested to stop ' + this.nodeStatuses[nodeIndex].Name + ' at ' + displayDate;
-    this.nodeStatuses[nodeIndex].State = 'Stopped';
-
-    console.log('clickStop', this.nodeStatuses[nodeIndex]);
+    this.serverStatus.NodeStatuses[nodeIndex].StateTxt = 'Requested to stop ' +
+      this.serverStatus.NodeStatuses[nodeIndex].Name + ' at ' + displayDate;
+    this.serverStatus.NodeStatuses[nodeIndex].State = 'Stopped';
+    console.log('clickStop', this.serverStatus.NodeStatuses[nodeIndex]);
   }
 
   clickRestart() {
     let displayDate = new Date().toTimeString();
     let nodeIndex = this.selectedTab - 3;
-    this.nodeStatuses[nodeIndex].Status = 'Requested to restart ' + this.nodeStatuses[nodeIndex].Name + ' at ' + displayDate;
-    this.nodeStatuses[nodeIndex].State = 'Follower';
-
-    console.log('clickRestart', this.nodeStatuses[nodeIndex]);
+    this.serverStatus.NodeStatuses[nodeIndex].StateTxt = 'Requested to restart ' +
+      this.serverStatus.NodeStatuses[nodeIndex].Name + ' at ' + displayDate;
+    this.serverStatus.NodeStatuses[nodeIndex].State = 'Follower';
+    console.log('clickRestart', this.serverStatus.NodeStatuses[nodeIndex]);
   }
 
-  fetchNodeStatus() {
-    console.log('fetching node status...');
+  fetch() {
+    this.serverService.fetchServerStatus().subscribe(
+      serverStatus => this.serverStatus = serverStatus,
+      error => this.errorMessage = <any>error);
+
+    console.log('fetch got', this.serverStatus);
   }
 }

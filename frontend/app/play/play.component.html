@@ -51,7 +51,7 @@
                         <template md-tab-label><b>Write</b></template>
                         <template md-tab-content>
 							<p>Write keys...</p>
-							<button md-button (click)=fetchNodeStatus()>Update (Test)</button>
+							<button md-button (click)=fetch()>Update (Test)</button>
 						</template>
                     </md-tab>
 
@@ -69,7 +69,7 @@
 						</template>
                     </md-tab>
 
-                    <md-tab *ngFor="let nodeStatus of nodeStatuses;">
+                    <md-tab *ngFor="let nodeStatus of serverStatus.NodeStatuses;">
                         <template md-tab-label>{{nodeStatus.Name}}</template>
                         <template md-tab-content>
 							<br>
@@ -78,7 +78,7 @@
 								<button md-button md-tooltip="Click to restart {{nodeStatus.Name}}" (click)=clickRestart()>Restart</button>
 							</div>
 							<p class="client-card-text-status">
-								{{nodeStatus.Status}} <span *ngIf='errorMessage'>(error: {{errorMessage}})</span>
+								{{nodeStatus.StateTxt}} <span *ngIf='errorMessage'>(error: {{errorMessage}})</span>
 							</p>
 							<ul>
 								<li><span class="client-card-text-list-title">ID:</span> <span class="client-card-text-sub">{{nodeStatus.ID}}</span></li>
