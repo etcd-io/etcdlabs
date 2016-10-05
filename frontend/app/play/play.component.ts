@@ -45,6 +45,7 @@ export class PlayComponent implements OnInit {
   }
 
   fetch() {
+    // TODO: periodic calls on Observable that is returned by fetchServerStatus
     this.serverService.fetchServerStatus().subscribe(
       serverStatus => this.serverStatus = serverStatus,
       error => this.errorMessage = <any>error);
