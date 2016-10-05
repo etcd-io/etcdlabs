@@ -1,0 +1,20 @@
+package: github.com/coreos/etcdlabs
+import:
+- package: github.com/coreos/etcd
+  version: d5cd563ce79b8d536d699121b3ac38fa3ccdb3cd
+  subpackages:
+  - clientv3
+  - embed
+  - etcdserver/etcdserverpb
+  - pkg/transport
+  - pkg/types
+- package: github.com/coreos/pkg
+  version: 3ac0863d7acf3bc44daf49afef8919af12f704ef
+  subpackages:
+  - capnslog
+- package: github.com/dustin/go-humanize
+  version: bd88f87ad3a420f7bcf05e90566fd1ceb351fa7f
+- package: google.golang.org/grpc
+  version: 231b4cfea0e79843053a33f5fe90bd4d84b23cd3
+  subpackages:
+  - credentials
