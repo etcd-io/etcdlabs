@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { NodeStatus, NodeStatusService } from './node-status.service';
 
 @Component({
@@ -7,7 +7,7 @@ import { NodeStatus, NodeStatusService } from './node-status.service';
   styleUrls: ['play.component.css'],
   providers: [NodeStatusService],
 })
-export class PlayComponent {
+export class PlayComponent implements OnInit {
   selectedTab: number;
 
   nodeStatuses: NodeStatus[];
@@ -15,9 +15,10 @@ export class PlayComponent {
 
   constructor(private nodeStatusService: NodeStatusService) {
     this.selectedTab = 3;
+  }
 
+  ngOnInit(): void {
     this.nodeStatuses = this.nodeStatusService.fetchNodeStatus();
-    // this.errorMessage = 'None';
   }
 
   selectTab(num: number) {
