@@ -78,8 +78,8 @@
         <div id="etcd"></div>
         <h2><a href="/doc/{{version.etcdVersionURL}}/faq#etcd" class="faq-title">What is etcd?</a></h2>
         <p>
-            etcd is distributed reliable key-value store for the most critical data of a distributed system. Similar to how Linux uses <span class="code-light-snippet">/etc</span> to store local configurations, etcd can be thought of as a reliable store
-            for distributed configuration data. It is distributed by replicating data to multiple machines, therefore highly available against single point of failures. Using the Raft<sup>[1]</sup> consensus algorithms, etcd gracefully handles network
+            etcd is distributed, transactional key-value store. It is designed to store the most critical data of distributed systems. Similar to how Linux uses <span class="code-light-snippet">/etc</span> directory to store local configurations, etcd
+            is a reliable store for distributed configuration data. Data is replicated to multiple etcd nodes, therefore highly available against single point of failures. Using the Raft<sup>[1]</sup> consensus algorithm, etcd gracefully handles network
             partitions and machine failures, even leader failures. etcd is inspired by Google's Chubby lock service<sup>[2]</sup>, and completely <a href="https://github.com/coreos/etcd" target="_blank" class="normal-link">open-source</a>.
         </p>
         <hr align="left" class="footer-top-line">
@@ -94,28 +94,27 @@
         <div id="etcd-to-use"></div>
         <h2><a href="/doc/{{version.etcdVersionURL}}/faq#etcd-to-use" class="faq-title">When to use etcd</a></h2>
         <p>
-            etcd is designed to store a small amount of meta-data in consistent, fault-tolerant way. Distributed systems use etcd as the root of scheduling, service discovery configuration. Distributed locks is implemented on top of etcd, used for master election
-            in other databases.
+            etcd is designed to store a small amount of meta-data in consistent, fault-tolerant way. Distributed systems use etcd as the root of scheduling and service discovery configuration storage. <a href="https://godoc.org/github.com/coreos/etcd/clientv3/concurrency"
+                target="_blank" class="normal-link">Distributed lock</a> is implemented on top of etcd, useful for master election in other distributed databases.
         </p>
         <br>
 
         <div id="etcd-not-to-use"></div>
         <h2><a href="/doc/{{version.etcdVersionURL}}/faq#etcd-not-to-use" class="faq-title">When not to use etcd</a></h2>
         <p>
-            etcd is designed for storing small chunks of mission critical data: configuration file, JSON, YAML, etc. etcd limits the size of request in 1.5MB (see <a href="https://github.com/coreos/etcd/blob/master/etcdserver/v3_server.go#L34-L38" target="_blank"
-                class="code-link">maxRequestBytes</a>). And default storage size limit is 2GB (see <a href="https://github.com/coreos/etcd/blob/master/mvcc/backend/backend.go#L46-L53" target="_blank" class="code-link">DefaultQuotaBytes</a>). These are the
-            tradeoffs that etcd makes for strong consistency.
+            etcd can only handle small chunks data: configuration file, JSON, YAML, etc. etcd limits the size of request in 1.5MB (see <a href="https://github.com/coreos/etcd/blob/master/etcdserver/v3_server.go#L34-L38" target="_blank" class="code-link">maxRequestBytes</a>).
+            And default storage size limit is 2GB (see <a href="https://github.com/coreos/etcd/blob/master/mvcc/backend/backend.go#L46-L53" target="_blank" class="code-link">DefaultQuotaBytes</a>). These are the tradeoffs that etcd makes for strong consistency.
         </p>
         <p>
-            etcd is not a relational SQL database. etcd has only primary index <i>key</i> and no secondary index. Clients can range- and prefix-scan on keys.
+            etcd is not a relational SQL database. etcd uses <i>key</i> as the primary index: clients can range- and prefix-scan on the keys. etcd does not have a secondary index.
         </p>
         <br>
 
         <div id="etcd-consensus"></div>
         <h2><a href="/doc/{{version.etcdVersionURL}}/faq#etcd-consensus" class="faq-title">Consensus protocol in etcd</a></h2>
         <p>
-            etcd uses Raft<sup>[1]</sup> consensus algorithm. It keeps data consistent even if a cluster has faulty process or loses one of its communications. Raft safety guarantees that system never returns incorrect value under network partitions and
-            delays (or <i>non-Byzantine failures</i>). Raft is fully functional as long as any majority of servers can communicate with each other. And command completes as soon as quorum responds; overall performance is not affected by the minority.
+            etcd uses Raft<sup>[1]</sup> consensus algorithm. It keeps data consistent even if a cluster has faulty process or loses one of its communications. Raft safety property guarantees that system never returns incorrect value under network partitions and
+            delays (<i>non-Byzantine failures</i>). Raft is fully functional as long as any majority of servers can communicate with each other. Command completes as soon as quorum responds; overall performance is not affected by the minority.
         </p>
         <hr align="left" class="footer-top-line">
         <footer>
@@ -193,7 +192,7 @@
             linearizable when clock skew happens. Multiple concurrent writes to the same key may arrive in different order, different nodes. Committed transactions can be lost by the later writes before the record gets replicated (i.e., not durable).
         </p>
         <p>
-            All etcd writes go to leader, then fowarded to followers. Entry is <i>committed</i> when replicated in majority of cluster. Each command is applied in the same order.
+            All etcd writes go to leader, then fowarded to followers. Entry is <i>committed</i> when replicated in majority of cluster. Clients won't be able to read that entry until it is committed, and each command is applied in the same order.
         </p>
         <hr align="left" class="footer-top-line">
         <footer>
