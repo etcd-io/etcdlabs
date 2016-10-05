@@ -32,9 +32,9 @@ import (
 	"github.com/coreos/etcd/embed"
 	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
 	"github.com/coreos/etcd/pkg/transport"
+	"github.com/coreos/etcd/pkg/types"
 
 	humanize "github.com/dustin/go-humanize"
-	"github.com/gyuho/db/pkg/types"
 )
 
 const (
