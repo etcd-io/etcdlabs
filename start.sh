@@ -13,4 +13,4 @@ sleep 3s
 
 printf "\n"
 echo "starting frontend"
-npm start
+nohup npm start >> $HOME/npm.log 2>&1 &
