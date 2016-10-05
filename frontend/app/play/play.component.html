@@ -81,15 +81,15 @@
 								{{nodeStatus.StateTxt}} <span *ngIf='errorMessage'>(error: {{errorMessage}})</span>
 							</p>
 							<ul>
-								<li><span class="client-card-text-list-title">ID:</span> <span class="client-card-text-sub">{{nodeStatus.ID}}</span></li>
-								<li><span class="client-card-text-list-title">Endpoint:</span> <span class="client-card-text-sub">{{nodeStatus.Endpoint}}</span></li>
+								<li><span class="client-card-text-list-title">ID:</span> <span class="client-card-text-id">{{nodeStatus.ID}}</span></li>
+								<li><span class="client-card-text-list-title">Endpoint:</span> <span class="client-card-text-endpoint">{{nodeStatus.Endpoint}}</span></li>
 								<li><span class="client-card-text-list-title">State:</span>
 									<span *ngIf="nodeStatus.State == 'Stopped'" class="client-card-text-stopped">{{nodeStatus.State}}</span>
 									<span *ngIf="nodeStatus.State == 'Follower'" class="client-card-text-follower">{{nodeStatus.State}}</span>
 									<span *ngIf="nodeStatus.State == 'Leader'" class="client-card-text-leader">{{nodeStatus.State}}</span>
 								</li>
-								<li><span class="client-card-text-list-title">DB Size:</span> <span class="client-card-text-sub">{{nodeStatus.DBSizeTxt}}</span></li>
-								<li><span class="client-card-text-list-title">Hash:</span> <span class="client-card-text-sub">{{nodeStatus.Hash}}</span></li>
+								<li><span class="client-card-text-list-title">DB Size:</span> <span class="client-card-text-dbsize">{{nodeStatus.DBSizeTxt}}</span></li>
+								<li><span class="client-card-text-list-title">Hash:</span> <span class="client-card-text-hash">{{nodeStatus.Hash}}</span></li>
 							</ul>
 						</template>
                     </md-tab>

@@ -21,32 +21,53 @@
     font-weight: 300;
 }
 
-.client-card-text-sub {
+.client-card-text-id {
+    font-size: 13px;
+    color: #000;
+    font-family: 'Inconsolata', monospace;
+    font-weight: 300;
+}
+
+.client-card-text-endpoint {
+    font-size: 13px;
+    color: #000;
+    font-family: 'Inconsolata', monospace;
+    font-weight: 300;
+}
+
+.client-card-text-dbsize {
     font-size: 15px;
     color: #000;
     font-family: 'Inconsolata', monospace;
     font-weight: 300;
 }
 
+.client-card-text-hash {
+    font-size: 15px;
+    color: black;
+    font-family: 'Roboto', Helvetica, sans-serif;
+    font-weight: bold;
+}
+
 .client-card-text-stopped {
     font-size: 15px;
     color: red;
     font-family: 'Inconsolata', monospace;
-    font-weight: 300;
+    font-weight: bold;
 }
 
 .client-card-text-follower {
     font-size: 15px;
     color: blue;
     font-family: 'Inconsolata', monospace;
-    font-weight: 300;
+    font-weight: bold;
 }
 
 .client-card-text-leader {
     font-size: 15px;
     color: seagreen;
     font-family: 'Inconsolata', monospace;
-    font-weight: 300;
+    font-weight: bold;
 }
 
 .log-box {

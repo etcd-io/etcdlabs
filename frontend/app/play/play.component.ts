@@ -8,6 +8,8 @@ import { ServerStatus, ServerStatusService } from './server-status.service';
   providers: [ServerStatusService],
 })
 export class PlayComponent implements OnInit {
+  mode = 'Observable';
+
   selectedTab: number;
 
   serverStatus: ServerStatus;
@@ -15,10 +17,11 @@ export class PlayComponent implements OnInit {
 
   constructor(private serverService: ServerStatusService) {
     this.selectedTab = 3;
+    this.serverStatus = serverService.serverStatus;
   }
 
   ngOnInit(): void {
-    this.serverStatus = this.serverService.serverStatus;
+    this.fetch();
   }
 
   selectTab(num: number) {
@@ -31,7 +34,6 @@ export class PlayComponent implements OnInit {
     this.serverStatus.NodeStatuses[nodeIndex].StateTxt = 'Requested to stop ' +
       this.serverStatus.NodeStatuses[nodeIndex].Name + ' at ' + displayDate;
     this.serverStatus.NodeStatuses[nodeIndex].State = 'Stopped';
-    console.log('clickStop', this.serverStatus.NodeStatuses[nodeIndex]);
   }
 
   clickRestart() {
@@ -40,7 +42,6 @@ export class PlayComponent implements OnInit {
     this.serverStatus.NodeStatuses[nodeIndex].StateTxt = 'Requested to restart ' +
       this.serverStatus.NodeStatuses[nodeIndex].Name + ' at ' + displayDate;
     this.serverStatus.NodeStatuses[nodeIndex].State = 'Follower';
-    console.log('clickRestart', this.serverStatus.NodeStatuses[nodeIndex]);
   }
 
   fetch() {

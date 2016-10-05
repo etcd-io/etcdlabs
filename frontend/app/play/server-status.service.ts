@@ -80,6 +80,12 @@ export class ServerStatusService {
       error.status ? `${error.status} - ${error.statusText}` : 'Server error';
     console.error(errMsg);
     this.errorMessage = errMsg;
+
+    for (let _i = 0; _i < this.serverStatus.NodeStatuses.length; _i++) {
+      this.serverStatus.NodeStatuses[_i].State = 'Stopped';
+      this.serverStatus.NodeStatuses[_i].StateTxt = this.serverStatus.NodeStatuses[_i].Name + ' is not reachable...';
+    }
+
     return Observable.throw(errMsg);
   }
 
