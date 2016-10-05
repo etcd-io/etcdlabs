@@ -1,7 +1,7 @@
 {
     "project": {
         "version": "1.0.0-beta.11-webpack.8",
-        "name": "etcd-app"
+        "name": "app-etcd"
     },
     "apps": [{
         "root": "frontend",
@@ -15,7 +15,7 @@
         "mobile": false,
         "styles": [
             "styles.css",
-            "etcd-app-theme.scss"
+            "app-etcd-theme.scss"
         ],
         "scripts": [],
         "environments": {

@@ -179,24 +179,20 @@ func (srv *Server) Stop() {
 	plog.Warning("stopped cluster")
 }
 
-var (
-	uptimeScale = time.Second
-	startTime   = time.Now().Round(uptimeScale)
-)
-
 // ServerStatus defines server status.
+// Encode without json tags to make it parsable by Typescript.
 type ServerStatus struct {
 	// ServerUptime is the duration since last deploy.
-	ServerUptime string `json:"server-uptime"`
+	ServerUptime string
 	// NodeStatuses contains all node statuses.
-	NodeStatuses []cluster.NodeStatus `json:"node-statuses"`
+	NodeStatuses []cluster.NodeStatus
 }
 
 func serverStatusHandler(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
 	switch req.Method {
 	case "GET":
 		ss := ServerStatus{
-			ServerUptime: humanize.Time(startTime),
+			ServerUptime: humanize.Time(globalCluster.Started),
 			NodeStatuses: globalCluster.AllNodeStatus(),
 		}
 		if err := json.NewEncoder(w).Encode(ss); err != nil {

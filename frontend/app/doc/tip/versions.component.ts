@@ -8,7 +8,14 @@ export class versionItem {
     releaseLink: string;
     docLink: string;
     versionHTMLClassLinkDoc: string;
-    constructor(isRoutable: boolean, version: string, releaseLink: string, versionHTMLClassLinkRelease: string, docLink: string, versionHTMLClassLinkDoc: string) {
+    constructor(
+        isRoutable: boolean,
+        version: string,
+        releaseLink: string,
+        versionHTMLClassLinkRelease: string,
+        docLink: string,
+        versionHTMLClassLinkDoc: string,
+    ) {
         this.isRoutable = isRoutable;
         this.version = version;
         this.releaseLink = releaseLink;
@@ -29,7 +36,7 @@ export class majorVersionItem {
 }
 
 @Component({
-    selector: 'versions',
+    selector: 'app-versions',
     templateUrl: 'versions.component.html',
     styleUrls: ['common.component.css'],
 })

@@ -1,60 +1,55 @@
-import { Component } from '@angular/core';
-
-
-export class NodeStatus {
-  Name: string;
-  ID: string;
-  Endpoint: string;
-
-  IsLeader: boolean;
-  State: string;
-
-  DBSize: number;
-  DBSizeTxt: string;
-  Hash: number;
-
-  constructor(
-    name: string,
-    id: string,
-    endpoint: string,
-    isLeader: boolean,
-    state: string,
-    dbSize: number,
-    dbSizeTxt: string,
-    hash: number) {
-      this.Name = name;
-      this.ID = id;
-      this.Endpoint = endpoint;
-
-      this.IsLeader = isLeader;
-      this.State = state;
-
-      this.DBSize = dbSize;
-      this.DBSizeTxt = dbSizeTxt;
-      this.Hash = hash;
-  }
-}
+import { Component, OnInit } from '@angular/core';
+import { ServerStatus, ServerStatusService } from './server-status.service';
 
 @Component({
-  selector: 'play',
+  selector: 'app-play',
   templateUrl: 'play.component.html',
   styleUrls: ['play.component.css'],
+  providers: [ServerStatusService],
 })
-export class PlayComponent {
+export class PlayComponent implements OnInit {
+  mode = 'Observable';
+
   selectedTab: number;
-  nodeStatuses: NodeStatus[];
-  constructor() {
+
+  serverStatus: ServerStatus;
+  errorMessage: string;
+
+  constructor(private serverService: ServerStatusService) {
     this.selectedTab = 3;
-    this.nodeStatuses = [
-      new NodeStatus('node1', 'None', 'None', false, 'Follower', 0, '0 B', 0),
-      new NodeStatus('node2', 'None', 'None', false, 'Follower', 0, '0 B', 0),
-      new NodeStatus('node3', 'None', 'None', false, 'Follower', 0, '0 B', 0),
-      new NodeStatus('node4', 'None', 'None', false, 'Follower', 0, '0 B', 0),
-      new NodeStatus('node5', 'None', 'None', false, 'Follower', 0, '0 B', 0),
-    ];
+    this.serverStatus = serverService.serverStatus;
+  }
+
+  ngOnInit(): void {
+    this.fetch();
   }
 
   selectTab(num: number) {
     this.selectedTab = num;
+  }
+
+  clickStop() {
+    let displayDate = new Date().toTimeString();
+    let nodeIndex = this.selectedTab - 3;
+    this.serverStatus.NodeStatuses[nodeIndex].StateTxt = 'Requested to stop ' +
+      this.serverStatus.NodeStatuses[nodeIndex].Name + ' at ' + displayDate;
+    this.serverStatus.NodeStatuses[nodeIndex].State = 'Stopped';
+  }
+
+  clickRestart() {
+    let displayDate = new Date().toTimeString();
+    let nodeIndex = this.selectedTab - 3;
+    this.serverStatus.NodeStatuses[nodeIndex].StateTxt = 'Requested to restart ' +
+      this.serverStatus.NodeStatuses[nodeIndex].Name + ' at ' + displayDate;
+    this.serverStatus.NodeStatuses[nodeIndex].State = 'Follower';
+  }
+
+  fetch() {
+    // TODO: periodic calls on Observable that is returned by fetchServerStatus
+    this.serverService.fetchServerStatus().subscribe(
+      serverStatus => this.serverStatus = serverStatus,
+      error => this.errorMessage = <any>error);
+
+    console.log('fetch got', this.serverStatus);
   }
 }

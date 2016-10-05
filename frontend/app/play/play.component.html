@@ -50,42 +50,47 @@
                     <md-tab>
                         <template md-tab-label><b>Write</b></template>
                         <template md-tab-content>
-							<p>Hello World! Read!</p>
+							<p>Write keys...</p>
+							<button md-button (click)=fetch()>Update (Test)</button>
 						</template>
                     </md-tab>
 
                     <md-tab>
                         <template md-tab-label><b>Read</b></template>
                         <template md-tab-content>
-							<p>Hello World! Read!</p>
+							<p>Read keys...</p>
 						</template>
                     </md-tab>
 
                     <md-tab>
                         <template md-tab-label><b>Delete</b></template>
                         <template md-tab-content>
-							<p>Hello World! Read!</p>
+							<p>Delete keys...</p>
 						</template>
                     </md-tab>
 
-                    <md-tab *ngFor="let nodeStatus of nodeStatuses; let i = index;">
+                    <md-tab *ngFor="let nodeStatus of serverStatus.NodeStatuses;">
                         <template md-tab-label>{{nodeStatus.Name}}</template>
                         <template md-tab-content>
 							<br>
 							<div align="center">
-								<button md-button color="warn" md-tooltip="To kill {{nodeStatus.Name}}">Stop</button>
-								<button md-button md-tooltip="To restart {{nodeStatus.Name}}">Restart</button>
+								<button md-button color="warn" md-tooltip="Click to kill {{nodeStatus.Name}}" (click)=clickStop()>Stop</button>
+								<button md-button md-tooltip="Click to restart {{nodeStatus.Name}}" (click)=clickRestart()>Restart</button>
 							</div>
-							<br>
-							<div class="client-card-text">
-								<ul>
-									<li>ID: {{nodeStatus.ID}}</li>
-									<li>Endpoint: {{nodeStatus.Endpoint}}</li>
-									<li>State: {{nodeStatus.State}}</li>
-									<li>DB Size: {{nodeStatus.DBSizeTxt}}</li>
-									<li>Hash: {{nodeStatus.Hash}}</li>
-								</ul>
-							</div>
+							<p class="client-card-text-status">
+								{{nodeStatus.StateTxt}} <span *ngIf='errorMessage'>(error: {{errorMessage}})</span>
+							</p>
+							<ul>
+								<li><span class="client-card-text-list-title">ID:</span> <span class="client-card-text-id">{{nodeStatus.ID}}</span></li>
+								<li><span class="client-card-text-list-title">Endpoint:</span> <span class="client-card-text-endpoint">{{nodeStatus.Endpoint}}</span></li>
+								<li><span class="client-card-text-list-title">State:</span>
+									<span *ngIf="nodeStatus.State == 'Stopped'" class="client-card-text-stopped">{{nodeStatus.State}}</span>
+									<span *ngIf="nodeStatus.State == 'Follower'" class="client-card-text-follower">{{nodeStatus.State}}</span>
+									<span *ngIf="nodeStatus.State == 'Leader'" class="client-card-text-leader">{{nodeStatus.State}}</span>
+								</li>
+								<li><span class="client-card-text-list-title">DB Size:</span> <span class="client-card-text-dbsize">{{nodeStatus.DBSizeTxt}}</span></li>
+								<li><span class="client-card-text-list-title">Hash:</span> <span class="client-card-text-hash">{{nodeStatus.Hash}}</span></li>
+							</ul>
 						</template>
                     </md-tab>
                 </md-tab-group>

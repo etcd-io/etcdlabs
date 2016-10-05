@@ -1,4 +1,8 @@
 {
+    "/server-status": {
+        "target": "http://0.0.0.0:2200",
+        "secure": "false"
+    },
     "/client": {
         "target": "http://0.0.0.0:2200",
         "secure": "false"

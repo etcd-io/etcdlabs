@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Version, parentComponent } from './common.component';
+import { parentComponent } from './common.component';
 
 export class etcdFlag {
     name: string;
@@ -64,7 +64,7 @@ export class etcdFlag {
 }
 
 @Component({
-    selector: 'install-deploy',
+    selector: 'app-install-deploy',
     templateUrl: 'install-deploy.component.html',
     styleUrls: ['common.component.css'],
 })
