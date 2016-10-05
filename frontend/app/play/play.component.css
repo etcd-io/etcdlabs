@@ -6,6 +6,20 @@
     min-height: 300px;
 }
 
+.select-node-checkbox {
+    font-size: 10px;
+    color: #000;
+    font-family: 'Inconsolata', monospace;
+    font-weight: 300;
+}
+
+.select-node-endpoints {
+    font-size: 10px;
+    color: #000;
+    font-family: 'Inconsolata', monospace;
+    font-weight: 300;
+}
+
 .client-card-text-status {
     text-align: center;
     font-size: 12px;

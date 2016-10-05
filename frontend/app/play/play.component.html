@@ -50,8 +50,23 @@
                     <md-tab>
                         <template md-tab-label><b>Write</b></template>
                         <template md-tab-content>
-							<p>Write keys...</p>
+							<br>
+							<div align="center">
+							<md-checkbox [(ngModel)]="selectedNodes[0]"><span class="select-node-checkbox">node1</span></md-checkbox>
+							<md-checkbox [(ngModel)]="selectedNodes[1]"><span class="select-node-checkbox">node2</span></md-checkbox>
+							<md-checkbox [(ngModel)]="selectedNodes[2]"><span class="select-node-checkbox">node3</span></md-checkbox>
+							<md-checkbox [(ngModel)]="selectedNodes[3]"><span class="select-node-checkbox">node4</span></md-checkbox>
+							<md-checkbox [(ngModel)]="selectedNodes[4]"><span class="select-node-checkbox">node5</span></md-checkbox>
+							</div>
+							<p>
+								
+							</p>
+							<p class="select-node-endpoints">
+								{{ getSelectedNodeEndpoints() }}
+							</p>
+
 							<button md-button (click)=fetch()>Update (Test)</button>
+
 						</template>
                     </md-tab>
 

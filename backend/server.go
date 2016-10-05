@@ -219,23 +219,26 @@ type ClientResponse struct {
 	KeyValues []KeyValue
 }
 
+// clientHandler handles writes, reads, deletes, kill, restart operations.
 func clientHandler(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
-	// TODO: rate limit
+	// TODO: rate limit globally
+
+	// TODO: parse HTML form
+	// req.ParseForm()
+	resp := ClientResponse{
+		Success: true,
+		Error:   "",
+	}
 
 	ns := strings.Replace(path.Base(req.URL.Path), "node", "", 1)
 	idx, err := strconv.Atoi(ns)
 	if err != nil {
 		return err
 	}
+
 	cli, _, err := globalCluster.Client(idx, false, false, 3*time.Second)
 	if err != nil {
 		return err
-	}
-
-	// TODO: parse HTML form
-	resp := ClientResponse{
-		Success: true,
-		Error:   "",
 	}
 
 	switch req.Method {
