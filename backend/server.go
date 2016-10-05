@@ -208,15 +208,15 @@ func serverStatusHandler(ctx context.Context, w http.ResponseWriter, req *http.R
 
 // KeyValue defines key-value pair.
 type KeyValue struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
+	Key   string
+	Value string
 }
 
 // ClientResponse translates client's GET response in frontend-friendly format.
 type ClientResponse struct {
-	Success   bool       `json:"success"`
-	Error     string     `json:"error"`
-	KeyValues []KeyValue `json:"kvs"`
+	Success   bool
+	Error     string
+	KeyValues []KeyValue
 }
 
 func clientHandler(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
