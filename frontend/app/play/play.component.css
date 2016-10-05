@@ -2,6 +2,16 @@
     padding: 30px;
 }
 
+.client-card {
+    min-height: 300px;
+}
+
+.client-card-text {
+    font-family: 'Roboto', Helvetica, sans-serif;
+    font-weight: 300;
+    color: #000
+}
+
 .log-box {
     padding-top: 10px;
     padding-left: 5px;
