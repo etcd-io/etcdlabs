@@ -38,8 +38,8 @@ import (
 )
 
 const (
-	// NoNodeStatus is node status before start or after stop.
-	NoNodeStatus = "Stopped"
+	// StoppedNodeStatus is node status before start or after stop.
+	StoppedNodeStatus = "Stopped"
 	// FollowerNodeStatus is follower in Raft.
 	FollowerNodeStatus = "Follower"
 	// LeaderNodeStatus is leader in Raft.
@@ -163,7 +163,7 @@ func Start(ccfg Config) (c *Cluster, err error) {
 		cfg.PeerAutoTLS = ccfg.PeerAutoTLS
 		cfg.PeerTLSInfo = ccfg.PeerTLSInfo
 
-		c.nodes[i] = &node{cfg: cfg, status: NodeStatus{Name: cfg.Name, Endpoint: clientURL.String(), IsLeader: false, State: NoNodeStatus}}
+		c.nodes[i] = &node{cfg: cfg, status: NodeStatus{Name: cfg.Name, Endpoint: clientURL.String(), IsLeader: false, State: StoppedNodeStatus}}
 
 		startPort += 2
 	}
@@ -305,7 +305,7 @@ func (c *Cluster) Stop(i int) {
 	plog.Printf("stopping %s", c.nodes[i].cfg.Name)
 
 	c.nodes[i].statusLock.RLock()
-	if c.nodes[i].status.State == NoNodeStatus {
+	if c.nodes[i].status.State == StoppedNodeStatus {
 		plog.Warningf("%s is already stopped", c.nodes[i].cfg.Name)
 		c.nodes[i].statusLock.RUnlock()
 		return
@@ -327,7 +327,7 @@ func (c *Cluster) Stop(i int) {
 
 	c.nodes[i].statusLock.Lock()
 	c.nodes[i].status.IsLeader = false
-	c.nodes[i].status.State = NoNodeStatus
+	c.nodes[i].status.State = StoppedNodeStatus
 	c.nodes[i].status.DBSize = 0
 	c.nodes[i].status.DBSizeTxt = ""
 	c.nodes[i].status.Hash = 0
@@ -348,7 +348,7 @@ func (c *Cluster) Restart(i int) error {
 	plog.Printf("restarting %s", c.nodes[i].cfg.Name)
 
 	c.nodes[i].statusLock.RLock()
-	if c.nodes[i].status.State != NoNodeStatus {
+	if c.nodes[i].status.State != StoppedNodeStatus {
 		plog.Warningf("%s is already started", c.nodes[i].cfg.Name)
 		c.nodes[i].statusLock.RUnlock()
 		return nil
@@ -406,14 +406,14 @@ func (c *Cluster) Shutdown() {
 		go func(i int) {
 			defer wg.Done()
 
-			if c.nodes[i].status.State == NoNodeStatus {
+			if c.nodes[i].status.State == StoppedNodeStatus {
 				plog.Warningf("%s is already stopped", c.nodes[i].cfg.Name)
 				return
 			}
 			c.nodes[i].stoppedStartedAt = time.Now()
 
 			c.nodes[i].status.IsLeader = false
-			c.nodes[i].status.State = NoNodeStatus
+			c.nodes[i].status.State = StoppedNodeStatus
 			c.nodes[i].status.DBSize = 0
 			c.nodes[i].status.DBSizeTxt = ""
 			c.nodes[i].status.Hash = 0
@@ -438,7 +438,7 @@ func (c *Cluster) updateNodeStatus() {
 				return
 			}
 
-			if c.nodes[i].status.State == NoNodeStatus {
+			if c.nodes[i].status.State == StoppedNodeStatus {
 				plog.Printf("%s is stopped (skipping updateNodeStatus)", c.nodes[i].cfg.Name)
 				return
 			}
@@ -446,7 +446,7 @@ func (c *Cluster) updateNodeStatus() {
 			cli, tlsConfig, err := c.Client(i, false, false, 3*time.Second)
 			if err != nil {
 				c.nodes[i].statusLock.Lock()
-				c.nodes[i].status.State = NoNodeStatus
+				c.nodes[i].status.State = StoppedNodeStatus
 				c.nodes[i].status.IsLeader = false
 				c.nodes[i].status.DBSize = 0
 				c.nodes[i].status.DBSizeTxt = ""
@@ -463,7 +463,7 @@ func (c *Cluster) updateNodeStatus() {
 			cancel()
 			if err != nil {
 				c.nodes[i].statusLock.Lock()
-				c.nodes[i].status.State = NoNodeStatus
+				c.nodes[i].status.State = StoppedNodeStatus
 				c.nodes[i].status.IsLeader = false
 				c.nodes[i].status.DBSize = 0
 				c.nodes[i].status.DBSizeTxt = ""
@@ -491,7 +491,7 @@ func (c *Cluster) updateNodeStatus() {
 			conn, err := grpc.Dial(c.nodes[i].cfg.LCUrls[0].Host, grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)), grpc.WithTimeout(3*time.Second))
 			if err != nil {
 				c.nodes[i].statusLock.Lock()
-				c.nodes[i].status.State = NoNodeStatus
+				c.nodes[i].status.State = StoppedNodeStatus
 				c.nodes[i].status.IsLeader = false
 				c.nodes[i].status.DBSize = 0
 				c.nodes[i].status.DBSizeTxt = ""
@@ -510,7 +510,7 @@ func (c *Cluster) updateNodeStatus() {
 			cancel()
 			if err != nil {
 				c.nodes[i].statusLock.Lock()
-				c.nodes[i].status.State = NoNodeStatus
+				c.nodes[i].status.State = StoppedNodeStatus
 				c.nodes[i].status.IsLeader = false
 				c.nodes[i].status.DBSize = 0
 				c.nodes[i].status.DBSizeTxt = ""
