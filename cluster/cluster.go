@@ -47,17 +47,18 @@ const (
 )
 
 // NodeStatus defines node status information.
+// Encode without json tag to make it parsable by Typescript.
 type NodeStatus struct {
-	Name     string `json:"name"`
-	ID       string `json:"id"`
-	Endpoint string `json:"endpoint"`
+	Name     string
+	ID       string
+	Endpoint string
 
-	IsLeader bool   `json:"is-leader"`
-	State    string `json:"state"`
+	IsLeader bool
+	State    string
 
-	DBSize    uint64 `json:"db-size"`
-	DBSizeTxt string `json:"db-size-txt"`
-	Hash      int    `json:"hash"`
+	DBSize    uint64
+	DBSizeTxt string
+	Hash      int
 }
 
 // node contains *embed.Etcd and its state.
