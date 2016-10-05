@@ -6,10 +6,47 @@
     min-height: 300px;
 }
 
-.client-card-text {
+.client-card-text-status {
+    text-align: center;
+    font-size: 12px;
+    color: #000;
     font-family: 'Inconsolata', monospace;
     font-weight: 300;
-    color: #000
+}
+
+.client-card-text-list-title {
+    font-size: 15px;
+    color: #000;
+    font-family: 'Inconsolata', monospace;
+    font-weight: 300;
+}
+
+.client-card-text-sub {
+    font-size: 15px;
+    color: #000;
+    font-family: 'Inconsolata', monospace;
+    font-weight: 300;
+}
+
+.client-card-text-stopped {
+    font-size: 15px;
+    color: red;
+    font-family: 'Inconsolata', monospace;
+    font-weight: 300;
+}
+
+.client-card-text-follower {
+    font-size: 15px;
+    color: blue;
+    font-family: 'Inconsolata', monospace;
+    font-weight: 300;
+}
+
+.client-card-text-leader {
+    font-size: 15px;
+    color: seagreen;
+    font-family: 'Inconsolata', monospace;
+    font-weight: 300;
 }
 
 .log-box {

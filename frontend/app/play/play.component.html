@@ -50,43 +50,47 @@
                     <md-tab>
                         <template md-tab-label><b>Write</b></template>
                         <template md-tab-content>
-							<p>Hello World! Read!</p>
+							<p>Write keys...</p>
+							<button md-button (click)=fetchNodeStatus()>Update (Test)</button>
 						</template>
                     </md-tab>
 
                     <md-tab>
                         <template md-tab-label><b>Read</b></template>
                         <template md-tab-content>
-							<p>Hello World! Read!</p>
+							<p>Read keys...</p>
 						</template>
                     </md-tab>
 
                     <md-tab>
                         <template md-tab-label><b>Delete</b></template>
                         <template md-tab-content>
-							<p>Hello World! Read!</p>
+							<p>Delete keys...</p>
 						</template>
                     </md-tab>
 
-                    <md-tab *ngFor="let nodeStatus of nodeStatuses; let i = index;">
+                    <md-tab *ngFor="let nodeStatus of nodeStatuses;">
                         <template md-tab-label>{{nodeStatus.Name}}</template>
                         <template md-tab-content>
 							<br>
 							<div align="center">
-								<button md-button color="warn" md-tooltip="Click to kill {{nodeStatus.Name}}">Stop</button>
-								<button md-button md-tooltip="Click to restart {{nodeStatus.Name}}">Restart</button>
+								<button md-button color="warn" md-tooltip="Click to kill {{nodeStatus.Name}}" (click)=clickStop()>Stop</button>
+								<button md-button md-tooltip="Click to restart {{nodeStatus.Name}}" (click)=clickRestart()>Restart</button>
 							</div>
-							<br>
-							<div>
-								<ul>
-									<li><span class="client-card-text">Name:</span> {{nodeStatus.Name}}</li>
-									<li><span class="client-card-text">ID:</span> {{nodeStatus.ID}}</li>
-									<li><span class="client-card-text">Endpoint:</span> {{nodeStatus.Endpoint}}</li>
-									<li><span class="client-card-text">State:</span> {{nodeStatus.State}}</li>
-									<li><span class="client-card-text">DB Size:</span> {{nodeStatus.DBSizeTxt}}</li>
-									<li><span class="client-card-text">Hash:</span> {{nodeStatus.Hash}}</li>
-								</ul>
-							</div>
+							<p class="client-card-text-status">
+								{{nodeStatus.Status}}
+							</p>
+							<ul>
+								<li><span class="client-card-text-list-title">ID:</span> <span class="client-card-text-sub">{{nodeStatus.ID}}</span></li>
+								<li><span class="client-card-text-list-title">Endpoint:</span> <span class="client-card-text-sub">{{nodeStatus.Endpoint}}</span></li>
+								<li><span class="client-card-text-list-title">State:</span>
+									<span *ngIf="nodeStatus.State == 'Stopped'" class="client-card-text-stopped">{{nodeStatus.State}}</span>
+									<span *ngIf="nodeStatus.State == 'Follower'" class="client-card-text-follower">{{nodeStatus.State}}</span>
+									<span *ngIf="nodeStatus.State == 'Leader'" class="client-card-text-leader">{{nodeStatus.State}}</span>
+								</li>
+								<li><span class="client-card-text-list-title">DB Size:</span> <span class="client-card-text-sub">{{nodeStatus.DBSizeTxt}}</span></li>
+								<li><span class="client-card-text-list-title">Hash:</span> <span class="client-card-text-sub">{{nodeStatus.Hash}}</span></li>
+							</ul>
 						</template>
                     </md-tab>
                 </md-tab-group>
