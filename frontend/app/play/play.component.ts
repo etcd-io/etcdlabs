@@ -1,62 +1,23 @@
 import { Component } from '@angular/core';
-
-
-export class NodeStatus {
-  Status: string;
-
-  Name: string;
-  ID: string;
-  Endpoint: string;
-
-  IsLeader: boolean;
-  State: string;
-
-  DBSize: number;
-  DBSizeTxt: string;
-  Hash: number;
-
-  constructor(
-    status: string,
-    name: string,
-    id: string,
-    endpoint: string,
-    isLeader: boolean,
-    state: string,
-    dbSize: number,
-    dbSizeTxt: string,
-    hash: number) {
-    this.Status = status;
-
-    this.Name = name;
-    this.ID = id;
-    this.Endpoint = endpoint;
-
-    this.IsLeader = isLeader;
-    this.State = state;
-
-    this.DBSize = dbSize;
-    this.DBSizeTxt = dbSizeTxt;
-    this.Hash = hash;
-  }
-}
+import { NodeStatus, NodeStatusService } from './node-status.service';
 
 @Component({
-  selector: 'play',
+  selector: 'app-play',
   templateUrl: 'play.component.html',
   styleUrls: ['play.component.css'],
+  providers: [NodeStatusService],
 })
 export class PlayComponent {
   selectedTab: number;
+
   nodeStatuses: NodeStatus[];
-  constructor() {
+  errorMessage: string;
+
+  constructor(private nodeStatusService: NodeStatusService) {
     this.selectedTab = 3;
-    this.nodeStatuses = [
-      new NodeStatus('node1 has not started...', 'node1', 'None', 'None', false, 'Stopped', 0, '0 B', 0),
-      new NodeStatus('node2 has not started...', 'node2', 'None', 'None', false, 'Stopped', 0, '0 B', 0),
-      new NodeStatus('node3 has not started...', 'node3', 'None', 'None', false, 'Stopped', 0, '0 B', 0),
-      new NodeStatus('node4 has not started...', 'node4', 'None', 'None', false, 'Stopped', 0, '0 B', 0),
-      new NodeStatus('node5 has not started...', 'node5', 'None', 'None', false, 'Stopped', 0, '0 B', 0),
-    ];
+
+    this.nodeStatuses = this.nodeStatusService.fetchNodeStatus();
+    // this.errorMessage = 'None';
   }
 
   selectTab(num: number) {

@@ -78,7 +78,7 @@
 								<button md-button md-tooltip="Click to restart {{nodeStatus.Name}}" (click)=clickRestart()>Restart</button>
 							</div>
 							<p class="client-card-text-status">
-								{{nodeStatus.Status}}
+								{{nodeStatus.Status}} <span *ngIf='errorMessage'>(error: {{errorMessage}})</span>
 							</p>
 							<ul>
 								<li><span class="client-card-text-list-title">ID:</span> <span class="client-card-text-sub">{{nodeStatus.ID}}</span></li>

@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { parentComponent, sidebarItem } from './common.component';
 
 @Component({
-    selector: 'doc',
+    selector: 'app-doc',
     templateUrl: 'doc.component.html',
     styleUrls: ['common.component.css'],
 })

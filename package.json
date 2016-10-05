@@ -1,5 +1,5 @@
 {
-    "name": "etcd-app",
+    "name": "app-etcd",
     "version": "0.0.1",
     "license": "MIT",
     "angular-cli": {},

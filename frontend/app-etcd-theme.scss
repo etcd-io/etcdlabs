@@ -22,7 +22,7 @@
 // NOTE: Theming is currently experimental and not yet publically released!
 @include md-core();
 // Mixin that captures themes for all of the components we use in our app.
-@mixin etcd-app-components($theme) {
+@mixin app-etcd-components($theme) {
     @include md-button-theme($theme);
     @include md-button-toggle-theme($theme);
     @include md-card-theme($theme);
@@ -47,4 +47,4 @@ $primary: md-palette($md-blue);
 $accent: md-palette($md-amber, A200, A100, A400);
 $warn: md-palette($md-red);
 $theme: md-light-theme($primary, $accent, $warn);
-@include etcd-app-components($theme);
+@include app-etcd-components($theme);
