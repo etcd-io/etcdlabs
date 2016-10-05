@@ -73,17 +73,18 @@
                         <template md-tab-content>
 							<br>
 							<div align="center">
-								<button md-button color="warn" md-tooltip="To kill {{nodeStatus.Name}}">Stop</button>
-								<button md-button md-tooltip="To restart {{nodeStatus.Name}}">Restart</button>
+								<button md-button color="warn" md-tooltip="Click to kill {{nodeStatus.Name}}">Stop</button>
+								<button md-button md-tooltip="Click to restart {{nodeStatus.Name}}">Restart</button>
 							</div>
 							<br>
-							<div class="client-card-text">
+							<div>
 								<ul>
-									<li>ID: {{nodeStatus.ID}}</li>
-									<li>Endpoint: {{nodeStatus.Endpoint}}</li>
-									<li>State: {{nodeStatus.State}}</li>
-									<li>DB Size: {{nodeStatus.DBSizeTxt}}</li>
-									<li>Hash: {{nodeStatus.Hash}}</li>
+									<li><span class="client-card-text">Name:</span> {{nodeStatus.Name}}</li>
+									<li><span class="client-card-text">ID:</span> {{nodeStatus.ID}}</li>
+									<li><span class="client-card-text">Endpoint:</span> {{nodeStatus.Endpoint}}</li>
+									<li><span class="client-card-text">State:</span> {{nodeStatus.State}}</li>
+									<li><span class="client-card-text">DB Size:</span> {{nodeStatus.DBSizeTxt}}</li>
+									<li><span class="client-card-text">Hash:</span> {{nodeStatus.Hash}}</li>
 								</ul>
 							</div>
 						</template>
