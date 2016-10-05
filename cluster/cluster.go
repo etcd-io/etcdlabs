@@ -452,7 +452,8 @@ func (c *Cluster) updateNodeStatus() {
 			}
 
 			if c.nodes[i].status.State == StoppedNodeStatus {
-				plog.Printf("%s is stopped (skipping updateNodeStatus)", c.nodes[i].cfg.Name)
+				c.nodes[i].status.StateTxt = fmt.Sprintf("%s has been stopped (since %s)", c.nodes[i].status.Name, humanize.Time(c.nodes[i].stoppedStartedAt))
+				plog.Printf("%s has been stopped (skipping updateNodeStatus)", c.nodes[i].cfg.Name)
 				return
 			}
 
@@ -501,7 +502,7 @@ func (c *Cluster) updateNodeStatus() {
 				Endpoint:  c.nodes[i].cfg.LCUrls[0].String(),
 				IsLeader:  isLeader,
 				State:     state,
-				StateTxt:  fmt.Sprintf("%s is healthy (%s)", c.nodes[i].status.Name, humanize.Time(c.nodes[i].stoppedStartedAt)),
+				StateTxt:  fmt.Sprintf("%s has been healthy (since %s)", c.nodes[i].status.Name, humanize.Time(c.nodes[i].stoppedStartedAt)),
 				DBSize:    uint64(resp.DbSize),
 				DBSizeTxt: humanize.Bytes(uint64(resp.DbSize)),
 			}
