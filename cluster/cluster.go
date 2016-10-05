@@ -55,6 +55,7 @@ type NodeStatus struct {
 
 	IsLeader bool
 	State    string
+	StateTxt string
 
 	DBSize    uint64
 	DBSizeTxt string
@@ -74,6 +75,8 @@ type node struct {
 // Cluster contains all embedded etcd nodes in the same cluster.
 // Configuration is meant to be auto-generated.
 type Cluster struct {
+	Started time.Time
+
 	// opLock blocks Stop, Restart, Shutdown.
 	opLock sync.Mutex
 
@@ -102,17 +105,22 @@ type Config struct {
 	StopStartInterval time.Duration
 }
 
-var minStopStartInterval = 2 * time.Second
+var (
+	uptimeScale          = time.Second
+	minStopStartInterval = 2 * time.Second
+)
 
 // Start starts embedded etcd cluster.
 func Start(ccfg Config) (c *Cluster, err error) {
 	plog.Printf("starting %d nodes (root directory %s, root port :%d)", ccfg.Size, ccfg.RootDir, ccfg.RootPort)
 
+	startTime := time.Now().Round(uptimeScale)
 	if ccfg.StopStartInterval < minStopStartInterval {
 		ccfg.StopStartInterval = minStopStartInterval
 	}
 
 	c = &Cluster{
+		Started:           startTime,
 		rootDir:           ccfg.RootDir,
 		size:              ccfg.Size,
 		stopStartInterval: ccfg.StopStartInterval,
@@ -202,6 +210,7 @@ func Start(ccfg Config) (c *Cluster, err error) {
 
 			c.nodes[i].stoppedStartedAt = time.Now()
 			c.nodes[i].status.State = FollowerNodeStatus
+			c.nodes[i].status.StateTxt = fmt.Sprintf("%s just started (%s)", c.nodes[i].status.Name, humanize.Time(c.nodes[i].stoppedStartedAt))
 			c.nodes[i].status.IsLeader = false
 
 			plog.Printf("started %s (client %s, peer %s)", c.nodes[i].cfg.Name, c.nodes[i].cfg.LCUrls[0].String(), c.nodes[i].cfg.LPUrls[0].String())
@@ -329,6 +338,7 @@ func (c *Cluster) Stop(i int) {
 	c.nodes[i].statusLock.Lock()
 	c.nodes[i].status.IsLeader = false
 	c.nodes[i].status.State = StoppedNodeStatus
+	c.nodes[i].status.StateTxt = fmt.Sprintf("%s just stopped (%s)", c.nodes[i].status.Name, humanize.Time(c.nodes[i].stoppedStartedAt))
 	c.nodes[i].status.DBSize = 0
 	c.nodes[i].status.DBSizeTxt = ""
 	c.nodes[i].status.Hash = 0
@@ -386,6 +396,7 @@ func (c *Cluster) Restart(i int) error {
 	c.nodes[i].statusLock.Lock()
 	c.nodes[i].status.IsLeader = false
 	c.nodes[i].status.State = FollowerNodeStatus
+	c.nodes[i].status.StateTxt = fmt.Sprintf("%s just restarted (%s)", c.nodes[i].status.Name, humanize.Time(c.nodes[i].stoppedStartedAt))
 	c.nodes[i].statusLock.Unlock()
 
 	plog.Printf("restarted %s", c.nodes[i].cfg.Name)
@@ -415,6 +426,7 @@ func (c *Cluster) Shutdown() {
 
 			c.nodes[i].status.IsLeader = false
 			c.nodes[i].status.State = StoppedNodeStatus
+			c.nodes[i].status.State = fmt.Sprintf("%s just stopped (%s)", c.nodes[i].status.Name, humanize.Time(c.nodes[i].stoppedStartedAt))
 			c.nodes[i].status.DBSize = 0
 			c.nodes[i].status.DBSizeTxt = ""
 			c.nodes[i].status.Hash = 0
@@ -444,10 +456,12 @@ func (c *Cluster) updateNodeStatus() {
 				return
 			}
 
+			now := time.Now()
 			cli, tlsConfig, err := c.Client(i, false, false, 3*time.Second)
 			if err != nil {
 				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.State = StoppedNodeStatus
+				c.nodes[i].status.StateTxt = fmt.Sprintf("%s was not reachable while client call (%s)", c.nodes[i].status.Name, humanize.Time(now))
 				c.nodes[i].status.IsLeader = false
 				c.nodes[i].status.DBSize = 0
 				c.nodes[i].status.DBSizeTxt = ""
@@ -459,12 +473,14 @@ func (c *Cluster) updateNodeStatus() {
 			}
 			defer cli.Close()
 
+			now = time.Now()
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 			resp, err := cli.Status(ctx, c.nodes[i].cfg.LCUrls[0].Host)
 			cancel()
 			if err != nil {
 				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.State = StoppedNodeStatus
+				c.nodes[i].status.StateTxt = fmt.Sprintf("%s was not reachable while getting status (%s)", c.nodes[i].status.Name, humanize.Time(now))
 				c.nodes[i].status.IsLeader = false
 				c.nodes[i].status.DBSize = 0
 				c.nodes[i].status.DBSizeTxt = ""
@@ -485,14 +501,17 @@ func (c *Cluster) updateNodeStatus() {
 				Endpoint:  c.nodes[i].cfg.LCUrls[0].String(),
 				IsLeader:  isLeader,
 				State:     state,
+				StateTxt:  fmt.Sprintf("%s is healthy (%s)", c.nodes[i].status.Name, humanize.Time(c.nodes[i].stoppedStartedAt)),
 				DBSize:    uint64(resp.DbSize),
 				DBSizeTxt: humanize.Bytes(uint64(resp.DbSize)),
 			}
 
+			now = time.Now()
 			conn, err := grpc.Dial(c.nodes[i].cfg.LCUrls[0].Host, grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)), grpc.WithTimeout(3*time.Second))
 			if err != nil {
 				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.State = StoppedNodeStatus
+				c.nodes[i].status.StateTxt = fmt.Sprintf("%s was not reachable while grpc.Dial (%s)", c.nodes[i].status.Name, humanize.Time(now))
 				c.nodes[i].status.IsLeader = false
 				c.nodes[i].status.DBSize = 0
 				c.nodes[i].status.DBSizeTxt = ""
@@ -504,6 +523,7 @@ func (c *Cluster) updateNodeStatus() {
 			}
 			defer conn.Close()
 
+			now = time.Now()
 			mc := pb.NewMaintenanceClient(conn)
 			ctx, cancel = context.WithTimeout(context.Background(), 3*time.Second)
 			var hresp *pb.HashResponse
@@ -512,6 +532,7 @@ func (c *Cluster) updateNodeStatus() {
 			if err != nil {
 				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.State = StoppedNodeStatus
+				c.nodes[i].status.StateTxt = fmt.Sprintf("%s was not reachable while getting hash (%s)", c.nodes[i].status.Name, humanize.Time(now))
 				c.nodes[i].status.IsLeader = false
 				c.nodes[i].status.DBSize = 0
 				c.nodes[i].status.DBSizeTxt = ""
