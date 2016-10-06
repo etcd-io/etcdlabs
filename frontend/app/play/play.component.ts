@@ -16,6 +16,9 @@ export class PlayComponent implements OnInit {
   serverStatus: ServerStatus;
   errorMessage: string;
 
+  inputKey: string;
+  inputValue: string;
+
   constructor(private serverService: ServerStatusService) {
     this.selectedTab = 3;
     this.serverStatus = serverService.serverStatus;
@@ -84,5 +87,11 @@ export class PlayComponent implements OnInit {
     this.serverService.fetchServerStatus().subscribe(
       serverStatus => this.serverStatus = serverStatus,
       error => this.errorMessage = <any>error);
+  }
+
+  processWrite(inputKey: string, inputValue: string) {
+    this.inputKey = inputKey;
+    this.inputValue = inputValue;
+    console.log(this.inputKey, this.inputValue);
   }
 }
