@@ -458,7 +458,7 @@ func (c *Cluster) updateNodeStatus() {
 				wg.Done()
 			}()
 
-			if c.nodes[i].status.State == StoppedNodeStatus {
+			if c.IsStopped(i) {
 				c.nodes[i].status.StateTxt = fmt.Sprintf("%s has been stopped (since %s)", c.nodes[i].status.Name, humanize.Time(c.nodes[i].stoppedStartedAt))
 				plog.Printf("%s has been stopped (skipping updateNodeStatus)", c.nodes[i].cfg.Name)
 				return
@@ -640,6 +640,20 @@ func (c *Cluster) Client(dialTimeout time.Duration, i int, eps ...string) (*clie
 
 	cli, err := clientv3.New(ccfg)
 	return cli, ccfg.TLS, err
+}
+
+// IsStopped returns true if the node has stopped.
+func (c *Cluster) IsStopped(i int) (stopped bool) {
+	c.nodes[i].statusLock.Lock()
+	stopped = c.nodes[i].status.State == StoppedNodeStatus
+	c.nodes[i].statusLock.Unlock()
+	return
+
+}
+
+// NodeStatus returns the node status.
+func (c *Cluster) NodeStatus(i int) NodeStatus {
+	return c.nodes[i].status
 }
 
 // AllNodeStatus returns all node status.
