@@ -225,7 +225,7 @@ func Start(ccfg Config) (c *Cluster, err error) {
 	for i := 0; i < c.size; i++ {
 		go func(i int) {
 			for {
-				cli, _, err := c.Client(i, false, false, 3*time.Second)
+				cli, _, err := c.Client(3*time.Second, i, c.Endpoints(i, false)...)
 				if err != nil {
 					plog.Warning(err)
 					continue
@@ -458,7 +458,7 @@ func (c *Cluster) updateNodeStatus() {
 			}
 
 			now := time.Now()
-			cli, tlsConfig, err := c.Client(i, false, false, 3*time.Second)
+			cli, tlsConfig, err := c.Client(3*time.Second, i, c.Endpoints(i, false)...)
 			if err != nil {
 				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.State = StoppedNodeStatus
@@ -567,6 +567,11 @@ func (c *Cluster) updateNodeStatus() {
 	return
 }
 
+// Config returns the configuration of the server.
+func (c *Cluster) Config(i int) embed.Config {
+	return *c.nodes[i].cfg
+}
+
 // AllConfigs returns all configurations.
 func (c *Cluster) AllConfigs() []embed.Config {
 	cs := make([]embed.Config, c.size)
@@ -574,6 +579,19 @@ func (c *Cluster) AllConfigs() []embed.Config {
 		cs[i] = *c.nodes[i].cfg
 	}
 	return cs
+}
+
+// Endpoints returns the endpoints of the node.
+func (c *Cluster) Endpoints(i int, scheme bool) []string {
+	var eps []string
+	for _, ep := range c.nodes[i].cfg.LCUrls {
+		if scheme {
+			eps = append(eps, ep.String())
+		} else {
+			eps = append(eps, ep.Host)
+		}
+	}
+	return eps
 }
 
 // AllEndpoints returns all endpoints of clients.
@@ -590,15 +608,7 @@ func (c *Cluster) AllEndpoints(scheme bool) []string {
 }
 
 // Client creates the client.
-func (c *Cluster) Client(i int, scheme, allEndpoints bool, dialTimeout time.Duration) (*clientv3.Client, *tls.Config, error) {
-	ep := c.nodes[i].cfg.LCUrls[0].Host
-	if scheme {
-		ep = c.nodes[i].cfg.LCUrls[0].String()
-	}
-	eps := []string{ep}
-	if allEndpoints {
-		eps = c.AllEndpoints(scheme)
-	}
+func (c *Cluster) Client(dialTimeout time.Duration, i int, eps ...string) (*clientv3.Client, *tls.Config, error) {
 	ccfg := clientv3.Config{
 		Endpoints:   eps,
 		DialTimeout: dialTimeout,

@@ -119,7 +119,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 		c.Shutdown()
 	}()
 
-	cli, _, err := c.Client(0, scheme, true, 3*time.Second)
+	cli, _, err := c.Client(3*time.Second, 0, c.AllEndpoints(scheme)...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -143,7 +143,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 		time.Sleep(time.Second)
 	}
 
-	cli, _, err = c.Client(0, scheme, true, 3*time.Second)
+	cli, _, err = c.Client(3*time.Second, 0, c.AllEndpoints(scheme)...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -168,4 +168,6 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 	for i, st := range c.AllNodeStatus() {
 		fmt.Printf("%s: %+v\n", c.nodes[i].cfg.Name, st)
 	}
+
+	fmt.Println("DONE!")
 }
