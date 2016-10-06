@@ -30,7 +30,7 @@ var (
 	testBasePort = 8080
 )
 
-func Test_StartServer(t *testing.T) {
+func TestServer(t *testing.T) {
 	testMu.Lock()
 	port := testBasePort
 	testBasePort++
@@ -42,7 +42,7 @@ func Test_StartServer(t *testing.T) {
 	}
 
 	println()
-	time.Sleep(2 * time.Second)
+	time.Sleep(time.Second)
 	fmt.Println("getting server status update...")
 	{
 		resp, err := http.Get(srv.addrURL.String() + "/server-status")
@@ -56,6 +56,35 @@ func Test_StartServer(t *testing.T) {
 		}
 		resp.Body.Close()
 		fmt.Println("'/server-status' response:", string(b))
+	}
+
+	println()
+	time.Sleep(time.Second)
+	fmt.Println("expecting errors...")
+	{
+		tu := srv.addrURL
+		tu.Path = "/client-request"
+
+		req := ClientRequest{
+			Action: "stress",
+		}
+		data, err := json.Marshal(&req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		fmt.Println("'/client-request' POST request:", string(data))
+
+		resp, err := http.Post(tu.String(), "application/json", bytes.NewReader(data))
+		if err != nil {
+			t.Fatal(err)
+		}
+		b, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			resp.Body.Close()
+			t.Fatal(err)
+		}
+		resp.Body.Close()
+		fmt.Println("'/client-request' POST response:", string(b))
 	}
 
 	println()
@@ -89,7 +118,7 @@ func Test_StartServer(t *testing.T) {
 	}
 
 	println()
-	time.Sleep(2 * time.Second)
+	time.Sleep(time.Second)
 	fmt.Println("writing to node2...")
 	{
 		tu := srv.addrURL
@@ -126,7 +155,7 @@ func Test_StartServer(t *testing.T) {
 	}
 
 	println()
-	time.Sleep(2 * time.Second)
+	time.Sleep(time.Second)
 	fmt.Println("prefix-range from node3...")
 	{
 		tu := srv.addrURL
@@ -158,7 +187,7 @@ func Test_StartServer(t *testing.T) {
 	}
 
 	println()
-	time.Sleep(2 * time.Second)
+	time.Sleep(time.Second)
 	fmt.Println("delete-prefix from node4...")
 	{
 		tu := srv.addrURL
@@ -190,7 +219,7 @@ func Test_StartServer(t *testing.T) {
 	}
 
 	println()
-	time.Sleep(2 * time.Second)
+	time.Sleep(time.Second)
 	fmt.Println("get from node5...")
 	{
 		tu := srv.addrURL
@@ -221,7 +250,7 @@ func Test_StartServer(t *testing.T) {
 	}
 
 	println()
-	time.Sleep(2 * time.Second)
+	time.Sleep(time.Second)
 	fmt.Println("stop node1...")
 	{
 		tu := srv.addrURL
@@ -251,7 +280,37 @@ func Test_StartServer(t *testing.T) {
 	}
 
 	println()
-	time.Sleep(2 * time.Second)
+	time.Sleep(time.Second)
+	fmt.Println("expecting errors after stopping node1...")
+	{
+		tu := srv.addrURL
+		tu.Path = "/client-request"
+
+		req := ClientRequest{
+			Action:    "stress",
+			Endpoints: globalCluster.Endpoints(0, false),
+		}
+		data, err := json.Marshal(&req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		fmt.Println("'/client-request' POST request:", string(data))
+
+		resp, err := http.Post(tu.String(), "application/json", bytes.NewReader(data))
+		if err != nil {
+			t.Fatal(err)
+		}
+		b, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			resp.Body.Close()
+			t.Fatal(err)
+		}
+		resp.Body.Close()
+		fmt.Println("'/client-request' POST response:", string(b))
+	}
+
+	println()
+	time.Sleep(time.Second)
 	fmt.Println("restart node1...")
 	{
 		tu := srv.addrURL

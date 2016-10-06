@@ -110,16 +110,33 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 			return err
 		}
 		defer req.Body.Close()
-		if len(creq.Endpoints) == 0 {
-			return fmt.Errorf("no endpoint is given (%v)", creq)
+
+		cresp := ClientResponse{
+			ClientRequest: creq,
+			Success:       true,
 		}
-		cctx, ccancel := context.WithTimeout(ctx, 3*time.Second)
-		defer ccancel()
+
+		if len(creq.Endpoints) == 0 {
+			cresp.Success = false
+			cresp.Error = fmt.Sprintf("no endpoint is given (request %+v)", creq)
+			return json.NewEncoder(w).Encode(&cresp)
+		}
 
 		idx := globalCluster.FindIndexByClientEndpoint(creq.Endpoints[0])
 		if idx == -1 {
-			return fmt.Errorf("wrong endpoints are given (%v)", creq.Endpoints)
+			cresp.Success = false
+			cresp.Error = fmt.Sprintf("wrong endpoints are given (%v)", creq.Endpoints)
+			return json.NewEncoder(w).Encode(&cresp)
 		}
+
+		if globalCluster.IsStopped(idx) && creq.Action != "restart-node" {
+			cresp.Success = false
+			cresp.Error = fmt.Sprintf("%s (%s) is stopped", globalCluster.NodeStatus(idx).Name, globalCluster.NodeStatus(idx).Endpoint)
+			return json.NewEncoder(w).Encode(&cresp)
+		}
+
+		cctx, ccancel := context.WithTimeout(ctx, 3*time.Second)
+		defer ccancel()
 
 		switch creq.Action {
 		case "stress":
@@ -129,11 +146,7 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 			}
 			defer cli.Close()
 
-			cresp := &ClientResponse{
-				ClientRequest: creq,
-				Success:       true,
-				KeyValues:     multiRandKeyValues(5, 3, "foo", "bar"),
-			}
+			cresp.KeyValues = multiRandKeyValues(5, 3, "foo", "bar")
 			for _, kv := range cresp.KeyValues {
 				if _, err := cli.Put(cctx, kv.Key, kv.Value); err != nil {
 					cresp.Success = false
@@ -141,7 +154,7 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 					break
 				}
 			}
-			if err := json.NewEncoder(w).Encode(cresp); err != nil {
+			if err := json.NewEncoder(w).Encode(&cresp); err != nil {
 				return err
 			}
 
@@ -156,16 +169,12 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 			}
 			defer cli.Close()
 
-			cresp := &ClientResponse{
-				ClientRequest: creq,
-				Success:       true,
-				KeyValues:     []KeyValue{creq.KeyValue},
-			}
+			cresp.KeyValues = []KeyValue{creq.KeyValue}
 			if _, err := cli.Put(cctx, creq.KeyValue.Key, creq.KeyValue.Value); err != nil {
 				cresp.Success = false
 				cresp.Error = err.Error()
 			}
-			if err := json.NewEncoder(w).Encode(cresp); err != nil {
+			if err := json.NewEncoder(w).Encode(&cresp); err != nil {
 				return err
 			}
 
@@ -184,10 +193,6 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 			if creq.RangePrefix {
 				opts = append(opts, clientv3.WithPrefix(), clientv3.WithPrevKV())
 			}
-			cresp := &ClientResponse{
-				ClientRequest: creq,
-				Success:       true,
-			}
 			gresp, err := cli.Get(cctx, creq.KeyValue.Key, opts...)
 			if err != nil {
 				cresp.Success = false
@@ -198,7 +203,7 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 				kvs[i] = KeyValue{Key: string(gresp.Kvs[i].Key), Value: string(gresp.Kvs[i].Value)}
 			}
 			cresp.KeyValues = kvs
-			if err := json.NewEncoder(w).Encode(cresp); err != nil {
+			if err := json.NewEncoder(w).Encode(&cresp); err != nil {
 				return err
 			}
 
@@ -217,10 +222,6 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 			if creq.RangePrefix {
 				opts = append(opts, clientv3.WithPrefix(), clientv3.WithPrevKV())
 			}
-			cresp := &ClientResponse{
-				ClientRequest: creq,
-				Success:       true,
-			}
 			dresp, err := cli.Delete(cctx, creq.KeyValue.Key, opts...)
 			if err != nil {
 				cresp.Success = false
@@ -231,30 +232,24 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 				kvs[i] = KeyValue{Key: string(dresp.PrevKvs[i].Key), Value: string(dresp.PrevKvs[i].Value)}
 			}
 			cresp.KeyValues = kvs
-			if err := json.NewEncoder(w).Encode(cresp); err != nil {
+			if err := json.NewEncoder(w).Encode(&cresp); err != nil {
 				return err
 			}
 
 		case "stop-node":
-			cresp := &ClientResponse{
-				ClientRequest: creq,
-				Success:       true,
-			}
+			fmt.Println("stopping")
 			globalCluster.Stop(idx)
-			if err := json.NewEncoder(w).Encode(cresp); err != nil {
+			if err := json.NewEncoder(w).Encode(&cresp); err != nil {
 				return err
 			}
+			fmt.Println("stop node is successful")
 
 		case "restart-node":
-			cresp := &ClientResponse{
-				ClientRequest: creq,
-				Success:       true,
-			}
 			if rerr := globalCluster.Restart(idx); rerr != nil {
 				cresp.Success = false
 				cresp.Error = rerr.Error()
 			}
-			if err := json.NewEncoder(w).Encode(cresp); err != nil {
+			if err := json.NewEncoder(w).Encode(&cresp); err != nil {
 				return err
 			}
 
