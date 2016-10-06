@@ -235,9 +235,10 @@ func Start(ccfg Config) (c *Cluster, err error) {
 	time.Sleep(time.Second)
 
 	plog.Print("checking leader")
-	errc := make(chan error)
+	wg.Add(c.size)
 	for i := 0; i < c.size; i++ {
 		go func(i int) {
+			defer wg.Done()
 			for {
 				cli, _, err := c.Client(3*time.Second, i, c.Endpoints(i, false)...)
 				if err != nil {
@@ -275,23 +276,9 @@ func Start(ccfg Config) (c *Cluster, err error) {
 
 				break
 			}
-
-			errc <- nil
 		}(i)
 	}
-
-	cn := 0
-	for err := range errc {
-		if err != nil {
-			plog.Warning(err)
-			return nil, err
-		}
-
-		cn++
-		if cn == c.size {
-			close(errc)
-		}
-	}
+	wg.Wait()
 
 	defer func() {
 		go func() {
@@ -455,13 +442,11 @@ func (c *Cluster) Shutdown() {
 }
 
 func (c *Cluster) updateNodeStatus() {
-	errc := make(chan error)
+	var wg sync.WaitGroup
+	wg.Add(c.size)
 	for i := 0; i < c.size; i++ {
 		go func(i int) {
-			if c.nodes[i] == nil {
-				errc <- fmt.Errorf("c.nodes[%d] is nil", i)
-				return
-			}
+			defer wg.Done()
 
 			if c.nodes[i].status.State == StoppedNodeStatus {
 				c.nodes[i].status.StateTxt = fmt.Sprintf("%s has been stopped (since %s)", c.nodes[i].status.Name, humanize.Time(c.nodes[i].stoppedStartedAt))
@@ -474,14 +459,12 @@ func (c *Cluster) updateNodeStatus() {
 			if err != nil {
 				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.State = StoppedNodeStatus
-				c.nodes[i].status.StateTxt = fmt.Sprintf("%s was not reachable while client call (%s)", c.nodes[i].status.Name, humanize.Time(now))
+				c.nodes[i].status.StateTxt = fmt.Sprintf("%s was not reachable while client call (%s - %v)", c.nodes[i].status.Name, humanize.Time(now), err)
 				c.nodes[i].status.IsLeader = false
 				c.nodes[i].status.DBSize = 0
 				c.nodes[i].status.DBSizeTxt = ""
 				c.nodes[i].status.Hash = 0
 				c.nodes[i].statusLock.Unlock()
-
-				errc <- err
 				return
 			}
 			defer cli.Close()
@@ -493,14 +476,12 @@ func (c *Cluster) updateNodeStatus() {
 			if err != nil {
 				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.State = StoppedNodeStatus
-				c.nodes[i].status.StateTxt = fmt.Sprintf("%s was not reachable while getting status (%s)", c.nodes[i].status.Name, humanize.Time(now))
+				c.nodes[i].status.StateTxt = fmt.Sprintf("%s was not reachable while getting status (%s - %v)", c.nodes[i].status.Name, humanize.Time(now), err)
 				c.nodes[i].status.IsLeader = false
 				c.nodes[i].status.DBSize = 0
 				c.nodes[i].status.DBSizeTxt = ""
 				c.nodes[i].status.Hash = 0
 				c.nodes[i].statusLock.Unlock()
-
-				errc <- err
 				return
 			}
 
@@ -524,14 +505,12 @@ func (c *Cluster) updateNodeStatus() {
 			if err != nil {
 				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.State = StoppedNodeStatus
-				c.nodes[i].status.StateTxt = fmt.Sprintf("%s was not reachable while grpc.Dial (%s)", c.nodes[i].status.Name, humanize.Time(now))
+				c.nodes[i].status.StateTxt = fmt.Sprintf("%s was not reachable while grpc.Dial (%s - %v)", c.nodes[i].status.Name, humanize.Time(now), err)
 				c.nodes[i].status.IsLeader = false
 				c.nodes[i].status.DBSize = 0
 				c.nodes[i].status.DBSizeTxt = ""
 				c.nodes[i].status.Hash = 0
 				c.nodes[i].statusLock.Unlock()
-
-				errc <- err
 				return
 			}
 			defer conn.Close()
@@ -545,14 +524,12 @@ func (c *Cluster) updateNodeStatus() {
 			if err != nil {
 				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.State = StoppedNodeStatus
-				c.nodes[i].status.StateTxt = fmt.Sprintf("%s was not reachable while getting hash (%s)", c.nodes[i].status.Name, humanize.Time(now))
+				c.nodes[i].status.StateTxt = fmt.Sprintf("%s was not reachable while getting hash (%s - %v)", c.nodes[i].status.Name, humanize.Time(now), err)
 				c.nodes[i].status.IsLeader = false
 				c.nodes[i].status.DBSize = 0
 				c.nodes[i].status.DBSizeTxt = ""
 				c.nodes[i].status.Hash = 0
 				c.nodes[i].statusLock.Unlock()
-
-				errc <- err
 				return
 			}
 			status.Hash = int(hresp.Hash)
@@ -560,27 +537,20 @@ func (c *Cluster) updateNodeStatus() {
 			c.nodes[i].statusLock.Lock()
 			c.nodes[i].status = status
 			c.nodes[i].statusLock.Unlock()
-
-			errc <- nil
 		}(i)
 	}
 
-	cn := 0
-escape:
-	for {
-		select {
-		case err := <-errc:
-			if err != nil {
-				plog.Warning("updateNodeStatus error:", err)
-			}
-			cn++
-			if cn == c.size {
-				close(errc)
-				break escape
-			}
-		case <-c.stopc:
-			return
-		}
+	wf := func() <-chan struct{} {
+		wg.Wait()
+		ch := make(chan struct{})
+		close(ch)
+		return ch
+	}
+
+	select {
+	case <-c.stopc:
+		return
+	case <-wf():
 	}
 	return
 }

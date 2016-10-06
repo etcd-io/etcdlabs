@@ -105,6 +105,13 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 	cfg.RootDir = dir
 	cfg.RootPort = basePort
 
+	if cfg.RootCtx == nil || cfg.RootCancel == nil {
+		rootCtx, rootCancel := context.WithCancel(context.Background())
+		defer rootCancel()
+		cfg.RootCtx = rootCtx
+		cfg.RootCancel = rootCancel
+	}
+
 	bmu.Lock()
 	basePort += 10
 	bmu.Unlock()
