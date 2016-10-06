@@ -364,7 +364,7 @@ func (w *watchGrpcStream) closeSubstream(ws *watcherStream) {
 	default:
 	}
 	// close subscriber's channel
-	if closeErr := w.closeErr; closeErr != nil {
+	if closeErr := w.closeErr; closeErr != nil && ws.initReq.ctx.Err() == nil {
 		go w.sendCloseSubstream(ws, &WatchResponse{closeErr: w.closeErr})
 	} else {
 		close(ws.outc)
@@ -573,7 +573,6 @@ func (w *watchGrpcStream) serveSubstream(ws *watcherStream, resumec chan struct{
 		if !resuming {
 			ws.closing = true
 		}
-		ws.initReq.rev = nextRev
 		close(ws.donec)
 		if !resuming {
 			w.closingc <- ws
@@ -619,6 +618,7 @@ func (w *watchGrpcStream) serveSubstream(ws *watcherStream, resumec chan struct{
 			if len(wr.Events) > 0 {
 				nextRev = wr.Events[len(wr.Events)-1].Kv.ModRevision + 1
 			}
+			ws.initReq.rev = nextRev
 		case <-ws.initReq.ctx.Done():
 			return
 		case <-resumec:
