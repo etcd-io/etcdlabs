@@ -8,16 +8,10 @@
 
 .select-node-checkbox {
     font-size: 10px;
-    color: #000;
+    color: darkgrey;
     font-family: 'Inconsolata', monospace;
     font-weight: 300;
-}
-
-.select-node-endpoints {
-    font-size: 10px;
-    color: #000;
-    font-family: 'Inconsolata', monospace;
-    font-weight: 300;
+    padding-right: 10px;
 }
 
 .client-card-text-status {
@@ -98,6 +92,12 @@
     font-size: 13px;
     font-style: normal;
     font-variant: normal;
+}
+
+#log-output {
+    font-size: 12px;
+    color: black;
+    font-family: 'Inconsolata', monospace;
 }
 
 /deep/ .md-tab-label {

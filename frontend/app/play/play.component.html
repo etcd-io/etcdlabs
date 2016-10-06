@@ -52,35 +52,50 @@
                         <template md-tab-content>
 							<br>
 							<div align="center">
-							<md-checkbox [(ngModel)]="selectedNodes[0]"><span class="select-node-checkbox">node1</span></md-checkbox>
-							<md-checkbox [(ngModel)]="selectedNodes[1]"><span class="select-node-checkbox">node2</span></md-checkbox>
-							<md-checkbox [(ngModel)]="selectedNodes[2]"><span class="select-node-checkbox">node3</span></md-checkbox>
-							<md-checkbox [(ngModel)]="selectedNodes[3]"><span class="select-node-checkbox">node4</span></md-checkbox>
-							<md-checkbox [(ngModel)]="selectedNodes[4]"><span class="select-node-checkbox">node5</span></md-checkbox>
+								<span class="select-node-checkbox">Select endpoints: </span>
+								<md-checkbox [(ngModel)]="selectedNodes[0]" [checked]="true"><span class="select-node-checkbox">node1</span></md-checkbox>
+								<md-checkbox [(ngModel)]="selectedNodes[1]"><span class="select-node-checkbox">node2</span></md-checkbox>
+								<md-checkbox [(ngModel)]="selectedNodes[2]"><span class="select-node-checkbox">node3</span></md-checkbox>
+								<md-checkbox [(ngModel)]="selectedNodes[3]"><span class="select-node-checkbox">node4</span></md-checkbox>
+								<md-checkbox [(ngModel)]="selectedNodes[4]"><span class="select-node-checkbox">node5</span></md-checkbox>
 							</div>
-							<p>
-								
-							</p>
-							<p class="select-node-endpoints">
-								{{ getSelectedNodeEndpoints() }}
-							</p>
+							<br>
 
 							<button md-button (click)=fetch()>Update (Test)</button>
-
 						</template>
                     </md-tab>
 
                     <md-tab>
                         <template md-tab-label><b>Read</b></template>
                         <template md-tab-content>
-							<p>Read keys...</p>
+							<br>
+							<div align="center">
+								<span class="select-node-checkbox">Select endpoints: </span>
+								<md-checkbox [(ngModel)]="selectedNodes[0]" [checked]="true"><span class="select-node-checkbox">node1</span></md-checkbox>
+								<md-checkbox [(ngModel)]="selectedNodes[1]"><span class="select-node-checkbox">node2</span></md-checkbox>
+								<md-checkbox [(ngModel)]="selectedNodes[2]"><span class="select-node-checkbox">node3</span></md-checkbox>
+								<md-checkbox [(ngModel)]="selectedNodes[3]"><span class="select-node-checkbox">node4</span></md-checkbox>
+								<md-checkbox [(ngModel)]="selectedNodes[4]"><span class="select-node-checkbox">node5</span></md-checkbox>
+							</div>
+							<br>
+
 						</template>
                     </md-tab>
 
                     <md-tab>
                         <template md-tab-label><b>Delete</b></template>
                         <template md-tab-content>
-							<p>Delete keys...</p>
+							<br>
+							<div align="center">
+								<span class="select-node-checkbox">Select endpoints: </span>
+								<md-checkbox [(ngModel)]="selectedNodes[0]" [checked]="true"><span class="select-node-checkbox">node1</span></md-checkbox>
+								<md-checkbox [(ngModel)]="selectedNodes[1]"><span class="select-node-checkbox">node2</span></md-checkbox>
+								<md-checkbox [(ngModel)]="selectedNodes[2]"><span class="select-node-checkbox">node3</span></md-checkbox>
+								<md-checkbox [(ngModel)]="selectedNodes[3]"><span class="select-node-checkbox">node4</span></md-checkbox>
+								<md-checkbox [(ngModel)]="selectedNodes[4]"><span class="select-node-checkbox">node5</span></md-checkbox>
+							</div>
+							<br>
+
 						</template>
                     </md-tab>
 
@@ -116,7 +131,8 @@
 
     <h3 id="log">Log</h3>
     <div id="log-box" class="log-box">
-        <div id="log-output ">
+        <div id="log-output">
+            {{ getSelectedNodeEndpointsTxt() }}
         </div>
     </div>
 </div>

@@ -11,7 +11,7 @@ export class PlayComponent implements OnInit {
   mode = 'Observable';
 
   selectedTab: number;
-  selectedNodes = [false, false, false, false, false];
+  selectedNodes = [true, false, false, false, false];
 
   serverStatus: ServerStatus;
   errorMessage: string;
@@ -44,6 +44,20 @@ export class PlayComponent implements OnInit {
       eps.push(this.serverStatus.NodeStatuses[idxs[_i]].Endpoint);
     }
     return eps;
+  }
+  getSelectedNodeEndpointsTxt() {
+    let eps = this.getSelectedNodeEndpoints();
+    let txt = 'No endpoint is selected...';
+    if (eps.length > 0) {
+      txt = 'Selected endpoints: ';
+      for (let _i = 0; _i < eps.length; _i++) {
+        if (_i > 0) {
+          txt += ',';
+        }
+        txt += eps[_i];
+      }
+    }
+    return txt;
   }
 
   clickStop() {
