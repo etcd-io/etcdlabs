@@ -446,7 +446,17 @@ func (c *Cluster) updateNodeStatus() {
 	wg.Add(c.size)
 	for i := 0; i < c.size; i++ {
 		go func(i int) {
-			defer wg.Done()
+			defer func() {
+				if err := recover(); err != nil {
+					plog.Warning("recovered from panic", err)
+					select {
+					case <-c.rootCtx.Done():
+						plog.Warning("most likely from rootCtx canceling")
+					default:
+					}
+				}
+				wg.Done()
+			}()
 
 			if c.nodes[i].status.State == StoppedNodeStatus {
 				c.nodes[i].status.StateTxt = fmt.Sprintf("%s has been stopped (since %s)", c.nodes[i].status.Name, humanize.Time(c.nodes[i].stoppedStartedAt))
