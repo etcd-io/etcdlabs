@@ -60,13 +60,14 @@ func TestServer(t *testing.T) {
 
 	println()
 	time.Sleep(time.Second)
-	fmt.Println("expecting errors...")
+	fmt.Println("stressing node1...")
 	{
 		tu := srv.addrURL
 		tu.Path = "/client-request"
 
 		req := ClientRequest{
-			Action: "stress",
+			Action:    "stress",
+			Endpoints: globalCluster.Endpoints(0, true),
 		}
 		data, err := json.Marshal(&req)
 		if err != nil {
@@ -88,15 +89,49 @@ func TestServer(t *testing.T) {
 	}
 
 	println()
-	time.Sleep(time.Second)
-	fmt.Println("stressing node1...")
+	fmt.Println("expecting rate-limit error from node1...")
 	{
 		tu := srv.addrURL
 		tu.Path = "/client-request"
 
 		req := ClientRequest{
 			Action:    "stress",
-			Endpoints: globalCluster.Endpoints(0, true),
+			Endpoints: globalCluster.Endpoints(0, false),
+		}
+		data, err := json.Marshal(&req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		fmt.Println("'/client-request' POST request:", string(data))
+
+		resp, err := http.Post(tu.String(), "application/json", bytes.NewReader(data))
+		if err != nil {
+			t.Fatal(err)
+		}
+		b, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			resp.Body.Close()
+			t.Fatal(err)
+		}
+		resp.Body.Close()
+		fmt.Println("'/client-request' POST response:", string(b))
+	}
+
+	orig := defaultRequestInterval
+	defaultRequestInterval = time.Millisecond
+	defer func() {
+		defaultRequestInterval = orig
+	}()
+
+	println()
+	time.Sleep(time.Second)
+	fmt.Println("expecting error from specifying no endpoints...")
+	{
+		tu := srv.addrURL
+		tu.Path = "/client-request"
+
+		req := ClientRequest{
+			Action: "stress",
 		}
 		data, err := json.Marshal(&req)
 		if err != nil {

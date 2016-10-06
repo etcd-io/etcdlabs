@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/coreos/etcd/clientv3"
@@ -100,25 +101,56 @@ type ClientResponse struct {
 	KeyValues     []KeyValue
 }
 
+var (
+	defaultRequestInterval = 3 * time.Second
+	minScale               = time.Millisecond
+
+	lastClientReqLock sync.Mutex
+	lastClientReqAt   = time.Now()
+)
+
+func okToClientRequest() (txt string, ok bool) {
+	lastClientReqLock.Lock()
+	took := time.Since(lastClientReqAt)
+	lastClientReqLock.Unlock()
+	ok = took > defaultRequestInterval
+	if !ok {
+		left := defaultRequestInterval - took
+		left /= minScale
+		left *= minScale
+		txt = fmt.Sprintf("rate limit excess (try again after %v)", left)
+	}
+	return
+}
+
+func updateClientRequestAt() {
+	lastClientReqLock.Lock()
+	lastClientReqAt = time.Now()
+	lastClientReqLock.Unlock()
+}
+
 // clientRequestHandler handles writes, reads, deletes, kill, restart operations.
-// TODO: rate limit globally
 func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
 	switch req.Method {
 	case "POST":
+		cresp := ClientResponse{Success: true}
+		if rmsg, ok := okToClientRequest(); !ok {
+			cresp.Success = false
+			cresp.Error = rmsg
+			return json.NewEncoder(w).Encode(&cresp)
+		}
+		updateClientRequestAt()
+
 		creq := ClientRequest{}
 		if err := json.NewDecoder(req.Body).Decode(&creq); err != nil {
 			return err
 		}
 		defer req.Body.Close()
-
-		cresp := ClientResponse{
-			ClientRequest: creq,
-			Success:       true,
-		}
+		cresp.ClientRequest = creq
 
 		if len(creq.Endpoints) == 0 {
 			cresp.Success = false
-			cresp.Error = fmt.Sprintf("no endpoint is given (request %+v)", creq)
+			cresp.Error = "no endpoint is given"
 			return json.NewEncoder(w).Encode(&cresp)
 		}
 
