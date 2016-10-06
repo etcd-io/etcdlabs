@@ -15,6 +15,8 @@
 package backend
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -57,6 +59,7 @@ func Test_StartServer(t *testing.T) {
 		fmt.Println("'/server-status' response:", string(b))
 	}
 
+	// stress node1
 	time.Sleep(time.Second)
 	{
 		tu := srv.addrURL
@@ -74,11 +77,24 @@ func Test_StartServer(t *testing.T) {
 		fmt.Println("'/client/node1' POST response:", string(b))
 	}
 
+	// write to node2
 	time.Sleep(2 * time.Second)
 	{
 		tu := srv.addrURL
 		tu.Path = "/client/node2"
-		req := &http.Request{Method: "PUT", URL: &tu}
+
+		cr := &ClientRequest{KeyValues: []KeyValue{{Key: "foo", Value: "bar"}}}
+		data, err := json.Marshal(cr)
+		if err != nil {
+			t.Fatal(err)
+		}
+		fmt.Println("'/client/node2' PUT request:", string(data))
+
+		req := &http.Request{
+			Method: "PUT",
+			URL:    &tu,
+			Body:   ioutil.NopCloser(bytes.NewReader(data)),
+		}
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
 			t.Fatal(err)

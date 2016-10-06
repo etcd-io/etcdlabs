@@ -15,6 +15,7 @@
 package backend
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 )
@@ -47,7 +48,7 @@ func multiRandStrings(bytesN, sliceN int, prefix string) []string {
 	rs := make([]string, 0, sliceN)
 	for len(rs) != sliceN {
 		b := randBytes(bytesN)
-		s := prefix + "-" + string(b)
+		s := fmt.Sprintf("%s-%s-%d", prefix, b, len(rs))
 		if _, ok := m[s]; !ok {
 			rs = append(rs, s)
 			m[s] = struct{}{}

@@ -86,6 +86,11 @@ type KeyValue struct {
 	Value string
 }
 
+// ClientRequest defines client requests.
+type ClientRequest struct {
+	KeyValues []KeyValue
+}
+
 // ClientResponse translates client's GET response in frontend-friendly format.
 type ClientResponse struct {
 	Success   bool
@@ -110,7 +115,7 @@ func clientHandler(ctx context.Context, w http.ResponseWriter, req *http.Request
 		return err
 	}
 
-	cli, _, err := globalCluster.Client(idx, false, false, 3*time.Second)
+	cli, _, err := globalCluster.Client(3*time.Second, idx, globalCluster.Endpoints(idx, false)...)
 	if err != nil {
 		return err
 	}
@@ -153,6 +158,8 @@ func clientHandler(ctx context.Context, w http.ResponseWriter, req *http.Request
 		if err := json.NewEncoder(w).Encode(resp); err != nil {
 			return err
 		}
+
+	case "DELETE":
 
 	default:
 		http.Error(w, "Method Not Allowed", 405)
