@@ -17,10 +17,8 @@ package backend
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
-	"path"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/coreos/etcd/clientv3"
@@ -88,78 +86,181 @@ type KeyValue struct {
 
 // ClientRequest defines client requests.
 type ClientRequest struct {
-	KeyValues []KeyValue
+	Action      string // 'stress', 'write', 'get', 'delete', 'stop-node', 'restart-node'
+	RangePrefix bool   // 'get', 'delete'
+	Endpoints   []string
+	KeyValue    KeyValue
 }
 
 // ClientResponse translates client's GET response in frontend-friendly format.
 type ClientResponse struct {
-	Success   bool
-	Error     string
-	KeyValues []KeyValue
+	ClientRequest ClientRequest
+	Success       bool
+	Error         string
+	KeyValues     []KeyValue
 }
 
-// clientHandler handles writes, reads, deletes, kill, restart operations.
-func clientHandler(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
-	// TODO: rate limit globally
-
-	// TODO: parse HTML form
-	// req.ParseForm()
-	resp := ClientResponse{
-		Success: true,
-		Error:   "",
-	}
-
-	ns := strings.Replace(path.Base(req.URL.Path), "node", "", 1)
-	idx, err := strconv.Atoi(ns)
-	if err != nil {
-		return err
-	}
-
-	cli, _, err := globalCluster.Client(3*time.Second, idx, globalCluster.Endpoints(idx, false)...)
-	if err != nil {
-		return err
-	}
-
+// clientRequestHandler handles writes, reads, deletes, kill, restart operations.
+// TODO: rate limit globally
+func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
 	switch req.Method {
-	case "POST": // stress
-		resp.KeyValues = multiRandKeyValues(5, 3, "foo", "bar")
-		for _, kv := range resp.KeyValues {
-			if _, err := cli.Put(ctx, kv.Key, kv.Value); err != nil {
-				resp.Success = false
-				resp.Error = err.Error()
-				break
+	case "POST":
+		creq := ClientRequest{}
+		if err := json.NewDecoder(req.Body).Decode(&creq); err != nil {
+			return err
+		}
+		defer req.Body.Close()
+		if len(creq.Endpoints) == 0 {
+			return fmt.Errorf("no endpoint is given (%v)", creq)
+		}
+		cctx, ccancel := context.WithTimeout(ctx, 3*time.Second)
+		defer ccancel()
+
+		idx := globalCluster.FindIndexByClientEndpoint(creq.Endpoints[0])
+		if idx == -1 {
+			return fmt.Errorf("wrong endpoints are given (%v)", creq.Endpoints)
+		}
+
+		switch creq.Action {
+		case "stress":
+			cli, _, err := globalCluster.Client(3*time.Second, idx, creq.Endpoints...)
+			if err != nil {
+				return err
 			}
-		}
-		if err := json.NewEncoder(w).Encode(resp); err != nil {
-			return err
-		}
+			defer cli.Close()
 
-	case "PUT": // write
-		resp.KeyValues = []KeyValue{{Key: "foo", Value: "bar"}}
-		if _, err := cli.Put(ctx, "foo", "bar"); err != nil {
-			resp.Success = false
-			resp.Error = err.Error()
-		}
-		if err := json.NewEncoder(w).Encode(resp); err != nil {
-			return err
-		}
+			cresp := &ClientResponse{
+				ClientRequest: creq,
+				Success:       true,
+				KeyValues:     multiRandKeyValues(5, 3, "foo", "bar"),
+			}
+			for _, kv := range cresp.KeyValues {
+				if _, err := cli.Put(cctx, kv.Key, kv.Value); err != nil {
+					cresp.Success = false
+					cresp.Error = err.Error()
+					break
+				}
+			}
+			if err := json.NewEncoder(w).Encode(cresp); err != nil {
+				return err
+			}
 
-	case "GET": // read
-		if gresp, err := cli.Get(ctx, "foo", clientv3.WithPrefix()); err != nil {
-			resp.Success = false
-			resp.Error = err.Error()
-		} else {
-			resp.KeyValues = make([]KeyValue, len(gresp.Kvs))
+		case "write":
+			if creq.KeyValue.Key == "" {
+				return fmt.Errorf("write request got empty key %v", creq.KeyValue)
+			}
+
+			cli, _, err := globalCluster.Client(3*time.Second, idx, creq.Endpoints...)
+			if err != nil {
+				return err
+			}
+			defer cli.Close()
+
+			cresp := &ClientResponse{
+				ClientRequest: creq,
+				Success:       true,
+				KeyValues:     []KeyValue{creq.KeyValue},
+			}
+			if _, err := cli.Put(cctx, creq.KeyValue.Key, creq.KeyValue.Value); err != nil {
+				cresp.Success = false
+				cresp.Error = err.Error()
+			}
+			if err := json.NewEncoder(w).Encode(cresp); err != nil {
+				return err
+			}
+
+		case "get":
+			if creq.KeyValue.Key == "" {
+				return fmt.Errorf("get request got empty key %v", creq.KeyValue)
+			}
+
+			cli, _, err := globalCluster.Client(3*time.Second, idx, creq.Endpoints...)
+			if err != nil {
+				return err
+			}
+			defer cli.Close()
+
+			var opts []clientv3.OpOption
+			if creq.RangePrefix {
+				opts = append(opts, clientv3.WithPrefix(), clientv3.WithPrevKV())
+			}
+			cresp := &ClientResponse{
+				ClientRequest: creq,
+				Success:       true,
+			}
+			gresp, err := cli.Get(cctx, creq.KeyValue.Key, opts...)
+			if err != nil {
+				cresp.Success = false
+				cresp.Error = err.Error()
+			}
+			kvs := make([]KeyValue, len(gresp.Kvs))
 			for i := range gresp.Kvs {
-				resp.KeyValues[i].Key = string(gresp.Kvs[i].Key)
-				resp.KeyValues[i].Value = string(gresp.Kvs[i].Value)
+				kvs[i] = KeyValue{Key: string(gresp.Kvs[i].Key), Value: string(gresp.Kvs[i].Value)}
 			}
-		}
-		if err := json.NewEncoder(w).Encode(resp); err != nil {
-			return err
-		}
+			cresp.KeyValues = kvs
+			if err := json.NewEncoder(w).Encode(cresp); err != nil {
+				return err
+			}
 
-	case "DELETE":
+		case "delete":
+			if creq.KeyValue.Key == "" {
+				return fmt.Errorf("delete request got empty key %v", creq.KeyValue)
+			}
+
+			cli, _, err := globalCluster.Client(3*time.Second, idx, creq.Endpoints...)
+			if err != nil {
+				return err
+			}
+			defer cli.Close()
+
+			var opts []clientv3.OpOption
+			if creq.RangePrefix {
+				opts = append(opts, clientv3.WithPrefix(), clientv3.WithPrevKV())
+			}
+			cresp := &ClientResponse{
+				ClientRequest: creq,
+				Success:       true,
+			}
+			dresp, err := cli.Delete(cctx, creq.KeyValue.Key, opts...)
+			if err != nil {
+				cresp.Success = false
+				cresp.Error = err.Error()
+			}
+			kvs := make([]KeyValue, len(dresp.PrevKvs))
+			for i := range dresp.PrevKvs {
+				kvs[i] = KeyValue{Key: string(dresp.PrevKvs[i].Key), Value: string(dresp.PrevKvs[i].Value)}
+			}
+			cresp.KeyValues = kvs
+			if err := json.NewEncoder(w).Encode(cresp); err != nil {
+				return err
+			}
+
+		case "stop-node":
+			cresp := &ClientResponse{
+				ClientRequest: creq,
+				Success:       true,
+			}
+			globalCluster.Stop(idx)
+			if err := json.NewEncoder(w).Encode(cresp); err != nil {
+				return err
+			}
+
+		case "restart-node":
+			cresp := &ClientResponse{
+				ClientRequest: creq,
+				Success:       true,
+			}
+			if rerr := globalCluster.Restart(idx); rerr != nil {
+				cresp.Success = false
+				cresp.Error = rerr.Error()
+			}
+			if err := json.NewEncoder(w).Encode(cresp); err != nil {
+				return err
+			}
+
+		default:
+			return fmt.Errorf("unknown action %q", creq.Action)
+		}
 
 	default:
 		http.Error(w, "Method Not Allowed", 405)

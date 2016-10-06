@@ -22,7 +22,6 @@ import (
 	"net/url"
 	"os"
 	"sync"
-	"time"
 
 	"github.com/coreos/etcdlabs/cluster"
 )
@@ -32,7 +31,7 @@ var (
 	rootPort   = 2379
 )
 
-func startCluster() (*cluster.Cluster, error) {
+func startCluster(rootContext context.Context, rootCancel func()) (*cluster.Cluster, error) {
 	rootPortMu.Lock()
 	port := rootPort
 	rootPort += 10 // for testing
@@ -48,18 +47,10 @@ func startCluster() (*cluster.Cluster, error) {
 		RootDir:       dir,
 		RootPort:      port,
 		ClientAutoTLS: true,
+		RootContext:   rootContext,
+		RootCancel:    rootCancel,
 	}
 	return cluster.Start(cfg)
-}
-
-var globalCluster *cluster.Cluster
-
-func init() {
-	c, err := startCluster()
-	if err != nil {
-		plog.Panic(err)
-	}
-	globalCluster = c
 }
 
 // Server warps http.Server.
@@ -73,6 +64,8 @@ type Server struct {
 	donec      chan struct{}
 }
 
+var globalCluster *cluster.Cluster
+
 // StartServer starts a backend webserver with stoppable listener.
 func StartServer(port int) (*Server, error) {
 	stopc := make(chan struct{})
@@ -81,22 +74,22 @@ func StartServer(port int) (*Server, error) {
 		return nil, err
 	}
 
-	rootContext, rootCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	rootContext, rootCancel := context.WithCancel(context.Background())
+	c, err := startCluster(rootContext, rootCancel)
+	if err != nil {
+		return nil, err
+	}
+	globalCluster = c
 
 	mux := http.NewServeMux()
-
 	mux.Handle("/server-status", &ContextAdapter{
 		ctx:     rootContext,
 		handler: ContextHandlerFunc(serverStatusHandler),
 	})
-
-	for _, cfg := range globalCluster.AllConfigs() {
-		ph := fmt.Sprintf("/client/%s", cfg.Name)
-		mux.Handle(ph, &ContextAdapter{
-			ctx:     rootContext,
-			handler: ContextHandlerFunc(clientHandler),
-		})
-	}
+	mux.Handle("/client-request", &ContextAdapter{
+		ctx:     rootContext,
+		handler: ContextHandlerFunc(clientRequestHandler),
+	})
 
 	addrURL := url.URL{Scheme: "http", Host: fmt.Sprintf("localhost:%d", port)}
 	plog.Infof("started server %s", addrURL.String())

@@ -23,8 +23,6 @@ import (
 	"sync"
 	"testing"
 	"time"
-
-	"github.com/coreos/pkg/capnslog"
 )
 
 var (
@@ -43,8 +41,9 @@ func Test_StartServer(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// wait until first server status update
+	println()
 	time.Sleep(2 * time.Second)
+	fmt.Println("getting server status update...")
 	{
 		resp, err := http.Get(srv.addrURL.String() + "/server-status")
 		if err != nil {
@@ -59,12 +58,24 @@ func Test_StartServer(t *testing.T) {
 		fmt.Println("'/server-status' response:", string(b))
 	}
 
-	// stress node1
+	println()
 	time.Sleep(time.Second)
+	fmt.Println("stressing node1...")
 	{
 		tu := srv.addrURL
-		tu.Path = "/client/node1"
-		resp, err := http.Post(tu.String(), "", nil)
+		tu.Path = "/client-request"
+
+		req := ClientRequest{
+			Action:    "stress",
+			Endpoints: globalCluster.Endpoints(0, true),
+		}
+		data, err := json.Marshal(&req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		fmt.Println("'/client-request' POST request:", string(data))
+
+		resp, err := http.Post(tu.String(), "application/json", bytes.NewReader(data))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -74,28 +85,34 @@ func Test_StartServer(t *testing.T) {
 			t.Fatal(err)
 		}
 		resp.Body.Close()
-		fmt.Println("'/client/node1' POST response:", string(b))
+		fmt.Println("'/client-request' POST response:", string(b))
 	}
 
-	// write to node2
+	println()
 	time.Sleep(2 * time.Second)
+	fmt.Println("writing to node2...")
 	{
 		tu := srv.addrURL
-		tu.Path = "/client/node2"
+		tu.Path = "/client-request"
 
-		cr := &ClientRequest{KeyValues: []KeyValue{{Key: "foo", Value: "bar"}}}
-		data, err := json.Marshal(cr)
+		req := ClientRequest{
+			Action:    "write",
+			Endpoints: globalCluster.Endpoints(1, true),
+			KeyValue:  KeyValue{Key: "foo", Value: "bar"},
+		}
+		data, err := json.Marshal(&req)
 		if err != nil {
 			t.Fatal(err)
 		}
-		fmt.Println("'/client/node2' PUT request:", string(data))
+		fmt.Println("'/client-request' POST request:", string(data))
 
-		req := &http.Request{
-			Method: "PUT",
-			URL:    &tu,
-			Body:   ioutil.NopCloser(bytes.NewReader(data)),
-		}
-		resp, err := http.DefaultClient.Do(req)
+		// hreq := &http.Request{
+		// 	Method: "POST",
+		// 	URL:    &tu,
+		// 	Body:   ioutil.NopCloser(bytes.NewReader(data)),
+		// }
+		// resp, err := http.DefaultClient.Do(hreq)
+		resp, err := http.Post(tu.String(), "application/json", bytes.NewReader(data))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -105,12 +122,29 @@ func Test_StartServer(t *testing.T) {
 			t.Fatal(err)
 		}
 		resp.Body.Close()
-		fmt.Println("'/client/node2' PUT response:", string(b))
+		fmt.Println("'/client-request' POST response:", string(b))
 	}
 
+	println()
 	time.Sleep(2 * time.Second)
+	fmt.Println("prefix-range from node3...")
 	{
-		resp, err := http.Get(srv.addrURL.String() + "/client/node3")
+		tu := srv.addrURL
+		tu.Path = "/client-request"
+
+		req := ClientRequest{
+			Action:      "get",
+			RangePrefix: true,
+			Endpoints:   globalCluster.Endpoints(2, true),
+			KeyValue:    KeyValue{Key: "foo"},
+		}
+		data, err := json.Marshal(&req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		fmt.Println("'/client-request' POST request:", string(data))
+
+		resp, err := http.Post(tu.String(), "application/json", bytes.NewReader(data))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -120,10 +154,135 @@ func Test_StartServer(t *testing.T) {
 			t.Fatal(err)
 		}
 		resp.Body.Close()
-		fmt.Println("'/client/node3' GET response:", string(b))
+		fmt.Println("'/client-request' POST response:", string(b))
 	}
 
-	capnslog.SetGlobalLogLevel(capnslog.CRITICAL)
-	defer capnslog.SetGlobalLogLevel(testLogLevel)
+	println()
+	time.Sleep(2 * time.Second)
+	fmt.Println("delete-prefix from node4...")
+	{
+		tu := srv.addrURL
+		tu.Path = "/client-request"
+
+		req := ClientRequest{
+			Action:      "delete",
+			RangePrefix: true,
+			Endpoints:   globalCluster.Endpoints(3, true),
+			KeyValue:    KeyValue{Key: "foo"},
+		}
+		data, err := json.Marshal(&req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		fmt.Println("'/client-request' POST request:", string(data))
+
+		resp, err := http.Post(tu.String(), "application/json", bytes.NewReader(data))
+		if err != nil {
+			t.Fatal(err)
+		}
+		b, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			resp.Body.Close()
+			t.Fatal(err)
+		}
+		resp.Body.Close()
+		fmt.Println("'/client-request' POST response:", string(b))
+	}
+
+	println()
+	time.Sleep(2 * time.Second)
+	fmt.Println("get from node5...")
+	{
+		tu := srv.addrURL
+		tu.Path = "/client-request"
+
+		req := ClientRequest{
+			Action:    "get",
+			Endpoints: globalCluster.Endpoints(4, true),
+			KeyValue:  KeyValue{Key: "foo"},
+		}
+		data, err := json.Marshal(&req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		fmt.Println("'/client-request' POST request:", string(data))
+
+		resp, err := http.Post(tu.String(), "application/json", bytes.NewReader(data))
+		if err != nil {
+			t.Fatal(err)
+		}
+		b, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			resp.Body.Close()
+			t.Fatal(err)
+		}
+		resp.Body.Close()
+		fmt.Println("'/client-request' POST response:", string(b))
+	}
+
+	println()
+	time.Sleep(2 * time.Second)
+	fmt.Println("stop node1...")
+	{
+		tu := srv.addrURL
+		tu.Path = "/client-request"
+
+		req := ClientRequest{
+			Action:    "stop-node",
+			Endpoints: globalCluster.Endpoints(0, true),
+		}
+		data, err := json.Marshal(&req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		fmt.Println("'/client-request' POST request:", string(data))
+
+		resp, err := http.Post(tu.String(), "application/json", bytes.NewReader(data))
+		if err != nil {
+			t.Fatal(err)
+		}
+		b, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			resp.Body.Close()
+			t.Fatal(err)
+		}
+		resp.Body.Close()
+		fmt.Println("'/client-request' POST response:", string(b))
+	}
+
+	println()
+	time.Sleep(2 * time.Second)
+	fmt.Println("restart node1...")
+	{
+		tu := srv.addrURL
+		tu.Path = "/client-request"
+
+		req := ClientRequest{
+			Action:    "restart-node",
+			Endpoints: globalCluster.Endpoints(0, true),
+		}
+		data, err := json.Marshal(&req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		fmt.Println("'/client-request' POST request:", string(data))
+
+		resp, err := http.Post(tu.String(), "application/json", bytes.NewReader(data))
+		if err != nil {
+			t.Fatal(err)
+		}
+		b, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			resp.Body.Close()
+			t.Fatal(err)
+		}
+		resp.Body.Close()
+		fmt.Println("'/client-request' POST response:", string(b))
+	}
+
+	fmt.Println("DONE!")
+
+	// capnslog.SetGlobalLogLevel(capnslog.CRITICAL)
+	// defer capnslog.SetGlobalLogLevel(testLogLevel)
 	srv.Stop()
 }
