@@ -28,6 +28,7 @@ export class PlayComponent implements OnInit {
   selectTab(num: number) {
     this.selectedTab = num;
   }
+
   getSelectedNodeIndexes() {
     let idxs = [];
     for (let _i = 0; _i < this.selectedNodes.length; _i++) {
@@ -37,6 +38,7 @@ export class PlayComponent implements OnInit {
     }
     return idxs;
   }
+
   getSelectedNodeEndpoints() {
     let idxs = this.getSelectedNodeIndexes();
     let eps = [];
@@ -45,6 +47,7 @@ export class PlayComponent implements OnInit {
     }
     return eps;
   }
+
   getSelectedNodeEndpointsTxt() {
     let eps = this.getSelectedNodeEndpoints();
     let txt = 'No endpoint is selected...';
@@ -81,7 +84,5 @@ export class PlayComponent implements OnInit {
     this.serverService.fetchServerStatus().subscribe(
       serverStatus => this.serverStatus = serverStatus,
       error => this.errorMessage = <any>error);
-
-    console.log('fetch got', this.serverStatus);
   }
 }
