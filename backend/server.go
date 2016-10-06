@@ -31,7 +31,7 @@ var (
 	rootPort   = 2379
 )
 
-func startCluster(rootContext context.Context, rootCancel func()) (*cluster.Cluster, error) {
+func startCluster(rootCtx context.Context, rootCancel func()) (*cluster.Cluster, error) {
 	rootPortMu.Lock()
 	port := rootPort
 	rootPort += 10 // for testing
@@ -47,7 +47,7 @@ func startCluster(rootContext context.Context, rootCancel func()) (*cluster.Clus
 		RootDir:       dir,
 		RootPort:      port,
 		ClientAutoTLS: true,
-		RootContext:   rootContext,
+		RootCtx:       rootCtx,
 		RootCancel:    rootCancel,
 	}
 	return cluster.Start(cfg)
@@ -74,8 +74,8 @@ func StartServer(port int) (*Server, error) {
 		return nil, err
 	}
 
-	rootContext, rootCancel := context.WithCancel(context.Background())
-	c, err := startCluster(rootContext, rootCancel)
+	rootCtx, rootCancel := context.WithCancel(context.Background())
+	c, err := startCluster(rootCtx, rootCancel)
 	if err != nil {
 		return nil, err
 	}
@@ -83,11 +83,11 @@ func StartServer(port int) (*Server, error) {
 
 	mux := http.NewServeMux()
 	mux.Handle("/server-status", &ContextAdapter{
-		ctx:     rootContext,
+		ctx:     rootCtx,
 		handler: ContextHandlerFunc(serverStatusHandler),
 	})
 	mux.Handle("/client-request", &ContextAdapter{
-		ctx:     rootContext,
+		ctx:     rootCtx,
 		handler: ContextHandlerFunc(clientRequestHandler),
 	})
 

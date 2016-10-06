@@ -89,8 +89,8 @@ type Cluster struct {
 	stopc chan struct{} // to signal updateNodeStatus
 	donec chan struct{} // after stopping updateNodeStatus
 
-	rootContext context.Context
-	rootCancel  func()
+	rootCtx    context.Context
+	rootCancel func()
 }
 
 // Config defines etcd local cluster Configuration.
@@ -108,8 +108,8 @@ type Config struct {
 	// This is to rate limit the nodes stop and restart operations.
 	StopStartInterval time.Duration
 
-	RootContext context.Context
-	RootCancel  func()
+	RootCtx    context.Context
+	RootCancel func()
 }
 
 var (
@@ -135,7 +135,7 @@ func Start(ccfg Config) (c *Cluster, err error) {
 		clientHostToIndex: make(map[string]int, ccfg.Size),
 		stopc:             make(chan struct{}),
 		donec:             make(chan struct{}),
-		rootContext:       ccfg.RootContext,
+		rootCtx:           ccfg.RootCtx,
 		rootCancel:        ccfg.RootCancel,
 	}
 
@@ -143,6 +143,8 @@ func Start(ccfg Config) (c *Cluster, err error) {
 		if err = mkdirAll(ccfg.RootDir); err != nil {
 			return nil, err
 		}
+	} else {
+		os.RemoveAll(ccfg.RootDir)
 	}
 
 	// client TLS
@@ -244,7 +246,7 @@ func Start(ccfg Config) (c *Cluster, err error) {
 				}
 				defer cli.Close()
 
-				ctx, cancel := context.WithTimeout(c.rootContext, 3*time.Second)
+				ctx, cancel := context.WithTimeout(c.rootCtx, 3*time.Second)
 				resp, err := cli.Status(ctx, c.nodes[i].cfg.LCUrls[0].Host)
 				cancel()
 				if err != nil {
@@ -485,7 +487,7 @@ func (c *Cluster) updateNodeStatus() {
 			defer cli.Close()
 
 			now = time.Now()
-			ctx, cancel := context.WithTimeout(c.rootContext, 3*time.Second)
+			ctx, cancel := context.WithTimeout(c.rootCtx, 3*time.Second)
 			resp, err := cli.Status(ctx, c.nodes[i].cfg.LCUrls[0].Host)
 			cancel()
 			if err != nil {
@@ -536,7 +538,7 @@ func (c *Cluster) updateNodeStatus() {
 
 			now = time.Now()
 			mc := pb.NewMaintenanceClient(conn)
-			ctx, cancel = context.WithTimeout(c.rootContext, 3*time.Second)
+			ctx, cancel = context.WithTimeout(c.rootCtx, 3*time.Second)
 			var hresp *pb.HashResponse
 			hresp, err = mc.Hash(ctx, &pb.HashRequest{})
 			cancel()
