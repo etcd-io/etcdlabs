@@ -84,9 +84,13 @@ type Cluster struct {
 	size              int
 	stopStartInterval time.Duration
 	nodes             []*node
+	clientHostToIndex map[string]int
 
 	stopc chan struct{} // to signal updateNodeStatus
 	donec chan struct{} // after stopping updateNodeStatus
+
+	rootContext context.Context
+	rootCancel  func()
 }
 
 // Config defines etcd local cluster Configuration.
@@ -103,6 +107,9 @@ type Config struct {
 	// StopStartInterval is the minimum duration to allow updates on nodes.
 	// This is to rate limit the nodes stop and restart operations.
 	StopStartInterval time.Duration
+
+	RootContext context.Context
+	RootCancel  func()
 }
 
 var (
@@ -125,8 +132,11 @@ func Start(ccfg Config) (c *Cluster, err error) {
 		size:              ccfg.Size,
 		stopStartInterval: ccfg.StopStartInterval,
 		nodes:             make([]*node, ccfg.Size),
+		clientHostToIndex: make(map[string]int, ccfg.Size),
 		stopc:             make(chan struct{}),
 		donec:             make(chan struct{}),
+		rootContext:       ccfg.RootContext,
+		rootCancel:        ccfg.RootCancel,
 	}
 
 	if !existFileOrDir(ccfg.RootDir) {
@@ -163,6 +173,8 @@ func Start(ccfg Config) (c *Cluster, err error) {
 
 		clientURL := url.URL{Scheme: clientScheme, Host: fmt.Sprintf("localhost:%d", startPort)}
 		cfg.LCUrls, cfg.ACUrls = []url.URL{clientURL}, []url.URL{clientURL}
+
+		c.clientHostToIndex[clientURL.Host] = i
 
 		peerURL := url.URL{Scheme: peerScheme, Host: fmt.Sprintf("localhost:%d", startPort+1)}
 		cfg.LPUrls, cfg.APUrls = []url.URL{peerURL}, []url.URL{peerURL}
@@ -232,7 +244,7 @@ func Start(ccfg Config) (c *Cluster, err error) {
 				}
 				defer cli.Close()
 
-				ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+				ctx, cancel := context.WithTimeout(c.rootContext, 3*time.Second)
 				resp, err := cli.Status(ctx, c.nodes[i].cfg.LCUrls[0].Host)
 				cancel()
 				if err != nil {
@@ -280,9 +292,6 @@ func Start(ccfg Config) (c *Cluster, err error) {
 	}
 
 	defer func() {
-		// update once at first
-		c.updateNodeStatus()
-
 		go func() {
 			for {
 				select {
@@ -405,6 +414,7 @@ func (c *Cluster) Restart(i int) error {
 
 // Shutdown stops all nodes and deletes all data directories.
 func (c *Cluster) Shutdown() {
+	c.rootCancel()
 	close(c.stopc) // stopping updateNodeStatus
 	<-c.donec      // wait until it returns
 
@@ -475,7 +485,7 @@ func (c *Cluster) updateNodeStatus() {
 			defer cli.Close()
 
 			now = time.Now()
-			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+			ctx, cancel := context.WithTimeout(c.rootContext, 3*time.Second)
 			resp, err := cli.Status(ctx, c.nodes[i].cfg.LCUrls[0].Host)
 			cancel()
 			if err != nil {
@@ -526,7 +536,7 @@ func (c *Cluster) updateNodeStatus() {
 
 			now = time.Now()
 			mc := pb.NewMaintenanceClient(conn)
-			ctx, cancel = context.WithTimeout(context.Background(), 3*time.Second)
+			ctx, cancel = context.WithTimeout(c.rootContext, 3*time.Second)
 			var hresp *pb.HashResponse
 			hresp, err = mc.Hash(ctx, &pb.HashRequest{})
 			cancel()
@@ -554,17 +564,41 @@ func (c *Cluster) updateNodeStatus() {
 	}
 
 	cn := 0
-	for err := range errc {
-		if err != nil {
-			plog.Warning("updateNodeStatus error:", err)
-		}
-
-		cn++
-		if cn == c.size {
-			close(errc)
+escape:
+	for {
+		select {
+		case err := <-errc:
+			if err != nil {
+				plog.Warning("updateNodeStatus error:", err)
+			}
+			cn++
+			if cn == c.size {
+				close(errc)
+				break escape
+			}
+		case <-c.stopc:
+			return
 		}
 	}
 	return
+}
+
+func getHost(ep string) string {
+	url, uerr := url.Parse(ep)
+	if uerr != nil || !strings.Contains(ep, "://") {
+		return ep
+	}
+	return url.Host
+}
+
+// FindIndexByClientEndpoint returns the node index by client URL.
+// It returns -1 if none.
+func (c *Cluster) FindIndexByClientEndpoint(ep string) int {
+	idx, ok := c.clientHostToIndex[getHost(ep)]
+	if !ok {
+		return -1
+	}
+	return idx
 }
 
 // Config returns the configuration of the server.
