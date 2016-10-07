@@ -14,10 +14,14 @@
 
 package backend
 
-import "github.com/coreos/pkg/capnslog"
+import (
+	"github.com/coreos/pkg/capnslog"
+	"google.golang.org/grpc/grpclog"
+)
 
 var plog = capnslog.NewPackageLogger("github.com/coreos/etcdlabs", "backend")
 
 func init() {
 	capnslog.SetGlobalLogLevel(capnslog.INFO)
+	grpclog.SetLogger(plog)
 }
