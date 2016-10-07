@@ -80,6 +80,7 @@ func StartServer(port int) (*Server, error) {
 		return nil, err
 	}
 	globalCluster = c
+	globalRequestLimiter.ctx = rootCtx
 
 	mux := http.NewServeMux()
 	mux.Handle("/server-status", &ContextAdapter{
