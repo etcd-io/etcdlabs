@@ -18,5 +18,6 @@ import:
   version: 231b4cfea0e79843053a33f5fe90bd4d84b23cd3
   subpackages:
   - credentials
+  - grpclog
 - package: golang.org/x/time
   version: 711ca1cb87636abec28122ef3bc6a77269d433f3
