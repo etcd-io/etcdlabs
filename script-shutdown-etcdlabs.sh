@@ -15,3 +15,5 @@ kill -2 $(lsof -ti tcp:2387)
 sleep 2s
 echo "killing Angular2 server"
 kill -2 $(lsof -ti tcp:4200)
+
+tail -20 $HOME/etcdlabs.log

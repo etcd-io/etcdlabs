@@ -76,7 +76,8 @@ type node struct {
 // Cluster contains all embedded etcd nodes in the same cluster.
 // Configuration is meant to be auto-generated.
 type Cluster struct {
-	Started time.Time
+	Started     time.Time
+	DialTimeout time.Duration // for client requests
 
 	// opLock blocks Stop, Restart, Shutdown.
 	opLock sync.Mutex
@@ -109,13 +110,15 @@ type Config struct {
 	// This is to rate limit the nodes stop and restart operations.
 	StopStartInterval time.Duration
 
-	RootCtx    context.Context
-	RootCancel func()
+	RootCtx     context.Context
+	RootCancel  func()
+	DialTimeout time.Duration // for client requests
 }
 
 var (
 	uptimeScale          = time.Second
 	minStopStartInterval = 2 * time.Second
+	defaultDialTimeout   = 3 * time.Second
 )
 
 // Start starts embedded etcd cluster.
@@ -126,9 +129,14 @@ func Start(ccfg Config) (c *Cluster, err error) {
 	if ccfg.StopStartInterval < minStopStartInterval {
 		ccfg.StopStartInterval = minStopStartInterval
 	}
+	dt := ccfg.DialTimeout
+	if dt == time.Duration(0) {
+		dt = defaultDialTimeout
+	}
 
 	c = &Cluster{
 		Started:           startTime,
+		DialTimeout:       dt,
 		rootDir:           ccfg.RootDir,
 		size:              ccfg.Size,
 		stopStartInterval: ccfg.StopStartInterval,
@@ -241,7 +249,7 @@ func Start(ccfg Config) (c *Cluster, err error) {
 		go func(i int) {
 			defer wg.Done()
 			for {
-				cli, _, err := c.Client(3*time.Second, c.Endpoints(i, false)...)
+				cli, _, err := c.Client(c.Endpoints(i, false)...)
 				if err != nil {
 					plog.Warning(err)
 					continue
@@ -466,7 +474,7 @@ func (c *Cluster) updateNodeStatus() {
 			}
 
 			now := time.Now()
-			cli, tlsConfig, err := c.Client(3*time.Second, c.Endpoints(i, false)...)
+			cli, tlsConfig, err := c.Client(c.Endpoints(i, false)...)
 			if err != nil {
 				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.State = StoppedNodeStatus
@@ -607,7 +615,7 @@ func (c *Cluster) AllEndpoints(scheme bool) []string {
 }
 
 // Client creates the client.
-func (c *Cluster) Client(dialTimeout time.Duration, eps ...string) (*clientv3.Client, *tls.Config, error) {
+func (c *Cluster) Client(eps ...string) (*clientv3.Client, *tls.Config, error) {
 	if len(eps) == 0 {
 		return nil, nil, errors.New("no endpoint is given")
 	}
@@ -618,7 +626,7 @@ func (c *Cluster) Client(dialTimeout time.Duration, eps ...string) (*clientv3.Cl
 
 	ccfg := clientv3.Config{
 		Endpoints:   eps,
-		DialTimeout: dialTimeout,
+		DialTimeout: c.DialTimeout,
 	}
 	if !c.nodes[idx].cfg.ClientTLSInfo.Empty() {
 		tlsConfig, err := c.nodes[idx].cfg.ClientTLSInfo.ClientConfig()

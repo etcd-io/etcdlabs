@@ -126,7 +126,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 		c.Shutdown()
 	}()
 
-	cli, _, err := c.Client(3*time.Second, c.AllEndpoints(scheme)...)
+	cli, _, err := c.Client(c.AllEndpoints(scheme)...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -150,7 +150,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 		time.Sleep(time.Second)
 	}
 
-	cli, _, err = c.Client(3*time.Second, c.AllEndpoints(scheme)...)
+	cli, _, err = c.Client(c.AllEndpoints(scheme)...)
 	if err != nil {
 		t.Fatal(err)
 	}
