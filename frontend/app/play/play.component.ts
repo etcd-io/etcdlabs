@@ -19,6 +19,10 @@ export class PlayComponent implements OnInit {
   inputKey: string;
   inputValue: string;
 
+  writeResponseTxt: string;
+  deleteResponseTxt: string;
+  readResponseTxt: string;
+
   constructor(private serverService: ServerStatusService) {
     this.selectedTab = 3;
     this.serverStatus = serverService.serverStatus;
@@ -92,16 +96,19 @@ export class PlayComponent implements OnInit {
   processWrite(inputKey: string, inputValue: string) {
     this.inputKey = inputKey;
     this.inputValue = inputValue;
-    console.log('processWrite', this.inputKey, this.inputValue);
-  }
 
-  processRead(inputKey: string) {
-    this.inputKey = inputKey;
-    console.log('processRead', this.inputKey);
+    this.writeResponseTxt = 'processWrite response ' + this.inputKey;
   }
 
   processDelete(inputKey: string) {
     this.inputKey = inputKey;
-    console.log('processDelete', this.inputKey);
+
+    this.deleteResponseTxt = 'processDelete response ' + this.inputKey;
+  }
+
+  processRead(inputKey: string) {
+    this.inputKey = inputKey;
+
+    this.readResponseTxt = 'processRead response ' + this.inputKey;
   }
 }

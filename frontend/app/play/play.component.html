@@ -1,39 +1,39 @@
 <div class="play-group">
 
-	<div class="inner">
-		<div class="block block-copy half">
-			<svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="border: 0px solid black" width="500" height="400">
+    <div class="inner">
+        <div class="block block-copy half">
+            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="border: 0px solid black" width="500" height="400">
 				<circle id="ring" cx="230" cy="210" r="110" style="fill: #F5F5F5"></circle>
 				<g id="servers">
-					<g id="node1" style="fill: #B3E5FC" tabindex="0" title="node1">
+					<g id="node1" style="fill: #B3E5FC" tabindex="0">
 						<text x="213" y="50" font-size="13">node1</text>
 						<text x="210" y="67" font-size="11" id="node1-id">(Hash: 0)</text>
 						<a (click)="selectTab(3)">
 							<circle cx="230" cy="100" r="25"></circle>
 						</a>
 					</g>
-					<g id="node2" style="fill: #B3E5FC" tabindex="0" title="node2">
+					<g id="node2" style="fill: #B3E5FC" tabindex="0">
 						<text x="355" y="160" font-size="13">node2</text>
 						<text x="360" y="177" font-size="11" id="node2-id">(Hash: 0)</text>
 						<a (click)="selectTab(4)">
 							<circle cx="330" cy="180" r="25"></circle>
 						</a>
 					</g>
-					<g id="node3" style="fill: #B3E5FC" tabindex="0" title="node3">
+					<g id="node3" style="fill: #B3E5FC" tabindex="0">
 						<text x="320" y="320" font-size="13">node3</text>
 						<text x="302" y="337" font-size="11" id="node3-id">(Hash: 0)</text>
 						<a (click)="selectTab(5)">
 							<circle cx="295" cy="295" r="25"></circle>
 						</a>
 					</g>
-					<g id="node4" style="fill: #B3E5FC" tabindex="0" title="node4">
+					<g id="node4" style="fill: #B3E5FC" tabindex="0">
 						<text x="80" y="320" font-size="13">node4</text>
 						<text x="80" y="337" font-size="11" id="node4-id">(Hash: 0)</text>
 						<a (click)="selectTab(6)">
 							<circle cx="160" cy="295" r="25"></circle>
 						</a>
 					</g>
-					<g id="node5" style="fill: #B3E5FC" tabindex="0" title="node5">
+					<g id="node5" style="fill: #B3E5FC" tabindex="0">
 						<text x="42" y="173" font-size="13">node5</text>
 						<text x="47" y="150" font-size="11" id="node5-id">(Hash: 0)</text>
 						<a (click)="selectTab(7)">
@@ -42,14 +42,14 @@
 					</g>
 				</g>
 			</svg>
-		</div>
+        </div>
 
-		<div class="block block-copy half">
-			<md-card class="client-card">
-				<md-tab-group [(selectedIndex)]="selectedTab">
-					<md-tab>
-						<template md-tab-label><b>Write</b></template>
-						<template md-tab-content>
+        <div class="block block-copy half">
+            <md-card class="client-card">
+                <md-tab-group [(selectedIndex)]="selectedTab">
+                    <md-tab>
+                        <template md-tab-label><b>Write</b></template>
+                        <template md-tab-content>
 							<br>
 							<div align="center">
 								<span class="select-node-checkbox">Select endpoints: </span>
@@ -59,24 +59,27 @@
 								<md-checkbox [(ngModel)]="selectedNodes[3]"><span class="select-node-checkbox">node4</span></md-checkbox>
 								<md-checkbox [(ngModel)]="selectedNodes[4]"><span class="select-node-checkbox">node5</span></md-checkbox>
 							</div>
+							<br>
 							<div class="input-group">
-								<!--<input #inputKey type="text" style="min-width: 370px;" class="form-control" placeholder="Type your key..." />-->
-								<input type="text" style="min-width: 370px;" class="form-control" placeholder="Type your key..." [(ngModel)]="inputKey" />
+								<!--<input #inputKey type="text" style="min-width: 250px;" class="form-control" placeholder="Type your key..." />-->
+								<input type="text" style="min-width: 250px;" class="form-control" placeholder="Type your key..." [(ngModel)]="inputKey" />
 
 								<!--processWrite(inputKey.value, inputValue.value); inputKey.value=''; inputValue.value='';-->
+								<span class="input-group-btn">
 								<button md-button color="primary" (click)="processWrite(inputKey, inputValue);">Submit</button>
+								</span>
 							</div>
 							<div class="input-group">
-								<!--<textarea #inputValue type="text" style="min-width: 370px;" class="form-control" placeholder="Type your value..." rows="5"></textarea>-->
-								<textarea type="text" style="min-width: 370px;" class="form-control" placeholder="Type your value..." rows="5" [(ngModel)]="inputValue"></textarea>
+								<!--<textarea #inputValue type="text" style="min-width: 250px;" class="form-control" placeholder="Type your value..." rows="5"></textarea>-->
+								<textarea type="text" style="min-width: 250px;" class="form-control" placeholder="Type your value..." rows="5" [(ngModel)]="inputValue"></textarea>
 							</div>
-							<button md-button (click)=fetch()>Test</button>
+							<p class="client-card-text-status">{{writeResponseTxt}}</p>
 						</template>
-					</md-tab>
+                    </md-tab>
 
-					<md-tab>
-						<template md-tab-label><b>Read</b></template>
-						<template md-tab-content>
+                    <md-tab>
+                        <template md-tab-label><b>Delete</b></template>
+                        <template md-tab-content>
 							<br>
 							<div align="center">
 								<span class="select-node-checkbox">Select endpoints: </span>
@@ -86,43 +89,48 @@
 								<md-checkbox [(ngModel)]="selectedNodes[3]"><span class="select-node-checkbox">node4</span></md-checkbox>
 								<md-checkbox [(ngModel)]="selectedNodes[4]"><span class="select-node-checkbox">node5</span></md-checkbox>
 							</div>
-							<div class="input-group">
-								<input type="text" style="min-width: 370px;" class="form-control" placeholder="Type your key..." [(ngModel)]="inputKey" />
-								<button md-button color="primary" (click)="processRead(inputKey);">Submit</button>
-							</div>
-						</template>
-					</md-tab>
-
-					<md-tab>
-						<template md-tab-label><b>Delete</b></template>
-						<template md-tab-content>
 							<br>
-							<div align="center">
-								<span class="select-node-checkbox">Select endpoints: </span>
-								<md-checkbox [(ngModel)]="selectedNodes[0]" [checked]="true"><span class="select-node-checkbox">node1</span></md-checkbox>
-								<md-checkbox [(ngModel)]="selectedNodes[1]"><span class="select-node-checkbox">node2</span></md-checkbox>
-								<md-checkbox [(ngModel)]="selectedNodes[2]"><span class="select-node-checkbox">node3</span></md-checkbox>
-								<md-checkbox [(ngModel)]="selectedNodes[3]"><span class="select-node-checkbox">node4</span></md-checkbox>
-								<md-checkbox [(ngModel)]="selectedNodes[4]"><span class="select-node-checkbox">node5</span></md-checkbox>
-							</div>
 							<div class="input-group">
-								<input type="text" style="min-width: 370px;" class="form-control" placeholder="Type your key..." [(ngModel)]="inputKey" />
+								<input type="text" style="min-width: 250px;" class="form-control" placeholder="Type your key..." [(ngModel)]="inputKey" />
+								<span class="input-group-btn">
 								<button md-button color="primary" (click)="processDelete(inputKey);">Submit</button>
+								</span>
 							</div>
+							<p class="client-card-text-status">{{deleteResponseTxt}}</p>
 						</template>
-					</md-tab>
+                    </md-tab>
 
-					<md-tab *ngFor="let nodeStatus of serverStatus.NodeStatuses;">
-						<template md-tab-label>{{nodeStatus.Name}}</template>
-						<template md-tab-content>
+                    <md-tab>
+                        <template md-tab-label><b>Read</b></template>
+                        <template md-tab-content>
+							<br>
+							<div align="center">
+								<span class="select-node-checkbox">Select endpoints: </span>
+								<md-checkbox [(ngModel)]="selectedNodes[0]" [checked]="true"><span class="select-node-checkbox">node1</span></md-checkbox>
+								<md-checkbox [(ngModel)]="selectedNodes[1]"><span class="select-node-checkbox">node2</span></md-checkbox>
+								<md-checkbox [(ngModel)]="selectedNodes[2]"><span class="select-node-checkbox">node3</span></md-checkbox>
+								<md-checkbox [(ngModel)]="selectedNodes[3]"><span class="select-node-checkbox">node4</span></md-checkbox>
+								<md-checkbox [(ngModel)]="selectedNodes[4]"><span class="select-node-checkbox">node5</span></md-checkbox>
+							</div>
+							<br>
+							<div class="input-group">
+								<input type="text" style="min-width: 250px;" class="form-control" placeholder="Type your key..." [(ngModel)]="inputKey" />
+								<span class="input-group-btn">
+								<button md-button color="primary" (click)="processRead(inputKey);">Submit</button>
+								</span>
+							</div>
+							<p class="client-card-text-status">{{readResponseTxt}}</p>
+						</template>
+                    </md-tab>
+
+                    <md-tab *ngFor="let nodeStatus of serverStatus.NodeStatuses;">
+                        <template md-tab-label>{{nodeStatus.Name}}</template>
+                        <template md-tab-content>
 							<br>
 							<div align="center">
 								<button md-button color="warn" md-tooltip="Click to kill {{nodeStatus.Name}}" (click)=clickStop()>Stop</button>
 								<button md-button md-tooltip="Click to restart {{nodeStatus.Name}}" (click)=clickRestart()>Restart</button>
 							</div>
-							<p class="client-card-text-status">
-								{{nodeStatus.StateTxt}} <span *ngIf='errorMessage'>(error: {{errorMessage}})</span>
-							</p>
 							<ul>
 								<li><span class="client-card-text-list-title">ID:</span> <span class="client-card-text-id">{{nodeStatus.ID}}</span></li>
 								<li><span class="client-card-text-list-title">Endpoint:</span> <span class="client-card-text-endpoint">{{nodeStatus.Endpoint}}</span></li>
@@ -134,18 +142,23 @@
 								<li><span class="client-card-text-list-title">DB Size:</span> <span class="client-card-text-dbsize">{{nodeStatus.DBSizeTxt}}</span></li>
 								<li><span class="client-card-text-list-title">Hash:</span> <span class="client-card-text-hash">{{nodeStatus.Hash}}</span></li>
 							</ul>
+							<p class="client-card-text-status">
+								{{nodeStatus.StateTxt}} <span *ngIf='errorMessage'>(error: {{errorMessage}})</span>
+							</p>
 						</template>
-					</md-tab>
-				</md-tab-group>
-			</md-card>
+                    </md-tab>
+                </md-tab-group>
+            </md-card>
 
-		</div>
-	</div>
+        </div>
+    </div>
 
-	<h3 id="log">Log</h3>
-	<div id="log-box" class="log-box">
-		<div id="log-output">
-			{{ getSelectedNodeEndpointsTxt() }}
-		</div>
-	</div>
+    <button md-button (click)=fetch()>Test</button>
+
+    <h3 id="log">Log</h3>
+    <div id="log-box" class="log-box">
+        <div id="log-output">
+            {{ getSelectedNodeEndpointsTxt() }}
+        </div>
+    </div>
 </div>
