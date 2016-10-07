@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { ServerStatus, ServerStatusService } from './server-status.service';
+import { Headers, RequestOptions } from '@angular/http';
+import { BackendService, ServerStatus, ClientRequest, ClientResponse } from './backend.service';
 
 @Component({
   selector: 'app-play',
   templateUrl: 'play.component.html',
   styleUrls: ['play.component.css'],
-  providers: [ServerStatusService],
+  providers: [BackendService],
 })
 export class PlayComponent implements OnInit {
   mode = 'Observable';
@@ -14,18 +15,30 @@ export class PlayComponent implements OnInit {
   selectedNodes = [true, false, false, false, false];
 
   serverStatus: ServerStatus;
-  errorMessage: string;
+  serverStatusErrorMessage: string;
 
   inputKey: string;
   inputValue: string;
+
+  stressResponse: ClientResponse;
+  stressError: string;
+
+  writeResponse: ClientResponse;
+  writeError: string;
+
+  deleteResponse: ClientResponse;
+  deleteErrpr: string;
+
+  readResponse: ClientResponse;
+  readError: string;
 
   writeResponseTxt: string;
   deleteResponseTxt: string;
   readResponseTxt: string;
 
-  constructor(private serverService: ServerStatusService) {
+  constructor(private backendService: BackendService) {
     this.selectedTab = 3;
-    this.serverStatus = serverService.serverStatus;
+    this.serverStatus = backendService.serverStatus;
   }
 
   ngOnInit(): void {
@@ -87,17 +100,22 @@ export class PlayComponent implements OnInit {
   }
 
   fetch() {
-    // TODO: periodic calls on Observable that is returned by fetchServerStatus
-    this.serverService.fetchServerStatus().subscribe(
+    // TODO: periodic calls on Observable that is returned by requestServerStatus
+    this.backendService.requestServerStatus().subscribe(
       serverStatus => this.serverStatus = serverStatus,
-      error => this.errorMessage = <any>error);
+      error => this.serverStatusErrorMessage = <any>error);
   }
 
   processWrite(inputKey: string, inputValue: string) {
     this.inputKey = inputKey;
     this.inputValue = inputValue;
 
-    this.writeResponseTxt = 'processWrite response ' + this.inputKey;
+    let eps = this.getSelectedNodeEndpoints();
+    this.backendService.requestWrite(eps, this.inputKey, this.inputValue).subscribe(
+      clientResponse => this.writeResponse = clientResponse,
+      error => this.writeError = <any>error);
+
+    this.writeResponseTxt = 'processWrite response ' + body;
   }
 
   processDelete(inputKey: string) {
