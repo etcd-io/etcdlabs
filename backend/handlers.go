@@ -96,7 +96,8 @@ type ClientRequest struct {
 type ClientResponse struct {
 	ClientRequest ClientRequest
 	Success       bool
-	Error         string
+	Result        string
+	ResultLines   []string
 	KeyValues     []KeyValue
 }
 
@@ -107,34 +108,41 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 		cresp := ClientResponse{Success: true}
 		if rmsg, ok := globalRequestLimiter.check(); !ok {
 			cresp.Success = false
-			cresp.Error = rmsg
+			cresp.Result = rmsg
+			cresp.ResultLines = []string{cresp.Result}
 			return json.NewEncoder(w).Encode(&cresp)
 		}
 		globalRequestLimiter.advance()
 
 		creq := ClientRequest{}
 		if err := json.NewDecoder(req.Body).Decode(&creq); err != nil {
-			return err
+			cresp.Success = false
+			cresp.Result = err.Error()
+			cresp.ResultLines = []string{cresp.Result}
+			return json.NewEncoder(w).Encode(&cresp)
 		}
 		defer req.Body.Close()
 		cresp.ClientRequest = creq
 
 		if len(creq.Endpoints) == 0 {
 			cresp.Success = false
-			cresp.Error = "no endpoint is given"
+			cresp.Result = "no endpoint is given"
+			cresp.ResultLines = []string{cresp.Result}
 			return json.NewEncoder(w).Encode(&cresp)
 		}
 
 		idx := globalCluster.FindIndex(creq.Endpoints[0])
 		if idx == -1 {
 			cresp.Success = false
-			cresp.Error = fmt.Sprintf("wrong endpoints are given (%v)", creq.Endpoints)
+			cresp.Result = fmt.Sprintf("wrong endpoints are given (%v)", creq.Endpoints)
+			cresp.ResultLines = []string{cresp.Result}
 			return json.NewEncoder(w).Encode(&cresp)
 		}
 
 		if globalCluster.IsStopped(idx) && creq.Action != "restart-node" {
 			cresp.Success = false
-			cresp.Error = fmt.Sprintf("%s (%s) is stopped", globalCluster.NodeStatus(idx).Name, globalCluster.NodeStatus(idx).Endpoint)
+			cresp.Result = fmt.Sprintf("%s (%s) is stopped", globalCluster.NodeStatus(idx).Name, globalCluster.NodeStatus(idx).Endpoint)
+			cresp.ResultLines = []string{cresp.Result}
 			return json.NewEncoder(w).Encode(&cresp)
 		}
 
@@ -143,9 +151,14 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 
 		switch creq.Action {
 		case "stress":
+			st := time.Now()
 			cli, _, err := globalCluster.Client(creq.Endpoints...)
 			if err != nil {
-				return err
+				took := time.Since(st)
+				cresp.Success = false
+				cresp.Result = fmt.Sprintf("client error %v (took %v)", err, roundDownDuration(took, time.Millisecond))
+				cresp.ResultLines = []string{cresp.Result}
+				return json.NewEncoder(w).Encode(&cresp)
 			}
 			defer cli.Close()
 
@@ -153,9 +166,20 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 			for _, kv := range cresp.KeyValues {
 				if _, err := cli.Put(cctx, kv.Key, kv.Value); err != nil {
 					cresp.Success = false
-					cresp.Error = err.Error()
+					cresp.Result = err.Error()
+					cresp.ResultLines = []string{cresp.Result}
 					break
 				}
+			}
+
+			if cresp.Success {
+				took := roundDownDuration(time.Since(st), time.Millisecond)
+				cresp.Result = fmt.Sprintf("WRITE success (took %v)", took)
+				lines := make([]string, 3)
+				for i := range lines {
+					lines[i] = fmt.Sprintf("WRITE success (key: %q, value: %q)", cresp.KeyValues[i].Key, cresp.KeyValues[i].Value)
+				}
+				cresp.ResultLines = lines
 			}
 			if err := json.NewEncoder(w).Encode(&cresp); err != nil {
 				return err
@@ -163,19 +187,38 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 
 		case "write":
 			if creq.KeyValue.Key == "" {
-				return fmt.Errorf("write request got empty key %v", creq.KeyValue)
+				cresp.Success = false
+				cresp.Result = fmt.Sprint("WRITE request got empty key")
+				cresp.ResultLines = []string{cresp.Result}
+				return json.NewEncoder(w).Encode(&cresp)
 			}
 
+			st := time.Now()
 			cli, _, err := globalCluster.Client(creq.Endpoints...)
 			if err != nil {
-				return err
+				took := time.Since(st)
+				cresp.Success = false
+				cresp.Result = fmt.Sprintf("client error %v (took %v)", err, roundDownDuration(took, time.Millisecond))
+				cresp.ResultLines = []string{cresp.Result}
+				return json.NewEncoder(w).Encode(&cresp)
 			}
 			defer cli.Close()
 
 			cresp.KeyValues = []KeyValue{creq.KeyValue}
 			if _, err := cli.Put(cctx, creq.KeyValue.Key, creq.KeyValue.Value); err != nil {
 				cresp.Success = false
-				cresp.Error = err.Error()
+				cresp.Result = err.Error()
+				cresp.ResultLines = []string{cresp.Result}
+			}
+
+			if cresp.Success {
+				took := roundDownDuration(time.Since(st), time.Millisecond)
+				cresp.Result = fmt.Sprintf("WRITE success (took %v)", took)
+				lines := make([]string, 1)
+				for i := range lines {
+					lines[i] = fmt.Sprintf("WRITE success (key: %q, value: %q)", cresp.KeyValues[i].Key, cresp.KeyValues[i].Value)
+				}
+				cresp.ResultLines = lines
 			}
 			if err := json.NewEncoder(w).Encode(&cresp); err != nil {
 				return err
@@ -183,12 +226,22 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 
 		case "get":
 			if creq.KeyValue.Key == "" {
-				return fmt.Errorf("get request got empty key %v", creq.KeyValue)
+				cresp.Success = false
+				cresp.Result = fmt.Sprint("GET request got empty key")
+				cresp.ResultLines = []string{cresp.Result}
+				return json.NewEncoder(w).Encode(&cresp)
 			}
 
+			// TODO: get all keys and by prefix
+
+			st := time.Now()
 			cli, _, err := globalCluster.Client(creq.Endpoints...)
 			if err != nil {
-				return err
+				took := time.Since(st)
+				cresp.Success = false
+				cresp.Result = fmt.Sprintf("client error %v (took %v)", err, roundDownDuration(took, time.Millisecond))
+				cresp.ResultLines = []string{cresp.Result}
+				return json.NewEncoder(w).Encode(&cresp)
 			}
 			defer cli.Close()
 
@@ -199,25 +252,44 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 			gresp, err := cli.Get(cctx, creq.KeyValue.Key, opts...)
 			if err != nil {
 				cresp.Success = false
-				cresp.Error = err.Error()
+				cresp.Result = err.Error()
+				cresp.ResultLines = []string{cresp.Result}
 			}
 			kvs := make([]KeyValue, len(gresp.Kvs))
 			for i := range gresp.Kvs {
 				kvs[i] = KeyValue{Key: string(gresp.Kvs[i].Key), Value: string(gresp.Kvs[i].Value)}
 			}
 			cresp.KeyValues = kvs
+
+			if cresp.Success {
+				took := roundDownDuration(time.Since(st), time.Millisecond)
+				cresp.Result = fmt.Sprintf("GET success (took %v)", took)
+				lines := make([]string, len(cresp.KeyValues))
+				for i := range lines {
+					lines[i] = fmt.Sprintf("GET success (key: %q, value: %q)", cresp.KeyValues[i].Key, cresp.KeyValues[i].Value)
+				}
+				cresp.ResultLines = lines
+			}
 			if err := json.NewEncoder(w).Encode(&cresp); err != nil {
 				return err
 			}
 
 		case "delete":
 			if creq.KeyValue.Key == "" {
-				return fmt.Errorf("delete request got empty key %v", creq.KeyValue)
+				cresp.Success = false
+				cresp.Result = fmt.Sprint("DELETE request got empty key")
+				cresp.ResultLines = []string{cresp.Result}
+				return json.NewEncoder(w).Encode(&cresp)
 			}
 
+			st := time.Now()
 			cli, _, err := globalCluster.Client(creq.Endpoints...)
 			if err != nil {
-				return err
+				took := time.Since(st)
+				cresp.Success = false
+				cresp.Result = fmt.Sprintf("client error %v (took %v)", err, roundDownDuration(took, time.Millisecond))
+				cresp.ResultLines = []string{cresp.Result}
+				return json.NewEncoder(w).Encode(&cresp)
 			}
 			defer cli.Close()
 
@@ -228,13 +300,23 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 			dresp, err := cli.Delete(cctx, creq.KeyValue.Key, opts...)
 			if err != nil {
 				cresp.Success = false
-				cresp.Error = err.Error()
+				cresp.Result = err.Error()
 			}
 			kvs := make([]KeyValue, len(dresp.PrevKvs))
 			for i := range dresp.PrevKvs {
 				kvs[i] = KeyValue{Key: string(dresp.PrevKvs[i].Key), Value: string(dresp.PrevKvs[i].Value)}
 			}
 			cresp.KeyValues = kvs
+
+			if cresp.Success {
+				took := roundDownDuration(time.Since(st), time.Millisecond)
+				cresp.Result = fmt.Sprintf("DELETE success (took %v)", took)
+				lines := make([]string, len(cresp.KeyValues))
+				for i := range lines {
+					lines[i] = fmt.Sprintf("DELETE success (key: %q, value: %q)", cresp.KeyValues[i].Key, cresp.KeyValues[i].Value)
+				}
+				cresp.ResultLines = lines
+			}
 			if err := json.NewEncoder(w).Encode(&cresp); err != nil {
 				return err
 			}
@@ -248,7 +330,7 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 		case "restart-node":
 			if rerr := globalCluster.Restart(idx); rerr != nil {
 				cresp.Success = false
-				cresp.Error = rerr.Error()
+				cresp.Result = rerr.Error()
 			}
 			if err := json.NewEncoder(w).Encode(&cresp); err != nil {
 				return err

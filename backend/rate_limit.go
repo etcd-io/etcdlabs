@@ -84,8 +84,7 @@ func (rl *requestLimiter) check() (msg string, ok bool) {
 		rl.mu.RUnlock()
 
 		left := rl.interval - took
-		left /= rl.minScale // round-off in minScale
-		left *= rl.minScale
+		left = roundDownDuration(left, rl.minScale)
 
 		msg = fmt.Sprintf("rate limit exceeded (try again after %v)", left)
 		ok = false

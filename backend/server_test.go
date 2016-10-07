@@ -120,7 +120,8 @@ func TestServer(t *testing.T) {
 	}
 
 	fmt.Println("allow more requests in limiter for testing")
-	globalRequestLimiter.limiter.SetLimit(rate.Every(10 * time.Second))
+	globalRequestLimiter.limiter.SetLimit(rate.Every(time.Millisecond))
+	globalRequestLimiter.interval = time.Millisecond
 
 	println()
 	time.Sleep(time.Second)
