@@ -269,12 +269,10 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 			}
 
 		case "stop-node":
-			fmt.Println("stopping")
 			globalCluster.Stop(idx)
 			if err := json.NewEncoder(w).Encode(&cresp); err != nil {
 				return err
 			}
-			fmt.Println("stop node is successful")
 
 		case "restart-node":
 			if rerr := globalCluster.Restart(idx); rerr != nil {
