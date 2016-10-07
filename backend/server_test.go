@@ -23,6 +23,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"golang.org/x/time/rate"
 )
 
 var (
@@ -117,11 +119,8 @@ func TestServer(t *testing.T) {
 		fmt.Println("'/client-request' POST response:", string(b))
 	}
 
-	orig := defaultRequestInterval
-	defaultRequestInterval = time.Millisecond
-	defer func() {
-		defaultRequestInterval = orig
-	}()
+	fmt.Println("allow more requests in limiter for testing")
+	globalRequestLimiter.limiter.SetLimit(rate.Every(10 * time.Second))
 
 	println()
 	time.Sleep(time.Second)
