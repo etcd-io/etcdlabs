@@ -19,7 +19,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"sync"
 	"time"
 
 	"github.com/coreos/etcd/clientv3"
@@ -101,45 +100,17 @@ type ClientResponse struct {
 	KeyValues     []KeyValue
 }
 
-var (
-	defaultRequestInterval = 3 * time.Second
-	minScale               = time.Millisecond
-
-	lastClientReqLock sync.Mutex
-	lastClientReqAt   = time.Now()
-)
-
-func okToClientRequest() (txt string, ok bool) {
-	lastClientReqLock.Lock()
-	took := time.Since(lastClientReqAt)
-	lastClientReqLock.Unlock()
-	ok = took > defaultRequestInterval
-	if !ok {
-		left := defaultRequestInterval - took
-		left /= minScale
-		left *= minScale
-		txt = fmt.Sprintf("rate limit excess (try again after %v)", left)
-	}
-	return
-}
-
-func updateClientRequestAt() {
-	lastClientReqLock.Lock()
-	lastClientReqAt = time.Now()
-	lastClientReqLock.Unlock()
-}
-
 // clientRequestHandler handles writes, reads, deletes, kill, restart operations.
 func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
 	switch req.Method {
 	case "POST":
 		cresp := ClientResponse{Success: true}
-		if rmsg, ok := okToClientRequest(); !ok {
+		if rmsg, ok := globalRequestLimiter.check(); !ok {
 			cresp.Success = false
 			cresp.Error = rmsg
 			return json.NewEncoder(w).Encode(&cresp)
 		}
-		updateClientRequestAt()
+		globalRequestLimiter.advance()
 
 		creq := ClientRequest{}
 		if err := json.NewDecoder(req.Body).Decode(&creq); err != nil {
