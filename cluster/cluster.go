@@ -17,6 +17,7 @@ package cluster
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -240,7 +241,7 @@ func Start(ccfg Config) (c *Cluster, err error) {
 		go func(i int) {
 			defer wg.Done()
 			for {
-				cli, _, err := c.Client(3*time.Second, i, c.Endpoints(i, false)...)
+				cli, _, err := c.Client(3*time.Second, c.Endpoints(i, false)...)
 				if err != nil {
 					plog.Warning(err)
 					continue
@@ -465,7 +466,7 @@ func (c *Cluster) updateNodeStatus() {
 			}
 
 			now := time.Now()
-			cli, tlsConfig, err := c.Client(3*time.Second, i, c.Endpoints(i, false)...)
+			cli, tlsConfig, err := c.Client(3*time.Second, c.Endpoints(i, false)...)
 			if err != nil {
 				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.State = StoppedNodeStatus
@@ -565,24 +566,6 @@ func (c *Cluster) updateNodeStatus() {
 	return
 }
 
-func getHost(ep string) string {
-	url, uerr := url.Parse(ep)
-	if uerr != nil || !strings.Contains(ep, "://") {
-		return ep
-	}
-	return url.Host
-}
-
-// FindIndexByClientEndpoint returns the node index by client URL.
-// It returns -1 if none.
-func (c *Cluster) FindIndexByClientEndpoint(ep string) int {
-	idx, ok := c.clientHostToIndex[getHost(ep)]
-	if !ok {
-		return -1
-	}
-	return idx
-}
-
 // Config returns the configuration of the server.
 func (c *Cluster) Config(i int) embed.Config {
 	return *c.nodes[i].cfg
@@ -624,14 +607,21 @@ func (c *Cluster) AllEndpoints(scheme bool) []string {
 }
 
 // Client creates the client.
-func (c *Cluster) Client(dialTimeout time.Duration, i int, eps ...string) (*clientv3.Client, *tls.Config, error) {
+func (c *Cluster) Client(dialTimeout time.Duration, eps ...string) (*clientv3.Client, *tls.Config, error) {
+	if len(eps) == 0 {
+		return nil, nil, errors.New("no endpoint is given")
+	}
+	idx, ok := c.clientHostToIndex[getHost(eps[0])]
+	if !ok {
+		return nil, nil, fmt.Errorf("cannot find node with endpoint %s", eps[0])
+	}
+
 	ccfg := clientv3.Config{
 		Endpoints:   eps,
 		DialTimeout: dialTimeout,
 	}
-
-	if !c.nodes[i].cfg.ClientTLSInfo.Empty() {
-		tlsConfig, err := c.nodes[i].cfg.ClientTLSInfo.ClientConfig()
+	if !c.nodes[idx].cfg.ClientTLSInfo.Empty() {
+		tlsConfig, err := c.nodes[idx].cfg.ClientTLSInfo.ClientConfig()
 		if err != nil {
 			return nil, nil, err
 		}
@@ -648,7 +638,6 @@ func (c *Cluster) IsStopped(i int) (stopped bool) {
 	stopped = c.nodes[i].status.State == StoppedNodeStatus
 	c.nodes[i].statusLock.Unlock()
 	return
-
 }
 
 // NodeStatus returns the node status.
@@ -663,4 +652,13 @@ func (c *Cluster) AllNodeStatus() []NodeStatus {
 		st[i] = c.nodes[i].status
 	}
 	return st
+}
+
+// FindIndex returns the node index by client URL. It returns -1 if none.
+func (c *Cluster) FindIndex(ep string) int {
+	idx, ok := c.clientHostToIndex[getHost(ep)]
+	if !ok {
+		return -1
+	}
+	return idx
 }

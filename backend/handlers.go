@@ -154,7 +154,7 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 			return json.NewEncoder(w).Encode(&cresp)
 		}
 
-		idx := globalCluster.FindIndexByClientEndpoint(creq.Endpoints[0])
+		idx := globalCluster.FindIndex(creq.Endpoints[0])
 		if idx == -1 {
 			cresp.Success = false
 			cresp.Error = fmt.Sprintf("wrong endpoints are given (%v)", creq.Endpoints)
@@ -172,7 +172,7 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 
 		switch creq.Action {
 		case "stress":
-			cli, _, err := globalCluster.Client(3*time.Second, idx, creq.Endpoints...)
+			cli, _, err := globalCluster.Client(3*time.Second, creq.Endpoints...)
 			if err != nil {
 				return err
 			}
@@ -195,7 +195,7 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 				return fmt.Errorf("write request got empty key %v", creq.KeyValue)
 			}
 
-			cli, _, err := globalCluster.Client(3*time.Second, idx, creq.Endpoints...)
+			cli, _, err := globalCluster.Client(3*time.Second, creq.Endpoints...)
 			if err != nil {
 				return err
 			}
@@ -215,7 +215,7 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 				return fmt.Errorf("get request got empty key %v", creq.KeyValue)
 			}
 
-			cli, _, err := globalCluster.Client(3*time.Second, idx, creq.Endpoints...)
+			cli, _, err := globalCluster.Client(3*time.Second, creq.Endpoints...)
 			if err != nil {
 				return err
 			}
@@ -244,7 +244,7 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 				return fmt.Errorf("delete request got empty key %v", creq.KeyValue)
 			}
 
-			cli, _, err := globalCluster.Client(3*time.Second, idx, creq.Endpoints...)
+			cli, _, err := globalCluster.Client(3*time.Second, creq.Endpoints...)
 			if err != nil {
 				return err
 			}
