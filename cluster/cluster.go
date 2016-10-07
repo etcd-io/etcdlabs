@@ -84,7 +84,6 @@ type Cluster struct {
 
 	rootDir           string
 	size              int
-	stopStartInterval time.Duration
 	nodes             []*node
 	clientHostToIndex map[string]int
 
@@ -106,40 +105,27 @@ type Config struct {
 	PeerTLSInfo   transport.TLSInfo
 	PeerAutoTLS   bool
 
-	// StopStartInterval is the minimum duration to allow updates on nodes.
-	// This is to rate limit the nodes stop and restart operations.
-	StopStartInterval time.Duration
-
 	RootCtx     context.Context
 	RootCancel  func()
 	DialTimeout time.Duration // for client requests
 }
 
-var (
-	uptimeScale          = time.Second
-	minStopStartInterval = 2 * time.Second
-	defaultDialTimeout   = 3 * time.Second
-)
+var defaultDialTimeout = 3 * time.Second
 
 // Start starts embedded etcd cluster.
 func Start(ccfg Config) (c *Cluster, err error) {
 	plog.Printf("starting %d nodes (root directory %s, root port :%d)", ccfg.Size, ccfg.RootDir, ccfg.RootPort)
 
-	startTime := time.Now().Round(uptimeScale)
-	if ccfg.StopStartInterval < minStopStartInterval {
-		ccfg.StopStartInterval = minStopStartInterval
-	}
 	dt := ccfg.DialTimeout
 	if dt == time.Duration(0) {
 		dt = defaultDialTimeout
 	}
 
 	c = &Cluster{
-		Started:           startTime,
+		Started:           time.Now(),
 		DialTimeout:       dt,
 		rootDir:           ccfg.RootDir,
 		size:              ccfg.Size,
-		stopStartInterval: ccfg.StopStartInterval,
 		nodes:             make([]*node, ccfg.Size),
 		clientHostToIndex: make(map[string]int, ccfg.Size),
 		stopc:             make(chan struct{}),
@@ -329,17 +315,6 @@ func (c *Cluster) Stop(i int) {
 	}
 	c.nodes[i].statusLock.RUnlock()
 
-	for {
-		it := time.Since(c.nodes[i].stoppedStartedAt)
-		if it > c.stopStartInterval {
-			break
-		}
-
-		more := c.stopStartInterval - it + 100*time.Millisecond
-		plog.Printf("rate-limiting stopping %s (sleeping %v)", c.nodes[i].cfg.Name, more)
-
-		time.Sleep(more)
-	}
 	c.nodes[i].stoppedStartedAt = time.Now()
 
 	c.nodes[i].statusLock.Lock()
@@ -372,18 +347,6 @@ func (c *Cluster) Restart(i int) error {
 		return nil
 	}
 	c.nodes[i].statusLock.RUnlock()
-
-	for {
-		it := time.Since(c.nodes[i].stoppedStartedAt)
-		if it > c.stopStartInterval {
-			break
-		}
-
-		more := c.stopStartInterval - it + 100*time.Millisecond
-		plog.Printf("rate-limiting restarting %s (sleeping %v)", c.nodes[i].cfg.Name, more)
-
-		time.Sleep(more)
-	}
 
 	c.nodes[i].cfg.ClusterState = "existing"
 
@@ -572,6 +535,11 @@ func (c *Cluster) updateNodeStatus() {
 	case <-wf():
 	}
 	return
+}
+
+// StoppedStartedAt returns the node's last stop and (re)start action time.
+func (c *Cluster) StoppedStartedAt(i int) time.Time {
+	return c.nodes[i].stoppedStartedAt
 }
 
 // Config returns the configuration of the server.
