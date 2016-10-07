@@ -1,5 +1,5 @@
-hash: da07bf00e8901a94aa8ddaea910e402c8ee85fab63a7286a906f4037558956bf
-updated: 2016-10-06T11:50:18.305752263-07:00
+hash: ea1c3a0d262fbb79351dabc02fb6653334f04372e5906886fb555865d86ee642
+updated: 2016-10-07T01:15:52.419184499-07:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -143,6 +143,10 @@ imports:
   version: 9c60d1c508f5134d1ca726b4641db998f2523357
   subpackages:
   - unix
+- name: golang.org/x/time
+  version: 711ca1cb87636abec28122ef3bc6a77269d433f3
+  subpackages:
+  - rate
 - name: google.golang.org/grpc
   version: 231b4cfea0e79843053a33f5fe90bd4d84b23cd3
   subpackages:
