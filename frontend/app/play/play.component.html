@@ -1,8 +1,8 @@
 <div class="play-group">
 
-    <div class="inner">
-        <div class="block block-copy half">
-            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="border: 0px solid black" width="500" height="400">
+	<div class="inner">
+		<div class="block block-copy half">
+			<svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="border: 0px solid black" width="500" height="400">
 				<circle id="ring" cx="230" cy="210" r="110" style="fill: #F5F5F5"></circle>
 				<g id="servers">
 					<g id="node1" style="fill: #B3E5FC" tabindex="0" title="node1">
@@ -42,14 +42,14 @@
 					</g>
 				</g>
 			</svg>
-        </div>
+		</div>
 
-        <div class="block block-copy half">
-            <md-card class="client-card">
-                <md-tab-group [(selectedIndex)]="selectedTab">
-                    <md-tab>
-                        <template md-tab-label><b>Write</b></template>
-                        <template md-tab-content>
+		<div class="block block-copy half">
+			<md-card class="client-card">
+				<md-tab-group [(selectedIndex)]="selectedTab">
+					<md-tab>
+						<template md-tab-label><b>Write</b></template>
+						<template md-tab-content>
 							<br>
 							<div align="center">
 								<span class="select-node-checkbox">Select endpoints: </span>
@@ -60,20 +60,23 @@
 								<md-checkbox [(ngModel)]="selectedNodes[4]"><span class="select-node-checkbox">node5</span></md-checkbox>
 							</div>
 							<div class="input-group">
-								<input type="text" style="min-width: 370px;" class="form-control" placeholder="Type your key..." [(ngModel)]="inputKey"/>
+								<!--<input #inputKey type="text" style="min-width: 370px;" class="form-control" placeholder="Type your key..." />-->
+								<input type="text" style="min-width: 370px;" class="form-control" placeholder="Type your key..." [(ngModel)]="inputKey" />
+
+								<!--processWrite(inputKey.value, inputValue.value); inputKey.value=''; inputValue.value='';-->
+								<button md-button color="primary" (click)="processWrite(inputKey, inputValue);">Submit</button>
 							</div>
 							<div class="input-group">
-								<textarea #inputValue type="text" style="min-width: 370px;" class="form-control" placeholder="Type your value..." rows="5"></textarea>
+								<!--<textarea #inputValue type="text" style="min-width: 370px;" class="form-control" placeholder="Type your value..." rows="5"></textarea>-->
+								<textarea type="text" style="min-width: 370px;" class="form-control" placeholder="Type your value..." rows="5" [(ngModel)]="inputValue"></textarea>
 							</div>
-							<!--processWrite(inputKey.value, inputValue.value); inputKey.value=''; inputValue.value=''-->
-							<button md-button color="primary" (click)="processWrite(inputKey, inputValue.value);">Submit</button>
 							<button md-button (click)=fetch()>Test</button>
 						</template>
-                    </md-tab>
+					</md-tab>
 
-                    <md-tab>
-                        <template md-tab-label><b>Read</b></template>
-                        <template md-tab-content>
+					<md-tab>
+						<template md-tab-label><b>Read</b></template>
+						<template md-tab-content>
 							<br>
 							<div align="center">
 								<span class="select-node-checkbox">Select endpoints: </span>
@@ -84,19 +87,15 @@
 								<md-checkbox [(ngModel)]="selectedNodes[4]"><span class="select-node-checkbox">node5</span></md-checkbox>
 							</div>
 							<div class="input-group">
-								<input #inputKey type="text" style="min-width: 370px;" class="form-control" placeholder="Type your key..." />
+								<input type="text" style="min-width: 370px;" class="form-control" placeholder="Type your key..." [(ngModel)]="inputKey" />
+								<button md-button color="primary" (click)="processRead(inputKey);">Submit</button>
 							</div>
-							<div class="input-group">
-								<textarea #inputValue type="text" style="min-width: 370px;" class="form-control" placeholder="Type your value..." rows="5"></textarea>
-							</div>
-							<button md-button color="primary" (click)="processWrite(inputKey.value, inputValue.value);">Submit</button>
-
 						</template>
-                    </md-tab>
+					</md-tab>
 
-                    <md-tab>
-                        <template md-tab-label><b>Delete</b></template>
-                        <template md-tab-content>
+					<md-tab>
+						<template md-tab-label><b>Delete</b></template>
+						<template md-tab-content>
 							<br>
 							<div align="center">
 								<span class="select-node-checkbox">Select endpoints: </span>
@@ -106,14 +105,16 @@
 								<md-checkbox [(ngModel)]="selectedNodes[3]"><span class="select-node-checkbox">node4</span></md-checkbox>
 								<md-checkbox [(ngModel)]="selectedNodes[4]"><span class="select-node-checkbox">node5</span></md-checkbox>
 							</div>
-							<br>
-
+							<div class="input-group">
+								<input type="text" style="min-width: 370px;" class="form-control" placeholder="Type your key..." [(ngModel)]="inputKey" />
+								<button md-button color="primary" (click)="processDelete(inputKey);">Submit</button>
+							</div>
 						</template>
-                    </md-tab>
+					</md-tab>
 
-                    <md-tab *ngFor="let nodeStatus of serverStatus.NodeStatuses;">
-                        <template md-tab-label>{{nodeStatus.Name}}</template>
-                        <template md-tab-content>
+					<md-tab *ngFor="let nodeStatus of serverStatus.NodeStatuses;">
+						<template md-tab-label>{{nodeStatus.Name}}</template>
+						<template md-tab-content>
 							<br>
 							<div align="center">
 								<button md-button color="warn" md-tooltip="Click to kill {{nodeStatus.Name}}" (click)=clickStop()>Stop</button>
@@ -134,17 +135,17 @@
 								<li><span class="client-card-text-list-title">Hash:</span> <span class="client-card-text-hash">{{nodeStatus.Hash}}</span></li>
 							</ul>
 						</template>
-                    </md-tab>
-                </md-tab-group>
-            </md-card>
+					</md-tab>
+				</md-tab-group>
+			</md-card>
 
-        </div>
-    </div>
+		</div>
+	</div>
 
-    <h3 id="log">Log</h3>
-    <div id="log-box" class="log-box">
-        <div id="log-output">
-            {{ getSelectedNodeEndpointsTxt() }}
-        </div>
-    </div>
+	<h3 id="log">Log</h3>
+	<div id="log-box" class="log-box">
+		<div id="log-output">
+			{{ getSelectedNodeEndpointsTxt() }}
+		</div>
+	</div>
 </div>

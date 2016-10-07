@@ -92,6 +92,16 @@ export class PlayComponent implements OnInit {
   processWrite(inputKey: string, inputValue: string) {
     this.inputKey = inputKey;
     this.inputValue = inputValue;
-    console.log(this.inputKey, this.inputValue);
+    console.log('processWrite', this.inputKey, this.inputValue);
+  }
+
+  processRead(inputKey: string) {
+    this.inputKey = inputKey;
+    console.log('processRead', this.inputKey);
+  }
+
+  processDelete(inputKey: string) {
+    this.inputKey = inputKey;
+    console.log('processDelete', this.inputKey);
   }
 }
