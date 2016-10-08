@@ -66,9 +66,3 @@ func multiRandKeyValues(bytesN, sliceN int, keyPrefix, valPrefix string) []KeyVa
 	}
 	return kvs
 }
-
-func roundDownDuration(d, scale time.Duration) time.Duration {
-	d /= scale // round down in scale
-	d *= scale
-	return d
-}
