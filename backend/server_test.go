@@ -23,13 +23,11 @@ import (
 	"sync"
 	"testing"
 	"time"
-
-	"golang.org/x/time/rate"
 )
 
 var (
 	testMu       sync.Mutex
-	testBasePort = 8080
+	testBasePort = 35000
 )
 
 func TestServer(t *testing.T) {
@@ -43,8 +41,6 @@ func TestServer(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	println()
-	time.Sleep(time.Second)
 	fmt.Println("getting server status update...")
 	{
 		resp, err := http.Get(srv.addrURL.String() + "/server-status")
@@ -61,7 +57,6 @@ func TestServer(t *testing.T) {
 	}
 
 	println()
-	time.Sleep(time.Second)
 	fmt.Println("stressing node1...")
 	{
 		tu := srv.addrURL
@@ -119,12 +114,9 @@ func TestServer(t *testing.T) {
 		fmt.Println("'/client-request' POST response:", string(b))
 	}
 
-	fmt.Println("allow more requests in limiter for testing")
-	globalRequestLimiter.limiter.SetLimit(rate.Every(time.Millisecond))
-	globalRequestLimiter.interval = time.Millisecond
+	globalClientRequestLimiter.SetInterval(time.Millisecond)
 
 	println()
-	time.Sleep(time.Second)
 	fmt.Println("expecting error from specifying no endpoints...")
 	{
 		tu := srv.addrURL
@@ -153,7 +145,6 @@ func TestServer(t *testing.T) {
 	}
 
 	println()
-	time.Sleep(time.Second)
 	fmt.Println("writing to node2...")
 	{
 		tu := srv.addrURL
@@ -287,6 +278,35 @@ func TestServer(t *testing.T) {
 	println()
 	time.Sleep(time.Second)
 	fmt.Println("stop node1...")
+	{
+		tu := srv.addrURL
+		tu.Path = "/client-request"
+
+		req := ClientRequest{
+			Action:    "stop-node",
+			Endpoints: globalCluster.Endpoints(0, true),
+		}
+		data, err := json.Marshal(&req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		fmt.Println("'/client-request' POST request:", string(data))
+
+		resp, err := http.Post(tu.String(), "application/json", bytes.NewReader(data))
+		if err != nil {
+			t.Fatal(err)
+		}
+		b, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			resp.Body.Close()
+			t.Fatal(err)
+		}
+		resp.Body.Close()
+		fmt.Println("'/client-request' POST response:", string(b))
+	}
+
+	println()
+	fmt.Println("expecting rate-limit excess error from stopping node1...")
 	{
 		tu := srv.addrURL
 		tu.Path = "/client-request"
