@@ -48,3 +48,6 @@ $accent: md-palette($md-amber, A200, A100, A400);
 $warn: md-palette($md-red);
 $theme: md-light-theme($primary, $accent, $warn);
 @include app-etcd-components($theme);
+// TODO: use attribute with https://github.com/angular/material2/issues/947
+$theme-checkbox-temporary: md-light-theme($primary, $primary, $primary);
+@include md-checkbox-theme($theme-checkbox-temporary);

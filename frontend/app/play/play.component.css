@@ -14,6 +14,13 @@
     padding-right: 10px;
 }
 
+.prefix-checkbox {
+    font-size: 10px;
+    color: darkgrey;
+    font-family: 'Inconsolata', monospace;
+    font-weight: 300;
+}
+
 .client-card-text-status {
     text-align: center;
     font-size: 12px;

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Http, Response } from '@angular/http';
+import { Http, Response, Headers, RequestOptions } from '@angular/http';
 import { Observable } from 'rxjs';
 
 // NodeStatus defines etcd node status.
@@ -61,8 +61,8 @@ export class KeyValue {
 }
 
 export class ClientRequest {
-  Action: string;
-  RangePrefix: boolean;
+  Action: string; // 'stress', 'write', 'get', 'delete', 'stop-node', 'restart-node'
+  RangePrefix: boolean; // 'get', 'delete'
   Endpoints: string[];
   KeyValue: KeyValue;
 
@@ -81,17 +81,20 @@ export class ClientRequest {
 }
 
 export class ClientResponse {
+  ClientRequest: ClientRequest;
   Success: boolean;
   Result: string;
   ResultLines: string[];
   KeyValues: KeyValue[];
 
   constructor(
+    clientRequest: ClientRequest,
     success: boolean,
     rs: string,
     rlines: string[],
     kvs: KeyValue[],
   ) {
+    this.ClientRequest = clientRequest;
     this.Success = success;
     this.Result = rs;
     this.ResultLines = rlines;
@@ -101,10 +104,10 @@ export class ClientResponse {
 
 @Injectable()
 export class BackendService {
-  private statusUrl = 'server-status';
-  private clientUrl = 'client-request';
+  private serverStatusEndpoint = 'server-status';
+  private clientRequestEndpoint = 'client-request';
 
-  d: ServerStatus;
+  serverStatus: ServerStatus;
   serverStatusErrorMessage: string;
 
   constructor(private http: Http) {
@@ -140,20 +143,20 @@ export class BackendService {
   }
 
   requestServerStatus(): Observable<ServerStatus> {
-    return this.http.get(this.statusUrl)
+    return this.http.get(this.serverStatusEndpoint)
       .map(this.processServerStatusResponse)
       .catch(this.processServerStatusError);
   }
   ///////////////////////////////////////////////////////
 
   ///////////////////////////////////////////////////////
-  private processWriteResponse(res: Response) {
+  private processClientResponse(res: Response) {
     let jsonBody = res.json();
     let statusResult = <ClientResponse>jsonBody;
     return statusResult || {};
   }
 
-  private processWriteError(error: any) {
+  private processClientRequestError(error: any) {
     let errMsg = (error.message) ? error.message :
       error.status ? `${error.status} - ${error.statusText}` : 'Server error';
     console.error(errMsg);
@@ -162,67 +165,14 @@ export class BackendService {
     return Observable.throw(errMsg);
   }
 
-  requestWrite(eps: string[], key: string, value: string): Observable<ClientResponse> {
-    let creq = new ClientRequest(
-      'write',
-      false,
-      eps,
-      this.inputKey,
-      this.inputValue);
-    let body = JSON.stringify(creq);
+  sendClientRequest(clientRequest: ClientRequest): Observable<ClientResponse> {
+    let body = JSON.stringify(clientRequest);
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({ headers: headers });
 
-
-    return this.http.get(this.clientUrl)
-      .map(this.processWriteResponse)
-      .catch(this.processWriteError);
-  }
-  ///////////////////////////////////////////////////////
-
-  ///////////////////////////////////////////////////////
-  private processDeleteResponse(res: Response) {
-    let jsonBody = res.json();
-    let statusResult = <ClientResponse>jsonBody;
-    return statusResult || {};
-  }
-
-  private processDeleteError(error: any) {
-    let errMsg = (error.message) ? error.message :
-      error.status ? `${error.status} - ${error.statusText}` : 'Server error';
-    console.error(errMsg);
-    this.serverStatusErrorMessage = errMsg;
-
-    return Observable.throw(errMsg);
-  }
-
-  requestDelete(): Observable<ClientResponse> {
-    return this.http.get(this.clientUrl)
-      .map(this.processDeleteResponse)
-      .catch(this.processDeleteError);
-  }
-  ///////////////////////////////////////////////////////
-
-  ///////////////////////////////////////////////////////
-  private processReadResponse(res: Response) {
-    let jsonBody = res.json();
-    let statusResult = <ClientResponse>jsonBody;
-    return statusResult || {};
-  }
-
-  private processReadError(error: any) {
-    let errMsg = (error.message) ? error.message :
-      error.status ? `${error.status} - ${error.statusText}` : 'Server error';
-    console.error(errMsg);
-    this.serverStatusErrorMessage = errMsg;
-
-    return Observable.throw(errMsg);
-  }
-
-  requestRead(): Observable<ClientResponse> {
-    return this.http.get(this.clientUrl)
-      .map(this.processReadResponse)
-      .catch(this.processReadError);
+    return this.http.get(this.clientRequestEndpoint)
+      .map(this.processClientResponse)
+      .catch(this.processClientRequestError);
   }
   ///////////////////////////////////////////////////////
 }

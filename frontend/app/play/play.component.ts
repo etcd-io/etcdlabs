@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Headers, RequestOptions } from '@angular/http';
-import { BackendService, ServerStatus, ClientRequest, ClientResponse } from './backend.service';
+import { BackendService, ServerStatus, KeyValue, ClientRequest, ClientResponse } from './backend.service';
 
 @Component({
   selector: 'app-play',
@@ -19,9 +18,12 @@ export class PlayComponent implements OnInit {
 
   inputKey: string;
   inputValue: string;
+  deleteReadByPrefix: boolean;
 
   stressResponse: ClientResponse;
   stressError: string;
+
+
 
   writeResponse: ClientResponse;
   writeError: string;
@@ -39,6 +41,10 @@ export class PlayComponent implements OnInit {
   constructor(private backendService: BackendService) {
     this.selectedTab = 3;
     this.serverStatus = backendService.serverStatus;
+    this.serverStatusErrorMessage = '';
+    this.inputKey = '';
+    this.inputValue = '';
+    this.deleteReadByPrefix = false;
   }
 
   ngOnInit(): void {
@@ -106,27 +112,12 @@ export class PlayComponent implements OnInit {
       error => this.serverStatusErrorMessage = <any>error);
   }
 
-  processWrite(inputKey: string, inputValue: string) {
-    this.inputKey = inputKey;
-    this.inputValue = inputValue;
-
-    let eps = this.getSelectedNodeEndpoints();
-    this.backendService.requestWrite(eps, this.inputKey, this.inputValue).subscribe(
+  processClientRequest(act: string) {
+    let clientRequest = new ClientRequest(act, this.deleteReadByPrefix, this.getSelectedNodeEndpoints(), this.inputKey, this.inputValue);
+    this.backendService.sendClientRequest(clientRequest).subscribe(
       clientResponse => this.writeResponse = clientResponse,
       error => this.writeError = <any>error);
 
-    this.writeResponseTxt = 'processWrite response ' + body;
-  }
-
-  processDelete(inputKey: string) {
-    this.inputKey = inputKey;
-
-    this.deleteResponseTxt = 'processDelete response ' + this.inputKey;
-  }
-
-  processRead(inputKey: string) {
-    this.inputKey = inputKey;
-
-    this.readResponseTxt = 'processRead response ' + this.inputKey;
+    console.log(clientRequest);
   }
 }
