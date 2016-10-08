@@ -43,19 +43,18 @@ type RequestLimiter interface {
 	Check() (msg string, ok bool)
 	// Advance must be called after Check.
 	Advance()
-	// Limiter returns rate.Limiter.
-	Limiter() *rate.Limiter
+	// SetInterval updates the interval.
+	SetInterval(interval time.Duration)
 }
 
 type requestLimiter struct {
+	mu      sync.RWMutex
 	rootCtx context.Context
 
 	interval time.Duration
 	minScale time.Duration
 
-	limiter *rate.Limiter
-
-	mu          sync.RWMutex
+	limiter     *rate.Limiter
 	lastRequest time.Time
 }
 
@@ -76,7 +75,12 @@ func (rl *requestLimiter) Check() (msg string, ok bool) {
 	wc := make(chan struct{})
 
 	go func(ctx context.Context) {
-		err := rl.limiter.Wait(ctx)
+		rl.mu.Lock()
+		limiter := rl.limiter
+		rl.mu.Unlock()
+
+		err := limiter.Wait(ctx)
+
 		canceled = err == context.Canceled
 		close(wc)
 	}(subctx)
@@ -120,6 +124,9 @@ func (rl *requestLimiter) Advance() {
 	rl.mu.Unlock()
 }
 
-func (rl *requestLimiter) Limiter() *rate.Limiter {
-	return rl.limiter
+func (rl *requestLimiter) SetInterval(interval time.Duration) {
+	rl.mu.Lock()
+	rl.limiter.SetLimit(rate.Every(interval))
+	rl.interval = interval
+	rl.mu.Unlock()
 }
