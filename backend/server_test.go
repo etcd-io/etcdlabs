@@ -18,8 +18,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -41,125 +41,141 @@ func TestServer(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	tu := srv.addrURL
+	tu.Path = "/client-request"
+
+	time.Sleep(2 * time.Second)
 	fmt.Println("getting server status update...")
-	{
+	func() {
 		resp, err := http.Get(srv.addrURL.String() + "/server-status")
 		if err != nil {
 			t.Fatal(err)
 		}
-		b, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			resp.Body.Close()
+		defer resp.Body.Close()
+
+		sresp := ServerStatus{}
+		if err := json.NewDecoder(resp.Body).Decode(&sresp); err != nil {
 			t.Fatal(err)
 		}
-		resp.Body.Close()
-		fmt.Println("'/server-status' response:", string(b))
-	}
+		if len(sresp.NodeStatuses) != 5 {
+			t.Fatalf("len(sresp.NodeStatuses) expected 5, got %d", len(sresp.NodeStatuses))
+		}
+		hash := sresp.NodeStatuses[0].Hash
+		for i, s := range sresp.NodeStatuses {
+			if hash != s.Hash {
+				t.Fatalf("%d: hash expected %d, got different hash %d", i, hash, s.Hash)
+			}
+		}
+		fmt.Printf("'/server-status' response: %+v\n", sresp)
+	}()
 
 	println()
 	fmt.Println("stressing node1...")
-	{
-		tu := srv.addrURL
-		tu.Path = "/client-request"
-
+	func() {
 		req := ClientRequest{
 			Action:    "stress",
 			Endpoints: globalCluster.Endpoints(0, true),
 		}
-		data, err := json.Marshal(&req)
+		data, err := json.Marshal(req)
 		if err != nil {
 			t.Fatal(err)
 		}
-		fmt.Println("'/client-request' POST request:", string(data))
 
 		resp, err := http.Post(tu.String(), "application/json", bytes.NewReader(data))
 		if err != nil {
 			t.Fatal(err)
 		}
-		b, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			resp.Body.Close()
+		defer resp.Body.Close()
+
+		cresp := ClientResponse{}
+		if err := json.NewDecoder(resp.Body).Decode(&cresp); err != nil {
 			t.Fatal(err)
 		}
-		resp.Body.Close()
-		fmt.Println("'/client-request' POST response:", string(b))
-	}
+		if cresp.ClientRequest.Action != "stress" {
+			t.Fatalf("client request expected 'stress', got %s", cresp.ClientRequest.Action)
+		}
+		if !cresp.Success {
+			t.Fatalf("expected success true, got success %v", cresp.Success)
+		}
+		if len(cresp.KeyValues) != 3 {
+			t.Fatalf("expected 3 kvs, got %v", cresp.KeyValues)
+		}
+		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
+	}()
 
 	println()
 	fmt.Println("expecting rate-limit error from node1...")
-	{
-		tu := srv.addrURL
-		tu.Path = "/client-request"
-
+	func() {
 		req := ClientRequest{
 			Action:    "stress",
 			Endpoints: globalCluster.Endpoints(0, false),
 		}
-		data, err := json.Marshal(&req)
+		data, err := json.Marshal(req)
 		if err != nil {
 			t.Fatal(err)
 		}
-		fmt.Println("'/client-request' POST request:", string(data))
 
 		resp, err := http.Post(tu.String(), "application/json", bytes.NewReader(data))
 		if err != nil {
 			t.Fatal(err)
 		}
-		b, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			resp.Body.Close()
+		defer resp.Body.Close()
+
+		cresp := ClientResponse{}
+		if err := json.NewDecoder(resp.Body).Decode(&cresp); err != nil {
 			t.Fatal(err)
 		}
-		resp.Body.Close()
-		fmt.Println("'/client-request' POST response:", string(b))
-	}
+		if cresp.Success {
+			t.Fatalf("expected success false, got success %v", cresp.Success)
+		}
+		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
+	}()
 
-	globalClientRequestLimiter.SetInterval(time.Millisecond)
+	// remove limiter for testing purposes
+	globalClientRequestLimiter.SetInterval(time.Nanosecond)
 
 	println()
 	fmt.Println("expecting error from specifying no endpoints...")
-	{
-		tu := srv.addrURL
-		tu.Path = "/client-request"
-
+	func() {
 		req := ClientRequest{
 			Action: "stress",
 		}
-		data, err := json.Marshal(&req)
+		data, err := json.Marshal(req)
 		if err != nil {
 			t.Fatal(err)
 		}
-		fmt.Println("'/client-request' POST request:", string(data))
 
 		resp, err := http.Post(tu.String(), "application/json", bytes.NewReader(data))
 		if err != nil {
 			t.Fatal(err)
 		}
-		b, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			resp.Body.Close()
+		defer resp.Body.Close()
+
+		cresp := ClientResponse{}
+		if err := json.NewDecoder(resp.Body).Decode(&cresp); err != nil {
 			t.Fatal(err)
 		}
-		resp.Body.Close()
-		fmt.Println("'/client-request' POST response:", string(b))
-	}
+		if cresp.Success {
+			t.Fatalf("expected success false, got success %v", cresp.Success)
+		}
+		if cresp.Result != ErrNoEndpoint {
+			t.Fatalf("expected %s, got %s", ErrNoEndpoint, cresp.Result)
+		}
+		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
+	}()
 
 	println()
 	fmt.Println("writing to node2...")
-	{
-		tu := srv.addrURL
-		tu.Path = "/client-request"
-
+	func() {
 		req := ClientRequest{
 			Action:    "write",
 			Endpoints: globalCluster.Endpoints(1, true),
 			KeyValue:  KeyValue{Key: "foo", Value: "bar"},
 		}
-		data, err := json.Marshal(&req)
+		data, err := json.Marshal(req)
 		if err != nil {
 			t.Fatal(err)
 		}
-		fmt.Println("'/client-request' POST request:", string(data))
 
 		// hreq := &http.Request{
 		// 	Method: "POST",
@@ -171,228 +187,299 @@ func TestServer(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		b, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			resp.Body.Close()
+		defer resp.Body.Close()
+
+		cresp := ClientResponse{}
+		if err := json.NewDecoder(resp.Body).Decode(&cresp); err != nil {
 			t.Fatal(err)
 		}
-		resp.Body.Close()
-		fmt.Println("'/client-request' POST response:", string(b))
-	}
+		if !cresp.Success {
+			t.Fatalf("expected success true, got success %v", cresp.Success)
+		}
+		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
+	}()
 
 	println()
 	time.Sleep(time.Second)
 	fmt.Println("prefix-range from node3...")
-	{
-		tu := srv.addrURL
-		tu.Path = "/client-request"
-
+	func() {
 		req := ClientRequest{
 			Action:      "get",
 			RangePrefix: true,
 			Endpoints:   globalCluster.Endpoints(2, true),
 			KeyValue:    KeyValue{Key: "foo"},
 		}
-		data, err := json.Marshal(&req)
+		data, err := json.Marshal(req)
 		if err != nil {
 			t.Fatal(err)
 		}
-		fmt.Println("'/client-request' POST request:", string(data))
 
 		resp, err := http.Post(tu.String(), "application/json", bytes.NewReader(data))
 		if err != nil {
 			t.Fatal(err)
 		}
-		b, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			resp.Body.Close()
+		defer resp.Body.Close()
+
+		cresp := ClientResponse{}
+		if err := json.NewDecoder(resp.Body).Decode(&cresp); err != nil {
 			t.Fatal(err)
 		}
-		resp.Body.Close()
-		fmt.Println("'/client-request' POST response:", string(b))
-	}
+		if !cresp.Success {
+			t.Fatalf("expected success true, got success %v", cresp.Success)
+		}
+		if len(cresp.KeyValues) != 4 {
+			t.Fatalf("len(cresp.KeyValues) expected 4, got %v", cresp.KeyValues)
+		}
+		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
+	}()
 
 	println()
 	time.Sleep(time.Second)
 	fmt.Println("delete-prefix from node4...")
-	{
-		tu := srv.addrURL
-		tu.Path = "/client-request"
-
+	func() {
 		req := ClientRequest{
 			Action:      "delete",
 			RangePrefix: true,
 			Endpoints:   globalCluster.Endpoints(3, true),
 			KeyValue:    KeyValue{Key: "foo"},
 		}
-		data, err := json.Marshal(&req)
+		data, err := json.Marshal(req)
 		if err != nil {
 			t.Fatal(err)
 		}
-		fmt.Println("'/client-request' POST request:", string(data))
 
 		resp, err := http.Post(tu.String(), "application/json", bytes.NewReader(data))
 		if err != nil {
 			t.Fatal(err)
 		}
-		b, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			resp.Body.Close()
+		defer resp.Body.Close()
+
+		cresp := ClientResponse{}
+		if err := json.NewDecoder(resp.Body).Decode(&cresp); err != nil {
 			t.Fatal(err)
 		}
-		resp.Body.Close()
-		fmt.Println("'/client-request' POST response:", string(b))
-	}
+		if !cresp.Success {
+			t.Fatalf("expected success true, got success %v", cresp.Success)
+		}
+		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
+	}()
 
 	println()
 	time.Sleep(time.Second)
 	fmt.Println("get from node5...")
-	{
-		tu := srv.addrURL
-		tu.Path = "/client-request"
-
+	func() {
 		req := ClientRequest{
 			Action:    "get",
 			Endpoints: globalCluster.Endpoints(4, true),
 			KeyValue:  KeyValue{Key: "foo"},
 		}
-		data, err := json.Marshal(&req)
+		data, err := json.Marshal(req)
 		if err != nil {
 			t.Fatal(err)
 		}
-		fmt.Println("'/client-request' POST request:", string(data))
 
 		resp, err := http.Post(tu.String(), "application/json", bytes.NewReader(data))
 		if err != nil {
 			t.Fatal(err)
 		}
-		b, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			resp.Body.Close()
+		defer resp.Body.Close()
+
+		cresp := ClientResponse{}
+		if err := json.NewDecoder(resp.Body).Decode(&cresp); err != nil {
 			t.Fatal(err)
 		}
-		resp.Body.Close()
-		fmt.Println("'/client-request' POST response:", string(b))
-	}
+		if !cresp.Success {
+			t.Fatalf("expected success true, got success %v", cresp.Success)
+		}
+		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
+	}()
 
 	println()
 	time.Sleep(time.Second)
 	fmt.Println("stop node1...")
-	{
-		tu := srv.addrURL
-		tu.Path = "/client-request"
-
+	func() {
 		req := ClientRequest{
 			Action:    "stop-node",
 			Endpoints: globalCluster.Endpoints(0, true),
 		}
-		data, err := json.Marshal(&req)
+		data, err := json.Marshal(req)
 		if err != nil {
 			t.Fatal(err)
 		}
-		fmt.Println("'/client-request' POST request:", string(data))
 
 		resp, err := http.Post(tu.String(), "application/json", bytes.NewReader(data))
 		if err != nil {
 			t.Fatal(err)
 		}
-		b, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			resp.Body.Close()
+		defer resp.Body.Close()
+
+		cresp := ClientResponse{}
+		if err := json.NewDecoder(resp.Body).Decode(&cresp); err != nil {
 			t.Fatal(err)
 		}
-		resp.Body.Close()
-		fmt.Println("'/client-request' POST response:", string(b))
-	}
+		if !cresp.Success {
+			t.Fatalf("expected success true, got success %v", cresp.Success)
+		}
+		if !strings.Contains(cresp.Result, "stopped ") {
+			t.Fatalf("expected 'stopped', got %v", cresp)
+		}
+		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
+	}()
 
 	println()
 	fmt.Println("expecting rate-limit excess error from stopping node1...")
-	{
-		tu := srv.addrURL
-		tu.Path = "/client-request"
-
+	func() {
 		req := ClientRequest{
 			Action:    "stop-node",
 			Endpoints: globalCluster.Endpoints(0, true),
 		}
-		data, err := json.Marshal(&req)
+		data, err := json.Marshal(req)
 		if err != nil {
 			t.Fatal(err)
 		}
-		fmt.Println("'/client-request' POST request:", string(data))
 
 		resp, err := http.Post(tu.String(), "application/json", bytes.NewReader(data))
 		if err != nil {
 			t.Fatal(err)
 		}
-		b, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			resp.Body.Close()
+		defer resp.Body.Close()
+
+		cresp := ClientResponse{}
+		if err := json.NewDecoder(resp.Body).Decode(&cresp); err != nil {
 			t.Fatal(err)
 		}
-		resp.Body.Close()
-		fmt.Println("'/client-request' POST response:", string(b))
-	}
+		if cresp.Success {
+			t.Fatalf("expected success false, got success %v", cresp.Success)
+		}
+		if !strings.Contains(cresp.Result, "rate limit exceeded") {
+			t.Fatalf("expected rate-limit excess, got %v", cresp)
+		}
+		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
+	}()
 
 	println()
 	time.Sleep(time.Second)
-	fmt.Println("expecting errors after stopping node1...")
-	{
-		tu := srv.addrURL
-		tu.Path = "/client-request"
-
+	fmt.Println("expecting errors after stopping same node1...")
+	func() {
 		req := ClientRequest{
 			Action:    "stress",
 			Endpoints: globalCluster.Endpoints(0, false),
 		}
-		data, err := json.Marshal(&req)
+		data, err := json.Marshal(req)
 		if err != nil {
 			t.Fatal(err)
 		}
-		fmt.Println("'/client-request' POST request:", string(data))
 
 		resp, err := http.Post(tu.String(), "application/json", bytes.NewReader(data))
 		if err != nil {
 			t.Fatal(err)
 		}
-		b, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			resp.Body.Close()
+		defer resp.Body.Close()
+
+		cresp := ClientResponse{}
+		if err := json.NewDecoder(resp.Body).Decode(&cresp); err != nil {
 			t.Fatal(err)
 		}
-		resp.Body.Close()
-		fmt.Println("'/client-request' POST response:", string(b))
-	}
+		if cresp.Success {
+			t.Fatalf("expected success false, got success %v", cresp.Success)
+		}
+		if !strings.Contains(cresp.Result, "client error") {
+			t.Fatalf("expected 'client error', got %v", cresp)
+		}
+		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
+	}()
 
 	println()
-	time.Sleep(time.Second)
+	time.Sleep(3 * time.Second)
 	fmt.Println("restart node1...")
-	{
-		tu := srv.addrURL
-		tu.Path = "/client-request"
-
+	func() {
 		req := ClientRequest{
 			Action:    "restart-node",
 			Endpoints: globalCluster.Endpoints(0, true),
 		}
-		data, err := json.Marshal(&req)
+		data, err := json.Marshal(req)
 		if err != nil {
 			t.Fatal(err)
 		}
-		fmt.Println("'/client-request' POST request:", string(data))
 
 		resp, err := http.Post(tu.String(), "application/json", bytes.NewReader(data))
 		if err != nil {
 			t.Fatal(err)
 		}
-		b, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			resp.Body.Close()
+		defer resp.Body.Close()
+
+		cresp := ClientResponse{}
+		if err := json.NewDecoder(resp.Body).Decode(&cresp); err != nil {
 			t.Fatal(err)
 		}
-		resp.Body.Close()
-		fmt.Println("'/client-request' POST response:", string(b))
-	}
+		if !cresp.Success {
+			t.Fatalf("expected success true, got success %v", cresp.Success)
+		}
+		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
+	}()
+
+	println()
+	fmt.Println("expected rate-limit excess from restarting node1...")
+	func() {
+		req := ClientRequest{
+			Action:    "restart-node",
+			Endpoints: globalCluster.Endpoints(0, true),
+		}
+		data, err := json.Marshal(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		resp, err := http.Post(tu.String(), "application/json", bytes.NewReader(data))
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer resp.Body.Close()
+
+		cresp := ClientResponse{}
+		if err := json.NewDecoder(resp.Body).Decode(&cresp); err != nil {
+			t.Fatal(err)
+		}
+		if cresp.Success {
+			t.Fatalf("expected success false, got success %v", cresp.Success)
+		}
+		if !strings.Contains(cresp.Result, "rate limit exceeded") {
+			t.Fatalf("expected rate-limit excess, got %v", cresp)
+		}
+		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
+	}()
+
+	println()
+	time.Sleep(3 * time.Second)
+	fmt.Println("expected errors from restarting same node1...")
+	func() {
+		req := ClientRequest{
+			Action:    "restart-node",
+			Endpoints: globalCluster.Endpoints(0, true),
+		}
+		data, err := json.Marshal(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		resp, err := http.Post(tu.String(), "application/json", bytes.NewReader(data))
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer resp.Body.Close()
+
+		cresp := ClientResponse{}
+		if err := json.NewDecoder(resp.Body).Decode(&cresp); err != nil {
+			t.Fatal(err)
+		}
+		if cresp.Success {
+			t.Fatalf("expected success false, got success %v", cresp.Success)
+		}
+		if !strings.Contains(cresp.Result, "already started") {
+			t.Fatalf("expected 'already started', got %v", cresp)
+		}
+		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
+	}()
 
 	fmt.Println("DONE!")
 

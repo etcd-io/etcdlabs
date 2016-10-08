@@ -91,13 +91,6 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 			return json.NewEncoder(w).Encode(cresp)
 		}
 
-		if globalCluster.IsStopped(idx) && creq.Action != "restart-node" {
-			cresp.Success = false
-			cresp.Result = fmt.Sprintf("%s is already stopped", globalCluster.NodeStatus(idx).Name)
-			cresp.ResultLines = []string{cresp.Result}
-			return json.NewEncoder(w).Encode(cresp)
-		}
-
 		cctx, ccancel := context.WithTimeout(ctx, 3*time.Second)
 		defer ccancel()
 
@@ -118,7 +111,7 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 			for _, kv := range cresp.KeyValues {
 				if _, err := cli.Put(cctx, kv.Key, kv.Value); err != nil {
 					cresp.Success = false
-					cresp.Result = err.Error()
+					cresp.Result = fmt.Sprintf("client error %v (took %v)", err, roundDownDuration(time.Since(reqStart), minScaleToDisplay))
 					cresp.ResultLines = []string{cresp.Result}
 					break
 				}
@@ -165,9 +158,8 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 				cresp.Success = false
 				cresp.Result = err.Error()
 				cresp.ResultLines = []string{cresp.Result}
-			}
-
-			if cresp.Success {
+			} else {
+				cresp.Success = true
 				cresp.Result = fmt.Sprintf("WRITE success (took %v)", roundDownDuration(time.Since(reqStart), minScaleToDisplay))
 				lines := make([]string, 1)
 				for i := range lines {
@@ -212,7 +204,7 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 			gresp, err := cli.Get(cctx, creq.KeyValue.Key, opts...)
 			if err != nil {
 				cresp.Success = false
-				cresp.Result = err.Error()
+				cresp.Result = fmt.Sprintf("client error %v (took %v)", err, roundDownDuration(time.Since(reqStart), minScaleToDisplay))
 				cresp.ResultLines = []string{cresp.Result}
 			}
 			kvs := make([]KeyValue, len(gresp.Kvs))
@@ -221,7 +213,7 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 			}
 			cresp.KeyValues = kvs
 
-			if cresp.Success {
+			if err == nil {
 				cresp.Result = fmt.Sprintf("GET success (took %v)", roundDownDuration(time.Since(reqStart), minScaleToDisplay))
 				lines := make([]string, len(cresp.KeyValues))
 				for i := range lines {
@@ -229,6 +221,7 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 				}
 				cresp.ResultLines = lines
 			}
+
 			if err := json.NewEncoder(w).Encode(cresp); err != nil {
 				return err
 			}
@@ -286,6 +279,13 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 			}
 			globalStopRestartLimiter.Advance()
 
+			if globalCluster.IsStopped(idx) {
+				cresp.Success = false
+				cresp.Result = fmt.Sprintf("%s is already stopped (took %v)", globalCluster.NodeStatus(idx).Name, roundDownDuration(time.Since(reqStart), minScaleToDisplay))
+				cresp.ResultLines = []string{cresp.Result}
+				return json.NewEncoder(w).Encode(cresp)
+			}
+
 			globalCluster.Stop(idx)
 
 			cresp.Result = fmt.Sprintf("stopped %s (took %v)", globalCluster.NodeStatus(idx).Name, roundDownDuration(time.Since(reqStart), minScaleToDisplay))
@@ -303,12 +303,19 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 			}
 			globalStopRestartLimiter.Advance()
 
+			if !globalCluster.IsStopped(idx) {
+				cresp.Success = false
+				cresp.Result = fmt.Sprintf("%s is already started (took %v)", globalCluster.NodeStatus(idx).Name, roundDownDuration(time.Since(reqStart), minScaleToDisplay))
+				cresp.ResultLines = []string{cresp.Result}
+				return json.NewEncoder(w).Encode(cresp)
+			}
+
 			if rerr := globalCluster.Restart(idx); rerr != nil {
 				cresp.Success = false
 				cresp.Result = rerr.Error()
 			} else {
 				cresp.Success = true
-				cresp.Result = fmt.Sprintf("stopped %s (took %v)", globalCluster.NodeStatus(idx).Name, roundDownDuration(time.Since(reqStart), minScaleToDisplay))
+				cresp.Result = fmt.Sprintf("restarted %s (took %v)", globalCluster.NodeStatus(idx).Name, roundDownDuration(time.Since(reqStart), minScaleToDisplay))
 			}
 
 			cresp.ResultLines = []string{cresp.Result}
