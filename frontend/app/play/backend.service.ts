@@ -104,17 +104,8 @@ export class BackendService {
   private statusUrl = 'server-status';
   private clientUrl = 'client-request';
 
-  serverStatus: ServerStatus;
+  d: ServerStatus;
   serverStatusErrorMessage: string;
-
-  writeResponse: string;
-  writeError: string;
-
-  deleteResponse: string;
-  deleteErrpr: string;
-
-  readResponse: string;
-  readError: string;
 
   constructor(private http: Http) {
     let nodeStatuses = [
@@ -172,6 +163,17 @@ export class BackendService {
   }
 
   requestWrite(eps: string[], key: string, value: string): Observable<ClientResponse> {
+    let creq = new ClientRequest(
+      'write',
+      false,
+      eps,
+      this.inputKey,
+      this.inputValue);
+    let body = JSON.stringify(creq);
+    let headers = new Headers({ 'Content-Type': 'application/json' });
+    let options = new RequestOptions({ headers: headers });
+
+
     return this.http.get(this.clientUrl)
       .map(this.processWriteResponse)
       .catch(this.processWriteError);
