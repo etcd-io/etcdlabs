@@ -32,8 +32,8 @@ type KeyValue struct {
 
 // ClientRequest defines client requests.
 type ClientRequest struct {
-	Action      string // 'stress', 'write', 'get', 'delete', 'stop-node', 'restart-node'
-	RangePrefix bool   // 'get', 'delete'
+	Action      string // 'stress', 'write', 'delete', 'get', 'stop-node', 'restart-node'
+	RangePrefix bool   // 'delete', 'get'
 	Endpoints   []string
 	KeyValue    KeyValue
 }
@@ -178,6 +178,50 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 				return err
 			}
 
+		case "delete":
+			if creq.KeyValue.Key == "" {
+				cresp.Success = false
+				cresp.Result = fmt.Sprint("DELETE request got empty key")
+				cresp.ResultLines = []string{cresp.Result}
+				return json.NewEncoder(w).Encode(cresp)
+			}
+
+			cli, _, err := globalCluster.Client(creq.Endpoints...)
+			if err != nil {
+				cresp.Success = false
+				cresp.Result = fmt.Sprintf("client error %v (took %v)", err, roundDownDuration(time.Since(reqStart), minScaleToDisplay))
+				cresp.ResultLines = []string{cresp.Result}
+				return json.NewEncoder(w).Encode(cresp)
+			}
+			defer cli.Close()
+
+			var opts []clientv3.OpOption
+			if creq.RangePrefix {
+				opts = append(opts, clientv3.WithPrefix(), clientv3.WithPrevKV())
+			}
+			dresp, err := cli.Delete(cctx, creq.KeyValue.Key, opts...)
+			if err != nil {
+				cresp.Success = false
+				cresp.Result = err.Error()
+			}
+			kvs := make([]KeyValue, len(dresp.PrevKvs))
+			for i := range dresp.PrevKvs {
+				kvs[i] = KeyValue{Key: string(dresp.PrevKvs[i].Key), Value: string(dresp.PrevKvs[i].Value)}
+			}
+			cresp.KeyValues = kvs
+
+			if cresp.Success {
+				cresp.Result = fmt.Sprintf("DELETE success (took %v)", roundDownDuration(time.Since(reqStart), minScaleToDisplay))
+				lines := make([]string, len(cresp.KeyValues))
+				for i := range lines {
+					lines[i] = fmt.Sprintf("DELETE success (key: %s, value: %s)", cresp.KeyValues[i].Key, cresp.KeyValues[i].Value)
+				}
+				cresp.ResultLines = lines
+			}
+			if err := json.NewEncoder(w).Encode(cresp); err != nil {
+				return err
+			}
+
 		case "get":
 			if creq.KeyValue.Key == "" {
 				cresp.Success = false
@@ -222,50 +266,6 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 				cresp.ResultLines = lines
 			}
 
-			if err := json.NewEncoder(w).Encode(cresp); err != nil {
-				return err
-			}
-
-		case "delete":
-			if creq.KeyValue.Key == "" {
-				cresp.Success = false
-				cresp.Result = fmt.Sprint("DELETE request got empty key")
-				cresp.ResultLines = []string{cresp.Result}
-				return json.NewEncoder(w).Encode(cresp)
-			}
-
-			cli, _, err := globalCluster.Client(creq.Endpoints...)
-			if err != nil {
-				cresp.Success = false
-				cresp.Result = fmt.Sprintf("client error %v (took %v)", err, roundDownDuration(time.Since(reqStart), minScaleToDisplay))
-				cresp.ResultLines = []string{cresp.Result}
-				return json.NewEncoder(w).Encode(cresp)
-			}
-			defer cli.Close()
-
-			var opts []clientv3.OpOption
-			if creq.RangePrefix {
-				opts = append(opts, clientv3.WithPrefix(), clientv3.WithPrevKV())
-			}
-			dresp, err := cli.Delete(cctx, creq.KeyValue.Key, opts...)
-			if err != nil {
-				cresp.Success = false
-				cresp.Result = err.Error()
-			}
-			kvs := make([]KeyValue, len(dresp.PrevKvs))
-			for i := range dresp.PrevKvs {
-				kvs[i] = KeyValue{Key: string(dresp.PrevKvs[i].Key), Value: string(dresp.PrevKvs[i].Value)}
-			}
-			cresp.KeyValues = kvs
-
-			if cresp.Success {
-				cresp.Result = fmt.Sprintf("DELETE success (took %v)", roundDownDuration(time.Since(reqStart), minScaleToDisplay))
-				lines := make([]string, len(cresp.KeyValues))
-				for i := range lines {
-					lines[i] = fmt.Sprintf("DELETE success (key: %s, value: %s)", cresp.KeyValues[i].Key, cresp.KeyValues[i].Value)
-				}
-				cresp.ResultLines = lines
-			}
 			if err := json.NewEncoder(w).Encode(cresp); err != nil {
 				return err
 			}
