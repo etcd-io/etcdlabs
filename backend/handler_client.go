@@ -32,7 +32,7 @@ type KeyValue struct {
 
 // ClientRequest defines client requests.
 type ClientRequest struct {
-	Action      string // 'stress', 'write', 'delete', 'get', 'stop-node', 'restart-node'
+	Action      string // 'write', 'stress', 'delete', 'get', 'stop-node', 'restart-node'
 	RangePrefix bool   // 'delete', 'get'
 	Endpoints   []string
 	KeyValue    KeyValue
@@ -97,45 +97,6 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 		reqStart := time.Now()
 
 		switch creq.Action {
-		case "stress":
-			cli, _, err := globalCluster.Client(creq.Endpoints...)
-			if err != nil {
-				cresp.Success = false
-				cresp.Result = fmt.Sprintf("client error %v (took %v)", err, roundDownDuration(time.Since(reqStart), minScaleToDisplay))
-				cresp.ResultLines = []string{cresp.Result}
-				return json.NewEncoder(w).Encode(cresp)
-			}
-			defer cli.Close()
-
-			cresp.KeyValues = multiRandKeyValues("foo", "bar", 3, 3)
-			for _, kv := range cresp.KeyValues {
-				if _, err := cli.Put(cctx, kv.Key, kv.Value); err != nil {
-					cresp.Success = false
-					cresp.Result = fmt.Sprintf("client error %v (took %v)", err, roundDownDuration(time.Since(reqStart), minScaleToDisplay))
-					cresp.ResultLines = []string{cresp.Result}
-					break
-				}
-			}
-
-			if cresp.Success {
-				cresp.Result = fmt.Sprintf("WRITE success (took %v)", roundDownDuration(time.Since(reqStart), minScaleToDisplay))
-				lines := make([]string, 3)
-				for i := range lines {
-					ks, vs := cresp.KeyValues[i].Key, cresp.KeyValues[i].Value
-					if len(ks) > 7 {
-						ks = ks[:7] + "..."
-					}
-					if len(vs) > 7 {
-						vs = vs[:7] + "..."
-					}
-					lines[i] = fmt.Sprintf("WRITE success (key: %s, value: %s)", ks, vs)
-				}
-				cresp.ResultLines = lines
-			}
-			if err := json.NewEncoder(w).Encode(cresp); err != nil {
-				return err
-			}
-
 		case "write":
 			if creq.KeyValue.Key == "" {
 				cresp.Success = false
@@ -162,6 +123,45 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 				cresp.Success = true
 				cresp.Result = fmt.Sprintf("WRITE success (took %v)", roundDownDuration(time.Since(reqStart), minScaleToDisplay))
 				lines := make([]string, 1)
+				for i := range lines {
+					ks, vs := cresp.KeyValues[i].Key, cresp.KeyValues[i].Value
+					if len(ks) > 7 {
+						ks = ks[:7] + "..."
+					}
+					if len(vs) > 7 {
+						vs = vs[:7] + "..."
+					}
+					lines[i] = fmt.Sprintf("WRITE success (key: %s, value: %s)", ks, vs)
+				}
+				cresp.ResultLines = lines
+			}
+			if err := json.NewEncoder(w).Encode(cresp); err != nil {
+				return err
+			}
+
+		case "stress":
+			cli, _, err := globalCluster.Client(creq.Endpoints...)
+			if err != nil {
+				cresp.Success = false
+				cresp.Result = fmt.Sprintf("client error %v (took %v)", err, roundDownDuration(time.Since(reqStart), minScaleToDisplay))
+				cresp.ResultLines = []string{cresp.Result}
+				return json.NewEncoder(w).Encode(cresp)
+			}
+			defer cli.Close()
+
+			cresp.KeyValues = multiRandKeyValues("foo", "bar", 3, 3)
+			for _, kv := range cresp.KeyValues {
+				if _, err := cli.Put(cctx, kv.Key, kv.Value); err != nil {
+					cresp.Success = false
+					cresp.Result = fmt.Sprintf("client error %v (took %v)", err, roundDownDuration(time.Since(reqStart), minScaleToDisplay))
+					cresp.ResultLines = []string{cresp.Result}
+					break
+				}
+			}
+
+			if cresp.Success {
+				cresp.Result = fmt.Sprintf("WRITE success (took %v)", roundDownDuration(time.Since(reqStart), minScaleToDisplay))
+				lines := make([]string, 3)
 				for i := range lines {
 					ks, vs := cresp.KeyValues[i].Key, cresp.KeyValues[i].Value
 					if len(ks) > 7 {
