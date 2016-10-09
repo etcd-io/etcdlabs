@@ -12,16 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package backend
+package ratelimit
 
-import (
-	"github.com/coreos/pkg/capnslog"
-	"google.golang.org/grpc/grpclog"
-)
+import "time"
 
-var plog = capnslog.NewPackageLogger("github.com/coreos/etcdlabs", "backend")
-
-func init() {
-	capnslog.SetGlobalLogLevel(capnslog.INFO)
-	grpclog.SetLogger(plog)
+func roundDownDuration(d, scale time.Duration) time.Duration {
+	d /= scale // round down in scale
+	d *= scale
+	return d
 }

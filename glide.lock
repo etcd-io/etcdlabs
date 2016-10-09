@@ -1,5 +1,5 @@
-hash: da07bf00e8901a94aa8ddaea910e402c8ee85fab63a7286a906f4037558956bf
-updated: 2016-10-06T11:50:18.305752263-07:00
+hash: 6dfe0aea7b0413b40d58099f794bc9517d1e8b2c6ed73caa5989127cd738d0d7
+updated: 2016-10-07T18:45:00.621068807-07:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -12,7 +12,7 @@ imports:
 - name: github.com/cockroachdb/cmux
   version: 112f0506e7743d64a6eb8fedbcff13d9979bbf92
 - name: github.com/coreos/etcd
-  version: 4a5fa261c64185853394204f100938a7e4e12de6
+  version: ac4d39cfb05df83b958c87df34bca5b668696e94
   subpackages:
   - alarm
   - auth
@@ -143,6 +143,10 @@ imports:
   version: 9c60d1c508f5134d1ca726b4641db998f2523357
   subpackages:
   - unix
+- name: golang.org/x/time
+  version: 711ca1cb87636abec28122ef3bc6a77269d433f3
+  subpackages:
+  - rate
 - name: google.golang.org/grpc
   version: 231b4cfea0e79843053a33f5fe90bd4d84b23cd3
   subpackages:

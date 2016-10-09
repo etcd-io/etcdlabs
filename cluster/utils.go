@@ -16,8 +16,10 @@ package cluster
 
 import (
 	"io/ioutil"
+	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func existFileOrDir(name string) bool {
@@ -47,4 +49,12 @@ func mkdirAll(dir string) error {
 		return err
 	}
 	return dirWritable(dir)
+}
+
+func getHost(ep string) string {
+	url, uerr := url.Parse(ep)
+	if uerr != nil || !strings.Contains(ep, "://") {
+		return ep
+	}
+	return url.Host
 }

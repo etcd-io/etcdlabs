@@ -1,6 +1,18 @@
 #!/usr/bin/env bash
 set -e
 
+# update depedency
+# 1. edit glide.yaml with version, git SHA
+# 2. run ./script-update-vendor-glide.sh
+# 3. it automatically detects new git SHA, and vendors updates to cmd/vendor directory
+#
+# add depedency
+# 1. run ./script-update-vendor-glide.sh github.com/USER/PROJECT#^1.0.0
+#        OR
+#        ./script-update-vendor-glide.sh github.com/USER/PROJECT#9b772b54b3bf0be1eec083c9669766a56332559a
+#        ./script-update-vendor-glide.sh golang.org/x/time#711ca1cb87636abec28122ef3bc6a77269d433f3
+# 2. make sure glide.yaml and glide.lock are updated
+
 GLIDE_ROOT="$GOPATH/src/github.com/Masterminds/glide"
 go get -v github.com/Masterminds/glide
 go get -v github.com/sgotti/glide-vc
@@ -11,8 +23,14 @@ pushd "${GLIDE_ROOT}"
 	go install
 popd
 
-rm -rf vendor
+rm -rf ./vendor
 
-glide update --strip-vendor --skip-test
+if [ -n "$1" ]; then
+	echo "glide get on $(echo $1)"
+	glide get --strip-vendor --skip-test $1
+else
+	echo "glide update on *"
+	glide update --strip-vendor --skip-test
+fi;
+
 glide vc --no-tests --only-code
-

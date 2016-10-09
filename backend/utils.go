@@ -20,13 +20,14 @@ import (
 	"time"
 )
 
+const (
+	letterBytes   = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	letterIdxBits = 6                    // 6 bits to represent a letter index
+	letterIdxMask = 1<<letterIdxBits - 1 // All 1-bits, as many as letterIdxBits
+	letterIdxMax  = 63 / letterIdxBits   // # of letter indices fitting in 63 bits
+)
+
 func randBytes(bytesN int) []byte {
-	const (
-		letterBytes   = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-		letterIdxBits = 6                    // 6 bits to represent a letter index
-		letterIdxMask = 1<<letterIdxBits - 1 // All 1-bits, as many as letterIdxBits
-		letterIdxMax  = 63 / letterIdxBits   // # of letter indices fitting in 63 bits
-	)
 	src := rand.NewSource(time.Now().UnixNano())
 	b := make([]byte, bytesN)
 	for i, cache, remain := bytesN-1, src.Int63(), letterIdxMax; i >= 0; {
@@ -48,7 +49,7 @@ func multiRandStrings(bytesN, sliceN int, prefix string) []string {
 	rs := make([]string, 0, sliceN)
 	for len(rs) != sliceN {
 		b := randBytes(bytesN)
-		s := fmt.Sprintf("%s-%s-%d", prefix, b, len(rs))
+		s := fmt.Sprintf("%s%s%d", prefix, b, len(rs)+1)
 		if _, ok := m[s]; !ok {
 			rs = append(rs, s)
 			m[s] = struct{}{}
@@ -57,7 +58,7 @@ func multiRandStrings(bytesN, sliceN int, prefix string) []string {
 	return rs
 }
 
-func multiRandKeyValues(bytesN, sliceN int, keyPrefix, valPrefix string) []KeyValue {
+func multiRandKeyValues(keyPrefix, valPrefix string, bytesN, sliceN int) []KeyValue {
 	keys, vals := multiRandStrings(bytesN, sliceN, keyPrefix), multiRandStrings(bytesN, sliceN, valPrefix)
 	kvs := make([]KeyValue, sliceN)
 	for i := range kvs {
@@ -65,4 +66,10 @@ func multiRandKeyValues(bytesN, sliceN int, keyPrefix, valPrefix string) []KeyVa
 		kvs[i].Value = vals[i]
 	}
 	return kvs
+}
+
+func roundDownDuration(d, scale time.Duration) time.Duration {
+	d /= scale // round down in scale
+	d *= scale
+	return d
 }

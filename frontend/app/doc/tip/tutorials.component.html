@@ -19,9 +19,20 @@
 
     <div class="doc-group">
         <router-outlet></router-outlet>
+
+        <!--TODO: create location hash to enable link to specific tab-->
         <md-tab-group>
             <md-tab>
-                <template md-tab-label>Write, Read</template>
+                <template md-tab-label>Write/Delete</template>
+                <template md-tab-content>
+					<p>
+						...
+					</p>
+				</template>
+            </md-tab>
+
+            <md-tab>
+                <template md-tab-label>Read</template>
                 <template md-tab-content>
 					<p>
 						...

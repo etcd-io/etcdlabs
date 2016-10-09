@@ -1,7 +1,7 @@
 package: github.com/coreos/etcdlabs
 import:
 - package: github.com/coreos/etcd
-  version: 4a5fa261c64185853394204f100938a7e4e12de6
+  version: ac4d39cfb05df83b958c87df34bca5b668696e94
   subpackages:
   - clientv3
   - embed
@@ -18,3 +18,6 @@ import:
   version: 231b4cfea0e79843053a33f5fe90bd4d84b23cd3
   subpackages:
   - credentials
+  - grpclog
+- package: golang.org/x/time
+  version: 711ca1cb87636abec28122ef3bc6a77269d433f3

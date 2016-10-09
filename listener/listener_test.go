@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package backend
+package listener
 
 import (
 	"bytes"
@@ -20,10 +20,7 @@ import (
 	"testing"
 )
 
-func Test_NewListener(t *testing.T) {
-	// stopc := make(chan struct{})
-	// ln, err := NewListenerStoppable("http", "127.0.0.1:0", nil, stopc)
-
+func TestNewListener(t *testing.T) {
 	ln, err := NewListener("http", "127.0.0.1:0", nil)
 	if err != nil {
 		t.Fatal(err)
@@ -56,7 +53,7 @@ func Test_NewListener(t *testing.T) {
 	}
 }
 
-func Test_NewListenerStoppable(t *testing.T) {
+func TestNewListenerStoppable(t *testing.T) {
 	stopc := make(chan struct{})
 	ln, err := NewListenerStoppable("http", "127.0.0.1:0", nil, stopc)
 	if err != nil {
@@ -90,7 +87,7 @@ func Test_NewListenerStoppable(t *testing.T) {
 	}
 }
 
-func Test_NewListenerStoppable_stop(t *testing.T) {
+func TestNewListenerStoppableStop(t *testing.T) {
 	stopc := make(chan struct{})
 	ln, err := NewListenerStoppable("http", "127.0.0.1:0", nil, stopc)
 	if err != nil {

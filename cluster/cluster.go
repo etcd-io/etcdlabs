@@ -17,6 +17,7 @@ package cluster
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -82,9 +83,9 @@ type Cluster struct {
 
 	rootDir           string
 	size              int
-	stopStartInterval time.Duration
 	nodes             []*node
 	clientHostToIndex map[string]int
+	clientDialTimeout time.Duration // for client requests
 
 	stopc chan struct{} // to signal updateNodeStatus
 	donec chan struct{} // after stopping updateNodeStatus
@@ -104,35 +105,29 @@ type Config struct {
 	PeerTLSInfo   transport.TLSInfo
 	PeerAutoTLS   bool
 
-	// StopStartInterval is the minimum duration to allow updates on nodes.
-	// This is to rate limit the nodes stop and restart operations.
-	StopStartInterval time.Duration
-
-	RootCtx    context.Context
-	RootCancel func()
+	RootCtx     context.Context
+	RootCancel  func()
+	DialTimeout time.Duration // for client requests
 }
 
-var (
-	uptimeScale          = time.Second
-	minStopStartInterval = 2 * time.Second
-)
+var defaultDialTimeout = time.Second
 
 // Start starts embedded etcd cluster.
 func Start(ccfg Config) (c *Cluster, err error) {
 	plog.Printf("starting %d nodes (root directory %s, root port :%d)", ccfg.Size, ccfg.RootDir, ccfg.RootPort)
 
-	startTime := time.Now().Round(uptimeScale)
-	if ccfg.StopStartInterval < minStopStartInterval {
-		ccfg.StopStartInterval = minStopStartInterval
+	dt := ccfg.DialTimeout
+	if dt == time.Duration(0) {
+		dt = defaultDialTimeout
 	}
 
 	c = &Cluster{
-		Started:           startTime,
+		Started:           time.Now(),
 		rootDir:           ccfg.RootDir,
 		size:              ccfg.Size,
-		stopStartInterval: ccfg.StopStartInterval,
 		nodes:             make([]*node, ccfg.Size),
 		clientHostToIndex: make(map[string]int, ccfg.Size),
+		clientDialTimeout: dt,
 		stopc:             make(chan struct{}),
 		donec:             make(chan struct{}),
 		rootCtx:           ccfg.RootCtx,
@@ -240,7 +235,7 @@ func Start(ccfg Config) (c *Cluster, err error) {
 		go func(i int) {
 			defer wg.Done()
 			for {
-				cli, _, err := c.Client(3*time.Second, i, c.Endpoints(i, false)...)
+				cli, _, err := c.Client(c.Endpoints(i, false)...)
 				if err != nil {
 					plog.Warning(err)
 					continue
@@ -320,17 +315,6 @@ func (c *Cluster) Stop(i int) {
 	}
 	c.nodes[i].statusLock.RUnlock()
 
-	for {
-		it := time.Since(c.nodes[i].stoppedStartedAt)
-		if it > c.stopStartInterval {
-			break
-		}
-
-		more := c.stopStartInterval - it + 100*time.Millisecond
-		plog.Printf("rate-limiting stopping %s (sleeping %v)", c.nodes[i].cfg.Name, more)
-
-		time.Sleep(more)
-	}
 	c.nodes[i].stoppedStartedAt = time.Now()
 
 	c.nodes[i].statusLock.Lock()
@@ -363,18 +347,6 @@ func (c *Cluster) Restart(i int) error {
 		return nil
 	}
 	c.nodes[i].statusLock.RUnlock()
-
-	for {
-		it := time.Since(c.nodes[i].stoppedStartedAt)
-		if it > c.stopStartInterval {
-			break
-		}
-
-		more := c.stopStartInterval - it + 100*time.Millisecond
-		plog.Printf("rate-limiting restarting %s (sleeping %v)", c.nodes[i].cfg.Name, more)
-
-		time.Sleep(more)
-	}
 
 	c.nodes[i].cfg.ClusterState = "existing"
 
@@ -418,7 +390,7 @@ func (c *Cluster) Shutdown() {
 			defer wg.Done()
 
 			if c.nodes[i].status.State == StoppedNodeStatus {
-				plog.Warningf("%s is already stopped", c.nodes[i].cfg.Name)
+				plog.Warningf("%s is already stopped (skipping shutdown)", c.nodes[i].cfg.Name)
 				return
 			}
 			c.nodes[i].stoppedStartedAt = time.Now()
@@ -465,7 +437,7 @@ func (c *Cluster) updateNodeStatus() {
 			}
 
 			now := time.Now()
-			cli, tlsConfig, err := c.Client(3*time.Second, i, c.Endpoints(i, false)...)
+			cli, tlsConfig, err := c.Client(c.Endpoints(i, false)...)
 			if err != nil {
 				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.State = StoppedNodeStatus
@@ -565,22 +537,9 @@ func (c *Cluster) updateNodeStatus() {
 	return
 }
 
-func getHost(ep string) string {
-	url, uerr := url.Parse(ep)
-	if uerr != nil || !strings.Contains(ep, "://") {
-		return ep
-	}
-	return url.Host
-}
-
-// FindIndexByClientEndpoint returns the node index by client URL.
-// It returns -1 if none.
-func (c *Cluster) FindIndexByClientEndpoint(ep string) int {
-	idx, ok := c.clientHostToIndex[getHost(ep)]
-	if !ok {
-		return -1
-	}
-	return idx
+// StoppedStartedAt returns the node's last stop and (re)start action time.
+func (c *Cluster) StoppedStartedAt(i int) time.Time {
+	return c.nodes[i].stoppedStartedAt
 }
 
 // Config returns the configuration of the server.
@@ -623,15 +582,27 @@ func (c *Cluster) AllEndpoints(scheme bool) []string {
 	return eps
 }
 
+// SetClientDialTimeout sets the client dial timeout.
+func (c *Cluster) SetClientDialTimeout(d time.Duration) {
+	c.clientDialTimeout = d
+}
+
 // Client creates the client.
-func (c *Cluster) Client(dialTimeout time.Duration, i int, eps ...string) (*clientv3.Client, *tls.Config, error) {
-	ccfg := clientv3.Config{
-		Endpoints:   eps,
-		DialTimeout: dialTimeout,
+func (c *Cluster) Client(eps ...string) (*clientv3.Client, *tls.Config, error) {
+	if len(eps) == 0 {
+		return nil, nil, errors.New("no endpoint is given")
+	}
+	idx, ok := c.clientHostToIndex[getHost(eps[0])]
+	if !ok {
+		return nil, nil, fmt.Errorf("cannot find node with endpoint %s", eps[0])
 	}
 
-	if !c.nodes[i].cfg.ClientTLSInfo.Empty() {
-		tlsConfig, err := c.nodes[i].cfg.ClientTLSInfo.ClientConfig()
+	ccfg := clientv3.Config{
+		Endpoints:   eps,
+		DialTimeout: c.clientDialTimeout,
+	}
+	if !c.nodes[idx].cfg.ClientTLSInfo.Empty() {
+		tlsConfig, err := c.nodes[idx].cfg.ClientTLSInfo.ClientConfig()
 		if err != nil {
 			return nil, nil, err
 		}
@@ -648,7 +619,6 @@ func (c *Cluster) IsStopped(i int) (stopped bool) {
 	stopped = c.nodes[i].status.State == StoppedNodeStatus
 	c.nodes[i].statusLock.Unlock()
 	return
-
 }
 
 // NodeStatus returns the node status.
@@ -663,4 +633,13 @@ func (c *Cluster) AllNodeStatus() []NodeStatus {
 		st[i] = c.nodes[i].status
 	}
 	return st
+}
+
+// FindIndex returns the node index by client URL. It returns -1 if none.
+func (c *Cluster) FindIndex(ep string) int {
+	idx, ok := c.clientHostToIndex[getHost(ep)]
+	if !ok {
+		return -1
+	}
+	return idx
 }

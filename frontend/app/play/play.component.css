@@ -2,16 +2,39 @@
     padding: 30px;
 }
 
+.circle-before-start {
+    fill: #B3E5FC;
+}
+
+.circle-Stopped {
+    fill: #F44336;
+}
+
+.circle-Follower {
+    fill: #40C4FF;
+}
+
+.circle-Leader {
+    fill: #2E7D32;
+}
+
 .client-card {
-    min-height: 300px;
+    min-height: 390px;
 }
 
 .select-node-checkbox {
+    font-size: 12px;
+    color: darkgrey;
+    font-family: 'Inconsolata', monospace;
+    font-weight: 300;
+    padding-right: 8px;
+}
+
+.prefix-checkbox {
     font-size: 10px;
     color: darkgrey;
     font-family: 'Inconsolata', monospace;
     font-weight: 300;
-    padding-right: 10px;
 }
 
 .client-card-text-status {
@@ -86,7 +109,8 @@
     overflow: scroll;
 }
 
-#log-box {
+#logContainer {
+    overflow: scroll;
     font-family: 'Roboto', Helvetica, sans-serif;
     font-weight: 300;
     font-size: 13px;
@@ -94,10 +118,24 @@
     font-variant: normal;
 }
 
-#log-output {
-    font-size: 12px;
+.log-output {
+    font-size: 15px;
     color: black;
     font-family: 'Inconsolata', monospace;
+}
+
+.log-output-prefix-OK {
+    font-size: 13px;
+    color: cornflowerblue;
+    font-family: 'Inconsolata', monospace;
+    font-weight: bold;
+}
+
+.log-output-prefix-WARN {
+    font-size: 13px;
+    color: red;
+    font-family: 'Inconsolata', monospace;
+    font-weight: bold;
 }
 
 /deep/ .md-tab-label {

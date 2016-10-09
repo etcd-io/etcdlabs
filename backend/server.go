@@ -22,8 +22,11 @@ import (
 	"net/url"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/coreos/etcdlabs/cluster"
+	"github.com/coreos/etcdlabs/listener"
+	"github.com/coreos/etcdlabs/ratelimit"
 )
 
 var (
@@ -64,12 +67,19 @@ type Server struct {
 	donec      chan struct{}
 }
 
-var globalCluster *cluster.Cluster
+var (
+	defaultLimitInterval       = 2 * time.Second
+	defaultStopRestartInterval = 3 * time.Second
+
+	globalCluster              *cluster.Cluster
+	globalClientRequestLimiter ratelimit.RequestLimiter
+	globalStopRestartLimiter   ratelimit.RequestLimiter
+)
 
 // StartServer starts a backend webserver with stoppable listener.
 func StartServer(port int) (*Server, error) {
 	stopc := make(chan struct{})
-	ln, err := NewListenerStoppable("http", fmt.Sprintf("localhost:%d", port), nil, stopc)
+	ln, err := listener.NewListenerStoppable("http", fmt.Sprintf("localhost:%d", port), nil, stopc)
 	if err != nil {
 		return nil, err
 	}
@@ -80,6 +90,12 @@ func StartServer(port int) (*Server, error) {
 		return nil, err
 	}
 	globalCluster = c
+
+	// allow only 1 request for every 2 second
+	globalClientRequestLimiter = ratelimit.NewRequestLimiter(rootCtx, defaultLimitInterval)
+
+	// rate-limit more strictly for every 3 second
+	globalStopRestartLimiter = ratelimit.NewRequestLimiter(rootCtx, defaultStopRestartInterval)
 
 	mux := http.NewServeMux()
 	mux.Handle("/server-status", &ContextAdapter{
@@ -111,7 +127,7 @@ func StartServer(port int) (*Server, error) {
 			close(srv.donec)
 		}()
 
-		if err := srv.httpServer.Serve(ln); err != nil && err != ErrListenerStopped {
+		if err := srv.httpServer.Serve(ln); err != nil && err != listener.ErrListenerStopped {
 			plog.Panic(err)
 		}
 	}()
