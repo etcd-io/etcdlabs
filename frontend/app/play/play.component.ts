@@ -160,11 +160,52 @@ export class PlayComponent implements OnInit, AfterViewChecked {
       prefix = false;
       key = '';
       val = '';
+    } else {
+      this.sendLogLine('OK', 'Requested ' + act + ' (' + this.getSelectedNodeEndpointsTxt() + ')');
     }
 
     let clientRequest = new ClientRequest(act, prefix, eps, key, val);
     this.backendService.sendClientRequest(clientRequest).subscribe(
       clientResponse => this.clientResponse = clientResponse,
       error => this.clientResponseError = <any>error);
+
+    switch (act) {
+      case 'stress':
+        this.writeResult = this.clientResponse.Result;
+        for (let _i = 0; _i < this.clientResponse.ResultLines.length; _i++) {
+          this.sendLogLine('OK', this.clientResponse.ResultLines[_i]);
+        }
+        break;
+
+      case 'write':
+        this.writeResult = this.clientResponse.Result;
+        for (let _i = 0; _i < this.clientResponse.ResultLines.length; _i++) {
+          this.sendLogLine('OK', this.clientResponse.ResultLines[_i]);
+        }
+        break;
+
+      case 'delete':
+        this.deleteResult = this.clientResponse.Result;
+        for (let _i = 0; _i < this.clientResponse.ResultLines.length; _i++) {
+          this.sendLogLine('OK', this.clientResponse.ResultLines[_i]);
+        }
+        break;
+
+      case 'get':
+        this.readResult = this.clientResponse.Result;
+        this.sendLogLine('OK', this.clientResponse.Result);
+        for (let _i = 0; _i < this.clientResponse.ResultLines.length; _i++) {
+          this.sendLogLine('OK', this.clientResponse.ResultLines[_i]);
+        }
+        break;
+
+      case 'stop-node':
+        this.sendLogLine('WARN', this.clientResponse.Result);
+        break;
+
+      case 'restart-node':
+        this.sendLogLine('WARN', this.clientResponse.Result);
+        break;
+    }
   }
 }

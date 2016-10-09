@@ -61,7 +61,7 @@ export class KeyValue {
 }
 
 export class ClientRequest {
-  Action: string; // 'stress', 'write', 'get', 'delete', 'stop-node', 'restart-node'
+  Action: string; // 'write', 'stress', 'get', 'delete', 'stop-node', 'restart-node'
   RangePrefix: boolean; // 'get', 'delete'
   Endpoints: string[];
   KeyValue: KeyValue;
@@ -169,6 +169,7 @@ export class BackendService {
     let body = JSON.stringify(clientRequest);
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({ headers: headers });
+
     console.log('request:', body);
 
     return this.http.post(this.clientRequestEndpoint, body, options)
