@@ -23,6 +23,9 @@
         <div class="inner">
             <div class="block block-copy half">
 
+                <a href="/doc/{{version.etcdVersionURL}}/faq#etcdlabs" class="faq-list">What is this website?</a>
+                <br><br>
+
                 <div class="faq-list-title">etcd, Distributed System</div>
                 <a href="/doc/{{version.etcdVersionURL}}/faq#etcd" class="faq-list">What is etcd?</a>
                 <br>
@@ -75,6 +78,14 @@
         <hr>
         <br>
 
+        <div id="etcdlabs"></div>
+        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#etcdlabs" class="faq-title">What is this website?</a></h2>
+        <p>
+            This website contains <a href="https://github.com/coreos/etcd" target="_blank" class="normal-link">etcd</a> documentation, tutorials, and demos. This is completely <a href="https://github.com/coreos/etcdlabs" target="_blank" class="normal-link">open-source</a>.
+            Contribution is always welcomed!
+        </p>
+        <br>
+
         <div id="etcd"></div>
         <h2><a href="/doc/{{version.etcdVersionURL}}/faq#etcd" class="faq-title">What is etcd?</a></h2>
         <p>
@@ -113,8 +124,8 @@
         <div id="etcd-consensus"></div>
         <h2><a href="/doc/{{version.etcdVersionURL}}/faq#etcd-consensus" class="faq-title">Consensus protocol in etcd</a></h2>
         <p>
-            etcd uses Raft<sup>[1]</sup> consensus algorithm. It keeps data consistent even if a cluster has faulty process or loses one of its communications. Raft safety property guarantees that system never returns incorrect value under network partitions and
-            delays (<i>non-Byzantine failures</i>). Raft is fully functional as long as any majority of servers can communicate with each other. Command completes as soon as quorum responds; overall performance is not affected by the minority.
+            etcd uses Raft<sup>[1]</sup> consensus algorithm. It keeps data consistent even if a cluster has faulty process or loses one of its communications. Raft safety property guarantees that system never returns incorrect value under network partitions
+            and delays (<i>non-Byzantine failures</i>). Raft is fully functional as long as any majority of servers can communicate with each other. Command completes as soon as quorum responds; overall performance is not affected by the minority.
         </p>
         <hr align="left" class="footer-top-line">
         <footer>
@@ -206,7 +217,6 @@
             <br> [5] Jonathan Ellis: "<a href="http://www.datastax.com/dev/blog/why-cassandra-doesnt-need-vector-clocks" target="_blank" class="footer-link">Why Cassandra doesn’t need vector clocks</a>," datastax.com, 2 September 2013.
         </footer>
         <br><br>
-
 
         <div id="etcd-use-case-coreos"></div>
         <h2><a href="/doc/{{version.etcdVersionURL}}/faq#etcd-use-case-coreos" class="faq-title">Production use: CoreOS</a></h2>
