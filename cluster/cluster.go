@@ -431,7 +431,9 @@ func (c *Cluster) updateNodeStatus() {
 			}()
 
 			if c.IsStopped(i) {
+				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.StateTxt = fmt.Sprintf("%s has been stopped (since %s)", c.nodes[i].status.Name, humanize.Time(c.nodes[i].stoppedStartedAt))
+				c.nodes[i].statusLock.Unlock()
 				plog.Printf("%s has been stopped (skipping updateNodeStatus)", c.nodes[i].cfg.Name)
 				return
 			}
@@ -452,7 +454,7 @@ func (c *Cluster) updateNodeStatus() {
 			defer cli.Close()
 
 			now = time.Now()
-			ctx, cancel := context.WithTimeout(c.rootCtx, 3*time.Second)
+			ctx, cancel := context.WithTimeout(c.rootCtx, time.Second)
 			resp, err := cli.Status(ctx, c.nodes[i].cfg.LCUrls[0].Host)
 			cancel()
 			if err != nil {
@@ -483,7 +485,7 @@ func (c *Cluster) updateNodeStatus() {
 			}
 
 			now = time.Now()
-			conn, err := grpc.Dial(c.nodes[i].cfg.LCUrls[0].Host, grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)), grpc.WithTimeout(3*time.Second))
+			conn, err := grpc.Dial(c.nodes[i].cfg.LCUrls[0].Host, grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)), grpc.WithTimeout(time.Second))
 			if err != nil {
 				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.State = StoppedNodeStatus
@@ -499,7 +501,17 @@ func (c *Cluster) updateNodeStatus() {
 
 			now = time.Now()
 			mc := pb.NewMaintenanceClient(conn)
-			ctx, cancel = context.WithTimeout(c.rootCtx, 3*time.Second)
+
+			// TODO: https://github.com/coreos/etcdlabs/issues/30
+			if c.IsStopped(i) { // double-check
+				c.nodes[i].statusLock.Lock()
+				c.nodes[i].status.StateTxt = fmt.Sprintf("%s has been stopped (since %s)", c.nodes[i].status.Name, humanize.Time(c.nodes[i].stoppedStartedAt))
+				c.nodes[i].statusLock.Unlock()
+				plog.Printf("%s has been stopped (skipping updateNodeStatus)", c.nodes[i].cfg.Name)
+				return
+			}
+
+			ctx, cancel = context.WithTimeout(c.rootCtx, time.Second)
 			var hresp *pb.HashResponse
 			hresp, err = mc.Hash(ctx, &pb.HashRequest{})
 			cancel()
