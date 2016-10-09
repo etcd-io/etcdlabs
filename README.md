@@ -19,3 +19,6 @@
 #### Project Status
 
 - [Angular 2 Material](https://github.com/angular/material2) is still in active development
+
+[cistat]: https://travis-ci.org/coreos/etcdlabs
+[etcdlabs-godoc]: https://godoc.org/github.com/coreos/etcdlabs
