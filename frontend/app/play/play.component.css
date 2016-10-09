@@ -2,6 +2,22 @@
     padding: 30px;
 }
 
+.circle-before-start {
+    fill: #B3E5FC;
+}
+
+.circle-Stopped {
+    fill: #F44336;
+}
+
+.circle-Follower {
+    fill: #40C4FF;
+}
+
+.circle-Leader {
+    fill: #2E7D32;
+}
+
 .client-card {
     min-height: 390px;
 }

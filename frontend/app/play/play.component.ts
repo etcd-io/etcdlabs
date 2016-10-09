@@ -158,9 +158,6 @@ export class PlayComponent implements OnInit, AfterViewChecked {
     this.backendService.fetchServerStatus().subscribe(
       serverStatus => this.serverStatus = serverStatus,
       error => this.serverStatusErrorMessage = <any>error);
-
-    // TODO: update cluster svg
-    this.sendLogLine('OK', 'getServerStatus started!');
   }
 
   processClientRequest(act: string) {
