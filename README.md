@@ -1,5 +1,8 @@
+# etcdlabs
 
-- [etcd website](http://104.199.121.254:4200)
+[![Build Status](https://img.shields.io/travis/coreos/etcdlabs.svg?style=flat-square)][cistat] [![Godoc](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)][etcdlabs-godoc]
+
+- [etcd website](http://104.199.121.254)
 - [Debug etcd](./debug-etcd)
 
 #### Technology Used
