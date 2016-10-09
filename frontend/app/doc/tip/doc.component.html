@@ -25,7 +25,7 @@
         <md-list>
             <md-list-item *ngFor="let docItem of docItems; let i = index;">
                 <md-icon md-list-avatar svgSrc="https://raw.githubusercontent.com/coreos/etcd/master/logos/etcd-glyph-color.svg" *ngIf="i == 0"></md-icon>
-                <h4 md-line class="doc-title">{{docItem.title}}</h4>
+                <p md-line class="doc-title">{{docItem.title}}</p>
                 <p md-line class="doc-description">{{docItem.description}}</p>
             </md-list-item>
         </md-list>

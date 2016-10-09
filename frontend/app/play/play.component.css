@@ -7,11 +7,11 @@
 }
 
 .select-node-checkbox {
-    font-size: 10px;
+    font-size: 12px;
     color: darkgrey;
     font-family: 'Inconsolata', monospace;
     font-weight: 300;
-    padding-right: 10px;
+    padding-right: 8px;
 }
 
 .prefix-checkbox {

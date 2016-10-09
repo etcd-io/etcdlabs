@@ -21,7 +21,7 @@
         <router-outlet></router-outlet>
 
         <h4>
-            Install and Deploy etcd <span class="versions-link-main-emphasize">{{inputEtcdVersion}}</span> <span class="versions-link-normal">(latest {{etcdVersionLatestRelease}})</span>
+            Install and Deploy etcd <span class="versions-link-normal">(latest {{etcdVersionLatestRelease}})</span>
         </h4>
 
         <md-card>
@@ -76,7 +76,7 @@
 				</template>
                 <template md-tab-content>
 					<br>
-					<h5 style="line-height: 0.07;">Why?</h5>
+					<h5>Why?</h5>
 					<p>
 						etcd writes data to disk. Such stateful application is complicated to run in container.
 					</p>
@@ -85,7 +85,7 @@
 					</p>
 
 					<br>
-					<h5 style="line-height: 0.07;">Install releases</h5>
+					<h5>Install releases</h5>
 					<div class="osx-window">
 						<div class="window-narrow">
 							<div class="titlebar">
@@ -101,15 +101,15 @@
 					</div>
 
 					<br>
-					<h5 style="line-height: 0.07;">Install on Linux</h5>
+					<h5>Install on Linux</h5>
 					<pre class="code-dark">{{getEtcdCommandInstallLinux()}}</pre>
 
 					<br>
-					<h5 style="line-height: 0.07;">Install on Mac OS (Darwin)</h5>
+					<h5>Install on Mac OS (Darwin)</h5>
 					<pre class="code-dark">{{getEtcdCommandInstallOSX()}}</pre>
 
 					<br>
-					<h5 style="line-height: 0.07;">Deploy etcd cluster</h5>
+					<h5>Deploy etcd cluster</h5>
 					<p *ngIf="flags[0].ipAddress == 'localhost'">
 						Seems like etcd is configured to run in localhost. Please make sure ports do not conflict!
 					</p>
@@ -129,7 +129,7 @@
 				</template>
                 <template md-tab-content>
 					<br>
-					<h5 style="line-height: 0.07;">Why?</h5>
+					<h5>Why?</h5>
 					<p>
 						Application container gives much portability to initial development phase.
 					</p>
@@ -148,7 +148,7 @@
 					<br>
 
 					<br>
-					<h5 style="line-height: 0.07;">Install Kubernetes</h5>
+					<h5>Install Kubernetes</h5>
 					This assumes host OS is Linux.
 					<div class="osx-window">
 						<div class="window">
@@ -225,7 +225,7 @@
 				</template>
                 <template md-tab-content>
 					<br>
-					<h5 style="line-height: 0.07;">Why?</h5>
+					<h5>Why?</h5>
 					<p>
 						If etcd stores information that should not be public, encryption is highly recommended.
 					</p>
@@ -238,7 +238,7 @@
 					</p>
 
 					<br>
-					<h5 style="line-height: 0.07;">Install cfssl</h5>
+					<h5>Install cfssl</h5>
 					<div class="osx-window">
 						<div class="window-narrow">
 							<div class="titlebar">
@@ -269,15 +269,15 @@
 					<br>
 					<br>
 
-					<h5 style="line-height: 0.07;">Generate self-signed root CA certificate</h5>
+					<h5>Generate self-signed root CA certificate</h5>
 					<pre class="code-dark">{{getCFSSLCommandRootCA()}}</pre>
 
 					<br>
-					<h5 style="line-height: 0.07;">Create a configuration file</h5>
+					<h5>Create a configuration file</h5>
 					<pre class="code-dark">{{getCFSSLCommandConfig()}}</pre>
 
 					<br>
-					<h5 style="line-height: 0.07;">Generate local-issued certificates with private keys</h5>
+					<h5>Generate local-issued certificates with private keys</h5>
 					<p *ngIf="flags[0].ipAddress == 'localhost'">
 						Seems like cert is configured for localhost. Please make sure to specify remote hosts, if any.
 					</p>
