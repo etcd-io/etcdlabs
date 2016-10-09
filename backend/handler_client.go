@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"net/http"
 	"time"
 
@@ -74,6 +75,14 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 			return json.NewEncoder(w).Encode(cresp)
 		}
 		defer req.Body.Close()
+
+		if creq.KeyValue.Key != "" {
+			creq.KeyValue.Key = template.HTMLEscapeString(creq.KeyValue.Key)
+		}
+		if creq.KeyValue.Value != "" {
+			creq.KeyValue.Value = template.HTMLEscapeString(creq.KeyValue.Value)
+		}
+
 		cresp.ClientRequest = creq
 
 		if len(creq.Endpoints) == 0 {
