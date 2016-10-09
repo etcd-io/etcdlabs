@@ -157,12 +157,15 @@
         </div>
     </div>
 
-    <button md-button (click)=fetch()>Test</button>
+    <button md-button (click)=getServerStatus()>Test</button>
 
     <h3 id="log">Log</h3>
-    <div id="log-box" class="log-box">
-        <div id="log-output">
-            {{ getSelectedNodeEndpointsTxt() }}
+    <div #logContainer class="log-box">
+        <!--{{ getLogOutput() }}-->
+        <div *ngFor="let logLine of this.logOutputLines; trackBy:trackByLineIndex">
+            <span *ngIf="logLine.logLevel == 'OK'" class="log-output-prefix-OK">{{ logLine.prefix }}</span>
+            <span *ngIf="logLine.logLevel == 'WARN'" class="log-output-prefix-WARN">{{ logLine.prefix }}</span>
+            <span class="log-output">{{ logLine.text }}</span>
         </div>
     </div>
 </div>

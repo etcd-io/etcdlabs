@@ -93,7 +93,8 @@
     overflow: scroll;
 }
 
-#log-box {
+#logContainer {
+    overflow: scroll;
     font-family: 'Roboto', Helvetica, sans-serif;
     font-weight: 300;
     font-size: 13px;
@@ -101,10 +102,24 @@
     font-variant: normal;
 }
 
-#log-output {
-    font-size: 12px;
+.log-output {
+    font-size: 15px;
     color: black;
     font-family: 'Inconsolata', monospace;
+}
+
+.log-output-prefix-OK {
+    font-size: 13px;
+    color: cornflowerblue;
+    font-family: 'Inconsolata', monospace;
+    font-weight: bold;
+}
+
+.log-output-prefix-WARN {
+    font-size: 13px;
+    color: red;
+    font-family: 'Inconsolata', monospace;
+    font-weight: bold;
 }
 
 /deep/ .md-tab-label {

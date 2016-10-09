@@ -142,7 +142,7 @@ export class BackendService {
     return Observable.throw(errMsg);
   }
 
-  requestServerStatus(): Observable<ServerStatus> {
+  fetchServerStatus(): Observable<ServerStatus> {
     return this.http.get(this.serverStatusEndpoint)
       .map(this.processServerStatusResponse)
       .catch(this.processServerStatusError);
