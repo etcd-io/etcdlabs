@@ -152,8 +152,9 @@ export class BackendService {
   ///////////////////////////////////////////////////////
   private processClientResponse(res: Response) {
     let jsonBody = res.json();
-    let statusResult = <ClientResponse>jsonBody;
-    return statusResult || {};
+    let clientResponse = <ClientResponse>jsonBody;
+    console.log('clientResponse', clientResponse);
+    return clientResponse || {};
   }
 
   private processClientRequestError(error: any) {
@@ -161,7 +162,6 @@ export class BackendService {
       error.status ? `${error.status} - ${error.statusText}` : 'Server error';
     console.error(errMsg);
     this.serverStatusErrorMessage = errMsg;
-
     return Observable.throw(errMsg);
   }
 
@@ -169,9 +169,6 @@ export class BackendService {
     let body = JSON.stringify(clientRequest);
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({ headers: headers });
-
-    console.log('request:', body);
-
     return this.http.post(this.clientRequestEndpoint, body, options)
       .map(this.processClientResponse)
       .catch(this.processClientRequestError);

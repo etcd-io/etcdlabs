@@ -160,7 +160,7 @@ export class PlayComponent implements OnInit, AfterViewChecked {
       prefix = false;
       key = '';
       val = '';
-      this.sendLogLine('WARN', 'Requested "' + act + '" ' + this.serverStatus.NodeStatuses[nodeIndex].Name);
+      this.sendLogLine('OK', 'Requested "' + act + '" ' + this.serverStatus.NodeStatuses[nodeIndex].Name);
     } else {
       this.sendLogLine('OK', 'Requested "' + act + '" (' + this.getSelectedNodeEndpointsTxt() + ')');
     }
@@ -168,7 +168,10 @@ export class PlayComponent implements OnInit, AfterViewChecked {
     let clientRequest = new ClientRequest(act, prefix, eps, key, val);
     this.backendService.sendClientRequest(clientRequest).subscribe(
       clientResponse => this.clientResponse = clientResponse,
-      error => this.clientResponseError = <any>error);
+      error => this.clientResponseError = <any>error,
+    );
+
+    console.log(act, this.clientResponse, this.clientResponseError);
 
     switch (act) {
       case 'stress':
@@ -205,7 +208,7 @@ export class PlayComponent implements OnInit, AfterViewChecked {
         break;
 
       case 'restart-node':
-        this.sendLogLine('WARN', this.clientResponse.Result);
+        this.sendLogLine('OK', this.clientResponse.Result);
         break;
     }
   }
