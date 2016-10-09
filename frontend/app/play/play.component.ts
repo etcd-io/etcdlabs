@@ -89,22 +89,6 @@ export class PlayComponent implements OnInit {
     return txt;
   }
 
-  clickStop() {
-    let displayDate = new Date().toTimeString();
-    let nodeIndex = this.selectedTab - 3;
-    this.serverStatus.NodeStatuses[nodeIndex].StateTxt = 'Requested to stop ' +
-      this.serverStatus.NodeStatuses[nodeIndex].Name + ' at ' + displayDate;
-    this.serverStatus.NodeStatuses[nodeIndex].State = 'Stopped';
-  }
-
-  clickRestart() {
-    let displayDate = new Date().toTimeString();
-    let nodeIndex = this.selectedTab - 3;
-    this.serverStatus.NodeStatuses[nodeIndex].StateTxt = 'Requested to restart ' +
-      this.serverStatus.NodeStatuses[nodeIndex].Name + ' at ' + displayDate;
-    this.serverStatus.NodeStatuses[nodeIndex].State = 'Follower';
-  }
-
   fetch() {
     // TODO: periodic calls on Observable that is returned by requestServerStatus
     this.backendService.requestServerStatus().subscribe(
@@ -113,11 +97,21 @@ export class PlayComponent implements OnInit {
   }
 
   processClientRequest(act: string) {
-    let clientRequest = new ClientRequest(act, this.deleteReadByPrefix, this.getSelectedNodeEndpoints(), this.inputKey, this.inputValue);
+    let nodeIndex = this.selectedTab - 3;
+    let eps = this.getSelectedNodeEndpoints();
+    let prefix = this.deleteReadByPrefix;
+    let key = this.inputKey;
+    let val = this.inputValue;
+    if (act === 'stop-node' || act === 'restart-node') {
+      eps = [this.serverStatus.NodeStatuses[nodeIndex].Endpoint];
+      prefix = false;
+      key = '';
+      val = '';
+    }
+
+    let clientRequest = new ClientRequest(act, prefix, eps, key, val);
     this.backendService.sendClientRequest(clientRequest).subscribe(
       clientResponse => this.writeResponse = clientResponse,
       error => this.writeError = <any>error);
-
-    console.log(clientRequest);
   }
 }

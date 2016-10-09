@@ -169,6 +169,7 @@ export class BackendService {
     let body = JSON.stringify(clientRequest);
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({ headers: headers });
+    console.log('request:', body);
 
     return this.http.get(this.clientRequestEndpoint)
       .map(this.processClientResponse)

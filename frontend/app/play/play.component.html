@@ -132,8 +132,8 @@
                         <template md-tab-content>
 							<br>
 							<div align="center">
-								<button md-button color="warn" md-tooltip="Click to kill {{nodeStatus.Name}}" (click)=clickStop()>Stop</button>
-								<button md-button md-tooltip="Click to restart {{nodeStatus.Name}}" (click)=clickRestart()>Restart</button>
+								<button md-button color="warn" md-tooltip="Click to kill {{nodeStatus.Name}}" (click)="processClientRequest('stop-node');">Stop</button>
+								<button md-button md-tooltip="Click to restart {{nodeStatus.Name}}" (click)="processClientRequest('restart-node');">Restart</button>
 							</div>
 							<ul>
 								<li><span class="client-card-text-list-title">ID:</span> <span class="client-card-text-id">{{nodeStatus.ID}}</span></li>
