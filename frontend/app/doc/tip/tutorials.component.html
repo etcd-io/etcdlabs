@@ -1,61 +1,63 @@
 <md-sidenav-layout>
-	<md-sidenav #sidenav [opened]="true" mode="side" class="doc-sidenav">
-		<md-list>
-			<a routerLink="/doc/{{version.etcdVersionURL}}">
-				<h3 md-subheader>Getting Started ({{version.etcdVersion}})</h3>
-			</a>
-			<md-list-item *ngFor="let item of getStartedItems">
-				<a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
-			</md-list-item>
+    <md-sidenav #sidenav [opened]="true" mode="side" class="doc-sidenav">
+        <md-list>
+            <a routerLink="/doc/{{version.etcdVersionURL}}">
+                <h3 md-subheader>Getting Started ({{version.etcdVersion}})</h3>
+            </a>
+            <md-list-item *ngFor="let item of getStartedItems">
+                <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
+            </md-list-item>
 
-			<md-divider></md-divider>
+            <md-divider></md-divider>
 
-			<h3 md-subheader>More</h3>
-			<md-list-item *ngFor="let item of moreItems">
-				<a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
-			</md-list-item>
-		</md-list>
-	</md-sidenav>
+            <h3 md-subheader>More</h3>
+            <md-list-item *ngFor="let item of moreItems">
+                <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
+            </md-list-item>
+        </md-list>
+    </md-sidenav>
 
-	<div class="doc-group">
-		<router-outlet></router-outlet>
-		<md-tab-group>
-			<md-tab>
-				<template md-tab-label>Write/Delete</template>
-				<template md-tab-content>
+    <div class="doc-group">
+        <router-outlet></router-outlet>
+
+        <!--TODO: create location hash to enable link to specific tab-->
+        <md-tab-group>
+            <md-tab>
+                <template md-tab-label>Write/Delete</template>
+                <template md-tab-content>
 					<p>
 						...
 					</p>
 				</template>
-			</md-tab>
+            </md-tab>
 
-			<md-tab>
-				<template md-tab-label>Read</template>
-				<template md-tab-content>
+            <md-tab>
+                <template md-tab-label>Read</template>
+                <template md-tab-content>
 					<p>
 						...
 					</p>
 				</template>
-			</md-tab>
+            </md-tab>
 
-			<md-tab>
-				<template md-tab-label>Watch</template>
-				<template md-tab-content>
+            <md-tab>
+                <template md-tab-label>Watch</template>
+                <template md-tab-content>
 					<p>
 						...
 					</p>
 				</template>
-			</md-tab>
+            </md-tab>
 
-			<md-tab>
-				<template md-tab-label>Lock, Election</template>
-				<template md-tab-content>
+            <md-tab>
+                <template md-tab-label>Lock, Election</template>
+                <template md-tab-content>
 					<p>
 						...
 					</p>
 				</template>
-			</md-tab>
+            </md-tab>
 
-		</md-tab-group>
-	</div>
+        </md-tab-group>
+    </div>
 </md-sidenav-layout>
