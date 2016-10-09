@@ -263,6 +263,9 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 				for i := range lines {
 					lines[i] = fmt.Sprintf("'get' success (key: %s, value: %s)", cresp.KeyValues[i].Key, cresp.KeyValues[i].Value)
 				}
+				if len(lines) == 0 {
+					lines = append(lines, fmt.Sprintf("key %q does not exist", creq.KeyValue.Key))
+				}
 				cresp.ResultLines = lines
 			}
 
