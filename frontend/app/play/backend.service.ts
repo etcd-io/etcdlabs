@@ -150,13 +150,40 @@ export class BackendService {
   ///////////////////////////////////////////////////////
 
   ///////////////////////////////////////////////////////
+  // with Promise
+  //
+  // private processClientResponse(res: Response) {
+  //   let jsonBody = res.json();
+  //   let clientResponse = <ClientResponse>jsonBody;
+  //   return clientResponse || {};
+  // }
+  // private processClientRequestError(error: any) {
+  //   let errMsg = (error.message) ? error.message :
+  //     error.status ? `${error.status} - ${error.statusText}` : 'Server error';
+  //   console.error(errMsg);
+  //   this.serverStatusErrorMessage = errMsg;
+  //   return Promise.reject(errMsg);
+  // }
+  // postClientRequest(clientRequest: ClientRequest): Promise<ClientResponse> {
+  //   let body = JSON.stringify(clientRequest);
+  //   let headers = new Headers({ 'Content-Type': 'application/json' });
+  //   let options = new RequestOptions({ headers: headers });
+  //   return this.http.post(this.clientRequestEndpoint, body, options)
+  //     .toPromise()
+  //     .then(this.processClientResponse)
+  //     .catch(this.processClientRequestError);
+  // }
+  ///////////////////////////////////////////////////////
+
+  ///////////////////////////////////////////////////////
+  // with Observable
+  //
   private processClientResponse(res: Response) {
     let jsonBody = res.json();
     let clientResponse = <ClientResponse>jsonBody;
     console.log('clientResponse', clientResponse);
     return clientResponse || {};
   }
-
   private processClientRequestError(error: any) {
     let errMsg = (error.message) ? error.message :
       error.status ? `${error.status} - ${error.statusText}` : 'Server error';
@@ -164,14 +191,16 @@ export class BackendService {
     this.serverStatusErrorMessage = errMsg;
     return Observable.throw(errMsg);
   }
-
-  sendClientRequest(clientRequest: ClientRequest): Observable<ClientResponse> {
+  postClientRequest(clientRequest: ClientRequest): Observable<ClientResponse> {
     let body = JSON.stringify(clientRequest);
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({ headers: headers });
-    return this.http.post(this.clientRequestEndpoint, body, options)
+
+    // this returns without waiting for POST response
+    let obser = this.http.post(this.clientRequestEndpoint, body, options)
       .map(this.processClientResponse)
       .catch(this.processClientRequestError);
+    return obser;
   }
   ///////////////////////////////////////////////////////
 }

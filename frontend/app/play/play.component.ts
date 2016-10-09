@@ -166,13 +166,24 @@ export class PlayComponent implements OnInit, AfterViewChecked {
     }
 
     let clientRequest = new ClientRequest(act, prefix, eps, key, val);
-    this.backendService.sendClientRequest(clientRequest).subscribe(
+
+    // with Promise
+    //
+    // this.backendService.postClientRequest(clientRequest).then(
+    //   clientResponse => this.clientResponse = clientResponse,
+    //   error => this.clientResponseError = <any>error,
+    // );
+
+    // with Observable
+    //
+    this.backendService.postClientRequest(clientRequest).subscribe(
       clientResponse => this.clientResponse = clientResponse,
       error => this.clientResponseError = <any>error,
     );
 
+    // TODO: $.ajax({ success: function(dataObj)
+    // Below are undefined...
     console.log(act, this.clientResponse, this.clientResponseError);
-
     switch (act) {
       case 'stress':
         this.writeResult = this.clientResponse.Result;
