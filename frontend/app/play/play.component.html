@@ -143,16 +143,18 @@
                         <template md-tab-content>
 							<br>
 							<div align="center">
-								<button md-button color="warn" md-tooltip="Click to kill {{nodeStatus.Name}}" (click)="processClientRequest('stop-node');">Stop</button>
-								<button md-button md-tooltip="Click to restart {{nodeStatus.Name}}" (click)="processClientRequest('restart-node');">Restart</button>
+								<!--md-tooltip="Click to kill {{nodeStatus.Name}}" -->
+								<!--md-tooltip="Click to restart {{nodeStatus.Name}}"-->
+								<button md-button color="warn" (click)="processClientRequest('stop-node');">Stop</button>
+								<button md-button (click)="processClientRequest('restart-node');">Restart</button>
 							</div>
 							<ul>
 								<li><span class="client-card-text-list-title">ID:</span> <span class="client-card-text-id">{{nodeStatus.ID}}</span></li>
 								<li><span class="client-card-text-list-title">Endpoint:</span> <span class="client-card-text-endpoint">{{nodeStatus.Endpoint}}</span></li>
 								<li><span class="client-card-text-list-title">State:</span>
-									<span *ngIf="nodeStatus.State == 'Stopped'" class="client-card-text-stopped">{{nodeStatus.State}}</span>
-									<span *ngIf="nodeStatus.State == 'Follower'" class="client-card-text-follower">{{nodeStatus.State}}</span>
-									<span *ngIf="nodeStatus.State == 'Leader'" class="client-card-text-leader">{{nodeStatus.State}}</span>
+									<span *ngIf="nodeStatus.State == 'Stopped'" class="client-card-text-Stopped">{{nodeStatus.State}}</span>
+									<span *ngIf="nodeStatus.State == 'Follower'" class="client-card-text-Follower">{{nodeStatus.State}}</span>
+									<span *ngIf="nodeStatus.State == 'Leader'" class="client-card-text-Leader">{{nodeStatus.State}}</span>
 								</li>
 								<li><span class="client-card-text-list-title">DB Size:</span> <span class="client-card-text-dbsize">{{nodeStatus.DBSizeTxt}}</span></li>
 								<li><span class="client-card-text-list-title">Hash:</span> <span class="client-card-text-hash">{{nodeStatus.Hash}}</span></li>
@@ -172,6 +174,7 @@
     <div #logContainer class="log-box">
         <div *ngFor="let logLine of this.logOutputLines; trackBy:trackByLineIndex">
             <span *ngIf="logLine.logLevel == 'OK'" class="log-output-prefix-OK">{{ logLine.prefix }}</span>
+            <span *ngIf="logLine.logLevel == 'INFO'" class="log-output-prefix-INFO">{{ logLine.prefix }}</span>
             <span *ngIf="logLine.logLevel == 'WARN'" class="log-output-prefix-WARN">{{ logLine.prefix }}</span>
             <span class="log-output">{{ logLine.text }}</span>
         </div>

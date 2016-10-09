@@ -100,7 +100,7 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 		case "write":
 			if creq.KeyValue.Key == "" {
 				cresp.Success = false
-				cresp.Result = fmt.Sprint("WRITE request got empty key")
+				cresp.Result = fmt.Sprint("'write' request got empty key")
 				cresp.ResultLines = []string{cresp.Result}
 				return json.NewEncoder(w).Encode(cresp)
 			}
@@ -121,7 +121,7 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 				cresp.ResultLines = []string{cresp.Result}
 			} else {
 				cresp.Success = true
-				cresp.Result = fmt.Sprintf("WRITE success (took %v)", roundDownDuration(time.Since(reqStart), minScaleToDisplay))
+				cresp.Result = fmt.Sprintf("'write' success (took %v)", roundDownDuration(time.Since(reqStart), minScaleToDisplay))
 				lines := make([]string, 1)
 				for i := range lines {
 					ks, vs := cresp.KeyValues[i].Key, cresp.KeyValues[i].Value
@@ -131,7 +131,7 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 					if len(vs) > 7 {
 						vs = vs[:7] + "..."
 					}
-					lines[i] = fmt.Sprintf("WRITE success (key: %s, value: %s)", ks, vs)
+					lines[i] = fmt.Sprintf("'write' success (key: %s, value: %s)", ks, vs)
 				}
 				cresp.ResultLines = lines
 			}
@@ -160,7 +160,7 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 			}
 
 			if cresp.Success {
-				cresp.Result = fmt.Sprintf("WRITE success (took %v)", roundDownDuration(time.Since(reqStart), minScaleToDisplay))
+				cresp.Result = fmt.Sprintf("'stress' success (took %v)", roundDownDuration(time.Since(reqStart), minScaleToDisplay))
 				lines := make([]string, 3)
 				for i := range lines {
 					ks, vs := cresp.KeyValues[i].Key, cresp.KeyValues[i].Value
@@ -170,7 +170,7 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 					if len(vs) > 7 {
 						vs = vs[:7] + "..."
 					}
-					lines[i] = fmt.Sprintf("WRITE success (key: %s, value: %s)", ks, vs)
+					lines[i] = fmt.Sprintf("'stress' success (key: %s, value: %s)", ks, vs)
 				}
 				cresp.ResultLines = lines
 			}
@@ -181,7 +181,7 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 		case "delete":
 			if creq.KeyValue.Key == "" {
 				cresp.Success = false
-				cresp.Result = fmt.Sprint("DELETE request got empty key")
+				cresp.Result = fmt.Sprint("'delete' request got empty key")
 				cresp.ResultLines = []string{cresp.Result}
 				return json.NewEncoder(w).Encode(cresp)
 			}
@@ -211,10 +211,10 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 			cresp.KeyValues = kvs
 
 			if cresp.Success {
-				cresp.Result = fmt.Sprintf("DELETE success (took %v)", roundDownDuration(time.Since(reqStart), minScaleToDisplay))
+				cresp.Result = fmt.Sprintf("'delete' success (took %v)", roundDownDuration(time.Since(reqStart), minScaleToDisplay))
 				lines := make([]string, len(cresp.KeyValues))
 				for i := range lines {
-					lines[i] = fmt.Sprintf("DELETE success (key: %s, value: %s)", cresp.KeyValues[i].Key, cresp.KeyValues[i].Value)
+					lines[i] = fmt.Sprintf("'delete' success (key: %s, value: %s)", cresp.KeyValues[i].Key, cresp.KeyValues[i].Value)
 				}
 				cresp.ResultLines = lines
 			}
@@ -225,7 +225,7 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 		case "get":
 			if creq.KeyValue.Key == "" {
 				cresp.Success = false
-				cresp.Result = fmt.Sprint("GET request got empty key")
+				cresp.Result = fmt.Sprint("'get' request got empty key")
 				cresp.ResultLines = []string{cresp.Result}
 				return json.NewEncoder(w).Encode(cresp)
 			}
@@ -258,10 +258,10 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 			cresp.KeyValues = kvs
 
 			if err == nil {
-				cresp.Result = fmt.Sprintf("GET success (took %v)", roundDownDuration(time.Since(reqStart), minScaleToDisplay))
+				cresp.Result = fmt.Sprintf("'get' success (took %v)", roundDownDuration(time.Since(reqStart), minScaleToDisplay))
 				lines := make([]string, len(cresp.KeyValues))
 				for i := range lines {
-					lines[i] = fmt.Sprintf("GET success (key: %s, value: %s)", cresp.KeyValues[i].Key, cresp.KeyValues[i].Value)
+					lines[i] = fmt.Sprintf("'get' success (key: %s, value: %s)", cresp.KeyValues[i].Key, cresp.KeyValues[i].Value)
 				}
 				cresp.ResultLines = lines
 			}
@@ -273,7 +273,7 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 		case "stop-node":
 			if rmsg, ok := globalStopRestartLimiter.Check(); !ok {
 				cresp.Success = false
-				cresp.Result = "stop request " + rmsg
+				cresp.Result = "'stop-node' request " + rmsg
 				cresp.ResultLines = []string{cresp.Result}
 				return json.NewEncoder(w).Encode(cresp)
 			}
@@ -297,7 +297,7 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 		case "restart-node":
 			if rmsg, ok := globalStopRestartLimiter.Check(); !ok {
 				cresp.Success = false
-				cresp.Result = "restart request " + rmsg
+				cresp.Result = "'restart-node' request " + rmsg
 				cresp.ResultLines = []string{cresp.Result}
 				return json.NewEncoder(w).Encode(cresp)
 			}
