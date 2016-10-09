@@ -21,5 +21,9 @@ nohup npm start >> $HOME/etcdlabs-npm.log 2>&1 &
 sleep 2s
 cat $HOME/etcdlabs-npm.log
 cat $HOME/etcdlabs.log
-# tail -f $HOME/etcdlabs-npm.log
-# tail -f $HOME/etcdlabs.log
+
+<<COMMENT
+tail -f /tmp/etcdlabs-npm.log
+tail -f /tmp/etcdlabs.log
+COMMENT
+
