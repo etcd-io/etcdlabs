@@ -82,7 +82,7 @@
 
 .client-card-text-Stopped {
     font-size: 15px;
-    color: red;
+    color: #FF1744;
     font-family: 'Inconsolata', monospace;
     font-weight: bold;
 }
@@ -96,16 +96,17 @@
 
 .client-card-text-Leader {
     font-size: 15px;
-    color: seagreen;
+    color: #388E3C;
     font-family: 'Inconsolata', monospace;
     font-weight: bold;
 }
 
 .log-box {
-    padding-top: 10px;
+    padding-top: 15px;
     padding-left: 5px;
     border: 1px solid black;
-    height: 500px;
+    max-width: 1450px;
+    height: 250px;
     overflow: scroll;
 }
 
@@ -126,21 +127,21 @@
 
 .log-output-prefix-OK {
     font-size: 13px;
-    color: cornflowerblue;
+    color: #2196F3;
     font-family: 'Inconsolata', monospace;
     font-weight: bold;
 }
 
 .log-output-prefix-INFO {
     font-size: 13px;
-    color: #4DB6AC;
+    color: #3949AB;
     font-family: 'Inconsolata', monospace;
     font-weight: bold;
 }
 
 .log-output-prefix-WARN {
     font-size: 13px;
-    color: red;
+    color: #F44336;
     font-family: 'Inconsolata', monospace;
     font-weight: bold;
 }

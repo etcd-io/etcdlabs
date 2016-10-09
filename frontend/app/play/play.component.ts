@@ -270,7 +270,8 @@ export class PlayComponent implements OnInit, AfterViewChecked {
     }
 
     switch (this.clientResponse.ClientRequest.Action) {
-      case 'stress', 'write':
+      case 'stress': // fallthrough
+      case 'write':
         this.writeResult = this.clientResponse.Result;
         break;
 
@@ -285,8 +286,10 @@ export class PlayComponent implements OnInit, AfterViewChecked {
 
     this.sendLogLine(logLevel, this.clientResponse.Result);
 
-    for (let _i = 0; _i < this.clientResponse.ResultLines.length; _i++) {
-      this.sendLogLine(logLevel, this.clientResponse.ResultLines[_i]);
+    if (this.clientResponse.ClientRequest.Action !== 'stop-node' && this.clientResponse.ClientRequest.Action !== 'restart-node') {
+      for (let _i = 0; _i < this.clientResponse.ResultLines.length; _i++) {
+        this.sendLogLine(logLevel, this.clientResponse.ResultLines[_i]);
+      }
     }
   }
 
@@ -322,9 +325,9 @@ export class PlayComponent implements OnInit, AfterViewChecked {
       prefix = false;
       key = '';
       val = '';
-      this.sendLogLine('OK', 'Requested "' + act + '" ' + this.serverStatus.NodeStatuses[nodeIndex].Name);
+      this.sendLogLine('OK', 'requested "' + act + '" ' + this.serverStatus.NodeStatuses[nodeIndex].Name);
     } else {
-      this.sendLogLine('OK', 'Requested "' + act + '" (' + this.getSelectedNodeEndpointsTxt() + ')');
+      this.sendLogLine('OK', 'requested "' + act + '" (' + this.getSelectedNodeEndpointsTxt() + ')');
     }
 
     let clientRequest = new ClientRequest(act, prefix, eps, key, val);

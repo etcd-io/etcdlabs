@@ -170,7 +170,6 @@
         </div>
     </div>
 
-    <h3 id="log">Log</h3>
     <div #logContainer class="log-box">
         <div *ngFor="let logLine of this.logOutputLines; trackBy:trackByLineIndex">
             <span *ngIf="logLine.logLevel == 'OK'" class="log-output-prefix-OK">{{ logLine.prefix }}</span>
