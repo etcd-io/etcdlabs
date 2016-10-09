@@ -1,8 +1,8 @@
 <div class="play-group">
 
-    <div class="inner">
-        <div class="block block-copy half">
-            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="border: 0px solid black" width="500" height="400">
+	<div class="inner">
+		<div class="block block-copy half">
+			<svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="border: 0px solid black" width="500" height="400">
 				<circle id="ring" cx="230" cy="210" r="110" style="fill: #F5F5F5"></circle>
 				<g id="servers">
 					<g class="circle-before-start" [class.circle-Stopped]="serverStatus.NodeStatuses[0].State == 'Stopped'" [class.circle-Follower]="serverStatus.NodeStatuses[0].State == 'Follower'"
@@ -47,14 +47,14 @@
 					</g>
 				</g>
 			</svg>
-        </div>
+		</div>
 
-        <div class="block block-copy half">
-            <md-card class="client-card">
-                <md-tab-group [(selectedIndex)]="selectedTab">
-                    <md-tab>
-                        <template md-tab-label><b>Write</b></template>
-                        <template md-tab-content>
+		<div class="block block-copy half">
+			<md-card class="client-card">
+				<md-tab-group [(selectedIndex)]="selectedTab">
+					<md-tab>
+						<template md-tab-label><b>Write</b></template>
+						<template md-tab-content>
 							<br>
 							<div align="center">
 								<span class="select-node-checkbox">Endpoints: </span>
@@ -82,11 +82,11 @@
 							</div>
 							<p class="client-card-text-status">{{writeResponseTxt}}</p>
 						</template>
-                    </md-tab>
+					</md-tab>
 
-                    <md-tab>
-                        <template md-tab-label><b>Delete</b></template>
-                        <template md-tab-content>
+					<md-tab>
+						<template md-tab-label><b>Delete</b></template>
+						<template md-tab-content>
 							<br>
 							<div align="center">
 								<span class="select-node-checkbox">Endpoints: </span>
@@ -106,11 +106,11 @@
 							</div>
 							<p class="client-card-text-status">{{deleteResponseTxt}}</p>
 						</template>
-                    </md-tab>
+					</md-tab>
 
-                    <md-tab>
-                        <template md-tab-label><b>Read</b></template>
-                        <template md-tab-content>
+					<md-tab>
+						<template md-tab-label><b>Read</b></template>
+						<template md-tab-content>
 							<br>
 							<div align="center">
 								<span class="select-node-checkbox">Endpoints: </span>
@@ -130,11 +130,11 @@
 							</div>
 							<p class="client-card-text-status">{{readResponseTxt}}</p>
 						</template>
-                    </md-tab>
+					</md-tab>
 
-                    <md-tab *ngFor="let nodeStatus of serverStatus.NodeStatuses;">
-                        <template md-tab-label>{{nodeStatus.Name}}</template>
-                        <template md-tab-content>
+					<md-tab *ngFor="let nodeStatus of serverStatus.NodeStatuses;">
+						<template md-tab-label>{{nodeStatus.Name}}</template>
+						<template md-tab-content>
 							<br>
 							<div align="center">
 								<button md-button color="warn" md-tooltip="Click to kill {{nodeStatus.Name}}" (click)="processClientRequest('stop-node');">Stop</button>
@@ -155,22 +155,19 @@
 								{{nodeStatus.StateTxt}} <span *ngIf='serverStatusErrorMessage'>(error: {{serverStatusErrorMessage}})</span>
 							</p>
 						</template>
-                    </md-tab>
-                </md-tab-group>
-            </md-card>
+					</md-tab>
+				</md-tab-group>
+			</md-card>
 
-        </div>
-    </div>
+		</div>
+	</div>
 
-    <button md-button (click)=getServerStatus()>Test</button>
-
-    <h3 id="log">Log</h3>
-    <div #logContainer class="log-box">
-        <!--{{ getLogOutput() }}-->
-        <div *ngFor="let logLine of this.logOutputLines; trackBy:trackByLineIndex">
-            <span *ngIf="logLine.logLevel == 'OK'" class="log-output-prefix-OK">{{ logLine.prefix }}</span>
-            <span *ngIf="logLine.logLevel == 'WARN'" class="log-output-prefix-WARN">{{ logLine.prefix }}</span>
-            <span class="log-output">{{ logLine.text }}</span>
-        </div>
-    </div>
+	<h3 id="log">Log</h3>
+	<div #logContainer class="log-box">
+		<div *ngFor="let logLine of this.logOutputLines; trackBy:trackByLineIndex">
+			<span *ngIf="logLine.logLevel == 'OK'" class="log-output-prefix-OK">{{ logLine.prefix }}</span>
+			<span *ngIf="logLine.logLevel == 'WARN'" class="log-output-prefix-WARN">{{ logLine.prefix }}</span>
+			<span class="log-output">{{ logLine.text }}</span>
+		</div>
+	</div>
 </div>
