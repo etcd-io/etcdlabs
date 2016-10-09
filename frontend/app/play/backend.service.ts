@@ -171,7 +171,7 @@ export class BackendService {
     let options = new RequestOptions({ headers: headers });
     console.log('request:', body);
 
-    return this.http.get(this.clientRequestEndpoint)
+    return this.http.post(this.clientRequestEndpoint, body, options)
       .map(this.processClientResponse)
       .catch(this.processClientRequestError);
   }

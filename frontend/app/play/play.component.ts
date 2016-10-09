@@ -58,23 +58,11 @@ export class PlayComponent implements OnInit, AfterViewChecked {
   inputValue: string;
   deleteReadByPrefix: boolean;
 
-  stressResponse: ClientResponse;
-  stressError: string;
-
-
-
-  writeResponse: ClientResponse;
-  writeError: string;
-
-  deleteResponse: ClientResponse;
-  deleteErrpr: string;
-
-  readResponse: ClientResponse;
-  readError: string;
-
-  writeResponseTxt: string;
-  deleteResponseTxt: string;
-  readResponseTxt: string;
+  clientResponse: ClientResponse;
+  clientResponseError: string;
+  writeResult: string;
+  deleteResult: string;
+  readResult: string;
 
   constructor(private backendService: BackendService) {
     this.logOutputLines = [];
@@ -176,7 +164,7 @@ export class PlayComponent implements OnInit, AfterViewChecked {
 
     let clientRequest = new ClientRequest(act, prefix, eps, key, val);
     this.backendService.sendClientRequest(clientRequest).subscribe(
-      clientResponse => this.writeResponse = clientResponse,
-      error => this.writeError = <any>error);
+      clientResponse => this.clientResponse = clientResponse,
+      error => this.clientResponseError = <any>error);
   }
 }
