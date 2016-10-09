@@ -197,10 +197,18 @@ export class PlayComponent implements OnInit, AfterViewChecked {
   }
 
   ///////////////////////////////////////////////////////
+  processServerStatusResponse(resp: ServerStatus) {
+    this.serverStatus = resp;
+    this.serverStatusErrorMessage = '';
+  }
+
   getServerStatus() {
+    let serverStatusResult: ServerStatus;
     this.backendService.fetchServerStatus().subscribe(
-      serverStatus => this.serverStatus = serverStatus,
-      error => this.serverStatusErrorMessage = <any>error);
+      serverStatus => serverStatusResult = serverStatus,
+      error => this.serverStatusErrorMessage = <any>error,
+      () => this.processServerStatusResponse(serverStatusResult),
+    );
   }
   ///////////////////////////////////////////////////////
 
