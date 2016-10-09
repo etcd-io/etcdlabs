@@ -6,6 +6,7 @@ sudo apt-get install -y nginx
 sudo service nginx stop
 sudo cp ./nginx.conf /etc/nginx/sites-available/default
 sudo service nginx restart
+sudo systemctl status nginx.service
 
 echo "building backend ectcdlabs"
 go build -v
