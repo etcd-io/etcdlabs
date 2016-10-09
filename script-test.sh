@@ -4,9 +4,10 @@ set -ex
 IGNORE_PKGS="(vendor)"
 TESTS=`find . -name \*_test.go | while read a; do dirname $a; done | sort | uniq | egrep -v "$IGNORE_PKGS"`
 
+# TODO: run with multi-CPU (not right now because of port conflict)
 echo "Running tests...";
-go test -v -cover -cpu 1,2,4 $TESTS;
-go test -v -cover -cpu 1,2,4 -race $TESTS;
+go test -v -cpu 1 $TESTS;
+go test -v -cpu 1 -race $TESTS;
 
 echo "Checking gofmt..."
 fmtRes=$(gofmt -l -s $TESTS 2>&1 >/dev/null)

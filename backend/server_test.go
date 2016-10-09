@@ -132,9 +132,10 @@ func TestServer(t *testing.T) {
 	}()
 
 	// remove limiter for testing purposes
-	globalClientRequestLimiter.SetInterval(time.Nanosecond)
+	globalClientRequestLimiter.SetInterval(10 * time.Millisecond)
 
 	println()
+	time.Sleep(time.Second)
 	fmt.Println("expecting error from specifying no endpoints...")
 	func() {
 		req := ClientRequest{
@@ -165,6 +166,7 @@ func TestServer(t *testing.T) {
 	}()
 
 	println()
+	time.Sleep(time.Second)
 	fmt.Println("writing to node2...")
 	func() {
 		req := ClientRequest{
@@ -193,10 +195,11 @@ func TestServer(t *testing.T) {
 		if err := json.NewDecoder(resp.Body).Decode(&cresp); err != nil {
 			t.Fatal(err)
 		}
+		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
+
 		if !cresp.Success {
 			t.Fatalf("expected success true, got success %v", cresp.Success)
 		}
-		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
 	}()
 
 	println()
@@ -224,17 +227,18 @@ func TestServer(t *testing.T) {
 		if err := json.NewDecoder(resp.Body).Decode(&cresp); err != nil {
 			t.Fatal(err)
 		}
+		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
+
 		if !cresp.Success {
 			t.Fatalf("expected success true, got success %v", cresp.Success)
 		}
 		if len(cresp.KeyValues) != 4 {
 			t.Fatalf("len(cresp.KeyValues) expected 4, got %v", cresp.KeyValues)
 		}
-		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
 	}()
 
 	println()
-	time.Sleep(time.Second)
+	time.Sleep(2 * time.Second)
 	fmt.Println("delete-prefix from node4...")
 	func() {
 		req := ClientRequest{
@@ -258,10 +262,11 @@ func TestServer(t *testing.T) {
 		if err := json.NewDecoder(resp.Body).Decode(&cresp); err != nil {
 			t.Fatal(err)
 		}
+		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
+
 		if !cresp.Success {
 			t.Fatalf("expected success true, got success %v", cresp.Success)
 		}
-		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
 	}()
 
 	println()
@@ -288,10 +293,11 @@ func TestServer(t *testing.T) {
 		if err := json.NewDecoder(resp.Body).Decode(&cresp); err != nil {
 			t.Fatal(err)
 		}
+		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
+
 		if !cresp.Success {
 			t.Fatalf("expected success true, got success %v", cresp.Success)
 		}
-		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
 	}()
 
 	println()
@@ -317,13 +323,14 @@ func TestServer(t *testing.T) {
 		if err := json.NewDecoder(resp.Body).Decode(&cresp); err != nil {
 			t.Fatal(err)
 		}
+		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
+
 		if !cresp.Success {
 			t.Fatalf("expected success true, got success %v", cresp.Success)
 		}
 		if !strings.Contains(cresp.Result, "stopped ") {
 			t.Fatalf("expected 'stopped', got %v", cresp)
 		}
-		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
 	}()
 
 	println()
@@ -348,13 +355,14 @@ func TestServer(t *testing.T) {
 		if err := json.NewDecoder(resp.Body).Decode(&cresp); err != nil {
 			t.Fatal(err)
 		}
+		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
+
 		if cresp.Success {
 			t.Fatalf("expected success false, got success %v", cresp.Success)
 		}
 		if !strings.Contains(cresp.Result, "rate limit exceeded") {
 			t.Fatalf("expected rate-limit excess, got %v", cresp)
 		}
-		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
 	}()
 
 	println()
@@ -380,13 +388,14 @@ func TestServer(t *testing.T) {
 		if err := json.NewDecoder(resp.Body).Decode(&cresp); err != nil {
 			t.Fatal(err)
 		}
+		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
+
 		if cresp.Success {
 			t.Fatalf("expected success false, got success %v", cresp.Success)
 		}
 		if !strings.Contains(cresp.Result, "client error") {
 			t.Fatalf("expected 'client error', got %v", cresp)
 		}
-		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
 	}()
 
 	println()
@@ -412,10 +421,11 @@ func TestServer(t *testing.T) {
 		if err := json.NewDecoder(resp.Body).Decode(&cresp); err != nil {
 			t.Fatal(err)
 		}
+		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
+
 		if !cresp.Success {
 			t.Fatalf("expected success true, got success %v", cresp.Success)
 		}
-		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
 	}()
 
 	println()
@@ -440,13 +450,14 @@ func TestServer(t *testing.T) {
 		if err := json.NewDecoder(resp.Body).Decode(&cresp); err != nil {
 			t.Fatal(err)
 		}
+		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
+
 		if cresp.Success {
 			t.Fatalf("expected success false, got success %v", cresp.Success)
 		}
 		if !strings.Contains(cresp.Result, "rate limit exceeded") {
 			t.Fatalf("expected rate-limit excess, got %v", cresp)
 		}
-		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
 	}()
 
 	println()
@@ -472,13 +483,14 @@ func TestServer(t *testing.T) {
 		if err := json.NewDecoder(resp.Body).Decode(&cresp); err != nil {
 			t.Fatal(err)
 		}
+		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
+
 		if cresp.Success {
 			t.Fatalf("expected success false, got success %v", cresp.Success)
 		}
 		if !strings.Contains(cresp.Result, "already started") {
 			t.Fatalf("expected 'already started', got %v", cresp)
 		}
-		fmt.Printf("'/client-request' POST response: %+v\n", cresp)
 	}()
 
 	fmt.Println("DONE!")
