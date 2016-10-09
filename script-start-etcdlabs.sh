@@ -2,10 +2,10 @@
 set -ex
 
 echo "building backend ectcdlabs"
-go install -v
+go build -v
 
 echo "running backend etcdlabs"
-nohup etcdlabs >> $HOME/etcdlabs.log 2>&1 &
+nohup ./etcdlabs >> $HOME/etcdlabs.log 2>&1 &
 
 sleep 3s
 echo "starting frontend"

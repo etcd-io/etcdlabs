@@ -30,3 +30,5 @@ testem.log
 # log file
 etcdlabs.log
 
+# binary file
+etcdlabs
