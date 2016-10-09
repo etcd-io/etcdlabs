@@ -110,8 +110,13 @@ func (rl *requestLimiter) Check() (msg string, ok bool) {
 		took := time.Since(rl.lastRequest)
 		rl.mu.RUnlock()
 
-		msg = fmt.Sprintf("rate limit exceeded (try again after %v)", roundDownDuration(rl.interval-took, rl.minScale))
-		ok = false
+		if rl.interval-took > time.Duration(0) {
+			msg = fmt.Sprintf("rate limit exceeded (try again after %v)", roundDownDuration(rl.interval-took, rl.minScale))
+			ok = false
+			break
+		}
+		msg = OkMessage
+		ok = true
 	}
 
 	subcancel()
