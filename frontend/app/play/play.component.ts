@@ -160,8 +160,9 @@ export class PlayComponent implements OnInit, AfterViewChecked {
       prefix = false;
       key = '';
       val = '';
+      this.sendLogLine('WARN', 'Requested "' + act + '" ' + this.serverStatus.NodeStatuses[nodeIndex].Name);
     } else {
-      this.sendLogLine('OK', 'Requested ' + act + ' (' + this.getSelectedNodeEndpointsTxt() + ')');
+      this.sendLogLine('OK', 'Requested "' + act + '" (' + this.getSelectedNodeEndpointsTxt() + ')');
     }
 
     let clientRequest = new ClientRequest(act, prefix, eps, key, val);
