@@ -42,7 +42,7 @@ export class LogLine {
 })
 export class PlayComponent implements OnInit, AfterViewChecked {
   // $("#logContainer").scrollTop($("#logContainer")[0].scrollHeight);
-  @ViewChild('logContainer') private myScrollContainer: ElementRef;
+  @ViewChild('logContainer') private logScrollContainer: ElementRef;
 
   mode = 'Observable';
 
@@ -91,8 +91,10 @@ export class PlayComponent implements OnInit, AfterViewChecked {
 
   ngOnInit(): void {
     this.sendLogLine('OK', 'Hell World! Connected to etcd cluster!');
-    this.getServerStatus();
     this.scrollToBottom();
+
+    // (X) setInterval(this.getServerStatus, 1000);
+    setInterval(() => this.getServerStatus(), 1000);
   }
 
   ngAfterViewChecked() {
@@ -101,7 +103,7 @@ export class PlayComponent implements OnInit, AfterViewChecked {
 
   scrollToBottom(): void {
     try {
-      this.myScrollContainer.nativeElement.scrollTop = this.myScrollContainer.nativeElement.scrollHeight;
+      this.logScrollContainer.nativeElement.scrollTop = this.logScrollContainer.nativeElement.scrollHeight;
     } catch (err) { }
   }
 
@@ -152,11 +154,12 @@ export class PlayComponent implements OnInit, AfterViewChecked {
     return line.index;
   }
 
-  // TODO: periodic calls on Observable that is returned by fetchServerStatus
   getServerStatus() {
     this.backendService.fetchServerStatus().subscribe(
       serverStatus => this.serverStatus = serverStatus,
       error => this.serverStatusErrorMessage = <any>error);
+
+    // TODO: update cluster svg
     this.sendLogLine('OK', 'getServerStatus started!');
   }
 
