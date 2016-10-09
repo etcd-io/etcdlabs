@@ -174,9 +174,9 @@ export class PlayComponent implements OnInit, AfterViewChecked {
 
   getSelectedNodeEndpointsTxt() {
     let eps = this.getSelectedNodeEndpoints();
-    let txt = 'No endpoint is selected...';
+    let txt = 'no endpoint is selected...';
     if (eps.length > 0) {
-      txt = 'Selected endpoints: ';
+      txt = 'selected endpoints: ';
       for (let _i = 0; _i < eps.length; _i++) {
         if (_i > 0) {
           txt += ',';
