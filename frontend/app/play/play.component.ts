@@ -1,5 +1,58 @@
 import { Component, OnInit, AfterViewChecked, ElementRef, ViewChild } from '@angular/core';
-import { BackendService, ServerStatus, ClientRequest, ClientResponse } from './backend.service';
+import { Http, Response, Headers, RequestOptions } from '@angular/http';
+import { Observable } from 'rxjs';
+import { BackendService, ServerStatus } from './backend.service';
+
+export class KeyValue {
+  Key: string;
+  Value: string;
+  constructor(key: string, value: string) {
+    this.Key = key;
+    this.Value = value;
+  }
+}
+
+export class ClientRequest {
+  Action: string; // 'write', 'stress', 'get', 'delete', 'stop-node', 'restart-node'
+  RangePrefix: boolean; // 'get', 'delete'
+  Endpoints: string[];
+  KeyValue: KeyValue;
+
+  constructor(
+    act: string,
+    prefix: boolean,
+    eps: string[],
+    key: string,
+    value: string,
+  ) {
+    this.Action = act;
+    this.RangePrefix = prefix;
+    this.Endpoints = eps;
+    this.KeyValue = new KeyValue(key, value);
+  }
+}
+
+export class ClientResponse {
+  ClientRequest: ClientRequest;
+  Success: boolean;
+  Result: string;
+  ResultLines: string[];
+  KeyValues: KeyValue[];
+
+  constructor(
+    clientRequest: ClientRequest,
+    success: boolean,
+    rs: string,
+    rlines: string[],
+    kvs: KeyValue[],
+  ) {
+    this.ClientRequest = clientRequest;
+    this.Success = success;
+    this.Result = rs;
+    this.ResultLines = rlines;
+    this.KeyValues = kvs;
+  }
+}
 
 export class LogLine {
   index: number;
@@ -45,6 +98,7 @@ export class PlayComponent implements OnInit, AfterViewChecked {
   @ViewChild('logContainer') private logScrollContainer: ElementRef;
 
   mode = 'Observable';
+  private clientRequestEndpoint = 'client-request';
 
   logOutputLines: LogLine[];
 
@@ -64,7 +118,7 @@ export class PlayComponent implements OnInit, AfterViewChecked {
   deleteResult: string;
   readResult: string;
 
-  constructor(private backendService: BackendService) {
+  constructor(private backendService: BackendService, private http: Http) {
     this.logOutputLines = [];
 
     this.selectedTab = 3;
@@ -142,10 +196,118 @@ export class PlayComponent implements OnInit, AfterViewChecked {
     return line.index;
   }
 
+  ///////////////////////////////////////////////////////
   getServerStatus() {
     this.backendService.fetchServerStatus().subscribe(
       serverStatus => this.serverStatus = serverStatus,
       error => this.serverStatusErrorMessage = <any>error);
+  }
+  ///////////////////////////////////////////////////////
+
+  ///////////////////////////////////////////////////////
+  // with Observable
+  //
+  processHTTPResponseClient(res: Response) {
+    let jsonBody = res.json();
+    let clientResponse = <ClientResponse>jsonBody;
+
+    // console.log('clientResponse', clientResponse); // this.clientResponse is undefined...
+    // this.clientResponse = clientResponse;
+    // switch (this.clientResponse.ClientRequest.Action) {
+    //   case 'stress':
+    //     this.writeResult = this.clientResponse.Result;
+    //     for (let _i = 0; _i < this.clientResponse.ResultLines.length; _i++) {
+    //       this.sendLogLine('OK', this.clientResponse.ResultLines[_i]);
+    //     }
+    //     break;
+    //
+    //   case 'write':
+    //     this.writeResult = this.clientResponse.Result;
+    //     for (let _i = 0; _i < this.clientResponse.ResultLines.length; _i++) {
+    //       this.sendLogLine('OK', this.clientResponse.ResultLines[_i]);
+    //     }
+    //     break;
+    //
+    //   case 'delete':
+    //     this.deleteResult = this.clientResponse.Result;
+    //     for (let _i = 0; _i < this.clientResponse.ResultLines.length; _i++) {
+    //       this.sendLogLine('OK', this.clientResponse.ResultLines[_i]);
+    //     }
+    //     break;
+    //
+    //   case 'get':
+    //     this.readResult = this.clientResponse.Result;
+    //     this.sendLogLine('OK', this.clientResponse.Result);
+    //     for (let _i = 0; _i < this.clientResponse.ResultLines.length; _i++) {
+    //       this.sendLogLine('OK', this.clientResponse.ResultLines[_i]);
+    //     }
+    //     break;
+    //
+    //   case 'stop-node':
+    //     this.sendLogLine('WARN', this.clientResponse.Result);
+    //     break;
+    //
+    //   case 'restart-node':
+    //     this.sendLogLine('OK', this.clientResponse.Result);
+    //     break;
+    // }
+
+    return clientResponse || {};
+  }
+
+  processClientResponse(resp: ClientResponse) {
+    this.clientResponse = resp;
+
+    let logLevel = 'OK';
+    if (!this.clientResponse.Success) {
+      logLevel = 'WARN';
+    }
+    if (this.clientResponse.ClientRequest.Action === 'stop-node') {
+      logLevel = 'WARN';
+    }
+    if (this.clientResponse.ClientRequest.Action === 'restart-node') {
+      logLevel = 'INFO';
+    }
+
+    switch (this.clientResponse.ClientRequest.Action) {
+      case 'stress', 'write':
+        this.writeResult = this.clientResponse.Result;
+        break;
+
+      case 'delete':
+        this.deleteResult = this.clientResponse.Result;
+        break;
+
+      case 'get':
+        this.readResult = this.clientResponse.Result;
+        break;
+    }
+
+    this.sendLogLine(logLevel, this.clientResponse.Result);
+
+    for (let _i = 0; _i < this.clientResponse.ResultLines.length; _i++) {
+      this.sendLogLine(logLevel, this.clientResponse.ResultLines[_i]);
+    }
+  }
+
+  processHTTPErrorClient(error: any) {
+    let errMsg = (error.message) ? error.message :
+      error.status ? `${error.status} - ${error.statusText}` : 'Server error';
+    console.error(errMsg);
+    this.clientResponseError = errMsg;
+    return Observable.throw(errMsg);
+  }
+
+  postClientRequest(clientRequest: ClientRequest): Observable<ClientResponse> {
+    let body = JSON.stringify(clientRequest);
+    let headers = new Headers({ 'Content-Type': 'application/json' });
+    let options = new RequestOptions({ headers: headers });
+
+    // this returns without waiting for POST response
+    let obser = this.http.post(this.clientRequestEndpoint, body, options)
+      .map(this.processHTTPResponseClient)
+      .catch(this.processHTTPErrorClient);
+    return obser;
   }
 
   processClientRequest(act: string) {
@@ -166,6 +328,14 @@ export class PlayComponent implements OnInit, AfterViewChecked {
     }
 
     let clientRequest = new ClientRequest(act, prefix, eps, key, val);
+    let clientResponseFromSubscribe: ClientResponse;
+    this.postClientRequest(clientRequest).subscribe(
+      clientResponse => clientResponseFromSubscribe = clientResponse,
+      error => this.clientResponseError = <any>error,
+
+      // () => this.clientResponse = clientResponseFromSubscribe, // on-complete
+      () => this.processClientResponse(clientResponseFromSubscribe), // on-complete
+    );
 
     // with Promise
     //
@@ -173,54 +343,55 @@ export class PlayComponent implements OnInit, AfterViewChecked {
     //   clientResponse => this.clientResponse = clientResponse,
     //   error => this.clientResponseError = <any>error,
     // );
-
+    //
     // with Observable
     //
-    this.backendService.postClientRequest(clientRequest).subscribe(
-      clientResponse => this.clientResponse = clientResponse,
-      error => this.clientResponseError = <any>error,
-    );
-
-    // TODO: $.ajax({ success: function(dataObj)
-    // Below are undefined...
-    console.log(act, this.clientResponse, this.clientResponseError);
-    switch (act) {
-      case 'stress':
-        this.writeResult = this.clientResponse.Result;
-        for (let _i = 0; _i < this.clientResponse.ResultLines.length; _i++) {
-          this.sendLogLine('OK', this.clientResponse.ResultLines[_i]);
-        }
-        break;
-
-      case 'write':
-        this.writeResult = this.clientResponse.Result;
-        for (let _i = 0; _i < this.clientResponse.ResultLines.length; _i++) {
-          this.sendLogLine('OK', this.clientResponse.ResultLines[_i]);
-        }
-        break;
-
-      case 'delete':
-        this.deleteResult = this.clientResponse.Result;
-        for (let _i = 0; _i < this.clientResponse.ResultLines.length; _i++) {
-          this.sendLogLine('OK', this.clientResponse.ResultLines[_i]);
-        }
-        break;
-
-      case 'get':
-        this.readResult = this.clientResponse.Result;
-        this.sendLogLine('OK', this.clientResponse.Result);
-        for (let _i = 0; _i < this.clientResponse.ResultLines.length; _i++) {
-          this.sendLogLine('OK', this.clientResponse.ResultLines[_i]);
-        }
-        break;
-
-      case 'stop-node':
-        this.sendLogLine('WARN', this.clientResponse.Result);
-        break;
-
-      case 'restart-node':
-        this.sendLogLine('OK', this.clientResponse.Result);
-        break;
-    }
+    // this.backendService.postClientRequest(clientRequest).subscribe(
+    //   clientResponse => this.clientResponse = clientResponse,
+    //   error => this.clientResponseError = <any>error,
+    // );
+    //
+    // TODO: wait for POST request response like $.ajax({ success: function(dataObj)
+    // currently this.clientResponse is undefined
+    //
+    // switch (act) {
+    //   case 'stress':
+    //     this.writeResult = this.clientResponse.Result;
+    //     for (let _i = 0; _i < this.clientResponse.ResultLines.length; _i++) {
+    //       this.sendLogLine('OK', this.clientResponse.ResultLines[_i]);
+    //     }
+    //     break;
+    //
+    //   case 'write':
+    //     this.writeResult = this.clientResponse.Result;
+    //     for (let _i = 0; _i < this.clientResponse.ResultLines.length; _i++) {
+    //       this.sendLogLine('OK', this.clientResponse.ResultLines[_i]);
+    //     }
+    //     break;
+    //
+    //   case 'delete':
+    //     this.deleteResult = this.clientResponse.Result;
+    //     for (let _i = 0; _i < this.clientResponse.ResultLines.length; _i++) {
+    //       this.sendLogLine('OK', this.clientResponse.ResultLines[_i]);
+    //     }
+    //     break;
+    //
+    //   case 'get':
+    //     this.readResult = this.clientResponse.Result;
+    //     this.sendLogLine('OK', this.clientResponse.Result);
+    //     for (let _i = 0; _i < this.clientResponse.ResultLines.length; _i++) {
+    //       this.sendLogLine('OK', this.clientResponse.ResultLines[_i]);
+    //     }
+    //     break;
+    //
+    //   case 'stop-node':
+    //     this.sendLogLine('WARN', this.clientResponse.Result);
+    //     break;
+    //
+    //   case 'restart-node':
+    //     this.sendLogLine('OK', this.clientResponse.Result);
+    //     break;
+    // }
   }
+  ///////////////////////////////////////////////////////
 }

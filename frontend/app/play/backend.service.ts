@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Http, Response, Headers, RequestOptions } from '@angular/http';
+import { Http, Response } from '@angular/http';
 import { Observable } from 'rxjs';
 
 // NodeStatus defines etcd node status.
@@ -51,61 +51,10 @@ export class ServerStatus {
   }
 }
 
-export class KeyValue {
-  Key: string;
-  Value: string;
-  constructor(key: string, value: string) {
-    this.Key = key;
-    this.Value = value;
-  }
-}
-
-export class ClientRequest {
-  Action: string; // 'write', 'stress', 'get', 'delete', 'stop-node', 'restart-node'
-  RangePrefix: boolean; // 'get', 'delete'
-  Endpoints: string[];
-  KeyValue: KeyValue;
-
-  constructor(
-    act: string,
-    prefix: boolean,
-    eps: string[],
-    key: string,
-    value: string,
-  ) {
-    this.Action = act;
-    this.RangePrefix = prefix;
-    this.Endpoints = eps;
-    this.KeyValue = new KeyValue(key, value);
-  }
-}
-
-export class ClientResponse {
-  ClientRequest: ClientRequest;
-  Success: boolean;
-  Result: string;
-  ResultLines: string[];
-  KeyValues: KeyValue[];
-
-  constructor(
-    clientRequest: ClientRequest,
-    success: boolean,
-    rs: string,
-    rlines: string[],
-    kvs: KeyValue[],
-  ) {
-    this.ClientRequest = clientRequest;
-    this.Success = success;
-    this.Result = rs;
-    this.ResultLines = rlines;
-    this.KeyValues = kvs;
-  }
-}
-
 @Injectable()
 export class BackendService {
   private serverStatusEndpoint = 'server-status';
-  private clientRequestEndpoint = 'client-request';
+  // private clientRequestEndpoint = 'client-request';
 
   serverStatus: ServerStatus;
   serverStatusErrorMessage: string;
@@ -122,46 +71,40 @@ export class BackendService {
   }
 
   ///////////////////////////////////////////////////////
-  private processServerStatusResponse(res: Response) {
+  // with Observable
+  //
+  private processHTTPResponseServerStatis(res: Response) {
     let jsonBody = res.json();
     let statusResult = <ServerStatus>jsonBody;
     return statusResult || {};
   }
-
-  private processServerStatusError(error: any) {
+  private processHTTPErrorServerStatus(error: any) {
     let errMsg = (error.message) ? error.message :
       error.status ? `${error.status} - ${error.statusText}` : 'Server error';
     console.error(errMsg);
     this.serverStatusErrorMessage = errMsg;
-
-    for (let _i = 0; _i < this.serverStatus.NodeStatuses.length; _i++) {
-      this.serverStatus.NodeStatuses[_i].State = 'Stopped';
-      this.serverStatus.NodeStatuses[_i].StateTxt = this.serverStatus.NodeStatuses[_i].Name + ' is not reachable...';
-    }
-
     return Observable.throw(errMsg);
   }
-
   fetchServerStatus(): Observable<ServerStatus> {
     return this.http.get(this.serverStatusEndpoint)
-      .map(this.processServerStatusResponse)
-      .catch(this.processServerStatusError);
+      .map(this.processHTTPResponseServerStatis)
+      .catch(this.processHTTPErrorServerStatus);
   }
   ///////////////////////////////////////////////////////
 
   ///////////////////////////////////////////////////////
   // with Promise
   //
-  // private processClientResponse(res: Response) {
+  // private processHTTPResponseClient(res: Response) {
   //   let jsonBody = res.json();
   //   let clientResponse = <ClientResponse>jsonBody;
   //   return clientResponse || {};
   // }
-  // private processClientRequestError(error: any) {
+  // private processHTTPErrorClient(error: any) {
   //   let errMsg = (error.message) ? error.message :
   //     error.status ? `${error.status} - ${error.statusText}` : 'Server error';
   //   console.error(errMsg);
-  //   this.serverStatusErrorMessage = errMsg;
+  //   this.clientResponseError = errMsg;
   //   return Promise.reject(errMsg);
   // }
   // postClientRequest(clientRequest: ClientRequest): Promise<ClientResponse> {
@@ -170,37 +113,37 @@ export class BackendService {
   //   let options = new RequestOptions({ headers: headers });
   //   return this.http.post(this.clientRequestEndpoint, body, options)
   //     .toPromise()
-  //     .then(this.processClientResponse)
-  //     .catch(this.processClientRequestError);
+  //     .then(this.processHTTPResponseClient)
+  //     .catch(this.processHTTPErrorClient);
   // }
   ///////////////////////////////////////////////////////
 
   ///////////////////////////////////////////////////////
   // with Observable
   //
-  private processClientResponse(res: Response) {
-    let jsonBody = res.json();
-    let clientResponse = <ClientResponse>jsonBody;
-    console.log('clientResponse', clientResponse);
-    return clientResponse || {};
-  }
-  private processClientRequestError(error: any) {
-    let errMsg = (error.message) ? error.message :
-      error.status ? `${error.status} - ${error.statusText}` : 'Server error';
-    console.error(errMsg);
-    this.serverStatusErrorMessage = errMsg;
-    return Observable.throw(errMsg);
-  }
-  postClientRequest(clientRequest: ClientRequest): Observable<ClientResponse> {
-    let body = JSON.stringify(clientRequest);
-    let headers = new Headers({ 'Content-Type': 'application/json' });
-    let options = new RequestOptions({ headers: headers });
-
-    // this returns without waiting for POST response
-    let obser = this.http.post(this.clientRequestEndpoint, body, options)
-      .map(this.processClientResponse)
-      .catch(this.processClientRequestError);
-    return obser;
-  }
+  // private processHTTPResponseClient(res: Response) {
+  //   let jsonBody = res.json();
+  //   let clientResponse = <ClientResponse>jsonBody;
+  //   console.log('clientResponse', clientResponse);
+  //   return clientResponse || {};
+  // }
+  // private processHTTPErrorClient(error: any) {
+  //   let errMsg = (error.message) ? error.message :
+  //     error.status ? `${error.status} - ${error.statusText}` : 'Server error';
+  //   console.error(errMsg);
+  //   this.clientResponseError = errMsg;
+  //   return Observable.throw(errMsg);
+  // }
+  // postClientRequest(clientRequest: ClientRequest): Observable<ClientResponse> {
+  //   let body = JSON.stringify(clientRequest);
+  //   let headers = new Headers({ 'Content-Type': 'application/json' });
+  //   let options = new RequestOptions({ headers: headers });
+  //
+  //   // this returns without waiting for POST response
+  //   let obser = this.http.post(this.clientRequestEndpoint, body, options)
+  //     .map(this.processHTTPResponseClient)
+  //     .catch(this.processHTTPErrorClient);
+  //   return obser;
+  // }
   ///////////////////////////////////////////////////////
 }
