@@ -3,10 +3,6 @@
         "target": "http://0.0.0.0:2200",
         "secure": "false"
     },
-    "/ws": {
-        "target": "http://0.0.0.0:2200",
-        "secure": "false"
-    },
     "/server-status": {
         "target": "http://0.0.0.0:2200",
         "secure": "false"

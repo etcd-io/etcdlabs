@@ -1,5 +1,5 @@
-hash: 6871d2055956206c379c3ad8a64addd4e809bcff808af0e7ccc0c10c684fe4d2
-updated: 2016-10-10T00:33:37.220873964-07:00
+hash: 6dfe0aea7b0413b40d58099f794bc9517d1e8b2c6ed73caa5989127cd738d0d7
+updated: 2016-10-10T02:08:30.420516337-07:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -93,8 +93,6 @@ imports:
   - proto
 - name: github.com/google/btree
   version: 7364763242911ab6d418d2722e237194938ebad0
-- name: github.com/gorilla/websocket
-  version: 2d1e4548da234d9cb742cc3628556fef86aafbac
 - name: github.com/grpc-ecosystem/grpc-gateway
   version: f52d055dc48aec25854ed7d31862f78913cf17d1
   subpackages:

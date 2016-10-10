@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/coreos/etcd/clientv3"
@@ -27,15 +28,62 @@ import (
 	humanize "github.com/dustin/go-humanize"
 )
 
+type key int
+
+const userKey key = 0
+
+type userData struct {
+	ip string
+}
+
+var (
+	globalCacheLock sync.Mutex
+	globalCache     = make(map[string]*userData)
+)
+
+func withCache(h ContextHandler) ContextHandler {
+	return ContextHandlerFunc(func(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
+		userID := getUserID(req)
+		ctx = context.WithValue(ctx, userKey, &userID)
+
+		globalCacheLock.Lock()
+		if _, ok := globalCache[userID]; !ok { // if user visits first time, create user cache
+			plog.Infof("just created user %q", userID)
+			globalCache[userID] = &userData{
+				ip: getRealIP(req),
+			}
+		}
+		globalCacheLock.Unlock()
+
+		return h.ServeHTTPContext(ctx, w, req)
+	})
+}
+
 // Connect contains initial server state.
 type Connect struct {
 	WebPort int
+	User    string
+	Deleted bool
 }
 
 func connectHandler(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
+	user := ctx.Value(userKey).(*string)
+	userID := *user
+
 	switch req.Method {
 	case "GET":
-		resp := Connect{WebPort: globalWebserverPort}
+		resp := Connect{WebPort: globalWebserverPort, User: userID, Deleted: false}
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			return err
+		}
+
+	case "DELETE": // user leaves component
+		plog.Infof("user %q just left (user deleted)", userID)
+		globalCacheLock.Lock()
+		delete(globalCache, userID)
+		globalCacheLock.Unlock()
+
+		resp := Connect{WebPort: globalWebserverPort, User: userID, Deleted: true}
 		if err := json.NewEncoder(w).Encode(resp); err != nil {
 			return err
 		}
@@ -45,45 +93,6 @@ func connectHandler(ctx context.Context, w http.ResponseWriter, req *http.Reques
 	}
 
 	return nil
-}
-
-func wsHandler(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
-	user := ctx.Value(userKey).(*string)
-	userID := *user
-
-	globalCacheLock.Lock()
-	upgrader := globalCache[userID].upgrader
-	globalCacheLock.Unlock()
-
-	req.Header.Set("Connection", "upgrade")
-	req.Header.Set("Upgrade", "websocket")
-
-	c, err := upgrader.Upgrade(w, req, nil)
-	if err != nil {
-		plog.Infof("user %q just left the browser", userID)
-
-		// clean up users that just left the browser
-		globalCacheLock.Lock()
-		delete(globalCache, userID)
-		globalCacheLock.Unlock()
-		return err
-	}
-
-	for {
-		mt, message, err := c.ReadMessage()
-		if err != nil {
-			globalCacheLock.Lock()
-			delete(globalCache, userID)
-			globalCacheLock.Unlock()
-			return err
-		}
-		if err := c.WriteMessage(mt, message); err != nil {
-			globalCacheLock.Lock()
-			delete(globalCache, userID)
-			globalCacheLock.Unlock()
-			return err
-		}
-	}
 }
 
 // ServerStatus defines server status.
