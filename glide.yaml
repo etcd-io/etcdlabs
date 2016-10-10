@@ -21,3 +21,5 @@ import:
   - grpclog
 - package: golang.org/x/time
   version: 711ca1cb87636abec28122ef3bc6a77269d433f3
+- package: github.com/gorilla/websocket
+  version: 2d1e4548da234d9cb742cc3628556fef86aafbac
