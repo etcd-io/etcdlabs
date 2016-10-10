@@ -2,6 +2,14 @@ import { Injectable } from '@angular/core';
 import { Http, Response } from '@angular/http';
 import { Observable } from 'rxjs';
 
+// Connect contains initial server state.
+export class Connect {
+  WebPort: number;
+  constructor(webPort: number) {
+    this.WebPort = webPort;
+  }
+}
+
 // NodeStatus defines etcd node status.
 export class NodeStatus {
   Name: string;
@@ -43,9 +51,11 @@ export class NodeStatus {
 
 // ServerStatus defines etcd server status.
 export class ServerStatus {
+  PlaygroundActive: boolean;
   ServerUptime: string;
   NodeStatuses: NodeStatus[];
-  constructor(serverUptime: string, nodeStatuses: NodeStatus[]) {
+  constructor(active: boolean, serverUptime: string, nodeStatuses: NodeStatus[]) {
+    this.PlaygroundActive = active;
     this.ServerUptime = serverUptime;
     this.NodeStatuses = nodeStatuses;
   }
@@ -53,13 +63,19 @@ export class ServerStatus {
 
 @Injectable()
 export class BackendService {
+  private connectEndpoint = 'conn';
   private serverStatusEndpoint = 'server-status';
   // private clientRequestEndpoint = 'client-request';
+
+  connect: Connect;
+  connectErrorMessage: string;
 
   serverStatus: ServerStatus;
   serverStatusErrorMessage: string;
 
   constructor(private http: Http) {
+    this.connect = new Connect(2200);
+
     let nodeStatuses = [
       new NodeStatus('node1', 'None', 'None', false, 'Stopped', 'node1 has not started...', 0, '0 B', 0),
       new NodeStatus('node2', 'None', 'None', false, 'Stopped', 'node2 has not started...', 0, '0 B', 0),
@@ -67,16 +83,34 @@ export class BackendService {
       new NodeStatus('node4', 'None', 'None', false, 'Stopped', 'node4 has not started...', 0, '0 B', 0),
       new NodeStatus('node5', 'None', 'None', false, 'Stopped', 'node5 has not started...', 0, '0 B', 0),
     ];
-    this.serverStatus = new ServerStatus('0s', nodeStatuses);
+    this.serverStatus = new ServerStatus(false, '0s', nodeStatuses);
   }
 
   ///////////////////////////////////////////////////////
-  // with Observable
-  //
-  private processHTTPResponseServerStatis(res: Response) {
+  private processHTTPResponseConnect(res: Response) {
     let jsonBody = res.json();
-    let statusResult = <ServerStatus>jsonBody;
-    return statusResult || {};
+    let rs = <Connect>jsonBody;
+    return rs || {};
+  }
+  private processHTTPErrorConnect(error: any) {
+    let errMsg = (error.message) ? error.message :
+      error.status ? `${error.status} - ${error.statusText}` : 'Server error';
+    console.error(errMsg);
+    this.connectErrorMessage = errMsg;
+    return Observable.throw(errMsg);
+  }
+  fetchConnect(): Observable<Connect> {
+    return this.http.get(this.connectEndpoint)
+      .map(this.processHTTPResponseConnect)
+      .catch(this.processHTTPErrorConnect);
+  }
+  ///////////////////////////////////////////////////////
+
+  ///////////////////////////////////////////////////////
+  private processHTTPResponseServerStatus(res: Response) {
+    let jsonBody = res.json();
+    let rs = <ServerStatus>jsonBody;
+    return rs || {};
   }
   private processHTTPErrorServerStatus(error: any) {
     let errMsg = (error.message) ? error.message :
@@ -87,7 +121,7 @@ export class BackendService {
   }
   fetchServerStatus(): Observable<ServerStatus> {
     return this.http.get(this.serverStatusEndpoint)
-      .map(this.processHTTPResponseServerStatis)
+      .map(this.processHTTPResponseServerStatus)
       .catch(this.processHTTPErrorServerStatus);
   }
   ///////////////////////////////////////////////////////
