@@ -71,7 +71,13 @@ func checkSameOrigin(req *http.Request) bool {
 	if err != nil {
 		return false
 	}
-	return u.Host == "localhost:4200" // sync with Angular app
+
+	if u.Host == "localhost:4200" { // sync with Angular app
+		return true
+	}
+
+	plog.Warningf("can verify the origin %q (expected %q)", req.Host, u.Host)
+	return false
 }
 
 var (
