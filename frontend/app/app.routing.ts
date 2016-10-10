@@ -1,36 +1,36 @@
 import { Routes, RouterModule } from '@angular/router';
 
 /*
-/home
+home
 */
 import { HomeComponent } from './home/home.component';
 
 /*
-/doc
+doc
 */
-import { doc_tip_Component } from './doc/tip/doc.component';
-import { install_deploy_tip_Component } from './doc/tip/install-deploy.component';
-import { tutorials_tip_Component } from './doc/tip/tutorials.component';
-import { tutorials_advanced_tip_Component } from './doc/tip/tutorials-advanced.component';
-import { faq_tip_Component } from './doc/tip/faq.component';
-import { performance_tip_Component } from './doc/tip/performance.component';
-import { reliability_tip_Component } from './doc/tip/reliability.component';
-import { versions_tip_Component } from './doc/tip/versions.component';
+import { DocTipComponent } from './doc/tip/doc.component';
+import { InstallDeployTipComponent } from './doc/tip/install-deploy.component';
+import { TutorialsTipComponent } from './doc/tip/tutorials.component';
+import { TutorialsAdvancedTipComponent } from './doc/tip/tutorials-advanced.component';
+import { FAQTipComponent } from './doc/tip/faq.component';
+import { PerformanceTipComponent } from './doc/tip/performance.component';
+import { ReliabilityTipComponent } from './doc/tip/reliability.component';
+import { VersionsTipComponent } from './doc/tip/versions.component';
 
 /*
-/blog
+blog
 */
 import { BlogComponent } from './blog/blog.component';
 import { AnnouncingEtcdV31Component } from './blog/2016/v3.1.component';
 import { STMComponent } from './blog/2016/stm.component';
 
 /*
-/play
+play
 */
 import { PlayComponent } from './play/play.component';
 
 /*
-/**
+**
 */
 import { NotFoundComponent } from './not-found.component';
 
@@ -44,14 +44,14 @@ const appRoutes: Routes = [
     {
         path: 'doc/tip',
         children: [
-            { path: '', component: doc_tip_Component },
-            { path: 'install-deploy', component: install_deploy_tip_Component },
-            { path: 'tutorials', component: tutorials_tip_Component },
-            { path: 'tutorials-advanced', component: tutorials_advanced_tip_Component },
-            { path: 'faq', component: faq_tip_Component },
-            { path: 'performance', component: performance_tip_Component },
-            { path: 'reliability', component: reliability_tip_Component },
-            { path: 'versions', component: versions_tip_Component },
+            { path: '', component: DocTipComponent },
+            { path: 'install-deploy', component: InstallDeployTipComponent },
+            { path: 'tutorials', component: TutorialsTipComponent },
+            { path: 'tutorials-advanced', component: TutorialsAdvancedTipComponent },
+            { path: 'faq', component: FAQTipComponent },
+            { path: 'performance', component: PerformanceTipComponent },
+            { path: 'reliability', component: ReliabilityTipComponent },
+            { path: 'versions', component: VersionsTipComponent },
         ],
     },
 
@@ -87,14 +87,14 @@ export const routing = RouterModule.forRoot(appRoutes);
 export const routedComponents = [
     HomeComponent,
 
-    doc_tip_Component,
-    install_deploy_tip_Component,
-    tutorials_tip_Component,
-    tutorials_advanced_tip_Component,
-    faq_tip_Component,
-    performance_tip_Component,
-    reliability_tip_Component,
-    versions_tip_Component,
+    DocTipComponent,
+    InstallDeployTipComponent,
+    TutorialsTipComponent,
+    TutorialsAdvancedTipComponent,
+    FAQTipComponent,
+    PerformanceTipComponent,
+    ReliabilityTipComponent,
+    VersionsTipComponent,
 
     BlogComponent,
     AnnouncingEtcdV31Component,
