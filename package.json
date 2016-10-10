@@ -1,7 +1,7 @@
 {
     "name": "app-etcd",
     "version": "0.0.3",
-    "license": "MIT",
+    "license": "Apache-2.0",
     "angular-cli": {},
     "scripts": {
         "start": "ng serve --host 0.0.0.0 --proxy-config proxy.config.json",
