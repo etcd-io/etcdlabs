@@ -107,10 +107,6 @@ func StartServer(port int) (*Server, error) {
 		ctx:     rootCtx,
 		handler: withCache(ContextHandlerFunc(connectHandler)),
 	})
-	mux.Handle("/ws", &ContextAdapter{
-		ctx:     rootCtx,
-		handler: withCache(ContextHandlerFunc(wsHandler)),
-	})
 	mux.Handle("/server-status", &ContextAdapter{
 		ctx:     rootCtx,
 		handler: withCache(ContextHandlerFunc(serverStatusHandler)),
