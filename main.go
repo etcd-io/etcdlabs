@@ -29,8 +29,10 @@ func init() {
 	capnslog.SetGlobalLogLevel(capnslog.INFO)
 }
 
+var webPort = 2200
+
 func main() {
-	srv, err := backend.StartServer(2200)
+	srv, err := backend.StartServer(webPort)
 	if err != nil {
 		panic(err)
 	}
