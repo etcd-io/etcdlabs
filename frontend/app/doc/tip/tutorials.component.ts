@@ -6,7 +6,7 @@ import { parentComponent } from './common.component';
     templateUrl: 'tutorials.component.html',
     styleUrls: ['common.component.css'],
 })
-export class tutorials_tip_Component extends parentComponent {
+export class TutorialsTipComponent extends parentComponent {
     constructor() {
         super();
     }

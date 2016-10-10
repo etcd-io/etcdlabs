@@ -40,7 +40,7 @@ export class majorVersionItem {
     templateUrl: 'versions.component.html',
     styleUrls: ['common.component.css'],
 })
-export class versions_tip_Component extends parentComponent {
+export class VersionsTipComponent extends parentComponent {
     majorVersionItems: majorVersionItem[];
     constructor() {
         super();
@@ -89,6 +89,6 @@ export class versions_tip_Component extends parentComponent {
                     'versions-link-other'
                 ),
             ]),
-        ]
+        ];
     }
 }

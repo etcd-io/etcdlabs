@@ -6,7 +6,7 @@ import { parentComponent, sidebarItem } from './common.component';
     templateUrl: 'doc.component.html',
     styleUrls: ['common.component.css'],
 })
-export class doc_tip_Component extends parentComponent {
+export class DocTipComponent extends parentComponent {
     docItems: sidebarItem[];
     constructor() {
         super();

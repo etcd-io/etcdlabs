@@ -1,7 +1,7 @@
-import { Component, OnInit, AfterViewChecked, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewChecked, ElementRef, ViewChild, OnDestroy } from '@angular/core';
 import { Http, Response, Headers, RequestOptions } from '@angular/http';
 import { Observable } from 'rxjs';
-import { BackendService, ServerStatus } from './backend.service';
+import { BackendService, ServerStatus, Connect } from './backend.service';
 
 export class KeyValue {
   Key: string;
@@ -93,7 +93,7 @@ export class LogLine {
   styleUrls: ['play.component.css'],
   providers: [BackendService],
 })
-export class PlayComponent implements OnInit, AfterViewChecked {
+export class PlayComponent implements OnInit, AfterViewChecked, OnDestroy {
   // $("#logContainer").scrollTop($("#logContainer")[0].scrollHeight);
   @ViewChild('logContainer') private logScrollContainer: ElementRef;
 
@@ -105,8 +105,14 @@ export class PlayComponent implements OnInit, AfterViewChecked {
   selectedTab: number;
   selectedNodes = [true, false, false, false, false];
 
+  wsConn;
+  playgroundActive: boolean;
+  connect: Connect;
+  connectErrorMessage: string;
+
   serverStatus: ServerStatus;
   serverStatusErrorMessage: string;
+  serverStatusHandler;
 
   inputKey: string;
   inputValue: string;
@@ -123,8 +129,12 @@ export class PlayComponent implements OnInit, AfterViewChecked {
 
     this.selectedTab = 3;
 
+    this.connect = backendService.connect;
+    this.connectErrorMessage = '';
+
     this.serverStatus = backendService.serverStatus;
     this.serverStatusErrorMessage = '';
+    this.playgroundActive = this.serverStatus.PlaygroundActive;
 
     this.inputKey = '';
     this.inputValue = '';
@@ -132,15 +142,19 @@ export class PlayComponent implements OnInit, AfterViewChecked {
   }
 
   ngOnInit(): void {
-    this.sendLogLine('OK', 'Hell World! Connected to etcd cluster!');
+    this.playgroundActive = false;
     this.scrollToBottom();
-
-    // (X) setInterval(this.getServerStatus, 1000);
-    setInterval(() => this.getServerStatus(), 1000);
   }
 
   ngAfterViewChecked() {
     this.scrollToBottom();
+  }
+
+  // user leaaves the template
+  ngOnDestroy() {
+    console.log('canceling serverStatus handler');
+    clearInterval(this.serverStatusHandler);
+    return;
   }
 
   scrollToBottom(): void {
@@ -197,9 +211,72 @@ export class PlayComponent implements OnInit, AfterViewChecked {
   }
 
   ///////////////////////////////////////////////////////
+  processConnectResponse(resp: Connect) {
+    this.connect = resp;
+    this.connectErrorMessage = '';
+  }
+
+  getClusterConnect() {
+    let connectResult: Connect;
+    this.backendService.fetchConnect().subscribe(
+      connect => connectResult = connect,
+      error => this.connectErrorMessage = <any>error,
+      () => this.processConnectResponse(connectResult),
+    );
+  }
+
+  clickConnect() {
+    if (this.playgroundActive) {
+      this.sendLogLine('INFO', 'Already connected to cluster!');
+      return;
+    }
+
+    this.playgroundActive = true;
+    this.sendLogLine('OK', 'Hello World! Connected to etcd cluster!');
+
+    this.getClusterConnect();
+
+    let wsURL = 'ws://' + window.location.hostname + ':' + String(this.connect.WebPort) + '/ws';
+    this.sendLogLine('INFO', 'connecting to ' + wsURL);
+
+    let supported: boolean;
+    if (window['WebSocket']) {
+      this.wsConn = new WebSocket(wsURL);
+      supported = true;
+    }
+    if (!supported) {
+      this.sendLogLine('WARN', 'WebSocket is not supported');
+    }
+
+    this.wsConn.onopen = () => {
+      this.sendLogLine('INFO', 'connected to ' + wsURL);
+    };
+    this.wsConn.onclose = () => {
+      this.sendLogLine('WARN', wsURL + ' connection is closed');
+    };
+    this.wsConn.onmessage = (message) => {
+      this.sendLogLine('INFO', message.data);
+    };
+    this.wsConn.onerror = (err) => {
+      this.sendLogLine('WARN', 'ERROR: ' + err);
+    };
+
+    // (X) setInterval(this.getServerStatus, 1000);
+    this.serverStatusHandler = setInterval(() => this.getServerStatus(), 1000);
+  }
+  ///////////////////////////////////////////////////////
+
+  ///////////////////////////////////////////////////////
   processServerStatusResponse(resp: ServerStatus) {
     this.serverStatus = resp;
     this.serverStatusErrorMessage = '';
+
+    this.playgroundActive = this.serverStatus.PlaygroundActive;
+
+    if (!this.playgroundActive) {
+      console.log('canceling serverStatus handler');
+      clearInterval(this.serverStatusHandler);
+    }
   }
 
   getServerStatus() {
@@ -213,56 +290,6 @@ export class PlayComponent implements OnInit, AfterViewChecked {
   ///////////////////////////////////////////////////////
 
   ///////////////////////////////////////////////////////
-  // with Observable
-  //
-  processHTTPResponseClient(res: Response) {
-    let jsonBody = res.json();
-    let clientResponse = <ClientResponse>jsonBody;
-
-    // console.log('clientResponse', clientResponse); // this.clientResponse is undefined...
-    // this.clientResponse = clientResponse;
-    // switch (this.clientResponse.ClientRequest.Action) {
-    //   case 'stress':
-    //     this.writeResult = this.clientResponse.Result;
-    //     for (let _i = 0; _i < this.clientResponse.ResultLines.length; _i++) {
-    //       this.sendLogLine('OK', this.clientResponse.ResultLines[_i]);
-    //     }
-    //     break;
-    //
-    //   case 'write':
-    //     this.writeResult = this.clientResponse.Result;
-    //     for (let _i = 0; _i < this.clientResponse.ResultLines.length; _i++) {
-    //       this.sendLogLine('OK', this.clientResponse.ResultLines[_i]);
-    //     }
-    //     break;
-    //
-    //   case 'delete':
-    //     this.deleteResult = this.clientResponse.Result;
-    //     for (let _i = 0; _i < this.clientResponse.ResultLines.length; _i++) {
-    //       this.sendLogLine('OK', this.clientResponse.ResultLines[_i]);
-    //     }
-    //     break;
-    //
-    //   case 'get':
-    //     this.readResult = this.clientResponse.Result;
-    //     this.sendLogLine('OK', this.clientResponse.Result);
-    //     for (let _i = 0; _i < this.clientResponse.ResultLines.length; _i++) {
-    //       this.sendLogLine('OK', this.clientResponse.ResultLines[_i]);
-    //     }
-    //     break;
-    //
-    //   case 'stop-node':
-    //     this.sendLogLine('WARN', this.clientResponse.Result);
-    //     break;
-    //
-    //   case 'restart-node':
-    //     this.sendLogLine('OK', this.clientResponse.Result);
-    //     break;
-    // }
-
-    return clientResponse || {};
-  }
-
   processClientResponse(resp: ClientResponse) {
     this.clientResponse = resp;
 
@@ -299,6 +326,12 @@ export class PlayComponent implements OnInit, AfterViewChecked {
         this.sendLogLine(logLevel, this.clientResponse.ResultLines[_i]);
       }
     }
+  }
+
+  processHTTPResponseClient(res: Response) {
+    let jsonBody = res.json();
+    let clientResponse = <ClientResponse>jsonBody;
+    return clientResponse || {};
   }
 
   processHTTPErrorClient(error: any) {
@@ -343,66 +376,8 @@ export class PlayComponent implements OnInit, AfterViewChecked {
     this.postClientRequest(clientRequest).subscribe(
       clientResponse => clientResponseFromSubscribe = clientResponse,
       error => this.clientResponseError = <any>error,
-
-      // () => this.clientResponse = clientResponseFromSubscribe, // on-complete
       () => this.processClientResponse(clientResponseFromSubscribe), // on-complete
     );
-
-    // with Promise
-    //
-    // this.backendService.postClientRequest(clientRequest).then(
-    //   clientResponse => this.clientResponse = clientResponse,
-    //   error => this.clientResponseError = <any>error,
-    // );
-    //
-    // with Observable
-    //
-    // this.backendService.postClientRequest(clientRequest).subscribe(
-    //   clientResponse => this.clientResponse = clientResponse,
-    //   error => this.clientResponseError = <any>error,
-    // );
-    //
-    // TODO: wait for POST request response like $.ajax({ success: function(dataObj)
-    // currently this.clientResponse is undefined
-    //
-    // switch (act) {
-    //   case 'stress':
-    //     this.writeResult = this.clientResponse.Result;
-    //     for (let _i = 0; _i < this.clientResponse.ResultLines.length; _i++) {
-    //       this.sendLogLine('OK', this.clientResponse.ResultLines[_i]);
-    //     }
-    //     break;
-    //
-    //   case 'write':
-    //     this.writeResult = this.clientResponse.Result;
-    //     for (let _i = 0; _i < this.clientResponse.ResultLines.length; _i++) {
-    //       this.sendLogLine('OK', this.clientResponse.ResultLines[_i]);
-    //     }
-    //     break;
-    //
-    //   case 'delete':
-    //     this.deleteResult = this.clientResponse.Result;
-    //     for (let _i = 0; _i < this.clientResponse.ResultLines.length; _i++) {
-    //       this.sendLogLine('OK', this.clientResponse.ResultLines[_i]);
-    //     }
-    //     break;
-    //
-    //   case 'get':
-    //     this.readResult = this.clientResponse.Result;
-    //     this.sendLogLine('OK', this.clientResponse.Result);
-    //     for (let _i = 0; _i < this.clientResponse.ResultLines.length; _i++) {
-    //       this.sendLogLine('OK', this.clientResponse.ResultLines[_i]);
-    //     }
-    //     break;
-    //
-    //   case 'stop-node':
-    //     this.sendLogLine('WARN', this.clientResponse.Result);
-    //     break;
-    //
-    //   case 'restart-node':
-    //     this.sendLogLine('OK', this.clientResponse.Result);
-    //     break;
-    // }
   }
   ///////////////////////////////////////////////////////
 }

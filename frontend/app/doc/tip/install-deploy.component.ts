@@ -68,7 +68,7 @@ export class etcdFlag {
     templateUrl: 'install-deploy.component.html',
     styleUrls: ['common.component.css'],
 })
-export class install_deploy_tip_Component extends parentComponent {
+export class InstallDeployTipComponent extends parentComponent {
     ////////////////////////////////////
     // etcd setting properties
     inputSecure: boolean;
