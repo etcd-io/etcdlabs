@@ -1,5 +1,5 @@
-hash: 6dfe0aea7b0413b40d58099f794bc9517d1e8b2c6ed73caa5989127cd738d0d7
-updated: 2016-10-10T02:08:30.420516337-07:00
+hash: 78576e7c8950d72a8bc01393369d8bfd45f34c5eb35a86ae2c3f2d95a5ad2d2a
+updated: 2016-10-10T16:29:23.404348785-07:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -12,7 +12,7 @@ imports:
 - name: github.com/cockroachdb/cmux
   version: 112f0506e7743d64a6eb8fedbcff13d9979bbf92
 - name: github.com/coreos/etcd
-  version: ac4d39cfb05df83b958c87df34bca5b668696e94
+  version: d7f69d0f92d3e2b9b2278b8e23519eb5580649f9
   subpackages:
   - alarm
   - auth
@@ -71,7 +71,7 @@ imports:
   subpackages:
   - semver
 - name: github.com/coreos/go-systemd
-  version: a63dfec412dc3675ec36888f359f8a1e5c3f740d
+  version: bfdc81d0d7e0fb19447b08571f63b774495251ce
   subpackages:
   - journal
 - name: github.com/coreos/pkg
@@ -148,7 +148,7 @@ imports:
   subpackages:
   - rate
 - name: google.golang.org/grpc
-  version: 231b4cfea0e79843053a33f5fe90bd4d84b23cd3
+  version: b1a2821ca5a4fd6b6e48ddfbb7d6d7584d839d21
   subpackages:
   - codes
   - credentials

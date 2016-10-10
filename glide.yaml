@@ -1,7 +1,7 @@
 package: github.com/coreos/etcdlabs
 import:
 - package: github.com/coreos/etcd
-  version: ac4d39cfb05df83b958c87df34bca5b668696e94
+  version: d7f69d0f92d3e2b9b2278b8e23519eb5580649f9
   subpackages:
   - clientv3
   - embed
@@ -15,7 +15,7 @@ import:
 - package: github.com/dustin/go-humanize
   version: bd88f87ad3a420f7bcf05e90566fd1ceb351fa7f
 - package: google.golang.org/grpc
-  version: 231b4cfea0e79843053a33f5fe90bd4d84b23cd3
+  version: v1.0.2
   subpackages:
   - credentials
   - grpclog
