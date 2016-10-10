@@ -182,12 +182,14 @@
         </div>
     </div>
 
-    <div #logContainer class="log-box">
-        <div *ngFor="let logLine of this.logOutputLines; trackBy:trackByLineIndex">
-            <span *ngIf="logLine.logLevel == 'OK'" class="log-output-prefix-OK">{{ logLine.prefix }}</span>
-            <span *ngIf="logLine.logLevel == 'INFO'" class="log-output-prefix-INFO">{{ logLine.prefix }}</span>
-            <span *ngIf="logLine.logLevel == 'WARN'" class="log-output-prefix-WARN">{{ logLine.prefix }}</span>
-            <span class="log-output">{{ logLine.text }}</span>
+    <div class="inner">
+        <div #logContainer class="log-box">
+            <div *ngFor="let logLine of this.logOutputLines; trackBy:trackByLineIndex">
+                <span *ngIf="logLine.logLevel == 'OK'" class="log-output-prefix-OK">{{ logLine.prefix }}</span>
+                <span *ngIf="logLine.logLevel == 'INFO'" class="log-output-prefix-INFO">{{ logLine.prefix }}</span>
+                <span *ngIf="logLine.logLevel == 'WARN'" class="log-output-prefix-WARN">{{ logLine.prefix }}</span>
+                <span class="log-output">{{ logLine.text }}</span>
+            </div>
         </div>
     </div>
 </div>
