@@ -21,8 +21,12 @@ nvm ls-remote
 # sudo apt-get install -y build-essential libssl-dev
 # sudo apt-get install -y nodejs
 # sudo apt-get install -y npm
-nvm install 6.6.0
+nvm install 6.7.0
 
 # check NodeJS version
 node -v
 npm -v
+
+<<COMMENT
+npm install
+COMMENT
