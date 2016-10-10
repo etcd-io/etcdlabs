@@ -71,6 +71,9 @@ var (
 	defaultLimitInterval       = 2 * time.Second
 	defaultStopRestartInterval = 3 * time.Second
 
+	// for websocket
+	globalWebserverPort int
+
 	globalCluster              *cluster.Cluster
 	globalClientRequestLimiter ratelimit.RequestLimiter
 	globalStopRestartLimiter   ratelimit.RequestLimiter
@@ -78,6 +81,8 @@ var (
 
 // StartServer starts a backend webserver with stoppable listener.
 func StartServer(port int) (*Server, error) {
+	globalWebserverPort = port
+
 	stopc := make(chan struct{})
 	ln, err := listener.NewListenerStoppable("http", fmt.Sprintf("localhost:%d", port), nil, stopc)
 	if err != nil {
@@ -98,13 +103,21 @@ func StartServer(port int) (*Server, error) {
 	globalStopRestartLimiter = ratelimit.NewRequestLimiter(rootCtx, defaultStopRestartInterval)
 
 	mux := http.NewServeMux()
+	mux.Handle("/conn", &ContextAdapter{
+		ctx:     rootCtx,
+		handler: withCache(ContextHandlerFunc(connectHandler)),
+	})
+	mux.Handle("/ws", &ContextAdapter{
+		ctx:     rootCtx,
+		handler: withCache(ContextHandlerFunc(wsHandler)),
+	})
 	mux.Handle("/server-status", &ContextAdapter{
 		ctx:     rootCtx,
-		handler: ContextHandlerFunc(serverStatusHandler),
+		handler: withCache(ContextHandlerFunc(serverStatusHandler)),
 	})
 	mux.Handle("/client-request", &ContextAdapter{
 		ctx:     rootCtx,
-		handler: ContextHandlerFunc(clientRequestHandler),
+		handler: withCache(ContextHandlerFunc(clientRequestHandler)),
 	})
 
 	addrURL := url.URL{Scheme: "http", Host: fmt.Sprintf("localhost:%d", port)}
