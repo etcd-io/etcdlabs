@@ -236,11 +236,9 @@ export class PlayComponent implements OnInit, AfterViewChecked, OnDestroy {
 
     this.getClusterConnect();
 
+    let host = window.location.hostname;
     let port = ':' + String(this.connect.WebPort);
-    if (window.location.hostname !== 'localhost') {
-      port = ':80';
-    }
-    let wsURL = 'ws://' + window.location.hostname + port + '/ws';
+    let wsURL = 'ws://' + host + port + '/ws';
     this.sendLogLine('INFO', 'connecting to ' + wsURL);
 
     let supported: boolean;
