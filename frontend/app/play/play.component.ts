@@ -154,6 +154,7 @@ export class PlayComponent implements OnInit, AfterViewChecked, OnDestroy {
   ngOnDestroy() {
     console.log('canceling serverStatus handler');
     clearInterval(this.serverStatusHandler);
+    this.cancelConnect();
     return;
   }
 
@@ -216,9 +217,18 @@ export class PlayComponent implements OnInit, AfterViewChecked, OnDestroy {
     this.connectErrorMessage = '';
   }
 
-  getClusterConnect() {
+  startConnect() {
     let connectResult: Connect;
     this.backendService.fetchConnect().subscribe(
+      connect => connectResult = connect,
+      error => this.connectErrorMessage = <any>error,
+      () => this.processConnectResponse(connectResult),
+    );
+  }
+
+  cancelConnect() {
+    let connectResult: Connect;
+    this.backendService.deleteConnect().subscribe(
       connect => connectResult = connect,
       error => this.connectErrorMessage = <any>error,
       () => this.processConnectResponse(connectResult),
@@ -234,34 +244,12 @@ export class PlayComponent implements OnInit, AfterViewChecked, OnDestroy {
     this.playgroundActive = true;
     this.sendLogLine('OK', 'Hello World! Connected to etcd cluster!');
 
-    this.getClusterConnect();
+    this.startConnect();
 
     let host = window.location.hostname;
     let port = ':' + String(this.connect.WebPort);
-    let wsURL = 'ws://' + host + port + '/ws';
-    this.sendLogLine('INFO', 'connecting to ' + wsURL);
-
-    let supported: boolean;
-    if (window['WebSocket']) {
-      this.wsConn = new WebSocket(wsURL);
-      supported = true;
-    }
-    if (!supported) {
-      this.sendLogLine('WARN', 'WebSocket is not supported');
-    }
-
-    this.wsConn.onopen = () => {
-      this.sendLogLine('INFO', 'connected to ' + wsURL);
-    };
-    this.wsConn.onclose = () => {
-      this.sendLogLine('WARN', wsURL + ' connection is closed');
-    };
-    this.wsConn.onmessage = (message) => {
-      this.sendLogLine('INFO', message.data);
-    };
-    this.wsConn.onerror = (err) => {
-      this.sendLogLine('WARN', 'ERROR: ' + err);
-    };
+    let backendURL = host + port;
+    this.sendLogLine('INFO', 'Connected to backend ' + backendURL);
 
     // (X) setInterval(this.getServerStatus, 1000);
     this.serverStatusHandler = setInterval(() => this.getServerStatus(), 1000);

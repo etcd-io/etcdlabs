@@ -5,8 +5,12 @@ import { Observable } from 'rxjs';
 // Connect contains initial server state.
 export class Connect {
   WebPort: number;
-  constructor(webPort: number) {
+  User: string;
+  Deleted: boolean;
+  constructor(webPort: number, user: string, deleted: boolean) {
     this.WebPort = webPort;
+    this.User = user;
+    this.Deleted = deleted;
   }
 }
 
@@ -74,7 +78,7 @@ export class BackendService {
   serverStatusErrorMessage: string;
 
   constructor(private http: Http) {
-    this.connect = new Connect(2200);
+    this.connect = new Connect(2200, '', false);
 
     let nodeStatuses = [
       new NodeStatus('node1', 'None', 'None', false, 'Stopped', 'node1 has not started...', 0, '0 B', 0),
@@ -101,6 +105,11 @@ export class BackendService {
   }
   fetchConnect(): Observable<Connect> {
     return this.http.get(this.connectEndpoint)
+      .map(this.processHTTPResponseConnect)
+      .catch(this.processHTTPErrorConnect);
+  }
+  deleteConnect(): Observable<Connect> {
+    return this.http.delete(this.connectEndpoint)
       .map(this.processHTTPResponseConnect)
       .catch(this.processHTTPErrorConnect);
   }
