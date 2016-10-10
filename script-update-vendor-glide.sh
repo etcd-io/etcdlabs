@@ -14,16 +14,26 @@ set -e
 # 2. make sure glide.yaml and glide.lock are updated
 
 GLIDE_ROOT="$GOPATH/src/github.com/Masterminds/glide"
-go get -v github.com/Masterminds/glide
-go get -v github.com/sgotti/glide-vc
 GLIDE_SHA=cfde1caa6b394a320fc65c5abc77646d18febff9
+go get -d -u github.com/Masterminds/glide
 pushd "${GLIDE_ROOT}"
 	# git reset --hard HEAD
 	git reset --hard ${GLIDE_SHA}
 	go install
 popd
 
+GLIDE_VC_ROOT="$GOPATH/src/github.com/sgotti/glide-vc"
+GLIDE_VC_SHA=d96375d23c85287e80296cdf48f9d21c227fa40a
+go get -d -u github.com/sgotti/glide-vc
+pushd "${GLIDE_VC_ROOT}"
+	# git reset --hard HEAD
+	git reset --hard ${GLIDE_VC_SHA}
+	go install
+popd
+
+
 rm -rf ./vendor
+
 
 if [ -n "$1" ]; then
 	echo "glide get on $(echo $1)"
