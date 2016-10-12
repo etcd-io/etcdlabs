@@ -128,19 +128,8 @@ func serverStatusHandler(ctx context.Context, w http.ResponseWriter, req *http.R
 			ServerUptime:     humanize.Time(globalCluster.Started),
 			UserN:            len(globalCache),
 			Users:            getUserIDs(globalCache),
+			NodeStatuses:     globalCluster.AllNodeStatus(),
 		}
-
-		switch req.URL.Path {
-		case "/server-status":
-			resp.NodeStatuses = globalCluster.AllNodeStatus()
-
-		case "/server-status-lite":
-			resp.PlaygroundActive = false
-
-		default:
-			return fmt.Errorf("%q is unknown to 'serverStatusHandler'", req.URL.Path)
-		}
-
 		if err := json.NewEncoder(w).Encode(resp); err != nil {
 			return err
 		}
