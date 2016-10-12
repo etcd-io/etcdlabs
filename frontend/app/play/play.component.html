@@ -7,9 +7,18 @@
         Please note that this will start sending/receiving a bunch of requests in backend.
     </p>
     <p>
-        Please click the button to start.
+        Please click to start.
     </p>
     <button (click)="clickConnect()" md-raised-button color="primary">Connect</button>
+    <button md-raised-button>Uptime: {{serverUptime}}</button>
+    <button md-raised-button (click)="clickShowUser()">{{userN}} users online</button>
+    <p *ngIf="showUser">
+        <md-list>
+            <md-list-item *ngFor="let user of users;">
+                {{users}}
+            </md-list-item>
+        </md-list>
+    </p>
     <br>
 
     <div class="inner">
@@ -17,42 +26,42 @@
             <svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="border: 0px solid black" width="500" height="400">
 				<circle id="ring" cx="230" cy="210" r="110" style="fill: #F5F5F5"></circle>
 				<g id="servers">
-					<g class="circle-before-start" [class.circle-Stopped]="serverStatus.NodeStatuses[0].State == 'Stopped'" [class.circle-Follower]="serverStatus.NodeStatuses[0].State == 'Follower'"
-						[class.circle-Leader]="serverStatus.NodeStatuses[0].State == 'Leader'" tabindex="0">
+					<g class="circle-before-start" [class.circle-Stopped]="nodeStatuses[0].State == 'Stopped'" [class.circle-Follower]="nodeStatuses[0].State == 'Follower'"
+						[class.circle-Leader]="nodeStatuses[0].State == 'Leader'" tabindex="0">
 						<text x="213" y="50" font-size="13">node1</text>
-						<text x="210" y="67" font-size="11">(Hash: {{ serverStatus.NodeStatuses[0].Hash }})</text>
+						<text x="210" y="67" font-size="11">(Hash: {{ nodeStatuses[0].Hash }})</text>
 						<a (click)="selectTab(3)">
 							<circle cx="230" cy="100" r="25"></circle>
 						</a>
 					</g>
-					<g class="circle-before-start" [class.circle-Stopped]="serverStatus.NodeStatuses[1].State == 'Stopped'" [class.circle-Follower]="serverStatus.NodeStatuses[1].State == 'Follower'"
-						[class.circle-Leader]="serverStatus.NodeStatuses[1].State == 'Leader'" tabindex="0">
+					<g class="circle-before-start" [class.circle-Stopped]="nodeStatuses[1].State == 'Stopped'" [class.circle-Follower]="nodeStatuses[1].State == 'Follower'"
+						[class.circle-Leader]="nodeStatuses[1].State == 'Leader'" tabindex="0">
 						<text x="355" y="160" font-size="13">node2</text>
-						<text x="360" y="177" font-size="11">(Hash: {{ serverStatus.NodeStatuses[1].Hash }})</text>
+						<text x="360" y="177" font-size="11">(Hash: {{ nodeStatuses[1].Hash }})</text>
 						<a (click)="selectTab(4)">
 							<circle cx="330" cy="180" r="25"></circle>
 						</a>
 					</g>
-					<g class="circle-before-start" [class.circle-Stopped]="serverStatus.NodeStatuses[2].State == 'Stopped'" [class.circle-Follower]="serverStatus.NodeStatuses[2].State == 'Follower'"
-						[class.circle-Leader]="serverStatus.NodeStatuses[2].State == 'Leader'" tabindex="0">
+					<g class="circle-before-start" [class.circle-Stopped]="nodeStatuses[2].State == 'Stopped'" [class.circle-Follower]="nodeStatuses[2].State == 'Follower'"
+						[class.circle-Leader]="nodeStatuses[2].State == 'Leader'" tabindex="0">
 						<text x="320" y="320" font-size="13">node3</text>
-						<text x="302" y="337" font-size="11">(Hash: {{ serverStatus.NodeStatuses[2].Hash }})</text>
+						<text x="302" y="337" font-size="11">(Hash: {{ nodeStatuses[2].Hash }})</text>
 						<a (click)="selectTab(5)">
 							<circle cx="295" cy="295" r="25"></circle>
 						</a>
 					</g>
-					<g class="circle-before-start" [class.circle-Stopped]="serverStatus.NodeStatuses[3].State == 'Stopped'" [class.circle-Follower]="serverStatus.NodeStatuses[3].State == 'Follower'"
-						[class.circle-Leader]="serverStatus.NodeStatuses[3].State == 'Leader'" tabindex="0">
+					<g class="circle-before-start" [class.circle-Stopped]="nodeStatuses[3].State == 'Stopped'" [class.circle-Follower]="nodeStatuses[3].State == 'Follower'"
+						[class.circle-Leader]="nodeStatuses[3].State == 'Leader'" tabindex="0">
 						<text x="80" y="320" font-size="13">node4</text>
-						<text x="80" y="337" font-size="11">(Hash: {{ serverStatus.NodeStatuses[3].Hash }})</text>
+						<text x="80" y="337" font-size="11">(Hash: {{ nodeStatuses[3].Hash }})</text>
 						<a (click)="selectTab(6)">
 							<circle cx="160" cy="295" r="25"></circle>
 						</a>
 					</g>
-					<g class="circle-before-start" [class.circle-Stopped]="serverStatus.NodeStatuses[4].State == 'Stopped'" [class.circle-Follower]="serverStatus.NodeStatuses[4].State == 'Follower'"
-						[class.circle-Leader]="serverStatus.NodeStatuses[4].State == 'Leader'" tabindex="0">
+					<g class="circle-before-start" [class.circle-Stopped]="nodeStatuses[4].State == 'Stopped'" [class.circle-Follower]="nodeStatuses[4].State == 'Follower'"
+						[class.circle-Leader]="nodeStatuses[4].State == 'Leader'" tabindex="0">
 						<text x="42" y="173" font-size="13">node5</text>
-						<text x="47" y="150" font-size="11">(Hash: {{ serverStatus.NodeStatuses[4].Hash }})</text>
+						<text x="47" y="150" font-size="11">(Hash: {{ nodeStatuses[4].Hash }})</text>
 						<a (click)="selectTab(7)">
 							<circle cx="125" cy="180" r="25"></circle>
 						</a>
@@ -150,7 +159,7 @@
 						</template>
                     </md-tab>
 
-                    <md-tab *ngFor="let nodeStatus of serverStatus.NodeStatuses;">
+                    <md-tab *ngFor="let nodeStatus of nodeStatuses;">
                         <template md-tab-label>{{nodeStatus.Name}}</template>
                         <template md-tab-content>
 							<br>

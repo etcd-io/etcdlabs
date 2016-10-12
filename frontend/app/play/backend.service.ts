@@ -57,10 +57,14 @@ export class NodeStatus {
 export class ServerStatus {
   PlaygroundActive: boolean;
   ServerUptime: string;
+  UserN: number;
+  Users: string[];
   NodeStatuses: NodeStatus[];
-  constructor(active: boolean, serverUptime: string, nodeStatuses: NodeStatus[]) {
+  constructor(active: boolean, serverUptime: string, userN: number, users: string[], nodeStatuses: NodeStatus[]) {
     this.PlaygroundActive = active;
     this.ServerUptime = serverUptime;
+    this.UserN = userN;
+    this.Users = users;
     this.NodeStatuses = nodeStatuses;
   }
 }
@@ -69,6 +73,7 @@ export class ServerStatus {
 export class BackendService {
   private connectEndpoint = 'conn';
   private serverStatusEndpoint = 'server-status';
+  private serverStatusEndpointLite = 'server-status-lite';
   // private clientRequestEndpoint = 'client-request';
 
   connect: Connect;
@@ -87,7 +92,7 @@ export class BackendService {
       new NodeStatus('node4', 'None', 'None', false, 'Stopped', 'node4 has not started...', 0, '0 B', 0),
       new NodeStatus('node5', 'None', 'None', false, 'Stopped', 'node5 has not started...', 0, '0 B', 0),
     ];
-    this.serverStatus = new ServerStatus(false, '0s', nodeStatuses);
+    this.serverStatus = new ServerStatus(false, '0s', 0, [], nodeStatuses);
   }
 
   ///////////////////////////////////////////////////////
@@ -128,8 +133,12 @@ export class BackendService {
     this.serverStatusErrorMessage = errMsg;
     return Observable.throw(errMsg);
   }
-  fetchServerStatus(): Observable<ServerStatus> {
-    return this.http.get(this.serverStatusEndpoint)
+  fetchServerStatus(nodeStatus: boolean): Observable<ServerStatus> {
+    let ep = this.serverStatusEndpoint;
+    if (!nodeStatus) {
+      ep = this.serverStatusEndpointLite;
+    }
+    return this.http.get(ep)
       .map(this.processHTTPResponseServerStatus)
       .catch(this.processHTTPErrorServerStatus);
   }

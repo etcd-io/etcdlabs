@@ -1,7 +1,7 @@
-import { Component, OnInit, AfterViewChecked, ElementRef, ViewChild, OnDestroy } from '@angular/core';
+import { Component, OnInit, AfterContentInit, AfterViewChecked, ElementRef, ViewChild, OnDestroy } from '@angular/core';
 import { Http, Response, Headers, RequestOptions } from '@angular/http';
 import { Observable } from 'rxjs';
-import { BackendService, ServerStatus, Connect } from './backend.service';
+import { BackendService, ServerStatus, NodeStatus, Connect } from './backend.service';
 
 export class KeyValue {
   Key: string;
@@ -93,7 +93,7 @@ export class LogLine {
   styleUrls: ['play.component.css'],
   providers: [BackendService],
 })
-export class PlayComponent implements OnInit, AfterViewChecked, OnDestroy {
+export class PlayComponent implements OnInit, AfterContentInit, AfterViewChecked, OnDestroy {
   // $("#logContainer").scrollTop($("#logContainer")[0].scrollHeight);
   @ViewChild('logContainer') private logScrollContainer: ElementRef;
 
@@ -105,12 +105,15 @@ export class PlayComponent implements OnInit, AfterViewChecked, OnDestroy {
   selectedTab: number;
   selectedNodes = [true, false, false, false, false];
 
-  wsConn;
   playgroundActive: boolean;
+  serverUptime: string;
+  userN: number;
+  users: string[];
+  nodeStatuses: NodeStatus[];
+
   connect: Connect;
   connectErrorMessage: string;
 
-  serverStatus: ServerStatus;
   serverStatusErrorMessage: string;
   serverStatusHandler;
 
@@ -124,6 +127,8 @@ export class PlayComponent implements OnInit, AfterViewChecked, OnDestroy {
   deleteResult: string;
   readResult: string;
 
+  showUser: boolean;
+
   constructor(private backendService: BackendService, private http: Http) {
     this.logOutputLines = [];
 
@@ -132,9 +137,13 @@ export class PlayComponent implements OnInit, AfterViewChecked, OnDestroy {
     this.connect = backendService.connect;
     this.connectErrorMessage = '';
 
-    this.serverStatus = backendService.serverStatus;
     this.serverStatusErrorMessage = '';
-    this.playgroundActive = this.serverStatus.PlaygroundActive;
+
+    this.playgroundActive = backendService.serverStatus.PlaygroundActive;
+    this.serverUptime = backendService.serverStatus.ServerUptime;
+    this.userN = backendService.serverStatus.UserN;
+    this.users = backendService.serverStatus.Users;
+    this.nodeStatuses = backendService.serverStatus.NodeStatuses;
 
     this.inputKey = '';
     this.inputValue = '';
@@ -146,13 +155,18 @@ export class PlayComponent implements OnInit, AfterViewChecked, OnDestroy {
     this.scrollToBottom();
   }
 
+  ngAfterContentInit() {
+    console.log('getting initial server status');
+    this.getServerStatus(false);
+  }
+
   ngAfterViewChecked() {
     this.scrollToBottom();
   }
 
   // user leaaves the template
   ngOnDestroy() {
-    console.log('Disconnected from cluster!');
+    console.log('Disconnected from cluster (user left the page)!');
     clearInterval(this.serverStatusHandler);
     this.cancelConnect();
     return;
@@ -182,7 +196,7 @@ export class PlayComponent implements OnInit, AfterViewChecked, OnDestroy {
     let idxs = this.getSelectedNodeIndexes();
     let eps = [];
     for (let _i = 0; _i < idxs.length; _i++) {
-      eps.push(this.serverStatus.NodeStatuses[idxs[_i]].Endpoint);
+      eps.push(this.nodeStatuses[idxs[_i]].Endpoint);
     }
     return eps;
   }
@@ -252,29 +266,36 @@ export class PlayComponent implements OnInit, AfterViewChecked, OnDestroy {
     this.sendLogLine('INFO', 'Connected to backend ' + backendURL);
 
     // (X) setInterval(this.getServerStatus, 1000);
-    this.serverStatusHandler = setInterval(() => this.getServerStatus(), 1000);
+    this.serverStatusHandler = setInterval(() => this.getServerStatus(true), 1000);
   }
   ///////////////////////////////////////////////////////
 
   ///////////////////////////////////////////////////////
-  processServerStatusResponse(resp: ServerStatus) {
-    this.serverStatus = resp;
+  processServerStatusResponse(resp: ServerStatus, nodeStatus: boolean) {
     this.serverStatusErrorMessage = '';
 
-    this.playgroundActive = this.serverStatus.PlaygroundActive;
+    this.playgroundActive = resp.PlaygroundActive;
+    this.serverUptime = resp.ServerUptime;
+    this.userN = resp.UserN;
+    this.users = resp.Users;
+    if (this.playgroundActive) {
+      this.nodeStatuses = resp.NodeStatuses;
+    };
 
-    if (!this.playgroundActive) {
-      console.log('Disconnected from cluster!');
+    if (!this.playgroundActive && nodeStatus) {
       clearInterval(this.serverStatusHandler);
+      this.cancelConnect();
     }
   }
 
-  getServerStatus() {
+  // getServerStatus fetches server status from backend.
+  // nodeStatus is true to get the status of all nodes.
+  getServerStatus(nodeStatus: boolean) {
     let serverStatusResult: ServerStatus;
-    this.backendService.fetchServerStatus().subscribe(
+    this.backendService.fetchServerStatus(nodeStatus).subscribe(
       serverStatus => serverStatusResult = serverStatus,
       error => this.serverStatusErrorMessage = <any>error,
-      () => this.processServerStatusResponse(serverStatusResult),
+      () => this.processServerStatusResponse(serverStatusResult, nodeStatus),
     );
   }
   ///////////////////////////////////////////////////////
@@ -357,11 +378,11 @@ export class PlayComponent implements OnInit, AfterViewChecked, OnDestroy {
 
     let nodeIndex = this.selectedTab - 3;
     if (act === 'stop-node' || act === 'restart-node') {
-      eps = [this.serverStatus.NodeStatuses[nodeIndex].Endpoint];
+      eps = [this.nodeStatuses[nodeIndex].Endpoint];
       prefix = false;
       key = '';
       val = '';
-      this.sendLogLine('OK', 'requested "' + act + '" ' + this.serverStatus.NodeStatuses[nodeIndex].Name);
+      this.sendLogLine('OK', 'requested "' + act + '" ' + this.nodeStatuses[nodeIndex].Name);
     } else {
       this.sendLogLine('OK', 'requested "' + act + '" (' + this.getSelectedNodeEndpointsTxt() + ')');
     }
@@ -375,4 +396,8 @@ export class PlayComponent implements OnInit, AfterViewChecked, OnDestroy {
     );
   }
   ///////////////////////////////////////////////////////
+
+  clickShowUser() {
+    this.showUser = !this.showUser;
+  }
 }
