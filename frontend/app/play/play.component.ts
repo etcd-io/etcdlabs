@@ -152,7 +152,7 @@ export class PlayComponent implements OnInit, AfterViewChecked, OnDestroy {
 
   // user leaaves the template
   ngOnDestroy() {
-    console.log('canceling serverStatus handler');
+    console.log('Disconnected from cluster!');
     clearInterval(this.serverStatusHandler);
     this.cancelConnect();
     return;
@@ -264,7 +264,7 @@ export class PlayComponent implements OnInit, AfterViewChecked, OnDestroy {
     this.playgroundActive = this.serverStatus.PlaygroundActive;
 
     if (!this.playgroundActive) {
-      console.log('canceling serverStatus handler');
+      console.log('Disconnected from cluster!');
       clearInterval(this.serverStatusHandler);
     }
   }
@@ -345,6 +345,11 @@ export class PlayComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   processClientRequest(act: string) {
+    if (!this.playgroundActive) {
+      this.sendLogLine('WARN', 'Not connected to cluster! (Please click "Connect" button.)');
+      return;
+    }
+
     let eps = this.getSelectedNodeEndpoints();
     let prefix = this.deleteReadByPrefix;
     let key = this.inputKey;
