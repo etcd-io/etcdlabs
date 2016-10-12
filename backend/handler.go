@@ -33,12 +33,11 @@ type key int
 const userKey key = 0
 
 type userData struct {
-	ip string
 }
 
 var (
 	globalCacheLock sync.Mutex
-	globalCache     = make(map[string]*userData)
+	globalCache     = make(map[string]userData)
 )
 
 func withCache(h ContextHandler) ContextHandler {
@@ -49,9 +48,7 @@ func withCache(h ContextHandler) ContextHandler {
 		globalCacheLock.Lock()
 		if _, ok := globalCache[userID]; !ok { // if user visits first time, create user cache
 			plog.Infof("just created user %q", userID)
-			globalCache[userID] = &userData{
-				ip: getRealIP(req),
-			}
+			globalCache[userID] = userData{}
 		}
 		globalCacheLock.Unlock()
 
@@ -100,8 +97,17 @@ func connectHandler(ctx context.Context, w http.ResponseWriter, req *http.Reques
 type ServerStatus struct {
 	// PlaygroundActive is true when the user is still active in '/play'.
 	PlaygroundActive bool
+
 	// ServerUptime is the duration since last deploy.
 	ServerUptime string
+
+	// UserN is the number of online users.
+	UserN int
+
+	// Users is a slice of users with real IPs being masked.
+	// Maximum 20 users are returned.
+	Users []string
+
 	// NodeStatuses contains all node statuses.
 	NodeStatuses []cluster.NodeStatus
 }
@@ -115,12 +121,27 @@ func serverStatusHandler(ctx context.Context, w http.ResponseWriter, req *http.R
 		_, active := globalCache[userID]
 		globalCacheLock.Unlock()
 
-		ss := ServerStatus{
+		active = active && globalCluster != nil
+
+		resp := ServerStatus{
 			PlaygroundActive: active,
 			ServerUptime:     humanize.Time(globalCluster.Started),
-			NodeStatuses:     globalCluster.AllNodeStatus(),
+			UserN:            len(globalCache),
+			Users:            getUserIDs(globalCache),
 		}
-		if err := json.NewEncoder(w).Encode(ss); err != nil {
+
+		switch req.URL.Path {
+		case "/server-status":
+			resp.NodeStatuses = globalCluster.AllNodeStatus()
+
+		case "/server-status-lite":
+			resp.PlaygroundActive = false
+
+		default:
+			return fmt.Errorf("%q is unknown to 'serverStatusHandler'", req.URL.Path)
+		}
+
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
 			return err
 		}
 

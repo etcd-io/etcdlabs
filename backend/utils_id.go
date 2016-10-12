@@ -46,6 +46,33 @@ func getUserID(req *http.Request) string {
 	return ip + simpleUA(ua) + hashSha512(ip + ua)[:15]
 }
 
+func maskUserID(id string) string {
+	bts := []byte(id)
+	bts[2] = 'x' // mask IP addresses
+	bts[3] = 'x'
+	bts[4] = 'x'
+	bts[5] = 'x'
+	bts[6] = 'x'
+	bts[7] = 'x'
+	bts[8] = 'x'
+	bs := string(bts)
+	if len(bs) > 23 {
+		bs = bs[:23] + "..."
+	}
+	return bs
+}
+
+func getUserIDs(m map[string]userData) []string {
+	s := make([]string, 0, len(m))
+	for id := range m {
+		s = append(s, maskUserID(id))
+		if len(s) > 20 {
+			break
+		}
+	}
+	return s
+}
+
 func simpleUA(ua string) string {
 	var (
 		us  = ""
