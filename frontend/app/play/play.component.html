@@ -1,17 +1,9 @@
 <div class="play-group">
-
-    <p>
-        You are about to connect to actual etcd cluster.
-    </p>
-    <p>
-        Please note that this will start sending/receiving a bunch of requests in backend.
-    </p>
-    <p>
-        Please click to start.
-    </p>
-    <button (click)="clickConnect()" md-raised-button color="primary">Connect</button>
+    <button (click)="clickConnect()" md-raised-button color="primary" *ngIf="!connected">Connect</button>
+    <button (click)="clickDisconnect()" md-raised-button color="warn" *ngIf="connected">Disconnect</button>
     <button md-raised-button>Uptime: {{serverUptime}}</button>
     <button md-raised-button (click)="clickShowUser()">{{userN}} users online</button>
+    <br>
     <p *ngIf="showUser">
         <md-list>
             <md-list-item *ngFor="let user of users;">

@@ -127,6 +127,7 @@ export class PlayComponent implements OnInit, AfterContentInit, AfterViewChecked
   deleteResult: string;
   readResult: string;
 
+  connected: boolean;
   showUser: boolean;
 
   constructor(private backendService: BackendService, private http: Http) {
@@ -157,7 +158,7 @@ export class PlayComponent implements OnInit, AfterContentInit, AfterViewChecked
 
   ngAfterContentInit() {
     console.log('getting initial server status');
-    this.getServerStatus(false);
+    this.clickConnect();
   }
 
   ngAfterViewChecked() {
@@ -167,8 +168,8 @@ export class PlayComponent implements OnInit, AfterContentInit, AfterViewChecked
   // user leaaves the template
   ngOnDestroy() {
     console.log('Disconnected from cluster (user left the page)!');
+    this.closeConnect();
     clearInterval(this.serverStatusHandler);
-    this.cancelConnect();
     return;
   }
 
@@ -240,7 +241,7 @@ export class PlayComponent implements OnInit, AfterContentInit, AfterViewChecked
     );
   }
 
-  cancelConnect() {
+  closeConnect() {
     let connectResult: Connect;
     this.backendService.deleteConnect().subscribe(
       connect => connectResult = connect,
@@ -254,7 +255,6 @@ export class PlayComponent implements OnInit, AfterContentInit, AfterViewChecked
       this.sendLogLine('INFO', 'Already connected to cluster!');
       return;
     }
-
     this.playgroundActive = true;
     this.sendLogLine('OK', 'Hello World! Connected to etcd cluster!');
 
@@ -265,37 +265,51 @@ export class PlayComponent implements OnInit, AfterContentInit, AfterViewChecked
     let backendURL = host + port;
     this.sendLogLine('INFO', 'Connected to backend ' + backendURL);
 
+    this.connected = true;
+
     // (X) setInterval(this.getServerStatus, 1000);
-    this.serverStatusHandler = setInterval(() => this.getServerStatus(true), 1000);
+    this.serverStatusHandler = setInterval(() => this.getServerStatus(), 1000);
+  }
+
+  clickDisconnect() {
+    if (!this.playgroundActive) {
+      this.sendLogLine('WARN', 'Already disconnected!');
+      return;
+    }
+    this.playgroundActive = false;
+    this.sendLogLine('WARN', 'Disconnected from etcd cluster!');
+
+    this.connected = false;
+
+    this.closeConnect();
+    clearInterval(this.serverStatusHandler);
   }
   ///////////////////////////////////////////////////////
 
   ///////////////////////////////////////////////////////
-  processServerStatusResponse(resp: ServerStatus, nodeStatus: boolean) {
+  processServerStatusResponse(resp: ServerStatus) {
     this.serverStatusErrorMessage = '';
 
     this.playgroundActive = resp.PlaygroundActive;
     this.serverUptime = resp.ServerUptime;
     this.userN = resp.UserN;
     this.users = resp.Users;
-    if (this.playgroundActive) {
-      this.nodeStatuses = resp.NodeStatuses;
-    };
+    this.nodeStatuses = resp.NodeStatuses;
 
-    if (!this.playgroundActive && nodeStatus) {
+    if (!this.playgroundActive) {
+      this.closeConnect();
       clearInterval(this.serverStatusHandler);
-      this.cancelConnect();
-    }
+    };
   }
 
   // getServerStatus fetches server status from backend.
   // nodeStatus is true to get the status of all nodes.
-  getServerStatus(nodeStatus: boolean) {
+  getServerStatus() {
     let serverStatusResult: ServerStatus;
-    this.backendService.fetchServerStatus(nodeStatus).subscribe(
+    this.backendService.fetchServerStatus().subscribe(
       serverStatus => serverStatusResult = serverStatus,
       error => this.serverStatusErrorMessage = <any>error,
-      () => this.processServerStatusResponse(serverStatusResult, nodeStatus),
+      () => this.processServerStatusResponse(serverStatusResult),
     );
   }
   ///////////////////////////////////////////////////////

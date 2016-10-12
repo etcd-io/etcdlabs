@@ -73,7 +73,6 @@ export class ServerStatus {
 export class BackendService {
   private connectEndpoint = 'conn';
   private serverStatusEndpoint = 'server-status';
-  private serverStatusEndpointLite = 'server-status-lite';
   // private clientRequestEndpoint = 'client-request';
 
   connect: Connect;
@@ -133,12 +132,8 @@ export class BackendService {
     this.serverStatusErrorMessage = errMsg;
     return Observable.throw(errMsg);
   }
-  fetchServerStatus(nodeStatus: boolean): Observable<ServerStatus> {
-    let ep = this.serverStatusEndpoint;
-    if (!nodeStatus) {
-      ep = this.serverStatusEndpointLite;
-    }
-    return this.http.get(ep)
+  fetchServerStatus(): Observable<ServerStatus> {
+    return this.http.get(this.serverStatusEndpoint)
       .map(this.processHTTPResponseServerStatus)
       .catch(this.processHTTPErrorServerStatus);
   }
