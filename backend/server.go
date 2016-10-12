@@ -68,8 +68,8 @@ type Server struct {
 }
 
 var (
-	defaultLimitInterval       = 2 * time.Second
-	defaultStopRestartInterval = 3 * time.Second
+	defaultLimitInterval       = 3 * time.Second
+	defaultStopRestartInterval = 5 * time.Second
 
 	// for websocket
 	globalWebserverPort int

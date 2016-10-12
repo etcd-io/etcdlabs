@@ -1,8 +1,8 @@
 <div class="play-group">
     <button (click)="clickConnect()" md-raised-button color="primary" *ngIf="!connected">Connect</button>
     <button (click)="clickDisconnect()" md-raised-button color="warn" *ngIf="connected">Disconnect</button>
-    <button md-raised-button>Uptime: {{serverUptime}}</button>
     <button md-raised-button (click)="clickShowUser()">{{userN}} users online</button>
+    <button md-raised-button>Uptime: {{serverUptime}}</button>
     <br>
     <p *ngIf="showUser">
         <md-list>
