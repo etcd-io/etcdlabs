@@ -234,10 +234,13 @@ func Start(ccfg Config) (c *Cluster, err error) {
 	for i := 0; i < c.size; i++ {
 		go func(i int) {
 			defer wg.Done()
+
 			for {
 				cli, _, err := c.Client(c.Endpoints(i, false)...)
 				if err != nil {
 					plog.Warning(err)
+
+					time.Sleep(time.Second)
 					continue
 				}
 				defer cli.Close()
@@ -247,6 +250,8 @@ func Start(ccfg Config) (c *Cluster, err error) {
 				cancel()
 				if err != nil {
 					plog.Warning(err)
+
+					time.Sleep(time.Second)
 					continue
 				}
 
