@@ -181,6 +181,9 @@ func Start(ccfg Config) (c *Cluster, err error) {
 		cfg.PeerAutoTLS = ccfg.PeerAutoTLS
 		cfg.PeerTLSInfo = ccfg.PeerTLSInfo
 
+		// auto-compaction every hour
+		cfg.AutoCompactionRetention = 1
+
 		c.nodes[i] = &node{cfg: cfg, status: NodeStatus{Name: cfg.Name, Endpoint: clientURL.String(), IsLeader: false, State: StoppedNodeStatus}}
 
 		startPort += 2
