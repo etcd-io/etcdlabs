@@ -18,6 +18,7 @@ import (
 	"crypto/sha512"
 	"encoding/base64"
 	"net/http"
+	"sort"
 	"strings"
 )
 
@@ -70,6 +71,7 @@ func getUserIDs(m map[string]userData) []string {
 			break
 		}
 	}
+	sort.Strings(s)
 	return s
 }
 
