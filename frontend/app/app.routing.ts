@@ -15,6 +15,7 @@ import { TutorialsAdvancedTipComponent } from './doc/tip/tutorials-advanced.comp
 import { FAQTipComponent } from './doc/tip/faq.component';
 import { PerformanceTipComponent } from './doc/tip/performance.component';
 import { ReliabilityTipComponent } from './doc/tip/reliability.component';
+import { ComparisonTipComponent } from './doc/tip/comparison.component';
 import { VersionsTipComponent } from './doc/tip/versions.component';
 
 /*
@@ -51,6 +52,7 @@ const appRoutes: Routes = [
             { path: 'faq', component: FAQTipComponent },
             { path: 'performance', component: PerformanceTipComponent },
             { path: 'reliability', component: ReliabilityTipComponent },
+            { path: 'comparison', component: ComparisonTipComponent },
             { path: 'versions', component: VersionsTipComponent },
         ],
     },
@@ -94,6 +96,7 @@ export const routedComponents = [
     FAQTipComponent,
     PerformanceTipComponent,
     ReliabilityTipComponent,
+    ComparisonTipComponent,
     VersionsTipComponent,
 
     BlogComponent,

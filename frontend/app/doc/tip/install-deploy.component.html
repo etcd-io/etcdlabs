@@ -24,6 +24,12 @@
             Install and Deploy etcd <span class="versions-link-normal">(latest {{etcdVersionLatestRelease}})</span>
         </h4>
 
+        <br>
+        <p>
+            This is an example workflow to install and deploy etcd (for/with Kubernetes).
+        </p>
+        <br>
+
         <md-card>
             <md-checkbox [(ngModel)]="inputSecure">Secure connection (HTTPS)</md-checkbox>
             <md-checkbox [(ngModel)]="inputEnableProfile">Enable profiler</md-checkbox>
@@ -67,107 +73,8 @@
         </md-card>
 
         <br><br>
-        <h4>Commands</h4>
+
         <md-tab-group>
-
-            <md-tab>
-                <template md-tab-label>
-					Bare metal, VM
-				</template>
-                <template md-tab-content>
-					<br>
-					<h5>Why?</h5>
-					<p>
-						etcd writes data to disk. Such stateful application is complicated to run in container.
-					</p>
-					<p>
-						Bare metal or virtual machine is the simplest way to run etcd.
-					</p>
-
-					<br>
-					<h5>Install releases</h5>
-					<div class="osx-window">
-						<div class="window-narrow">
-							<div class="titlebar">
-								<div class="buttons">
-									<div class="closebtn"><span><strong></strong></span></div>
-									<div class="minimize"><span><strong></strong></span></div>
-									<div class="zoom"><span><strong></strong></span></div>
-								</div><span class="title-bar-text">terminal</span></div>
-							<div class="content">
-								<pre class="osx-terminal-contents">{{getEtcdCommandInitial()}}</pre>
-							</div>
-						</div>
-					</div>
-
-					<br>
-					<h5>Install on Linux</h5>
-					<pre class="code-dark">{{getEtcdCommandInstallLinux()}}</pre>
-
-					<br>
-					<h5>Install on Mac OS (Darwin)</h5>
-					<pre class="code-dark">{{getEtcdCommandInstallOSX()}}</pre>
-
-					<br>
-					<h5>Deploy etcd cluster</h5>
-					<p *ngIf="flags[0].ipAddress == 'localhost'">
-						Seems like etcd is configured to run in localhost. Please make sure ports do not conflict!
-					</p>
-					<div *ngFor="let flag of flags; let i = index;">
-						<div *ngIf="inputClusterSize > i">
-							<pre class="code-dark">{{getEtcdCommandBash(flag)}}</pre>
-						</div>
-					</div>
-					<pre class="code-dark">{{getEtcdctlCommandBash(flags[0])}}</pre>
-					<br>
-				</template>
-            </md-tab>
-
-            <md-tab>
-                <template md-tab-label>
-					Kubernetes
-				</template>
-                <template md-tab-content>
-					<br>
-					<h5>Why?</h5>
-					<p>
-						Application container gives much portability to initial development phase.
-					</p>
-					<p>
-						But operating and scaling container requires much more work.
-					</p>
-					<p>
-						<a href="http://kubernetes.io/" target="_blank" class="normal-link">Kubernetes</a> manages such complex container environments.
-					</p>
-					<p>
-						Here's how to run etcd with Kubernetes.
-					</p>
-
-					<br>
-					<md-input type="text" [(ngModel)]="inputKubernetesVersion" placeholder="Kubernetes version"></md-input>
-					<br>
-
-					<br>
-					<h5>Install Kubernetes</h5>
-					This assumes host OS is Linux.
-					<div class="osx-window">
-						<div class="window">
-							<div class="titlebar">
-								<div class="buttons">
-									<div class="closebtn"><span><strong></strong></span></div>
-									<div class="minimize"><span><strong></strong></span></div>
-									<div class="zoom"><span><strong></strong></span></div>
-								</div><span class="title-bar-text">terminal</span></div>
-							<div class="content">
-								<pre class="osx-terminal-contents">{{getKubernetesCommandInitial()}}</pre>
-							</div>
-						</div>
-					</div>
-
-					<br><br>
-					<p>Sorry, this page is still working in progress.</p>
-				</template>
-            </md-tab>
 
             <md-tab>
                 <template md-tab-label>
@@ -219,6 +126,7 @@
 				</template>
             </md-tab>
 
+
             <md-tab>
                 <template md-tab-label>
 					TLS (cfssl)
@@ -230,7 +138,7 @@
 						If etcd stores information that should not be public, encryption is highly recommended.
 					</p>
 					<p>
-						etcd supports SSL/TLS and authentication both for clients to server as well as peer communication.
+						etcd supports SSL/TLS and authentication for clients-to-server and peer-to-peer communication.
 					</p>
 					<p>
 						Here's how to generate self-signed TLS certificates with
@@ -239,8 +147,11 @@
 
 					<br>
 					<h5>Install cfssl</h5>
+					<br>
+					<md-input type="text" [(ngModel)]="inputCFSSLVersion" placeholder="cfssl version"></md-input>
+					<br>
 					<div class="osx-window">
-						<div class="window-narrow">
+						<div class="window">
 							<div class="titlebar">
 								<div class="buttons">
 									<div class="closebtn"><span><strong></strong></span></div>
@@ -288,6 +199,123 @@
 					</div>
 
 					<br>
+				</template>
+            </md-tab>
+
+
+            <md-tab>
+                <template md-tab-label>
+					Bare metal, VM
+				</template>
+                <template md-tab-content>
+					<br>
+					<h5>Why?</h5>
+					<p>
+						etcd writes data to disk. Such stateful application is complicated to run in container.
+					</p>
+					<p>
+						Bare metal or virtual machine is the simplest way to run etcd.
+					</p>
+
+					<br>
+					<h5>Install releases</h5>
+					<div class="osx-window">
+						<div class="window-narrow">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{getEtcdCommandVMInitial()}}</pre>
+							</div>
+						</div>
+					</div>
+
+					<br>
+					<h5>Install on Linux</h5>
+					<pre class="code-dark">{{getEtcdCommandVMInstallLinux()}}</pre>
+
+					<br>
+					<h5>Install on Mac OS (Darwin)</h5>
+					<pre class="code-dark">{{getEtcdCommandVMInstallOSX()}}</pre>
+
+					<br>
+					<h5>Deploy etcd cluster</h5>
+					<p *ngIf="flags[0].ipAddress == 'localhost'">
+						Seems like etcd is configured to run in localhost. Please make sure ports do not conflict!
+					</p>
+					<div *ngFor="let flag of flags; let i = index;">
+						<div *ngIf="inputClusterSize > i">
+							<pre class="code-dark">{{getEtcdCommandVMBash(flag)}}</pre>
+						</div>
+					</div>
+					<pre class="code-dark">{{getEtcdctlCommandVMBash(flags[0])}}</pre>
+					<br>
+				</template>
+            </md-tab>
+
+
+            <md-tab>
+                <template md-tab-label>
+					systemd
+				</template>
+                <template md-tab-content>
+					<br>
+					<h5>Why?</h5>
+					<br>
+				</template>
+            </md-tab>
+
+            <md-tab>
+                <template md-tab-label>
+					Kubernetes
+				</template>
+                <template md-tab-content>
+					<br>
+					<h5>Why?</h5>
+					<p>
+						Application container gives much portability to initial development phase.
+					</p>
+					<p>
+						But operating and scaling container requires much more work.
+					</p>
+					<p>
+						<a href="http://kubernetes.io/" target="_blank" class="normal-link">Kubernetes</a> manages such complex container environments.
+					</p>
+					<p>
+						Kubernetes stores all states in etcd, which is required to run independently.
+					</p>
+					<p>
+						And here's how to run etcd with Kubernetes.
+					</p>
+
+					<br>
+					<h5>Install Kubernetes</h5>
+
+					<br>
+					<md-input type="text" [(ngModel)]="inputKubernetesVersion" placeholder="Kubernetes version"></md-input>
+					<md-input type="text" [(ngModel)]="inputKubernetesGOOS" placeholder="GOOS"></md-input>
+					<md-input type="text" [(ngModel)]="inputKubernetesGOARCH" placeholder="GOARCH"></md-input>
+					<br>
+
+					<div class="osx-window">
+						<div class="window">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{getKubernetesCommandInitial()}}</pre>
+							</div>
+						</div>
+					</div>
+
+					<br><br>
+					<p>Sorry, this page is still working in progress.</p>
 				</template>
             </md-tab>
 
