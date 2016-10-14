@@ -101,6 +101,7 @@ export class InstallDeployTipComponent extends parentComponent {
     inputEtcdVersion: string;
 
     inputClusterSize: number;
+    inputEtcdExecDir: string;
 
     flags: etcdFlag[];
     ////////////////////////////////////
@@ -146,6 +147,7 @@ export class InstallDeployTipComponent extends parentComponent {
         this.inputEtcdVersion = this.etcdVersionLatestRelease;
 
         this.inputClusterSize = 3;
+        this.inputEtcdExecDir = '/usr/bin';
 
         this.flags = [
             new etcdFlag(
@@ -412,7 +414,7 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
 ` + 'curl -L ${DOWNLOAD_URL}/${ETCD_VER}/etcd-${ETCD_VER}-linux-amd64.tar.gz -o /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz' + `
 ` + 'tar xzvf /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz -C /tmp/test-etcd --strip-components=1' + `
 
-sudo cp /tmp/test-etcd/etcd* /usr/bin/
+sudo cp /tmp/test-etcd/etcd* ` + this.inputEtcdExecDir + `
 
 etcd --version
 etcdctl --version`;
@@ -424,7 +426,7 @@ etcdctl --version`;
 ` + 'curl -L ${DOWNLOAD_URL}/${ETCD_VER}/etcd-${ETCD_VER}-darwin-amd64.zip -o /tmp/etcd-${ETCD_VER}-darwin-amd64.zip' + `
 ` + 'unzip /tmp/etcd-${ETCD_VER}-darwin-amd64.zip -d /tmp && mv /tmp/etcd-${ETCD_VER}-darwin-amd64 /tmp/test-etcd' + `
 
-sudo cp /tmp/test-etcd/etcd* /usr/bin/
+sudo cp /tmp/test-etcd/etcd* ` + this.inputEtcdExecDir + `
 
 etcd --version
 etcdctl --version`;
@@ -492,7 +494,8 @@ etcdctl --version`;
     }
 
     getEtcdCommandVMBash(flag: etcdFlag) {
-        let cmd = 'etcd' + ' ' + '--name' + ' ' + flag.name + ' ' + '--data-dir' + ' ' + flag.dataDir + ' \\' + `
+        let exec = this.inputEtcdExecDir + `/` + 'etcd';
+        let cmd =  exec + ' ' + '--name' + ' ' + flag.name + ' ' + '--data-dir' + ' ' + flag.dataDir + ' \\' + `
     ` + '--listen-client-urls' + ' ' + this.getClientURL(flag) + ' ' + '--advertise-client-urls' + ' ' + this.getClientURL(flag) + ' \\' + `
     ` + '--listen-peer-urls' + ' ' + this.getPeerURL(flag) + ' ' + '--initial-advertise-peer-urls' + ' ' + this.getPeerURL(flag) + ' \\' + `
     ` + '--initial-cluster' + ' ' + this.getInitialCluster() + ' \\' + `
@@ -524,7 +527,8 @@ etcdctl --version`;
     }
 
     getEtcdctlCommandVMBash(flag: etcdFlag) {
-        let cmd = 'ETCDCTL_API=3 etcdctl' + ' \\' + `
+        let exec = this.inputEtcdExecDir + `/` + 'etcdctl';
+        let cmd = 'ETCDCTL_API=3 ' + exec + ' \\' + `
     ` + '--endpoints' + ' ' + this.getAllClientEndpoints() + ' \\' + `
     `;
         if (this.inputSecure) {
@@ -553,7 +557,7 @@ Description=etcd
 Documentation=https://github.com/coreos
 
 [Service]
-ExecStart=/usr/bin/` + this.getEtcdCommandVMBash(flag) + `
+ExecStart=` + this.getEtcdCommandVMBash(flag) + `
 Restart=always
 RestartSec=5
 LimitNOFILE=40000
