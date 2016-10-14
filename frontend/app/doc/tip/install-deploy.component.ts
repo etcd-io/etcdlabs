@@ -111,7 +111,7 @@ export class InstallDeployTipComponent extends parentComponent {
     inputKubernetesVersion: string;
     inputKubernetesGOOS: string;
     inputKubernetesGOARCH: string;
-    inputKubernetesBinary: string;
+    inputKubernetesExecDir: string;
     ////////////////////////////////////
 
     constructor() {
@@ -227,6 +227,7 @@ export class InstallDeployTipComponent extends parentComponent {
         this.inputKubernetesVersion = 'v1.4.0';
         this.inputKubernetesGOOS = 'linux';
         this.inputKubernetesGOARCH = 'amd64';
+        this.inputKubernetesExecDir = '/usr/local/bin';
         ///////////////////////////////////////////////////
     }
 
@@ -589,14 +590,21 @@ sudo systemctl status etcd --no-pager
 
 GOOS=${this.inputKubernetesGOOS}
 GOARCH=${this.inputKubernetesGOARCH}
-K8S_BIN=kubectl
 
 DOWNLOAD_URL=https://storage.googleapis.com/kubernetes-release/release
-` + 'rm -f /tmp/${K8S_BIN}' + `
-` + 'curl -L ${DOWNLOAD_URL}/${K8S_VER}/bin/${GOOS}/${GOARCH}/${K8S_BIN} -o /tmp/${K8S_BIN}' + `
-` + 'sudo chmod +x /tmp/${K8S_BIN} && sudo mv /tmp/${K8S_BIN} /usr/local/bin/' + `
 
-` + `kubectl version`;
+for K8S_BIN in kubectl kube-apiserver kube-controller-manager kube-scheduler; do
+    echo "Downloading" ` + '${K8S_BIN}' + `
+    ` + 'rm -f /tmp/${K8S_BIN}' + `
+    ` + 'curl -L ${DOWNLOAD_URL}/${K8S_VER}/bin/${GOOS}/${GOARCH}/${K8S_BIN} -o /tmp/${K8S_BIN}' + `
+    ` + 'sudo chmod +x /tmp/${K8S_BIN} && sudo mv /tmp/${K8S_BIN} ' + this.inputKubernetesExecDir + `
+done
+
+kubectl version
+kube-apiserver --version
+kube-controller-manager --version
+kube-scheduler --version
+`;
     }
     ///////////////////////////////////////////////////
 }
