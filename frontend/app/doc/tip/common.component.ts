@@ -13,7 +13,7 @@ export class Versioner {
         goVersion: '1.7.1',
         etcdVersion: 'tip',
         etcdVersionURL: 'tip',
-        etcdVersionLatestRelease: 'v3.1.0-alpha.1',
+        etcdVersionLatestRelease: 'v3.1.0-rc.0',
         etcdFlagPage: 'https://github.com/coreos/etcd/blob/master/etcdmain/help.go',
     };
 
