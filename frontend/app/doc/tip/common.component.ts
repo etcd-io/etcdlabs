@@ -83,6 +83,13 @@ export class parentComponent {
                 `/doc/${this.version.etcdVersionURL}/reliability`,
                 'no-text-decoration'
             ),
+
+            new sidebarItem(
+                'Comparison',
+                `etcd in comparison with other databases`,
+                `/doc/${this.version.etcdVersionURL}/comparison`,
+                'no-text-decoration'
+            ),
             new sidebarItem(
                 'Versions',
                 'looking for documentation of other versions?',
