@@ -572,8 +572,8 @@ sudo systemctl enable etcd
 sudo systemctl start etcd
 
 sudo systemctl status etcd --no-pager
-sudo journalctl -f -u etcd
-sudo journalctl -u etcd -l --no-pager|less
+# sudo journalctl -f -u etcd
+# sudo journalctl -u etcd -l --no-pager|less
 `;
     }
     ///////////////////////////////////////////////////
