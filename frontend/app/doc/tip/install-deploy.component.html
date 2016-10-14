@@ -182,6 +182,20 @@
 
 					<h5>Generate self-signed root CA certificate</h5>
 					<pre class="code-dark">{{getCFSSLCommandRootCA()}}</pre>
+					Results:
+					<div class="osx-window">
+						<div class="window-narrow">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{getCFSSLCommandRootCAResult()}}</pre>
+							</div>
+						</div>
+					</div>
 
 					<br>
 					<h5>Create a configuration file</h5>
@@ -198,7 +212,19 @@
 						</div>
 					</div>
 
-					<br>
+					<div *ngIf="flags[0].ipAddress != 'localhost'" class="osx-window">
+						<div class="window-narrow">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{getCFSSLCommandKeysCopyGCP()}}</pre>
+							</div>
+						</div>
+					</div>
 				</template>
             </md-tab>
 
@@ -246,13 +272,26 @@
 					<p *ngIf="flags[0].ipAddress == 'localhost'">
 						Seems like etcd is configured to run in localhost. Please make sure ports do not conflict!
 					</p>
+					<div class="osx-window">
+						<div class="window-narrow">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{getEtcdCommandVMCreateDir()}}</pre>
+							</div>
+						</div>
+					</div>
+
 					<div *ngFor="let flag of flags; let i = index;">
 						<div *ngIf="inputClusterSize > i">
 							<pre class="code-dark">{{getEtcdCommandVMBash(flag)}}</pre>
 						</div>
 					</div>
 					<pre class="code-dark">{{getEtcdctlCommandVMBash(flags[0])}}</pre>
-					<br>
 				</template>
             </md-tab>
 
@@ -264,7 +303,32 @@
                 <template md-tab-content>
 					<br>
 					<h5>Why?</h5>
+					<p>
+						<a href="https://en.wikipedia.org/wiki/Systemd" target="_blank" class="normal-link">systemd</a> can help bootstrap
+						etcd cluster.
+					</p>
+
 					<br>
+					<h5>Set up systemd service</h5>
+					<div *ngFor="let flag of flags; let i = index;">
+						<div *ngIf="inputClusterSize > i">
+							<pre class="code-dark">{{getEtcdCommandVMSystemdServiceFile(flag)}}</pre>
+						</div>
+					</div>
+					Check status:
+					<div class="osx-window">
+						<div class="window-narrow">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{getEtcdCommandVMSystemdServiceFileResult()}}</pre>
+							</div>
+						</div>
+					</div>
 				</template>
             </md-tab>
 

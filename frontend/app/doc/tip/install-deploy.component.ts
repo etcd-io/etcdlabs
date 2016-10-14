@@ -52,13 +52,13 @@ export class etcdFlag {
 
         this.initialCluster = '';
 
-        this.clientCertFile = '/tmp/test-certs/' + this.name + '.pem';
-        this.clientKeyFile = '/tmp/test-certs/' + this.name + '-key.pem';
-        this.clientTrustedCAFile = '/tmp/test-certs/trusted-ca.pem';
+        this.clientCertFile = '/etc/etcd/' + this.name + '.pem';
+        this.clientKeyFile = '/etc/etcd/' + this.name + '-key.pem';
+        this.clientTrustedCAFile = '/etc/etcd/trusted-ca.pem';
 
-        this.peerCertFile = '/tmp/test-certs/' + this.name + '.pem';
-        this.peerKeyFile = '/tmp/test-certs/' + this.name + '-key.pem';
-        this.peerTrustedCAFile = '/tmp/test-certs/trusted-ca.pem';
+        this.peerCertFile = '/etc/etcd/' + this.name + '.pem';
+        this.peerKeyFile = '/etc/etcd/' + this.name + '-key.pem';
+        this.peerTrustedCAFile = '/etc/etcd/trusted-ca.pem';
     }
 }
 
@@ -287,11 +287,14 @@ sudo mv /tmp/cfssljson /usr/local/bin/cfssljson
 
 cfssl version
 cfssljson -h
+
+rm -rf $HOME/test-certs && mkdir -p $HOME/test-certs/
 `;
     }
 
     getCFSSLCommandRootCA() {
-        return `echo '{
+        return `cat > $HOME/test-certs/trusted-ca-csr.json <<EOF
+{
   "key": {
     "algo": "${this.inputCFSSLKeyAlgorithm}",
     "size": ${this.inputCFSSLKeySize}
@@ -306,14 +309,28 @@ cfssljson -h
     }
   ],
   "CN": "${this.inputCFSSLCommonName}"
-}' > /tmp/test-certs/trusted-ca-csr.json
+}
+EOF
 
-cfssl gencert --initca=true /tmp/test-certs/trusted-ca-csr.json | cfssljson --bare /tmp/test-certs/trusted-ca
+cfssl gencert --initca=true $HOME/test-certs/trusted-ca-csr.json | cfssljson --bare $HOME/test-certs/trusted-ca
+
+# verify
+openssl x509 -in $HOME/test-certs/trusted-ca.pem -text -noout
+`;
+    }
+
+    getCFSSLCommandRootCAResult() {
+        return `
+$HOME/test-certs/trusted-ca.csr
+$HOME/test-certs/trusted-ca-csr.json
+$HOME/test-certs/trusted-ca-key.pem
+$HOME/test-certs/trusted-ca.pem
 `;
     }
 
     getCFSSLCommandConfig() {
-        return `echo '{
+        return `cat > $HOME/test-certs/gencert-config.json <<EOF
+{
   "signing": {
     "default": {
         "usages": [
@@ -325,8 +342,8 @@ cfssl gencert --initca=true /tmp/test-certs/trusted-ca-csr.json | cfssljson --ba
         "expiry": "${this.inputCFSSLKeyExpirationHour}h"
     }
   }
-}' > /tmp/test-certs/gencert-config.json
-`;
+}
+EOF`;
     }
 
     getCFSSLCommandKeys(flag: etcdFlag) {
@@ -336,7 +353,8 @@ cfssl gencert --initca=true /tmp/test-certs/trusted-ca-csr.json | cfssljson --ba
     "${flag.ipAddress}"`;
         }
 
-        return `echo '{
+        return `cat > $HOME/test-certs/request-ca-csr-${flag.name}.json <<EOF
+{
   "key": {
     "algo": "${this.inputCFSSLKeyAlgorithm}",
     "size": ${this.inputCFSSLKeySize}
@@ -354,13 +372,26 @@ cfssl gencert --initca=true /tmp/test-certs/trusted-ca-csr.json | cfssljson --ba
   "hosts": [
 ${hostTxt}
   ]
-}' > /tmp/test-certs/request-ca-csr-${flag.name}.json
+}
+EOF
 
 cfssl gencert` + ' \\' + `
-    ` + '--ca /tmp/test-certs/trusted-ca.pem' + ' \\' + `
-    ` + '--ca-key /tmp/test-certs/trusted-ca-key.pem' + ' \\' + `
-    ` + '--config /tmp/test-certs/gencert-config.json' + ' \\' + `
-    ` + `/tmp/test-certs/request-ca-csr-${flag.name}.json | cfssljson --bare /tmp/test-certs/${flag.name}`;
+    ` + '--ca $HOME/test-certs/trusted-ca.pem' + ' \\' + `
+    ` + '--ca-key $HOME/test-certs/trusted-ca-key.pem' + ' \\' + `
+    ` + '--config $HOME/test-certs/gencert-config.json' + ' \\' + `
+    ` + `$HOME/test-certs/request-ca-csr-${flag.name}.json | cfssljson --bare $HOME/test-certs/${flag.name}`;
+    }
+
+    getCFSSLCommandKeysCopyGCP() {
+        return `# after transferring files to remote machines
+
+# sudo rm -rf /etc/etcd
+sudo mkdir -p /etc/etcd
+sudo chown -R root:$(whoami) /etc/etcd
+sudo chmod -R a+rw /etc/etcd
+
+sudo cp $HOME/test-certs/* /etc/etcd/
+`;
     }
     ///////////////////////////////////////////////////
 
@@ -381,7 +412,6 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
 ` + 'curl -L ${DOWNLOAD_URL}/${ETCD_VER}/etcd-${ETCD_VER}-linux-amd64.tar.gz -o /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz' + `
 ` + 'tar xzvf /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz -C /tmp/test-etcd --strip-components=1' + `
 
-sudo mkdir -p /var/lib/etcd
 sudo cp /tmp/test-etcd/etcd* /usr/bin/
 
 etcd --version
@@ -394,7 +424,6 @@ etcdctl --version`;
 ` + 'curl -L ${DOWNLOAD_URL}/${ETCD_VER}/etcd-${ETCD_VER}-darwin-amd64.zip -o /tmp/etcd-${ETCD_VER}-darwin-amd64.zip' + `
 ` + 'unzip /tmp/etcd-${ETCD_VER}-darwin-amd64.zip -d /tmp && mv /tmp/etcd-${ETCD_VER}-darwin-amd64 /tmp/test-etcd' + `
 
-sudo mkdir -p /var/lib/etcd
 sudo cp /tmp/test-etcd/etcd* /usr/bin/
 
 etcd --version
@@ -506,6 +535,46 @@ etcdctl --version`;
         }
         cmd += 'put foo bar';
         return cmd;
+    }
+
+
+    getEtcdCommandVMCreateDir() {
+        return `# sudo rm -rf /var/lib/etcd
+sudo mkdir -p /var/lib/etcd
+sudo chown -R root:$(whoami) /var/lib/etcd
+sudo chmod -R a+rw /var/lib/etcd
+`;
+    }
+
+    getEtcdCommandVMSystemdServiceFile(flag: etcdFlag) {
+        return `cat > /tmp/etcd-${flag.name}.service <<EOF
+[Unit]
+Description=etcd
+Documentation=https://github.com/coreos
+
+[Service]
+ExecStart=/usr/bin/` + this.getEtcdCommandVMBash(flag) + `
+Restart=always
+RestartSec=5
+LimitNOFILE=40000
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo mv /tmp/etcd-${flag.name}.service /etc/systemd/system/etcd.service
+`;
+    }
+
+    getEtcdCommandVMSystemdServiceFileResult() {
+        return `sudo systemctl daemon-reload
+sudo systemctl enable etcd
+sudo systemctl start etcd
+
+sudo systemctl status etcd --no-pager
+sudo journalctl -f -u etcd
+sudo journalctl -u etcd -l --no-pager|less
+`;
     }
     ///////////////////////////////////////////////////
 
