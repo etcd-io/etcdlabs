@@ -6,7 +6,7 @@ sudo apt-get install -y nginx
 sudo service nginx stop
 sudo cp ./nginx.conf /etc/nginx/sites-available/default
 sudo service nginx restart
-sudo systemctl status nginx.service
+sudo systemctl status nginx --no-pager
 
 echo "building backend ectcdlabs"
 go build -v
@@ -14,16 +14,15 @@ go build -v
 echo "running backend etcdlabs"
 nohup ./etcdlabs >> $HOME/etcdlabs.log 2>&1 &
 
-sleep 3s
+sleep 5s
 echo "starting frontend"
 nohup npm start >> $HOME/etcdlabs-npm.log 2>&1 &
 
-sleep 2s
-cat $HOME/etcdlabs-npm.log
+sleep 5s
 cat $HOME/etcdlabs.log
+cat $HOME/etcdlabs-npm.log
 
 <<COMMENT
-tail -f /tmp/etcdlabs-npm.log
 tail -f /tmp/etcdlabs.log
+tail -f /tmp/etcdlabs-npm.log
 COMMENT
-
