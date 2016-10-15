@@ -407,7 +407,6 @@
 
 					<br>
 					<h5>Install Kubernetes</h5>
-
 					<br>
 					<md-input type="text" [(ngModel)]="inputKubernetesVersion" placeholder="version"></md-input>
 					<md-input type="text" [(ngModel)]="inputKubernetesGOOS" placeholder="GOOS"></md-input>
@@ -424,13 +423,41 @@
 									<div class="zoom"><span><strong></strong></span></div>
 								</div><span class="title-bar-text">terminal</span></div>
 							<div class="content">
-								<pre class="osx-terminal-contents">{{getKubernetesCommandInitial()}}</pre>
+								<pre class="osx-terminal-contents">{{getKubernetesCommandInstall()}}</pre>
 							</div>
 						</div>
 					</div>
+					<p>
+						<span class="code-light-snippet">kube-apiserver</span>, <span class="code-light-snippet">kube-controller-manager</span>,
+						<span class="code-light-snippet">kube-scheduler</span> are to be run on the same machines.
+					</p>
+					<p>
+						And running multiple copies is recommended for higher availability.
+					</p>
+					<p>
+						When multiple copies are run, each component will elect a leader via <span class="code-light-snippet">kube-apiserver</span>						that talks to etcd cluster.
+					</p>
+					<p>
+						<span class="code-light-snippet">kubectl</span> is the client that talks to <span class="code-light-snippet">kube-apiserver</span>						server.
+					</p>
 
-					<br><br>
-					<p>Sorry, this page is still working in progress.</p>
+					<br>
+					<h5>kube-apiserver</h5>
+
+
+					<br>
+					<h5>kube-controller-manager</h5>
+
+
+					<br>
+					<h5>kube-scheduler</h5>
+
+
+					<br>
+					<h5>kubectl</h5>
+
+					<br>
+
 				</template>
             </md-tab>
 

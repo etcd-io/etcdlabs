@@ -641,7 +641,7 @@ sudo systemctl status etcd --no-pager
 
 
     ///////////////////////////////////////////////////
-    getKubernetesCommandInitial() {
+    getKubernetesCommandInstall() {
         return `K8S_VER=${this.inputKubernetesVersion}
 
 GOOS=${this.inputKubernetesGOOS}
@@ -649,7 +649,7 @@ GOARCH=${this.inputKubernetesGOARCH}
 
 DOWNLOAD_URL=https://storage.googleapis.com/kubernetes-release/release
 
-for K8S_BIN in kube-apiserver kube-controller-manager kube-scheduler kubectl; do
+for K8S_BIN in kube-apiserver kube-controller-manager kube-scheduler kube-proxy kubelet kubectl; do
     echo "Downloading" ` + '${K8S_BIN}' + `
     ` + 'rm -f /tmp/${K8S_BIN}' + `
     ` + 'curl -L ${DOWNLOAD_URL}/${K8S_VER}/bin/${GOOS}/${GOARCH}/${K8S_BIN} -o /tmp/${K8S_BIN}' + `
@@ -659,6 +659,8 @@ done
 ` + this.inputKubernetesExecDir + `/kube-apiserver --version
 ` + this.inputKubernetesExecDir + `/kube-controller-manager --version
 ` + this.inputKubernetesExecDir + `/kube-scheduler --version
+` + this.inputKubernetesExecDir + `/kube-proxy --version
+` + this.inputKubernetesExecDir + `/kubelet --version
 ` + this.inputKubernetesExecDir + `/kubectl version
 `;
     }
