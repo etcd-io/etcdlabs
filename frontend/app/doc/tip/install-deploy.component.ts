@@ -656,11 +656,14 @@ for K8S_BIN in kube-apiserver kube-controller-manager kube-scheduler kube-proxy 
     ` + 'sudo chmod +x /tmp/${K8S_BIN} && sudo mv /tmp/${K8S_BIN} ' + this.inputKubernetesExecDir + `
 done
 
+
 ` + this.inputKubernetesExecDir + `/kube-apiserver --version
 ` + this.inputKubernetesExecDir + `/kube-controller-manager --version
 ` + this.inputKubernetesExecDir + `/kube-scheduler --version
+
 ` + this.inputKubernetesExecDir + `/kube-proxy --version
 ` + this.inputKubernetesExecDir + `/kubelet --version
+
 ` + this.inputKubernetesExecDir + `/kubectl version
 `;
     }
