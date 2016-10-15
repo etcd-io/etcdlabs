@@ -150,6 +150,7 @@
 					<h5>Install cfssl</h5>
 					<br>
 					<md-input type="text" [(ngModel)]="inputCFSSLVersion" placeholder="cfssl version"></md-input>
+					<md-input type="text" [(ngModel)]="inputCFSSLExecDir" placeholder="exec dir"></md-input>
 					<br>
 					<div class="osx-window">
 						<div class="window">
@@ -212,8 +213,24 @@
 							<pre class="code-dark">{{getCFSSLCommandKeys(flag)}}</pre>
 						</div>
 					</div>
+					<div class="osx-window">
+						<div class="window-narrow">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{ggetCFSSLCommandResults()}}</pre>
+							</div>
+						</div>
+					</div>
 
-					<div *ngIf="flags[0].ipAddress != 'localhost'" class="osx-window">
+					<br>
+					<md-input type="text" [(ngModel)]="inputCertsDir" placeholder="certs dir"></md-input>
+					<br>
+					<div class="osx-window">
 						<div class="window-narrow">
 							<div class="titlebar">
 								<div class="buttons">
@@ -292,7 +309,21 @@
 							<pre class="code-dark">{{getEtcdCommandVMBash(flag)}}</pre>
 						</div>
 					</div>
-					<pre class="code-dark">{{getEtcdctlCommandVMBash(flags[0])}}</pre>
+
+					Check status:
+					<div class="osx-window">
+						<div class="window-narrow">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{getEtcdctlCommandVMBash(flags[0])}}</pre>
+							</div>
+						</div>
+					</div>
 				</template>
             </md-tab>
 
@@ -316,6 +347,7 @@
 							<pre class="code-dark">{{getEtcdCommandVMSystemdServiceFile(flag)}}</pre>
 						</div>
 					</div>
+
 					Check status:
 					<div class="osx-window">
 						<div class="window-narrow">
@@ -327,6 +359,19 @@
 								</div><span class="title-bar-text">terminal</span></div>
 							<div class="content">
 								<pre class="osx-terminal-contents">{{getEtcdCommandVMSystemdServiceFileResult()}}</pre>
+							</div>
+						</div>
+					</div>
+					<div class="osx-window">
+						<div class="window-narrow">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{getEtcdctlCommandVMBash(flags[0])}}</pre>
 							</div>
 						</div>
 					</div>
@@ -350,10 +395,13 @@
 						<a href="http://kubernetes.io/" target="_blank" class="normal-link">Kubernetes</a> manages such complex container environments.
 					</p>
 					<p>
-						Kubernetes stores all states in etcd, which is required to run independently.
+						And here's how to run etcd with Kubernetes.
 					</p>
 					<p>
-						And here's how to run etcd with Kubernetes.
+						Kubernetes stores all states in etcd, which is recommended to run independently.
+					</p>
+					<p>
+						This assumes that etcd cluster for Kubernetes is already running.
 					</p>
 
 					<br>
