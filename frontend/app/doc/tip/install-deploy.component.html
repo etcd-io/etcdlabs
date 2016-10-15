@@ -36,8 +36,9 @@
             <md-checkbox [(ngModel)]="inputDebug">Debug mode</md-checkbox>
             <p></p>
             <md-input type="text" [(ngModel)]="inputEtcdVersion" placeholder="etcd version"></md-input>
-            <md-input type="number" [(ngModel)]="inputClusterSize" placeholder="Cluster size (up to 7)"></md-input>
             <md-input type="text" [(ngModel)]="inputEtcdExecDir" placeholder="exec dir"></md-input>
+            <md-input type="number" [(ngModel)]="inputAutoCompact" placeholder="auto compaction (hour)"></md-input>
+            <md-input type="number" [(ngModel)]="inputClusterSize" placeholder="Cluster size (up to 7)"></md-input>
             <span *ngIf="inputClusterSize > 7" class="error-message">This tool only supports up to 7 nodes</span>
             <span *ngIf="inputClusterSize < 1" class="error-message">Minimum cluster size is 1</span>
             <span *ngIf="inputClusterSize % 2 == 0" class="error-message">Cluster size should an odd number</span>
@@ -150,6 +151,7 @@
 					<h5>Install cfssl</h5>
 					<br>
 					<md-input type="text" [(ngModel)]="inputCFSSLVersion" placeholder="cfssl version"></md-input>
+					<md-input type="text" [(ngModel)]="inputCFSSLExecDir" placeholder="exec dir"></md-input>
 					<br>
 					<div class="osx-window">
 						<div class="window">
@@ -212,8 +214,24 @@
 							<pre class="code-dark">{{getCFSSLCommandKeys(flag)}}</pre>
 						</div>
 					</div>
+					<div class="osx-window">
+						<div class="window-narrow">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{ggetCFSSLCommandResults()}}</pre>
+							</div>
+						</div>
+					</div>
 
-					<div *ngIf="flags[0].ipAddress != 'localhost'" class="osx-window">
+					<br>
+					<md-input type="text" [(ngModel)]="inputCertsDir" placeholder="certs dir"></md-input>
+					<br>
+					<div class="osx-window">
 						<div class="window-narrow">
 							<div class="titlebar">
 								<div class="buttons">
@@ -292,7 +310,21 @@
 							<pre class="code-dark">{{getEtcdCommandVMBash(flag)}}</pre>
 						</div>
 					</div>
-					<pre class="code-dark">{{getEtcdctlCommandVMBash(flags[0])}}</pre>
+
+					Check status:
+					<div class="osx-window">
+						<div class="window-narrow">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{getEtcdctlCommandVMBash(flags[0])}}</pre>
+							</div>
+						</div>
+					</div>
 				</template>
             </md-tab>
 
@@ -316,6 +348,7 @@
 							<pre class="code-dark">{{getEtcdCommandVMSystemdServiceFile(flag)}}</pre>
 						</div>
 					</div>
+
 					Check status:
 					<div class="osx-window">
 						<div class="window-narrow">
@@ -327,6 +360,19 @@
 								</div><span class="title-bar-text">terminal</span></div>
 							<div class="content">
 								<pre class="osx-terminal-contents">{{getEtcdCommandVMSystemdServiceFileResult()}}</pre>
+							</div>
+						</div>
+					</div>
+					<div class="osx-window">
+						<div class="window-narrow">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{getEtcdctlCommandVMBash(flags[0])}}</pre>
 							</div>
 						</div>
 					</div>
@@ -350,15 +396,17 @@
 						<a href="http://kubernetes.io/" target="_blank" class="normal-link">Kubernetes</a> manages such complex container environments.
 					</p>
 					<p>
-						Kubernetes stores all states in etcd, which is required to run independently.
+						And here's how to run etcd with Kubernetes.
 					</p>
 					<p>
-						And here's how to run etcd with Kubernetes.
+						Kubernetes stores all states in etcd, which is recommended to run independently.
+					</p>
+					<p>
+						This assumes that etcd cluster for Kubernetes is already running.
 					</p>
 
 					<br>
 					<h5>Install Kubernetes</h5>
-
 					<br>
 					<md-input type="text" [(ngModel)]="inputKubernetesVersion" placeholder="version"></md-input>
 					<md-input type="text" [(ngModel)]="inputKubernetesGOOS" placeholder="GOOS"></md-input>
@@ -375,13 +423,62 @@
 									<div class="zoom"><span><strong></strong></span></div>
 								</div><span class="title-bar-text">terminal</span></div>
 							<div class="content">
-								<pre class="osx-terminal-contents">{{getKubernetesCommandInitial()}}</pre>
+								<pre class="osx-terminal-contents">{{getKubernetesCommandInstall()}}</pre>
 							</div>
 						</div>
 					</div>
+					<p>
+						<span class="code-light-snippet">kube-apiserver</span>, <span class="code-light-snippet">kube-controller-manager</span>,
+						<span class="code-light-snippet">kube-scheduler</span> are to be run on the same machines.
+					</p>
+					<p>
+						And running multiple copies is recommended for higher availability.
+					</p>
+					<p>
+						When multiple copies are run, each component will elect a leader via <span class="code-light-snippet">kube-apiserver</span>						that talks to etcd cluster.
+					</p>
 
-					<br><br>
-					<p>Sorry, this page is still working in progress.</p>
+					<br>
+					<h5>kube-apiserver</h5>
+					<p>
+						<span class="code-light-snippet">kube-apiserver</span> stores all cluster configuration states as a frontend to all other components.
+					</p>
+
+					<br>
+					<h5>kube-controller-manager</h5>
+					<p>
+						<span class="code-light-snippet">kube-controller-manager</span> is a daemon that controls the current states via <span class="code-light-snippet">kube-apiserver</span>.
+					</p>
+
+					<br>
+					<h5>kube-scheduler</h5>
+					<p>
+						<span class="code-light-snippet">kube-scheduler</span> takes resources and policies, and helps find the best available machines.
+					</p>
+
+					<br>
+					<h5>kube-proxy</h5>
+					<p>
+						<span class="code-light-snippet">kube-proxy</span> is networ proxy that runs on each node.
+					</p>
+
+					<br>
+					<h5>kubelet</h5>
+					<p>
+						<span class="code-light-snippet">kubelet</span> is the agent that runs on each node.
+					</p>
+
+					<br>
+					<h5>kubectl</h5>
+					<p>
+						<span class="code-light-snippet">kubectl</span> is the client that talks to <span class="code-light-snippet">kube-apiserver</span>.
+					</p>
+
+					<br>
+					<h5>Easier way?</h5>
+					<p>
+						Any easier way to run Kubernetes? Please visit <a href="http://kubernetes.io/docs" target="_blank" class="normal-link">Kubernetes Guides</a>. Run etcd? Please visit <a href="https://github.com/coreos/kube-etcd-controller" target="_blank" class="normal-link">kube-etcd-controller</a>.
+					</p>
 				</template>
             </md-tab>
 

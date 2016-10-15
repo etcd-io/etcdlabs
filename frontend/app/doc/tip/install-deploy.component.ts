@@ -76,6 +76,13 @@ export class InstallDeployTipComponent extends parentComponent {
     ////////////////////////////////////
 
     ////////////////////////////////////
+    inputCertsDir: string;
+    inputCFSSLExecDir: string;
+    inputEtcdExecDir: string;
+    inputKubernetesExecDir: string;
+    ////////////////////////////////////
+
+    ////////////////////////////////////
     // TLS setting properties
     inputCFSSLVersion: string;
     inputCFSSLOrganization: string;
@@ -96,12 +103,12 @@ export class InstallDeployTipComponent extends parentComponent {
     inputSecure: boolean;
     inputEnableProfile: boolean;
     inputDebug: boolean;
+    inputAutoCompact: number;
 
     etcdVersionLatestRelease: string;
     inputEtcdVersion: string;
 
     inputClusterSize: number;
-    inputEtcdExecDir: string;
 
     flags: etcdFlag[];
     ////////////////////////////////////
@@ -111,7 +118,6 @@ export class InstallDeployTipComponent extends parentComponent {
     inputKubernetesVersion: string;
     inputKubernetesGOOS: string;
     inputKubernetesGOARCH: string;
-    inputKubernetesExecDir: string;
     ////////////////////////////////////
 
     constructor() {
@@ -121,6 +127,13 @@ export class InstallDeployTipComponent extends parentComponent {
         this.inputGoVersion = super.getVersion().goVersion;
         this.inputGitUser = 'coreos';
         this.inputGitBranch = 'master';
+        ///////////////////////////////////////////////////
+
+        ///////////////////////////////////////////////////
+        this.inputCertsDir = '/etc/etcd';
+        this.inputCFSSLExecDir = '/usr/local/bin';
+        this.inputEtcdExecDir = '/usr/local/bin';
+        this.inputKubernetesExecDir = '/usr/local/bin';
         ///////////////////////////////////////////////////
 
         ///////////////////////////////////////////////////
@@ -142,92 +155,91 @@ export class InstallDeployTipComponent extends parentComponent {
         this.inputSecure = true;
         this.inputEnableProfile = false;
         this.inputDebug = false;
+        this.inputAutoCompact = 1;
 
         this.etcdVersionLatestRelease = super.getVersion().etcdVersionLatestRelease;
         this.inputEtcdVersion = this.etcdVersionLatestRelease;
 
         this.inputClusterSize = 3;
-        this.inputEtcdExecDir = '/usr/bin';
 
         this.flags = [
             new etcdFlag(
-                'test-1',
-                '/var/lib/etcd/test-1.data',
+                'my-etcd-1',
+                '/var/lib/etcd/my-etcd-1.data',
                 this.inputSecure,
                 'localhost',
                 2379,
                 2380,
-                'test-token',
+                'my-etcd-token',
                 'new'
             ),
             new etcdFlag(
-                'test-2',
-                '/var/lib/etcd/test-2.data',
+                'my-etcd-2',
+                '/var/lib/etcd/my-etcd-2.data',
                 this.inputSecure,
                 'localhost',
                 22379,
                 22380,
-                'test-token',
+                'my-etcd-token',
                 'new'
             ),
             new etcdFlag(
-                'test-3',
-                '/var/lib/etcd/test-3.data',
+                'my-etcd-3',
+                '/var/lib/etcd/my-etcd-3.data',
                 this.inputSecure,
                 'localhost',
                 32379,
                 32380,
-                'test-token',
+                'my-etcd-token',
                 'new'
             ),
             new etcdFlag(
-                'test-4',
-                '/var/lib/etcd/test-4.data',
+                'my-etcd-4',
+                '/var/lib/etcd/my-etcd-4.data',
                 this.inputSecure,
                 'localhost',
                 4379,
                 4380,
-                'test-token',
+                'my-etcd-token',
                 'new'
             ),
             new etcdFlag(
-                'test-5',
-                '/var/lib/etcd/test-5.data',
+                'my-etcd-5',
+                '/var/lib/etcd/my-etcd-5.data',
                 this.inputSecure,
                 'localhost',
                 5379,
                 5380,
-                'test-token',
+                'my-etcd-token',
                 'new'
             ),
             new etcdFlag(
-                'test-6',
-                '/var/lib/etcd/test-6.data',
+                'my-etcd-6',
+                '/var/lib/etcd/my-etcd-6.data',
                 this.inputSecure,
                 'localhost',
                 6379,
                 6380,
-                'test-token',
+                'my-etcd-token',
                 'new'
             ),
             new etcdFlag(
-                'test-7',
-                '/var/lib/etcd/test-7.data',
+                'my-etcd-7',
+                '/var/lib/etcd/my-etcd-7.data',
                 this.inputSecure,
                 'localhost',
                 7379,
                 7380,
-                'test-token',
+                'my-etcd-token',
                 'new'
             ),
         ];
         ///////////////////////////////////////////////////
 
         ///////////////////////////////////////////////////
-        this.inputKubernetesVersion = 'v1.4.0';
+        this.inputKubernetesVersion = 'v1.5.0-alpha.1';
         this.inputKubernetesGOOS = 'linux';
         this.inputKubernetesGOARCH = 'amd64';
-        this.inputKubernetesExecDir = '/usr/local/bin';
         ///////////////////////////////////////////////////
     }
 
@@ -270,8 +282,10 @@ BRANCH_NAME=${this.inputGitBranch}
 
 ` + 'cd ${GOPATH}/src/${GIT_PATH} && ./build' + `
 
-` + '${GOPATH}/src/${GIT_PATH}/bin/etcd --version' + `
-` + '${GOPATH}/src/${GIT_PATH}/bin/etcdctl --version';
+sudo cp ` + '${GOPATH}/src/${GIT_PATH}/bin/etcd* ' + this.inputEtcdExecDir + `
+
+` + this.inputEtcdExecDir + `/etcd --version
+` + this.inputEtcdExecDir + `/etcdctl --version`;
     }
     ///////////////////////////////////////////////////
 
@@ -282,16 +296,16 @@ BRANCH_NAME=${this.inputGitBranch}
 
 curl -L https://pkg.cfssl.org/${this.inputCFSSLVersion}/cfssl_linux-amd64 -o /tmp/cfssl
 chmod +x /tmp/cfssl
-sudo mv /tmp/cfssl /usr/local/bin/cfssl
+sudo mv /tmp/cfssl ` + this.inputCFSSLExecDir + `/cfssl
 
 curl -L https://pkg.cfssl.org/${this.inputCFSSLVersion}/cfssljson_linux-amd64 -o /tmp/cfssljson
 chmod +x /tmp/cfssljson
-sudo mv /tmp/cfssljson /usr/local/bin/cfssljson
+sudo mv /tmp/cfssljson ` + this.inputCFSSLExecDir + `/cfssljson
 
-cfssl version
-cfssljson -h
+` + this.inputCFSSLExecDir + `/cfssl version
+` + this.inputCFSSLExecDir + `/cfssljson -h
 
-rm -rf $HOME/test-certs && mkdir -p $HOME/test-certs/
+mkdir -p $HOME/test-certs/
 `;
     }
 
@@ -322,15 +336,6 @@ openssl x509 -in $HOME/test-certs/trusted-ca.pem -text -noout
 `;
     }
 
-    getCFSSLCommandRootCAResult() {
-        return `
-$HOME/test-certs/trusted-ca.csr
-$HOME/test-certs/trusted-ca-csr.json
-$HOME/test-certs/trusted-ca-key.pem
-$HOME/test-certs/trusted-ca.pem
-`;
-    }
-
     getCFSSLCommandConfig() {
         return `cat > $HOME/test-certs/gencert-config.json <<EOF
 {
@@ -356,7 +361,7 @@ EOF`;
     "${flag.ipAddress}"`;
         }
 
-        return `cat > $HOME/test-certs/request-ca-csr-${flag.name}.json <<EOF
+        return `cat > $HOME/test-certs/${flag.name}-ca-csr.json <<EOF
 {
   "key": {
     "algo": "${this.inputCFSSLKeyAlgorithm}",
@@ -382,19 +387,65 @@ cfssl gencert` + ' \\' + `
     ` + '--ca $HOME/test-certs/trusted-ca.pem' + ' \\' + `
     ` + '--ca-key $HOME/test-certs/trusted-ca-key.pem' + ' \\' + `
     ` + '--config $HOME/test-certs/gencert-config.json' + ' \\' + `
-    ` + `$HOME/test-certs/request-ca-csr-${flag.name}.json | cfssljson --bare $HOME/test-certs/${flag.name}`;
+    ` + `$HOME/test-certs/${flag.name}-ca-csr.json | cfssljson --bare $HOME/test-certs/${flag.name}`;
+    }
+
+
+    getCFSSLCommandRootCAResult() {
+        return `# CSR configuration
+$HOME/test-certs/trusted-ca-csr.json
+
+# CSR
+$HOME/test-certs/trusted-ca.csr
+
+# private key
+$HOME/test-certs/trusted-ca-key.pem
+
+# public key
+$HOME/test-certs/trusted-ca.pem`;
+    }
+
+    ggetCFSSLCommandResults() {
+        let txt = `# CSR configuration
+$HOME/test-certs/trusted-ca-csr.json
+
+# CSR
+$HOME/test-certs/trusted-ca.csr
+
+# private key
+$HOME/test-certs/trusted-ca-key.pem
+
+# public key
+$HOME/test-certs/trusted-ca.pem
+
+`;
+        for (let _i = 0; _i < this.flags.length; _i++) {
+            txt += `
+`;
+            txt += '$HOME/test-certs/' + this.flags[_i].name + '-ca-csr.json' + `
+`;
+            txt += '$HOME/test-certs/' + this.flags[_i].name + '.csr' + `
+`;
+            txt += '$HOME/test-certs/' + this.flags[_i].name + '-key.pem' + `
+`;
+            txt += '$HOME/test-certs/' + this.flags[_i].name + '.pem' + `
+`;
+            if (_i + 1 === this.inputClusterSize) {
+                break;
+            }
+        }
+        return txt;
     }
 
     getCFSSLCommandKeysCopyGCP() {
         return `# after transferring files to remote machines
 
-# sudo rm -rf /etc/etcd
-sudo mkdir -p /etc/etcd
-sudo chown -R root:$(whoami) /etc/etcd
-sudo chmod -R a+rw /etc/etcd
+# sudo rm -rf ` + this.inputCertsDir + `
+sudo mkdir -p ` + this.inputCertsDir + `
+sudo chown -R root:$(whoami) ` + this.inputCertsDir + `
+sudo chmod -R a+rw ` + this.inputCertsDir + `
 
-sudo cp $HOME/test-certs/* /etc/etcd/
-`;
+sudo cp $HOME/test-certs/* ` + this.inputCertsDir;
     }
     ///////////////////////////////////////////////////
 
@@ -410,6 +461,10 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
     }
 
     getEtcdCommandVMInstallLinux() {
+        let divide = '/';
+        if (this.inputEtcdExecDir === '/') {
+            divide = '';
+        }
         return 'rm -f /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz && rm -rf /tmp/test-etcd && mkdir -p /tmp/test-etcd' + `
 
 ` + 'curl -L ${DOWNLOAD_URL}/${ETCD_VER}/etcd-${ETCD_VER}-linux-amd64.tar.gz -o /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz' + `
@@ -417,11 +472,15 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
 
 sudo cp /tmp/test-etcd/etcd* ` + this.inputEtcdExecDir + `
 
-etcd --version
-etcdctl --version`;
+` + this.inputEtcdExecDir + divide + `etcd --version
+` + this.inputEtcdExecDir + divide + `etcdctl --version`;
     }
 
     getEtcdCommandVMInstallOSX() {
+        let divide = '/';
+        if (this.inputEtcdExecDir === '/') {
+            divide = '';
+        }
         return 'rm -f /tmp/etcd-${ETCD_VER}-darwin-amd64.zip && rm -rf /tmp/test-etcd' + `
 
 ` + 'curl -L ${DOWNLOAD_URL}/${ETCD_VER}/etcd-${ETCD_VER}-darwin-amd64.zip -o /tmp/etcd-${ETCD_VER}-darwin-amd64.zip' + `
@@ -429,8 +488,8 @@ etcdctl --version`;
 
 sudo cp /tmp/test-etcd/etcd* ` + this.inputEtcdExecDir + `
 
-etcd --version
-etcdctl --version`;
+` + this.inputEtcdExecDir + divide + `etcd --version
+` + this.inputEtcdExecDir + divide + `etcdctl --version`;
     }
 
     getClientURL(flag: etcdFlag) {
@@ -495,8 +554,12 @@ etcdctl --version`;
     }
 
     getEtcdCommandVMBash(flag: etcdFlag) {
-        let exec = this.inputEtcdExecDir + `/` + 'etcd';
-        let cmd =  exec + ' ' + '--name' + ' ' + flag.name + ' ' + '--data-dir' + ' ' + flag.dataDir + ' \\' + `
+        let divide = '/';
+        if (this.inputEtcdExecDir === '/') {
+            divide = '';
+        }
+        let exec = this.inputEtcdExecDir + divide + 'etcd';
+        let cmd = exec + ' ' + '--name' + ' ' + flag.name + ' ' + '--data-dir' + ' ' + flag.dataDir + ' \\' + `
     ` + '--listen-client-urls' + ' ' + this.getClientURL(flag) + ' ' + '--advertise-client-urls' + ' ' + this.getClientURL(flag) + ' \\' + `
     ` + '--listen-peer-urls' + ' ' + this.getPeerURL(flag) + ' ' + '--initial-advertise-peer-urls' + ' ' + this.getPeerURL(flag) + ' \\' + `
     ` + '--initial-cluster' + ' ' + this.getInitialCluster() + ' \\' + `
@@ -524,11 +587,20 @@ etcdctl --version`;
     ` + '--debug';
         }
 
+        if (this.inputAutoCompact > 0) {
+            cmd += ' \\' + `
+    ` + '--auto-compaction-retention' + ' ' + String(this.inputAutoCompact);
+        }
+
         return cmd;
     }
 
     getEtcdctlCommandVMBash(flag: etcdFlag) {
-        let exec = this.inputEtcdExecDir + `/` + 'etcdctl';
+        let divide = '/';
+        if (this.inputEtcdExecDir === '/') {
+            divide = '';
+        }
+        let exec = this.inputEtcdExecDir + divide + 'etcdctl';
         let cmd = 'ETCDCTL_API=3 ' + exec + ' \\' + `
     ` + '--endpoints' + ' ' + this.getAllClientEndpoints() + ' \\' + `
     `;
@@ -538,7 +610,7 @@ etcdctl --version`;
     ` + '--cacert' + ' ' + flag.clientTrustedCAFile + ' \\' + `
     `;
         }
-        cmd += 'put foo bar';
+        cmd += 'endpoint health';
         return cmd;
     }
 
@@ -585,7 +657,11 @@ sudo systemctl status etcd --no-pager
 
 
     ///////////////////////////////////////////////////
-    getKubernetesCommandInitial() {
+    getKubernetesCommandInstall() {
+        let divide = '/';
+        if (this.inputKubernetesExecDir === '/') {
+            divide = '';
+        }
         return `K8S_VER=${this.inputKubernetesVersion}
 
 GOOS=${this.inputKubernetesGOOS}
@@ -593,17 +669,22 @@ GOARCH=${this.inputKubernetesGOARCH}
 
 DOWNLOAD_URL=https://storage.googleapis.com/kubernetes-release/release
 
-for K8S_BIN in kubectl kube-apiserver kube-controller-manager kube-scheduler; do
+for K8S_BIN in kube-apiserver kube-controller-manager kube-scheduler kube-proxy kubelet kubectl; do
     echo "Downloading" ` + '${K8S_BIN}' + `
     ` + 'rm -f /tmp/${K8S_BIN}' + `
     ` + 'curl -L ${DOWNLOAD_URL}/${K8S_VER}/bin/${GOOS}/${GOARCH}/${K8S_BIN} -o /tmp/${K8S_BIN}' + `
     ` + 'sudo chmod +x /tmp/${K8S_BIN} && sudo mv /tmp/${K8S_BIN} ' + this.inputKubernetesExecDir + `
 done
 
-kubectl version
-kube-apiserver --version
-kube-controller-manager --version
-kube-scheduler --version
+
+` + this.inputKubernetesExecDir + divide + `kube-apiserver --version
+` + this.inputKubernetesExecDir + divide + `kube-controller-manager --version
+` + this.inputKubernetesExecDir + divide + `kube-scheduler --version
+
+` + this.inputKubernetesExecDir + divide + `kube-proxy --version
+` + this.inputKubernetesExecDir + divide + `kubelet --version
+
+` + this.inputKubernetesExecDir + divide + `kubectl version
 `;
     }
     ///////////////////////////////////////////////////

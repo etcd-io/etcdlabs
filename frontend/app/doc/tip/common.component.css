@@ -195,9 +195,9 @@ https://codepen.io/JohJakob/pen/YPxgwo
     vertical-align: 50%;
 }
 
-.osx-window .window-narrow {
+.osx-window .window {
     background: #fff;
-    max-width: 35em;
+    max-width: 55em;
     margin-top: 20px;
     margin-bottom: 20px;
     border: 1px solid #acacac;
@@ -205,9 +205,9 @@ https://codepen.io/JohJakob/pen/YPxgwo
     box-shadow: 0px 0px 20px #acacac;
 }
 
-.osx-window .window {
+.osx-window .window-narrow {
     background: #fff;
-    max-width: 52em;
+    max-width: 35em;
     margin-top: 20px;
     margin-bottom: 20px;
     border: 1px solid #acacac;
