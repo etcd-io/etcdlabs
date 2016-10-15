@@ -461,6 +461,10 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
     }
 
     getEtcdCommandVMInstallLinux() {
+        let divide = '/';
+        if (this.inputEtcdExecDir === '/') {
+            divide = '';
+        }
         return 'rm -f /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz && rm -rf /tmp/test-etcd && mkdir -p /tmp/test-etcd' + `
 
 ` + 'curl -L ${DOWNLOAD_URL}/${ETCD_VER}/etcd-${ETCD_VER}-linux-amd64.tar.gz -o /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz' + `
@@ -468,11 +472,15 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
 
 sudo cp /tmp/test-etcd/etcd* ` + this.inputEtcdExecDir + `
 
-` + this.inputEtcdExecDir + `/etcd --version
-` + this.inputEtcdExecDir + `/etcdctl --version`;
+` + this.inputEtcdExecDir + divide + `etcd --version
+` + this.inputEtcdExecDir + divide + `etcdctl --version`;
     }
 
     getEtcdCommandVMInstallOSX() {
+        let divide = '/';
+        if (this.inputEtcdExecDir === '/') {
+            divide = '';
+        }
         return 'rm -f /tmp/etcd-${ETCD_VER}-darwin-amd64.zip && rm -rf /tmp/test-etcd' + `
 
 ` + 'curl -L ${DOWNLOAD_URL}/${ETCD_VER}/etcd-${ETCD_VER}-darwin-amd64.zip -o /tmp/etcd-${ETCD_VER}-darwin-amd64.zip' + `
@@ -480,8 +488,8 @@ sudo cp /tmp/test-etcd/etcd* ` + this.inputEtcdExecDir + `
 
 sudo cp /tmp/test-etcd/etcd* ` + this.inputEtcdExecDir + `
 
-` + this.inputEtcdExecDir + `/etcd --version
-` + this.inputEtcdExecDir + `/etcdctl --version`;
+` + this.inputEtcdExecDir + divide + `etcd --version
+` + this.inputEtcdExecDir + divide + `etcdctl --version`;
     }
 
     getClientURL(flag: etcdFlag) {
@@ -546,7 +554,11 @@ sudo cp /tmp/test-etcd/etcd* ` + this.inputEtcdExecDir + `
     }
 
     getEtcdCommandVMBash(flag: etcdFlag) {
-        let exec = this.inputEtcdExecDir + `/` + 'etcd';
+        let divide = '/';
+        if (this.inputEtcdExecDir === '/') {
+            divide = '';
+        }
+        let exec = this.inputEtcdExecDir + divide + 'etcd';
         let cmd = exec + ' ' + '--name' + ' ' + flag.name + ' ' + '--data-dir' + ' ' + flag.dataDir + ' \\' + `
     ` + '--listen-client-urls' + ' ' + this.getClientURL(flag) + ' ' + '--advertise-client-urls' + ' ' + this.getClientURL(flag) + ' \\' + `
     ` + '--listen-peer-urls' + ' ' + this.getPeerURL(flag) + ' ' + '--initial-advertise-peer-urls' + ' ' + this.getPeerURL(flag) + ' \\' + `
@@ -584,7 +596,11 @@ sudo cp /tmp/test-etcd/etcd* ` + this.inputEtcdExecDir + `
     }
 
     getEtcdctlCommandVMBash(flag: etcdFlag) {
-        let exec = this.inputEtcdExecDir + `/` + 'etcdctl';
+        let divide = '/';
+        if (this.inputEtcdExecDir === '/') {
+            divide = '';
+        }
+        let exec = this.inputEtcdExecDir + divide + 'etcdctl';
         let cmd = 'ETCDCTL_API=3 ' + exec + ' \\' + `
     ` + '--endpoints' + ' ' + this.getAllClientEndpoints() + ' \\' + `
     `;
@@ -642,6 +658,10 @@ sudo systemctl status etcd --no-pager
 
     ///////////////////////////////////////////////////
     getKubernetesCommandInstall() {
+        let divide = '/';
+        if (this.inputKubernetesExecDir === '/') {
+            divide = '';
+        }
         return `K8S_VER=${this.inputKubernetesVersion}
 
 GOOS=${this.inputKubernetesGOOS}
@@ -657,14 +677,14 @@ for K8S_BIN in kube-apiserver kube-controller-manager kube-scheduler kube-proxy 
 done
 
 
-` + this.inputKubernetesExecDir + `/kube-apiserver --version
-` + this.inputKubernetesExecDir + `/kube-controller-manager --version
-` + this.inputKubernetesExecDir + `/kube-scheduler --version
+` + this.inputKubernetesExecDir + divide + `kube-apiserver --version
+` + this.inputKubernetesExecDir + divide + `kube-controller-manager --version
+` + this.inputKubernetesExecDir + divide + `kube-scheduler --version
 
-` + this.inputKubernetesExecDir + `/kube-proxy --version
-` + this.inputKubernetesExecDir + `/kubelet --version
+` + this.inputKubernetesExecDir + divide + `kube-proxy --version
+` + this.inputKubernetesExecDir + divide + `kubelet --version
 
-` + this.inputKubernetesExecDir + `/kubectl version
+` + this.inputKubernetesExecDir + divide + `kubectl version
 `;
     }
     ///////////////////////////////////////////////////
