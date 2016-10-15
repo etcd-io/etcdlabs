@@ -103,6 +103,7 @@ export class InstallDeployTipComponent extends parentComponent {
     inputSecure: boolean;
     inputEnableProfile: boolean;
     inputDebug: boolean;
+    inputAutoCompact: number;
 
     etcdVersionLatestRelease: string;
     inputEtcdVersion: string;
@@ -154,6 +155,7 @@ export class InstallDeployTipComponent extends parentComponent {
         this.inputSecure = true;
         this.inputEnableProfile = false;
         this.inputDebug = false;
+        this.inputAutoCompact = 1;
 
         this.etcdVersionLatestRelease = super.getVersion().etcdVersionLatestRelease;
         this.inputEtcdVersion = this.etcdVersionLatestRelease;
@@ -571,6 +573,11 @@ sudo cp /tmp/test-etcd/etcd* ` + this.inputEtcdExecDir + `
         if (this.inputDebug) {
             cmd += ' \\' + `
     ` + '--debug';
+        }
+
+        if (this.inputAutoCompact > 0) {
+            cmd += ' \\' + `
+    ` + '--auto-compaction-retention' + ' ' + String(this.inputAutoCompact);
         }
 
         return cmd;

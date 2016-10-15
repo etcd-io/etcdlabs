@@ -36,8 +36,9 @@
             <md-checkbox [(ngModel)]="inputDebug">Debug mode</md-checkbox>
             <p></p>
             <md-input type="text" [(ngModel)]="inputEtcdVersion" placeholder="etcd version"></md-input>
-            <md-input type="number" [(ngModel)]="inputClusterSize" placeholder="Cluster size (up to 7)"></md-input>
             <md-input type="text" [(ngModel)]="inputEtcdExecDir" placeholder="exec dir"></md-input>
+            <md-input type="number" [(ngModel)]="inputAutoCompact" placeholder="auto compaction (hour)"></md-input>
+            <md-input type="number" [(ngModel)]="inputClusterSize" placeholder="Cluster size (up to 7)"></md-input>
             <span *ngIf="inputClusterSize > 7" class="error-message">This tool only supports up to 7 nodes</span>
             <span *ngIf="inputClusterSize < 1" class="error-message">Minimum cluster size is 1</span>
             <span *ngIf="inputClusterSize % 2 == 0" class="error-message">Cluster size should an odd number</span>
