@@ -20,10 +20,7 @@
     <div class="doc-group">
         <router-outlet></router-outlet>
 
-        <h4>
-            Install and Deploy etcd <span class="versions-link-normal">(latest {{etcdVersionLatestRelease}})</span>
-        </h4>
-
+        <h4>Install and Deploy etcd <span class="versions-link-normal">(latest {{etcdVersionLatestRelease}})</span></h4>
         <br>
         <p>
             This is an example workflow to install and deploy etcd (for/with Kubernetes).
@@ -35,8 +32,6 @@
             <md-checkbox [(ngModel)]="inputEnableProfile">Enable profiler</md-checkbox>
             <md-checkbox [(ngModel)]="inputDebug">Debug mode</md-checkbox>
             <p></p>
-            <md-input type="text" [(ngModel)]="inputEtcdVersion" placeholder="etcd version"></md-input>
-            <md-input type="text" [(ngModel)]="inputEtcdExecDir" placeholder="exec dir"></md-input>
             <md-input type="number" [(ngModel)]="inputAutoCompact" placeholder="auto compaction (hour)"></md-input>
             <md-input type="number" [(ngModel)]="inputClusterSize" placeholder="Cluster size (up to 7)"></md-input>
             <span *ngIf="inputClusterSize > 7" class="error-message">This tool only supports up to 7 nodes</span>
@@ -44,7 +39,7 @@
             <span *ngIf="inputClusterSize % 2 == 0" class="error-message">Cluster size should an odd number</span>
             <br>
 
-            <div *ngFor="let flag of flags; let i = index;">
+            <div *ngFor="let flag of etcdFlags; let i = index;">
                 <div *ngIf="inputClusterSize > i">
                     <br>
                     <md-card-subtitle class="sub-sub-title">Node {{i+1}}</md-card-subtitle>
@@ -77,57 +72,6 @@
         <br><br>
 
         <md-tab-group>
-
-            <md-tab>
-                <template md-tab-label>
-					Build from source
-				</template>
-                <template md-tab-content>
-					<br>
-					<p>
-						etcd is written in Go. To build from source, you need Go 1.7+. This assumes host OS is Linux.
-					</p>
-					<p>
-						<md-input type="text" [(ngModel)]="inputGoVersion" placeholder="Go version"></md-input>
-					</p>
-					<div class="osx-window">
-						<div class="window">
-							<div class="titlebar">
-								<div class="buttons">
-									<div class="closebtn"><span><strong></strong></span></div>
-									<div class="minimize"><span><strong></strong></span></div>
-									<div class="zoom"><span><strong></strong></span></div>
-								</div><span class="title-bar-text">terminal</span></div>
-							<div class="content">
-								<pre class="osx-terminal-contents">{{getGoCommand()}}</pre>
-							</div>
-						</div>
-					</div>
-					<br>
-					<p>
-						Now let's build etcd from source.
-					</p>
-					<p>
-						<md-input type="text" [(ngModel)]="inputGitUser" placeholder="Git User"></md-input>
-						<md-input type="text" [(ngModel)]="inputGitBranch" placeholder="Git Branch"></md-input>
-					</p>
-					<div class="osx-window">
-						<div class="window-narrow">
-							<div class="titlebar">
-								<div class="buttons">
-									<div class="closebtn"><span><strong></strong></span></div>
-									<div class="minimize"><span><strong></strong></span></div>
-									<div class="zoom"><span><strong></strong></span></div>
-								</div><span class="title-bar-text">terminal</span></div>
-							<div class="content">
-								<pre class="osx-terminal-contents">{{getEtcdCommandBuildFromSource()}}</pre>
-							</div>
-						</div>
-					</div>
-					<br>
-				</template>
-            </md-tab>
-
 
             <md-tab>
                 <template md-tab-label>
@@ -206,10 +150,10 @@
 
 					<br>
 					<h5>Generate local-issued certificates with private keys</h5>
-					<p *ngIf="flags[0].ipAddress == 'localhost'">
+					<p *ngIf="etcdFlags[0].ipAddress == 'localhost'">
 						Seems like cert is configured for localhost. Please make sure to specify remote hosts, if any.
 					</p>
-					<div *ngFor="let flag of flags; let i = index;">
+					<div *ngFor="let flag of etcdFlags; let i = index;">
 						<div *ngIf="inputClusterSize > i">
 							<pre class="code-dark">{{getCFSSLCommandKeys(flag)}}</pre>
 						</div>
@@ -231,6 +175,7 @@
 					<br>
 					<md-input type="text" [(ngModel)]="inputCertsDir" placeholder="certs dir"></md-input>
 					<br>
+
 					<div class="osx-window">
 						<div class="window-narrow">
 							<div class="titlebar">
@@ -250,6 +195,58 @@
 
             <md-tab>
                 <template md-tab-label>
+					Build from source
+				</template>
+                <template md-tab-content>
+					<br>
+					<p>
+						etcd is written in Go. To build from source, you need Go 1.7+. This assumes host OS is Linux.
+					</p>
+					<p>
+						<md-input type="text" [(ngModel)]="inputGoVersion" placeholder="Go version"></md-input>
+					</p>
+					<div class="osx-window">
+						<div class="window">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{getGoCommand()}}</pre>
+							</div>
+						</div>
+					</div>
+					<br>
+					<p>
+						Now let's build etcd from source.
+					</p>
+					<p>
+						<md-input type="text" [(ngModel)]="inputGitUser" placeholder="Git User"></md-input>
+						<md-input type="text" [(ngModel)]="inputGitBranch" placeholder="Git Branch"></md-input>
+						<md-input type="text" [(ngModel)]="inputEtcdExecDirSource" placeholder="exec dir"></md-input>
+					</p>
+					<div class="osx-window">
+						<div class="window-narrow">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{getEtcdCommandBuildFromSource()}}</pre>
+							</div>
+						</div>
+					</div>
+					<br>
+				</template>
+            </md-tab>
+
+
+            <md-tab>
+                <template md-tab-label>
 					Bare metal, VM
 				</template>
                 <template md-tab-content>
@@ -263,9 +260,14 @@
 					</p>
 
 					<br>
-					<h5>Install releases</h5>
+					<md-input type="text" [(ngModel)]="inputEtcdVersionVM" placeholder="etcd version"></md-input>
+					<md-input type="text" [(ngModel)]="inputEtcdExecDirVM" placeholder="exec dir"></md-input>
+					<br>
+
+					<br>
+					<h5>Install on Linux</h5>
 					<div class="osx-window">
-						<div class="window-narrow">
+						<div class="window-long">
 							<div class="titlebar">
 								<div class="buttons">
 									<div class="closebtn"><span><strong></strong></span></div>
@@ -273,22 +275,30 @@
 									<div class="zoom"><span><strong></strong></span></div>
 								</div><span class="title-bar-text">terminal</span></div>
 							<div class="content">
-								<pre class="osx-terminal-contents">{{getEtcdCommandVMInitial()}}</pre>
+								<pre class="osx-terminal-contents">{{getEtcdCommandVMInstallLinux()}}</pre>
 							</div>
 						</div>
 					</div>
 
 					<br>
-					<h5>Install on Linux</h5>
-					<pre class="code-dark">{{getEtcdCommandVMInstallLinux()}}</pre>
-
-					<br>
 					<h5>Install on Mac OS (Darwin)</h5>
-					<pre class="code-dark">{{getEtcdCommandVMInstallOSX()}}</pre>
+					<div class="osx-window">
+						<div class="window-long">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{getEtcdCommandVMInstallOSX()}}</pre>
+							</div>
+						</div>
+					</div>
 
 					<br>
 					<h5>Deploy etcd cluster</h5>
-					<p *ngIf="flags[0].ipAddress == 'localhost'">
+					<p *ngIf="etcdFlags[0].ipAddress == 'localhost'">
 						Seems like etcd is configured to run in localhost. Please make sure ports do not conflict!
 					</p>
 					<div class="osx-window">
@@ -305,15 +315,15 @@
 						</div>
 					</div>
 
-					<div *ngFor="let flag of flags; let i = index;">
+					<div *ngFor="let flag of etcdFlags; let i = index;">
 						<div *ngIf="inputClusterSize > i">
-							<pre class="code-dark">{{getEtcdCommandVMBash(flag)}}</pre>
+							<pre class="code-dark">{{getEtcdCommandVMBash(inputEtcdExecDirVM, flag)}}</pre>
 						</div>
 					</div>
 
 					Check status:
 					<div class="osx-window">
-						<div class="window-narrow">
+						<div class="window-mid">
 							<div class="titlebar">
 								<div class="buttons">
 									<div class="closebtn"><span><strong></strong></span></div>
@@ -321,7 +331,7 @@
 									<div class="zoom"><span><strong></strong></span></div>
 								</div><span class="title-bar-text">terminal</span></div>
 							<div class="content">
-								<pre class="osx-terminal-contents">{{getEtcdctlCommandVMBash(flags[0])}}</pre>
+								<pre class="osx-terminal-contents">{{getEtcdctlCommandVMBash(inputEtcdExecDirVM, etcdFlags[0])}}</pre>
 							</div>
 						</div>
 					</div>
@@ -342,16 +352,66 @@
 					</p>
 
 					<br>
+					<h5>Install on Linux</h5>
+					<br>
+					<md-input type="text" [(ngModel)]="inputEtcdVersionSystemd" placeholder="etcd version"></md-input>
+					<md-input type="text" [(ngModel)]="inputEtcdExecDirSystemd" placeholder="exec dir"></md-input>
+					<br>
+					<div class="osx-window">
+						<div class="window-long">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{getEtcdCommandSystemdInstallLinux()}}</pre>
+							</div>
+						</div>
+					</div>
+
+					<p *ngIf="etcdFlags[0].ipAddress == 'localhost'">
+						Seems like etcd is configured to run in localhost. Please make sure ports do not conflict!
+					</p>
+					<div class="osx-window">
+						<div class="window-narrow">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{getEtcdCommandVMCreateDir()}}</pre>
+							</div>
+						</div>
+					</div>
+
+					<br>
 					<h5>Set up systemd service</h5>
-					<div *ngFor="let flag of flags; let i = index;">
+					<div *ngFor="let flag of etcdFlags; let i = index;">
 						<div *ngIf="inputClusterSize > i">
-							<pre class="code-dark">{{getEtcdCommandVMSystemdServiceFile(flag)}}</pre>
+							<pre class="code-dark">{{getEtcdCommandSystemdServiceFile(inputEtcdExecDirSystemd, flag)}}</pre>
+							<div class="osx-window">
+								<div class="window-narrow">
+									<div class="titlebar">
+										<div class="buttons">
+											<div class="closebtn"><span><strong></strong></span></div>
+											<div class="minimize"><span><strong></strong></span></div>
+											<div class="zoom"><span><strong></strong></span></div>
+										</div><span class="title-bar-text">terminal</span></div>
+									<div class="content">
+										<pre class="osx-terminal-contents">{{getEtcdCommandSystemdServiceFileResult(flag)}}</pre>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 
 					Check status:
 					<div class="osx-window">
-						<div class="window-narrow">
+						<div class="window-mid">
 							<div class="titlebar">
 								<div class="buttons">
 									<div class="closebtn"><span><strong></strong></span></div>
@@ -359,20 +419,7 @@
 									<div class="zoom"><span><strong></strong></span></div>
 								</div><span class="title-bar-text">terminal</span></div>
 							<div class="content">
-								<pre class="osx-terminal-contents">{{getEtcdCommandVMSystemdServiceFileResult()}}</pre>
-							</div>
-						</div>
-					</div>
-					<div class="osx-window">
-						<div class="window-narrow">
-							<div class="titlebar">
-								<div class="buttons">
-									<div class="closebtn"><span><strong></strong></span></div>
-									<div class="minimize"><span><strong></strong></span></div>
-									<div class="zoom"><span><strong></strong></span></div>
-								</div><span class="title-bar-text">terminal</span></div>
-							<div class="content">
-								<pre class="osx-terminal-contents">{{getEtcdctlCommandVMBash(flags[0])}}</pre>
+								<pre class="osx-terminal-contents">{{getEtcdctlCommandVMBash(inputEtcdExecDirSystemd, etcdFlags[0])}}</pre>
 							</div>
 						</div>
 					</div>
@@ -402,7 +449,17 @@
 						Kubernetes stores all states in etcd, which is recommended to run independently.
 					</p>
 					<p>
-						This assumes that etcd cluster for Kubernetes is already running.
+						This assumes that independent etcd cluster for Kubernetes is already running.
+					</p>
+					<p>
+						This uses 3 machines for apiserver: <span class="code-light-snippet-red">apiserver1</span>, <span class="code-light-snippet-red">apiserver2</span>,
+						<span class="code-light-snippet-red">apiserver3</span>, each running <span class="code-light-snippet">kube-apiserver</span>,
+						<span class="code-light-snippet">kube-controller-manager</span>,
+						<span class="code-light-snippet">kube-scheduler</span> on its own.
+					</p>
+					<p>
+						And 3 more machines to run etcd containers: <span class="code-light-snippet-red">worker1</span>, <span class="code-light-snippet-red">worker2</span>,
+						<span class="code-light-snippet-red">worker3</span>.
 					</p>
 
 					<br>
@@ -441,20 +498,110 @@
 					<br>
 					<h5>kube-apiserver</h5>
 					<p>
-						<span class="code-light-snippet">kube-apiserver</span> stores all cluster configuration states as a frontend to all other components.
+						<span class="code-light-snippet">kube-apiserver</span> stores all cluster configuration states as frontend to all other
+						components.
 					</p>
+					<div *ngFor="let flag of kubernetesAPIServerFlags; let i = index;">
+						<div *ngIf="3 > i">
+							<br>
+							<md-card-subtitle class="sub-sub-title">kube-apiserver {{i+1}}</md-card-subtitle>
+							<md-input type="text" [(ngModel)]="flag.name" placeholder="name"></md-input>
+							<md-input type="text" [(ngModel)]="flag.advertiseAddress" placeholder="advertise address"></md-input>
+							<br>
+							<md-input type="text" [(ngModel)]="flag.serviceClusterIPRange" placeholder="service cluster IP range"></md-input>
+							<md-input type="text" [(ngModel)]="flag.serviceNodePortRange" placeholder="service node port range"></md-input>
+						</div>
+					</div>
+					<br>
+					<div *ngFor="let flag of kubernetesAPIServerFlags; let i = index;">
+						<div *ngIf="inputClusterSize > i">
+							<pre class="code-dark">{{getKubernetesAPIServerSystemdServiceFile(inputKubernetesExecDir, flag)}}</pre>
+							<div class="osx-window">
+								<div class="window-mid">
+									<div class="titlebar">
+										<div class="buttons">
+											<div class="closebtn"><span><strong></strong></span></div>
+											<div class="minimize"><span><strong></strong></span></div>
+											<div class="zoom"><span><strong></strong></span></div>
+										</div><span class="title-bar-text">terminal</span></div>
+									<div class="content">
+										<pre class="osx-terminal-contents">{{getKubernetesAPIServerSystemdServiceFileResult(flag)}}</pre>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
 
 					<br>
 					<h5>kube-controller-manager</h5>
 					<p>
-						<span class="code-light-snippet">kube-controller-manager</span> is a daemon that controls the current states via <span class="code-light-snippet">kube-apiserver</span>.
+						<span class="code-light-snippet">kube-controller-manager</span> is a daemon that controls the current states via
+						<span class="code-light-snippet">kube-apiserver</span>.
 					</p>
+					<div *ngFor="let flag of kubernetesControllerManagerFlags; let i = index;">
+						<div *ngIf="3 > i">
+							<br>
+							<md-card-subtitle class="sub-sub-title">kube-controller-manager {{i+1}}</md-card-subtitle>
+							<md-input type="text" [(ngModel)]="flag.name" placeholder="name"></md-input>
+							<md-input type="text" [(ngModel)]="flag.clusterCIDR" placeholder="cluster CIDR"></md-input>
+							<br>
+							<md-input type="text" [(ngModel)]="flag.apiserverMaster" placeholder="apiserver master"></md-input>
+							<md-input type="text" [(ngModel)]="flag.serviceClusterIPRange" placeholder="service cluster IP range"></md-input>
+						</div>
+					</div>
+					<br>
+					<div *ngFor="let flag of kubernetesControllerManagerFlags; let i = index;">
+						<div *ngIf="inputClusterSize > i">
+							<pre class="code-dark">{{getKubernetesControllerManagerSystemdServiceFile(inputKubernetesExecDir, flag)}}</pre>
+							<div class="osx-window">
+								<div class="window-mid">
+									<div class="titlebar">
+										<div class="buttons">
+											<div class="closebtn"><span><strong></strong></span></div>
+											<div class="minimize"><span><strong></strong></span></div>
+											<div class="zoom"><span><strong></strong></span></div>
+										</div><span class="title-bar-text">terminal</span></div>
+									<div class="content">
+										<pre class="osx-terminal-contents">{{getKubernetesControllerManagerSystemdServiceFileResult(flag)}}</pre>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
 
 					<br>
 					<h5>kube-scheduler</h5>
 					<p>
-						<span class="code-light-snippet">kube-scheduler</span> takes resources and policies, and helps find the best available machines.
+						<span class="code-light-snippet">kube-scheduler</span> takes resources and policies, and helps find the best available
+						machines.
 					</p>
+					<div *ngFor="let flag of kubernetesSchedulerFlags; let i = index;">
+						<div *ngIf="3 > i">
+							<br>
+							<md-card-subtitle class="sub-sub-title">kube-scheduler {{i+1}}</md-card-subtitle>
+							<md-input type="text" [(ngModel)]="flag.name" placeholder="name"></md-input>
+							<md-input type="text" [(ngModel)]="flag.apiserverMaster" placeholder="apiserver master"></md-input>
+						</div>
+					</div>
+					<br>
+					<div *ngFor="let flag of kubernetesSchedulerFlags; let i = index;">
+						<div *ngIf="inputClusterSize > i">
+							<pre class="code-dark">{{getKubernetesSchedulerSystemdServiceFile(inputKubernetesExecDir, flag)}}</pre>
+							<div class="osx-window">
+								<div class="window-mid">
+									<div class="titlebar">
+										<div class="buttons">
+											<div class="closebtn"><span><strong></strong></span></div>
+											<div class="minimize"><span><strong></strong></span></div>
+											<div class="zoom"><span><strong></strong></span></div>
+										</div><span class="title-bar-text">terminal</span></div>
+									<div class="content">
+										<pre class="osx-terminal-contents">{{getKubernetesSchedulerSystemdServiceFileResult(flag)}}</pre>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
 
 					<br>
 					<h5>kube-proxy</h5>
@@ -475,9 +622,15 @@
 					</p>
 
 					<br>
-					<h5>Easier way?</h5>
+					<h5>More</h5>
 					<p>
-						Any easier way to run Kubernetes? Please visit <a href="http://kubernetes.io/docs" target="_blank" class="normal-link">Kubernetes Guides</a>. Run etcd? Please visit <a href="https://github.com/coreos/kube-etcd-controller" target="_blank" class="normal-link">kube-etcd-controller</a>.
+						There are a lot of things missing here (security, network, automatic backup, etc.).
+					</p>
+					<p>
+						More guides on Kubernetes? Please visit <a href="http://kubernetes.io/docs" target="_blank" class="normal-link">Official Kubernetes Guides</a>.
+					</p>
+					<p>
+						Fully managed etcd cluster? Please visit <a href="https://github.com/coreos/kube-etcd-controller" target="_blank" class="normal-link">kube-etcd-controller</a>.
 					</p>
 				</template>
             </md-tab>
