@@ -46,7 +46,7 @@ export class parentComponent {
         this.getStartedItems = [
             new sidebarItem(
                 'Install, Deploy',
-                'set up etcd cluster: bare metal, virtual machine, Kubernetes',
+                'set up etcd cluster: bare metal, virtual machine, systemd, rkt',
                 `/doc/${this.version.etcdVersionURL}/install-deploy`,
                 'no-text-decoration'
             ),

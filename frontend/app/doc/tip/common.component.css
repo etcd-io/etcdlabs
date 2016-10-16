@@ -162,6 +162,13 @@ h2 .faq-title {
     font-size: 14px;
 }
 
+.code-light-snippet-red {
+    background: #f5f5f5;
+    color: #F44336;
+    font-family: monospace;
+    font-size: 14px;
+}
+
 .code-dark {
     white-space: pre-wrap;
     border-style: solid;
@@ -198,6 +205,26 @@ https://codepen.io/JohJakob/pen/YPxgwo
 .osx-window .window {
     background: #fff;
     max-width: 55em;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #acacac;
+    border-radius: 6px;
+    box-shadow: 0px 0px 20px #acacac;
+}
+
+.osx-window .window-long {
+    background: #fff;
+    max-width: 70em;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #acacac;
+    border-radius: 6px;
+    box-shadow: 0px 0px 20px #acacac;
+}
+
+.osx-window .window-mid {
+    background: #fff;
+    max-width: 45em;
     margin-top: 20px;
     margin-bottom: 20px;
     border: 1px solid #acacac;
