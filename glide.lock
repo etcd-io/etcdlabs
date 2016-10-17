@@ -1,5 +1,5 @@
-hash: a2ad76b08af175a3fb32ef720722d080ef09a79893ffddf62ca53f0843af5533
-updated: 2016-10-14T15:24:05.902434856-07:00
+hash: a9c119005dd7c1dd7e52f4852d2a8013720661e959d810819063eb5aa50f0be1
+updated: 2016-10-17T09:19:44.975140502-07:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -12,7 +12,7 @@ imports:
 - name: github.com/cockroachdb/cmux
   version: 112f0506e7743d64a6eb8fedbcff13d9979bbf92
 - name: github.com/coreos/etcd
-  version: 698a78964412eeb5516186cca718f196b1c7c1ba
+  version: cc96f91156ed35caaf57ed987b4e9f75d142813a
   subpackages:
   - alarm
   - auth
