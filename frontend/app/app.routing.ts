@@ -10,8 +10,7 @@ doc
 */
 import { DocTipComponent } from './doc/tip/doc.component';
 import { InstallDeployTipComponent } from './doc/tip/install-deploy.component';
-import { TutorialsTipComponent } from './doc/tip/tutorials.component';
-import { TutorialsAdvancedTipComponent } from './doc/tip/tutorials-advanced.component';
+import { QuickTutorialsTipComponent } from './doc/tip/quick-tutorials.component';
 import { FAQTipComponent } from './doc/tip/faq.component';
 import { PerformanceTipComponent } from './doc/tip/performance.component';
 import { ReliabilityTipComponent } from './doc/tip/reliability.component';
@@ -36,10 +35,12 @@ import { PlayComponent } from './play/play.component';
 import { NotFoundComponent } from './not-found.component';
 
 const appRoutes: Routes = [
+    // etcd main page
     { path: '', redirectTo: '/home', pathMatch: 'full' },
     { path: 'main', redirectTo: '/home', pathMatch: 'full' },
     { path: 'home', component: HomeComponent },
 
+    // etcd documentation
     { path: 'docs', redirectTo: '/doc', pathMatch: 'full' },
     { path: 'doc', redirectTo: '/doc/tip', pathMatch: 'full' },
     {
@@ -47,8 +48,7 @@ const appRoutes: Routes = [
         children: [
             { path: '', component: DocTipComponent },
             { path: 'install-deploy', component: InstallDeployTipComponent },
-            { path: 'tutorials', component: TutorialsTipComponent },
-            { path: 'tutorials-advanced', component: TutorialsAdvancedTipComponent },
+            { path: 'quick-tutorials', component: QuickTutorialsTipComponent },
             { path: 'faq', component: FAQTipComponent },
             { path: 'performance', component: PerformanceTipComponent },
             { path: 'reliability', component: ReliabilityTipComponent },
@@ -57,6 +57,7 @@ const appRoutes: Routes = [
         ],
     },
 
+    // etcd blog
     { path: 'blogs', redirectTo: '/blog', pathMatch: 'full' },
     { path: 'blog', component: AnnouncingEtcdV31Component }, // update whenever we have a new post
     {
@@ -76,7 +77,7 @@ const appRoutes: Routes = [
     { path: 'doc/v31', redirectTo: '/doc/tip', pathMatch: 'full' },
     { path: 'doc/v32', redirectTo: '/doc/tip', pathMatch: 'full' },
 
-    // TODO
+    // etcd playground
     { path: 'playground', redirectTo: '/play', pathMatch: 'full' },
     { path: 'play', component: PlayComponent },
 
@@ -91,8 +92,7 @@ export const routedComponents = [
 
     DocTipComponent,
     InstallDeployTipComponent,
-    TutorialsTipComponent,
-    TutorialsAdvancedTipComponent,
+    QuickTutorialsTipComponent,
     FAQTipComponent,
     PerformanceTipComponent,
     ReliabilityTipComponent,
