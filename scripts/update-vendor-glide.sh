@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
+if ! [[ "$0" =~ "scripts/update-vendor-glide.sh" ]]; then
+    echo "must be run from repository root"
+    exit 255
+fi
+
 # update depedency
 # 1. edit glide.yaml with version, git SHA
 # 2. run ./script-update-vendor-glide.sh
