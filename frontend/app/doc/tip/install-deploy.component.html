@@ -23,7 +23,7 @@
         <h4>Install and Deploy etcd <span class="versions-link-normal">(latest {{etcdVersionLatestRelease}})</span></h4>
         <br>
         <p>
-            This is an example workflow to install and deploy etcd (for/with Kubernetes).
+            This is an example workflow to install and deploy etcd.
         </p>
 
         <md-card>
@@ -234,7 +234,7 @@
 									<div class="zoom"><span><strong></strong></span></div>
 								</div><span class="title-bar-text">terminal</span></div>
 							<div class="content">
-								<pre class="osx-terminal-contents">{{getEtcdBuildFromSource()}}</pre>
+								<pre class="osx-terminal-contents">{{getEtcdBuildFromSource(inputEtcdExecDirSource)}}</pre>
 							</div>
 						</div>
 					</div>
@@ -540,6 +540,9 @@
 					</div>
 
 					Check status:
+					<br>
+					<br>
+					<md-input type="text" [(ngModel)]="inputEtcdRktExecDir" placeholder="etcd exec dir"></md-input>
 					<div class="osx-window">
 						<div class="window-mid">
 							<div class="titlebar">
@@ -549,7 +552,7 @@
 									<div class="zoom"><span><strong></strong></span></div>
 								</div><span class="title-bar-text">terminal</span></div>
 							<div class="content">
-								<pre class="osx-terminal-contents">{{getEtcdctlFullCommand(inputEtcdExecDirSystemd, etcdFlags[0])}}</pre>
+								<pre class="osx-terminal-contents">{{getEtcdctlFullCommand(inputEtcdRktExecDir, etcdFlags[0])}}</pre>
 							</div>
 						</div>
 					</div>

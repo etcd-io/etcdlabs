@@ -85,6 +85,7 @@ export class InstallDeployTipComponent extends parentComponent {
     inputEtcdExecDirVM: string;
     inputEtcdExecDirSystemd: string;
     inputRktExecDir: string;
+    inputEtcdRktExecDir: string;
 
     inputEtcdDataDirVM: string;
     inputEtcdDataDirSystemd: string;
@@ -153,6 +154,7 @@ export class InstallDeployTipComponent extends parentComponent {
         this.inputEtcdExecDirVM = '/';
         this.inputEtcdExecDirSystemd = '/';
         this.inputRktExecDir = '/';
+        this.inputEtcdRktExecDir = '/';
 
         this.inputEtcdDataDirVM = '/var/lib/etcd';
         this.inputEtcdDataDirSystemd = '/var/lib/etcd';
@@ -318,9 +320,9 @@ mkdir -p $GOPATH/bin/
 go version`;
     }
 
-    getEtcdBuildFromSource() {
+    getEtcdBuildFromSource(execDir: string) {
         let divide = '/';
-        if (this.inputEtcdExecDirSource === '/') {
+        if (execDir === '/') {
             divide = '';
         }
 
@@ -338,14 +340,14 @@ BRANCH_NAME=${this.inputGitBranch}
 
 `;
 
-        if (this.inputEtcdExecDirSource === '/') {
+        if (execDir === '/') {
             txt += `# sudo cp ` + '${GOPATH}/src/${GIT_PATH}/bin/etcd* /usr/local/bin' + `
 `;
         }
-        txt += `sudo cp ` + '${GOPATH}/src/${GIT_PATH}/bin/etcd* ' + this.inputEtcdExecDirSource + `
+        txt += `sudo cp ` + '${GOPATH}/src/${GIT_PATH}/bin/etcd* ' + execDir + `
 
-` + this.inputEtcdExecDirSource + divide + `etcd --version
-` + this.inputEtcdExecDirSource + divide + `etcdctl --version`;
+` + execDir + divide + `etcd --version
+` + execDir + divide + `etcdctl --version`;
 
         return txt;
     }
