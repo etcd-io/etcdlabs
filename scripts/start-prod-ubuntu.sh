@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -ex
 
+if ! [[ "$0" =~ "scripts/start-prod-ubuntu.sh" ]]; then
+    echo "must be run from repository root"
+    exit 255
+fi
+
 echo "restarting nginx"
 sudo apt-get install -y nginx
 sudo service nginx stop

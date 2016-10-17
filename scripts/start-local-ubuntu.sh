@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -ex
 
+if ! [[ "$0" =~ "scripts/start-local-ubuntu.sh" ]]; then
+    echo "must be run from repository root"
+    exit 255
+fi
+
 echo "building backend ectcdlabs"
 go build -v
 

@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -ex
 
+if ! [[ "$0" =~ "scripts/shutdown-prod-ubuntu.sh" ]]; then
+    echo "must be run from repository root"
+    exit 255
+fi
+
 echo "stopping nginx"
 sudo service nginx stop
 
