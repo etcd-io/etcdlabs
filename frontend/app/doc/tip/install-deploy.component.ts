@@ -49,13 +49,13 @@ export class etcdFlag {
 
         this.initialCluster = '';
 
-        this.clientCertFile = '/etc/etcd/' + this.name + '.pem';
-        this.clientKeyFile = '/etc/etcd/' + this.name + '-key.pem';
-        this.clientTrustedCAFile = '/etc/etcd/trusted-ca.pem';
+        this.clientCertFile = this.name + '.pem';
+        this.clientKeyFile = this.name + '-key.pem';
+        this.clientTrustedCAFile = 'trusted-ca.pem';
 
-        this.peerCertFile = '/etc/etcd/' + this.name + '.pem';
-        this.peerKeyFile = '/etc/etcd/' + this.name + '-key.pem';
-        this.peerTrustedCAFile = '/etc/etcd/trusted-ca.pem';
+        this.peerCertFile = this.name + '.pem';
+        this.peerKeyFile = this.name + '-key.pem';
+        this.peerTrustedCAFile = 'trusted-ca.pem';
     }
 }
 
@@ -90,10 +90,12 @@ export class InstallDeployTipComponent extends parentComponent {
     inputEtcdDataDirVM: string;
     inputEtcdDataDirSystemd: string;
     inputEtcdDataDirRkt: string;
+    inputEtcdDataDirCoreOS: string;
 
     inputEtcdCertsDirVM: string;
     inputEtcdCertsDirSystemd: string;
     inputEtcdCertsDirRkt: string;
+    inputEtcdCertsDirCoreOS: string;
     ////////////////////////////////////
 
     ////////////////////////////////////
@@ -148,7 +150,7 @@ export class InstallDeployTipComponent extends parentComponent {
 
         ///////////////////////////////////////////////////
         this.inputCFSSLExecDir = '/usr/local/bin';
-        this.inputEtcdCertsDir = '/etc/etcd';
+        this.inputEtcdCertsDir = '/etc/ssl/certs';
 
         this.inputEtcdExecDirSource = '/';
         this.inputEtcdExecDirVM = '/';
@@ -159,10 +161,12 @@ export class InstallDeployTipComponent extends parentComponent {
         this.inputEtcdDataDirVM = '/var/lib/etcd';
         this.inputEtcdDataDirSystemd = '/var/lib/etcd';
         this.inputEtcdDataDirRkt = '/var/lib/etcd';
+        this.inputEtcdDataDirCoreOS = '/var/lib/etcd';
 
-        this.inputEtcdCertsDirVM = '/etc/etcd';
-        this.inputEtcdCertsDirSystemd = '/etc/etcd';
-        this.inputEtcdCertsDirRkt = '/etc/etcd';
+        this.inputEtcdCertsDirVM = '/etc/ssl/certs';
+        this.inputEtcdCertsDirSystemd = '/etc/ssl/certs';
+        this.inputEtcdCertsDirRkt = '/etc/ssl/certs';
+        this.inputEtcdCertsDirCoreOS = '/etc/ssl/certs';
         ///////////////////////////////////////////////////
 
         ///////////////////////////////////////////////////
@@ -535,7 +539,9 @@ sudo systemctl start ${name}.service
 sudo systemctl status ${name}.service -l --no-pager
 # sudo journalctl -u ${name}.service -l --no-pager|less
 # sudo journalctl -f -u ${name}.service
-`;
+
+# sudo systemctl stop ${name}.service
+# sudo systemctl disable ${name}.service`;
     }
     ///////////////////////////////////////////////////
 
@@ -699,44 +705,57 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
     }
 
 
-    getEtcdAllFlags(dataDir: string, flag: etcdFlag) {
-        let txt = '--name' + ' ' + flag.name + ' ' + '--data-dir' + ' ' + dataDir + ' \\' + `
-    ` + '--listen-client-urls' + ' ' + this.getClientURL(flag) + ' ' + '--advertise-client-urls' + ' ' + this.getClientURL(flag) + ' \\' + `
-    ` + '--listen-peer-urls' + ' ' + this.getPeerURL(flag) + ' ' + '--initial-advertise-peer-urls' + ' ' + this.getPeerURL(flag) + ' \\' + `
-    ` + '--initial-cluster' + ' ' + this.getInitialCluster() + ' \\' + `
-    ` + '--initial-cluster-token' + ' ' + flag.initialClusterToken + ' ' + '--initial-cluster-state' + ' ' + flag.initialClusterState;
+    getEtcdAllFlags(dataDir: string, certsDir: string, flag: etcdFlag, skipDataDir: boolean, oneLine: boolean) {
+        let flags: string[] = [];
+        flags.push('--name' + ' ' + flag.name);
+
+        if (!skipDataDir) {
+            flags.push('--data-dir' + ' ' + dataDir);
+        }
+
+        flags.push('--listen-client-urls' + ' ' + this.getClientURL(flag));
+        flags.push('--advertise-client-urls' + ' ' + this.getClientURL(flag));
+        flags.push('--listen-peer-urls' + ' ' + this.getPeerURL(flag));
+        flags.push('--initial-advertise-peer-urls' + ' ' + this.getPeerURL(flag));
+        flags.push('--initial-cluster' + ' ' + this.getInitialCluster());
+        flags.push('--initial-cluster-token' + ' ' + flag.initialClusterToken);
+        flags.push('--initial-cluster-state' + ' ' + flag.initialClusterState);
 
         if (this.inputSecure) {
-            txt += ' \\' + `
-    ` + '--client-cert-auth' + ' \\' + `
-    ` + '--cert-file' + ' ' + flag.clientCertFile + ' \\' + `
-    ` + '--key-file' + ' ' + flag.clientKeyFile + ' \\' + `
-    ` + '--trusted-ca-file' + ' ' + flag.clientTrustedCAFile + ' \\' + `
-    ` + '--peer-client-cert-auth' + ' \\' + `
-    ` + '--peer-cert-file' + ' ' + flag.peerCertFile + ' \\' + `
-    ` + '--peer-key-file' + ' ' + flag.peerKeyFile + ' \\' + `
-    ` + '--peer-trusted-ca-file' + ' ' + flag.peerTrustedCAFile;
+            flags.push('--client-cert-auth');
+            flags.push('--cert-file' + ' ' + certsDir + '/' + flag.clientCertFile);
+            flags.push('--key-file' + ' ' + certsDir + '/' + flag.clientKeyFile);
+            flags.push('--trusted-ca-file' + ' ' + certsDir + '/' + flag.clientTrustedCAFile);
+            flags.push('--peer-client-cert-auth');
+            flags.push('--peer-cert-file' + ' ' + certsDir + '/' + flag.peerCertFile);
+            flags.push('--peer-trusted-ca-file' + ' ' + certsDir + '/' + flag.peerTrustedCAFile);
         }
 
         if (this.inputEnableProfile) {
-            txt += ' \\' + `
-    ` + '--enable-pprof';
+            flags.push('--enable-pprof');
         }
 
         if (this.inputDebug) {
-            txt += ' \\' + `
-    ` + '--debug';
+            flags.push('--debug');
         }
 
         if (this.inputAutoCompact > 0) {
-            txt += ' \\' + `
-    ` + '--auto-compaction-retention' + ' ' + String(this.inputAutoCompact);
+            flags.push('--auto-compaction-retention' + ' ' + String(this.inputAutoCompact));
         }
 
+        let txt = '';
+        let lineBreak = ' \\' + `
+    `;
+        for (let _i = 0; _i < flags.length; _i++) {
+            if (_i > 0 && _i !== flags.length - 1) {
+                txt += lineBreak;
+            }
+            txt += flags[_i];
+        }
         return txt;
     }
 
-    getEtcdFullCommand(execDir: string, dataDir: string, flag: etcdFlag) {
+    getEtcdFullCommand(execDir: string, dataDir: string, certsDir: string, flag: etcdFlag, skipDataDir: boolean, oneLine: boolean) {
         let divide = '/';
         if (execDir === '/') {
             divide = '';
@@ -744,34 +763,45 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
         let exec = execDir + divide + 'etcd';
 
         let ds = dataDir;
-        if (dataDir.endsWith('/')) {
-            ds = dataDir.substring(0, dataDir.length - 1)
+        if (ds.endsWith('/')) {
+            ds = ds.substring(0, ds.length - 1);
         }
         ds = ds + `/${flag.name}.data`;
 
-        return exec + ' ' + this.getEtcdAllFlags(ds, flag);
+        let cs = certsDir;
+        if (this.inputSecure && cs.endsWith('/')) {
+            cs = cs.substring(0, cs.length - 1);
+        }
+
+        return exec + ' ' + this.getEtcdAllFlags(ds, cs, flag, skipDataDir, oneLine);
     }
 
-    getEtcdctlFullCommand(execDir: string, flag: etcdFlag) {
+    getEtcdctlFullCommand(execDir: string, certsDir: string, flag: etcdFlag) {
         let divide = '/';
         if (execDir === '/') {
             divide = '';
         }
         let exec = execDir + divide + 'etcdctl';
+
+        let cs = certsDir;
+        if (this.inputSecure && cs.endsWith('/')) {
+            cs = cs.substring(0, cs.length - 1);
+        }
+
         let cmd = 'ETCDCTL_API=3 ' + exec + ' \\' + `
     ` + '--endpoints' + ' ' + this.getAllClientEndpoints() + ' \\' + `
     `;
         if (this.inputSecure) {
-            cmd += '--cert' + ' ' + flag.clientCertFile + ' \\' + `
-    ` + '--key' + ' ' + flag.clientKeyFile + ' \\' + `
-    ` + '--cacert' + ' ' + flag.clientTrustedCAFile + ' \\' + `
+            cmd += '--cert' + ' ' + cs + '/' + flag.clientCertFile + ' \\' + `
+    ` + '--key' + ' ' + cs + '/' + flag.clientKeyFile + ' \\' + `
+    ` + '--cacert' + ' ' + cs + '/' + flag.clientTrustedCAFile + ' \\' + `
     `;
         }
         cmd += 'endpoint health';
         return cmd;
     }
 
-    getEtcdSystemdServiceFile(execDir: string, etcdDataDir: string, flag: etcdFlag) {
+    getEtcdSystemdServiceFile(execDir: string, certsDir: string, etcdDataDir: string, flag: etcdFlag) {
         return `cat > /tmp/${flag.name}.service <<EOF
 [Unit]
 Description=etcd
@@ -784,7 +814,7 @@ Restart=always
 RestartSec=5s
 LimitNOFILE=40000
 TimeoutStartSec=0
-ExecStart=` + this.getEtcdFullCommand(execDir, etcdDataDir, flag) + `
+ExecStart=` + this.getEtcdFullCommand(execDir, certsDir, etcdDataDir, flag, false, false) + `
 
 [Install]
 WantedBy=multi-user.target
@@ -837,10 +867,15 @@ GITHUB_URL=https://github.com/coreos/rkt/releases/download
         let execRkt = rktExecDir + divideRkt + 'rkt';
 
         let ds = etcdDataDir;
-        if (etcdDataDir.endsWith('/')) {
-            ds = etcdDataDir.substring(0, etcdDataDir.length - 1)
+        if (ds.endsWith('/')) {
+            ds = ds.substring(0, ds.length - 1)
         }
         ds = ds + `/${etcdFlag.name}.data`;
+
+        let cs = certsDir;
+        if (this.inputSecure && cs.endsWith('/')) {
+            cs = cs.substring(0, cs.length - 1);
+        }
 
         let vs = this.inputRktVersion.substring(1);
         let cmd = `cat > /tmp/${rktFlag.name}.service <<EOF
@@ -849,26 +884,26 @@ Description=etcd with rkt
 Documentation=https://github.com/coreos/rkt
 
 [Service]
+Type=notify
 Restart=always
 RestartSec=5s
-LimitNOFILE=40000
 TimeoutStartSec=0
+LimitNOFILE=40000
+
 ExecStart=` + execRkt + ' ' + '--trust-keys-from-https' + ' ' + '--dir=/var/lib/rkt' + ' ' + 'run' + ' \\' + `
     ` + '--stage1-name' + ' ' + 'coreos.com/rkt/stage1-fly:' + vs + ' \\' + `
     ` + '--net=host' + ' \\' + `
-    ` + '--volume' + ' ' + 'data-dir,kind=host,source=' + etcdDataDir + ' \\' + `
-    ` + '--volume' + ' ' + 'etcd-data-dir,kind=host,readOnly=false,source=' + etcdDataDir + ' \\' + `
-    ` + '--mount' + ' ' + 'volume=etcd-data-dir,target=' + etcdDataDir + ' \\' + `
-    `;
+    ` + '--volume' + ' ' + 'data-dir,kind=host,source=' + ds;
 
         if (this.inputSecure) {
-            cmd += '--volume' + ' ' + 'etcd-ssl-certs-dir,kind=host,source=' + certsDir + ' \\' + `
-    ` + '--mount' + ' ' + 'volume=etcd-ssl-certs-dir,target=' + certsDir + ' \\' + `
+            cmd += + ' \\' + `
+    ` + '--volume' + ' ' + 'etcd-ssl-certs-dir,kind=host,source=' + cs + ' \\' + `
+    ` + '--mount' + ' ' + 'volume=etcd-ssl-certs-dir,target=' + cs + ' \\' + `
     `;
         }
 
         cmd += 'coreos.com/etcd:' + this.inputEtcdVersionRkt + ' ' + '--' + ' \\' + `
-    ` + this.getEtcdAllFlags(ds, etcdFlag) + `
+    ` + this.getEtcdAllFlags(ds, cs, etcdFlag, true, false) + `
 
 [Install]
 WantedBy=multi-user.target
