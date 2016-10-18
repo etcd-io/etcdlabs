@@ -1,3 +1,10 @@
+/deep/ .md-tab-label {
+    /*TODO: adjust md-tab-label size by class*/
+    text-align: center;
+    /*decrease width of md-tab labels*/
+    min-width: 50px !important;
+}
+
 .play-group {
     padding: 30px;
 }
@@ -143,13 +150,6 @@
     color: #F44336;
     font-family: 'Inconsolata', monospace;
     font-weight: bold;
-}
-
-/deep/ .md-tab-label {
-    /*TODO: adjust md-tab-label size by class*/
-    text-align: center;
-    /*decrease width of md-tab labels*/
-    min-width: 50px !important;
 }
 
 
