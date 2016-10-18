@@ -171,7 +171,7 @@
 					</div>
 
 					<br>
-					<md-input type="text" [(ngModel)]="inputEtcdCertsDir" placeholder="certs dir"></md-input>
+					<md-input type="text" *ngIf="inputSecure" [(ngModel)]="inputEtcdCertsDir" placeholder="certs dir"></md-input>
 					<br>
 
 					<div class="osx-window">
@@ -261,7 +261,7 @@
 					<md-input type="text" [(ngModel)]="inputEtcdVersionVM" placeholder="etcd version"></md-input>
 					<md-input type="text" [(ngModel)]="inputEtcdExecDirVM" placeholder="exec dir"></md-input>
 					<md-input type="text" [(ngModel)]="inputEtcdDataDirVM" placeholder="data dir"></md-input>
-					<md-input type="text" [(ngModel)]="inputEtcdCertsDirVM" placeholder="certs dir"></md-input>
+					<md-input type="text" *ngIf="inputSecure" [(ngModel)]="inputEtcdCertsDirVM" placeholder="certs dir"></md-input>
 					<br>
 
 					<br>
@@ -329,7 +329,7 @@
 					</div>
 					<div *ngFor="let flag of etcdFlags; let i = index;">
 						<div *ngIf="inputClusterSize > i">
-							<pre class="code-dark">{{getEtcdFullCommand(inputEtcdExecDirVM, inputEtcdDataDirVM, flag)}}</pre>
+							<pre class="code-dark">{{getEtcdFullCommand(inputEtcdExecDirVM, inputEtcdDataDirVM, inputEtcdCertsDirVM, flag, false, false)}}</pre>
 						</div>
 					</div>
 
@@ -343,7 +343,7 @@
 									<div class="zoom"><span><strong></strong></span></div>
 								</div><span class="title-bar-text">terminal</span></div>
 							<div class="content">
-								<pre class="osx-terminal-contents">{{getEtcdctlFullCommand(inputEtcdExecDirVM, etcdFlags[0])}}</pre>
+								<pre class="osx-terminal-contents">{{getEtcdctlFullCommand(inputEtcdExecDirVM, inputEtcdCertsDirVM, etcdFlags[0])}}</pre>
 							</div>
 						</div>
 					</div>
@@ -367,7 +367,7 @@
 					<md-input type="text" [(ngModel)]="inputEtcdVersionSystemd" placeholder="etcd version"></md-input>
 					<md-input type="text" [(ngModel)]="inputEtcdExecDirSystemd" placeholder="exec dir"></md-input>
 					<md-input type="text" [(ngModel)]="inputEtcdDataDirSystemd" placeholder="data dir"></md-input>
-					<md-input type="text" [(ngModel)]="inputEtcdCertsDirSystemd" placeholder="certs dir"></md-input>
+					<md-input type="text" *ngIf="inputSecure" [(ngModel)]="inputEtcdCertsDirSystemd" placeholder="certs dir"></md-input>
 					<br>
 
 					<br>
@@ -419,7 +419,7 @@
 					</div>
 					<div *ngFor="let flag of etcdFlags; let i = index;">
 						<div *ngIf="inputClusterSize > i">
-							<pre class="code-dark">{{getEtcdSystemdServiceFile(inputEtcdExecDirSystemd, inputEtcdDataDirSystemd, flag)}}</pre>
+							<pre class="code-dark">{{getEtcdSystemdServiceFile(inputEtcdExecDirSystemd, inputEtcdDataDirSystemd, inputEtcdCertsDirSystemd, flag)}}</pre>
 							<div class="osx-window">
 								<div class="window-narrow">
 									<div class="titlebar">
@@ -446,7 +446,7 @@
 									<div class="zoom"><span><strong></strong></span></div>
 								</div><span class="title-bar-text">terminal</span></div>
 							<div class="content">
-								<pre class="osx-terminal-contents">{{getEtcdctlFullCommand(inputEtcdExecDirSystemd, etcdFlags[0])}}</pre>
+								<pre class="osx-terminal-contents">{{getEtcdctlFullCommand(inputEtcdExecDirSystemd, inputEtcdCertsDirSystemd, etcdFlags[0])}}</pre>
 							</div>
 						</div>
 					</div>
@@ -467,7 +467,7 @@
 					<br>
 					<md-input type="text" [(ngModel)]="inputEtcdVersionRkt" placeholder="etcd version"></md-input>
 					<md-input type="text" [(ngModel)]="inputEtcdDataDirRkt" placeholder="data dir"></md-input>
-					<md-input type="text" [(ngModel)]="inputEtcdCertsDirRkt" placeholder="certs dir"></md-input>
+					<md-input type="text" *ngIf="inputSecure" [(ngModel)]="inputEtcdCertsDirRkt" placeholder="certs dir"></md-input>
 					<br>
 					<md-input type="text" [(ngModel)]="inputRktVersion" placeholder="rkt version"></md-input>
 					<md-input type="text" [(ngModel)]="inputRktExecDir" placeholder="rkt exec dir"></md-input>
@@ -552,7 +552,7 @@
 									<div class="zoom"><span><strong></strong></span></div>
 								</div><span class="title-bar-text">terminal</span></div>
 							<div class="content">
-								<pre class="osx-terminal-contents">{{getEtcdctlFullCommand(inputEtcdRktExecDir, etcdFlags[0])}}</pre>
+								<pre class="osx-terminal-contents">{{getEtcdctlFullCommand(inputEtcdRktExecDir, inputEtcdCertsDirRkt, etcdFlags[0])}}</pre>
 							</div>
 						</div>
 					</div>
@@ -576,6 +576,82 @@
 					</p>
 				</template>
             </md-tab>
+
+
+            <md-tab>
+                <template md-tab-label>
+					CoreOS
+				</template>
+                <template md-tab-content>
+					<br>
+					<h5>Why?</h5>
+					<p>
+						CoreOS is good.
+					</p>
+
+					<br>
+					<md-input type="text" [(ngModel)]="inputEtcdDataDirCoreOS" placeholder="etcd data dir"></md-input>
+					<md-input type="text" *ngIf="inputSecure" [(ngModel)]="inputEtcdCertsDirCoreOS" placeholder="etcd certs dir"></md-input>
+					<br>
+
+					<br>
+					<h5>Run with CoreOS</h5>
+					<p *ngIf="etcdFlags[0].ipAddress == 'localhost'">
+						Seems like etcd is configured to run in localhost. Please make sure ports do not conflict!
+					</p>
+					<div class="osx-window">
+						<div class="window-narrow">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{getEtcdDataDirCommand(inputEtcdDataDirCoreOS)}}</pre>
+							</div>
+						</div>
+					</div>
+					<div *ngIf="inputSecure" class="osx-window">
+						<div class="window-narrow">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{getCFSSLKeysCopyCommand(inputEtcdCertsDirCoreOS)}}</pre>
+							</div>
+						</div>
+					</div>
+
+					Check status:
+					<br>
+					<br>
+					<md-input type="text" [(ngModel)]="inputEtcdRktExecDir" placeholder="etcd exec dir"></md-input>
+					<div class="osx-window">
+						<div class="window-mid">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{getEtcdctlFullCommand('/', inputEtcdCertsDirCoreOS, etcdFlags[0])}}</pre>
+							</div>
+						</div>
+					</div>
+
+					<br>
+					<h5>More</h5>
+					<p>
+						CoreOS ...
+					</p>
+				</template>
+            </md-tab>
+
 
         </md-tab-group>
     </div>
