@@ -747,10 +747,10 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
         let lineBreak = ' \\' + `
     `;
         for (let _i = 0; _i < flags.length; _i++) {
+            txt += flags[_i];
             if (_i > 0 && _i !== flags.length - 1) {
                 txt += lineBreak;
             }
-            txt += flags[_i];
         }
         return txt;
     }
