@@ -36,6 +36,8 @@
                 <br>
                 <a href="/doc/{{version.etcdVersionURL}}/faq#etcd-consistency" class="faq-list">Consistency model in etcd</a>
                 <br>
+                <a href="/doc/{{version.etcdVersionURL}}/faq#follower-leader" class="faq-list">Follower, leader in etcd</a>
+                <br>
                 <a href="/doc/{{version.etcdVersionURL}}/faq#etcd-failure-tolerance" class="faq-list">Failure tolerance in etcd</a>
                 <br>
                 <a href="/doc/{{version.etcdVersionURL}}/faq#etcd-use-case-coreos" class="faq-list">Who uses etcd: CoreOS</a>
@@ -186,7 +188,7 @@
         <p>
             Linearizability<sup>[1]</sup> (also known as <i>strong, atomic consistency</i>) is an important requirement for implementing distributed locks. The basic idea is to make distributed nodes work like a single copy, with all operations being
             atomic. etcd provides two types of read consistency: linearizable (or <i>quorum</i>) read that requires majority to agree on the value before responding to client. Serializable read is returned from local node without going through consensus
-            protocol. Serializable read normally has higher throughput but possibly serving stale data, while linearizable read returns the latest value written.
+            protocol. Serializable read normally has higher throughput but possibly serving stale data, whereas linearizable read always returns the latest value written.
         </p>
         <p>
             In etcd v3.0, quorum read throughput is around 40,000 requests per second (QPS), whereas serializable read is over 100,000 QPS (2x faster). Quorum read is slower because it needs to issue a read query command, and this command gets replicated, costs disk
@@ -214,6 +216,17 @@
             <br> [5] Jonathan Ellis: "<a href="http://www.datastax.com/dev/blog/why-cassandra-doesnt-need-vector-clocks" target="_blank" class="footer-link">Why Cassandra doesn’t need vector clocks</a>," datastax.com, 2 September 2013.
         </footer>
         <br><br>
+
+        <div id="follower-leader"></div>
+        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#follower-leader" class="faq-title">Follower, leader in etcd</a></h2>
+        <p>
+            Raft is leader-based, and the leader handles all client requests. Client does not need to know which node is the leader. Request to follower is automatically forwarded to leader.
+        </p>
+        <p>
+            Raft algorithm divides time into terms, and each term begins with an election to choose one leader. If leader becomes unavailable, cluster immediately elects a new leader or automatically transfers the leadership to a follower. This requires no human
+            intervention.
+        </p>
+        <br>
 
         <div id="etcd-failure-tolerance"></div>
         <h2><a href="/doc/{{version.etcdVersionURL}}/faq#etcd-failure-tolerance" class="faq-title">Failure tolerance in etcd</a></h2>
