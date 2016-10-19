@@ -38,9 +38,9 @@
                 <br>
                 <a href="/doc/{{version.etcdVersionURL}}/faq#etcd-failure-tolerance" class="faq-list">Failure tolerance in etcd</a>
                 <br>
-                <a href="/doc/{{version.etcdVersionURL}}/faq#etcd-use-case-coreos" class="faq-list">Production use: CoreOS</a>
+                <a href="/doc/{{version.etcdVersionURL}}/faq#etcd-use-case-coreos" class="faq-list">Who uses etcd: CoreOS</a>
                 <br>
-                <a href="/doc/{{version.etcdVersionURL}}/faq#etcd-use-case-kubernetes" class="faq-list">Production use: Kubernetes</a>
+                <a href="/doc/{{version.etcdVersionURL}}/faq#etcd-use-case-kubernetes" class="faq-list">Who uses etcd: Kubernetes</a>
                 <br>
 
             </div>
@@ -229,7 +229,7 @@
         <br><br>
 
         <div id="etcd-use-case-coreos"></div>
-        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#etcd-use-case-coreos" class="faq-title">Production use: CoreOS</a></h2>
+        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#etcd-use-case-coreos" class="faq-title">Who uses etcd: CoreOS</a></h2>
         <p>
             Application running on <a href="https://coreos.com/why/" target="_blank" class="normal-link">CoreOS</a> gets automatic, no-downtime Linux kernel updates. CoreOS uses
             <a href="https://github.com/coreos/locksmith" target="_blank" class="normal-link">locksmith</a> to coordinate updates. locksmith stores semephore values in etcd to ensure that only subset of cluster are rebooting at any given time.
@@ -237,7 +237,7 @@
         <br>
 
         <div id="etcd-use-case-kubernetes"></div>
-        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#etcd-use-case-kubernetes" class="faq-title">Production use: Kubernetes</a></h2>
+        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#etcd-use-case-kubernetes" class="faq-title">Who uses etcd: Kubernetes</a></h2>
         <p>
             <a href="http://kubernetes.io/docs/whatisk8s/" target="_blank" class="normal-link">Kubernetes</a> needs configuration storage for service discovery and cluster management. Kubernetes API server writes persistent cluster states in etcd. And
             uses etcd watch API to get notified whenever changes happen. Consistency is the key to ensure that services correctly schedule and operatate.
