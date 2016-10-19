@@ -10,7 +10,7 @@ export class Version {
 
 export class Versioner {
     version: Version = {
-        goVersion: '1.7.1',
+        goVersion: '1.7.3',
         etcdVersion: 'tip',
         etcdVersionURL: 'tip',
         etcdVersionLatestRelease: 'v3.1.0-rc.0',
