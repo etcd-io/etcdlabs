@@ -748,7 +748,7 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
     `;
         for (let _i = 0; _i < flags.length; _i++) {
             txt += flags[_i];
-            if (_i > 0 && _i !== flags.length - 1) {
+            if (_i !== flags.length - 1) {
                 txt += lineBreak;
             }
         }
@@ -810,10 +810,12 @@ Conflicts=etcd.service
 Conflicts=etcd2.service
 
 [Service]
+Type=notify
 Restart=always
 RestartSec=5s
 LimitNOFILE=40000
 TimeoutStartSec=0
+
 ExecStart=` + this.getEtcdFullCommand(execDir, certsDir, etcdDataDir, flag, false, false) + `
 
 [Install]
@@ -868,7 +870,7 @@ GITHUB_URL=https://github.com/coreos/rkt/releases/download
 
         let ds = etcdDataDir;
         if (ds.endsWith('/')) {
-            ds = ds.substring(0, ds.length - 1)
+            ds = ds.substring(0, ds.length - 1);
         }
         ds = ds + `/${etcdFlag.name}.data`;
 
@@ -896,7 +898,7 @@ ExecStart=` + execRkt + ' ' + '--trust-keys-from-https' + ' ' + '--dir=/var/lib/
     ` + '--volume' + ' ' + 'data-dir,kind=host,source=' + ds;
 
         if (this.inputSecure) {
-            cmd += + ' \\' + `
+            cmd += ' \\' + `
     ` + '--volume' + ' ' + 'etcd-ssl-certs-dir,kind=host,source=' + cs + ' \\' + `
     ` + '--mount' + ' ' + 'volume=etcd-ssl-certs-dir,target=' + cs + ' \\' + `
     `;
