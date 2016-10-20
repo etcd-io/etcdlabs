@@ -145,6 +145,11 @@ export class InstallDeployTipComponent extends parentComponent {
     rktFlags: rktFlag[];
     ////////////////////////////////////
 
+    ////////////////////////////////////
+    // CoreOS setting properties
+    inputEtcdVersionCoreOS: string;
+    ////////////////////////////////////
+
     constructor() {
         super();
 
@@ -295,6 +300,10 @@ export class InstallDeployTipComponent extends parentComponent {
                 'my-etcd-rkt-7'
             ),
         ]
+        ///////////////////////////////////////////////////
+
+        ///////////////////////////////////////////////////
+        this.inputEtcdVersionCoreOS = this.etcdVersionLatestRelease;
         ///////////////////////////////////////////////////
     }
 
@@ -537,11 +546,11 @@ sudo systemctl enable ${name}.service
 sudo systemctl start ${name}.service
 
 sudo systemctl status ${name}.service -l --no-pager
-# sudo journalctl -u ${name}.service -l --no-pager|less
-# sudo journalctl -f -u ${name}.service
+sudo journalctl -u ${name}.service -l --no-pager|less
+sudo journalctl -f -u ${name}.service
 
-# sudo systemctl stop ${name}.service
-# sudo systemctl disable ${name}.service`;
+sudo systemctl stop ${name}.service
+sudo systemctl disable ${name}.service`;
     }
     ///////////////////////////////////////////////////
 
@@ -728,6 +737,7 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
             flags.push('--trusted-ca-file' + ' ' + certsDir + '/' + flag.clientTrustedCAFile);
             flags.push('--peer-client-cert-auth');
             flags.push('--peer-cert-file' + ' ' + certsDir + '/' + flag.peerCertFile);
+            flags.push('--peer-key-file' + ' ' + certsDir + '/' + flag.peerKeyFile);
             flags.push('--peer-trusted-ca-file' + ' ' + certsDir + '/' + flag.peerTrustedCAFile);
         }
 
@@ -746,6 +756,9 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
         let txt = '';
         let lineBreak = ' \\' + `
     `;
+        if (oneLine) {
+            lineBreak = ' ';
+        }
         for (let _i = 0; _i < flags.length; _i++) {
             txt += flags[_i];
             if (_i !== flags.length - 1) {
@@ -861,7 +874,15 @@ GITHUB_URL=https://github.com/coreos/rkt/releases/download
         return txt;
     }
 
-    getEtcdRktSystemdServiceFile(rktExecDir: string, etcdDataDir: string, certsDir: string, etcdFlag: etcdFlag, rktFlag: rktFlag) {
+    getEtcdRktSystemdServiceFile(
+        rktExecDir: string,
+        etcdDataDir: string,
+        certsDir: string,
+        etcdVer: string,
+        etcdFlag: etcdFlag,
+        rktVer: string,
+        rktFlag: rktFlag
+    ) {
         let divideRkt = '/';
         if (rktExecDir === '/') {
             divideRkt = '';
@@ -879,7 +900,7 @@ GITHUB_URL=https://github.com/coreos/rkt/releases/download
             cs = cs.substring(0, cs.length - 1);
         }
 
-        let vs = this.inputRktVersion.substring(1);
+        let vs = rktVer.substring(1);
         let cmd = `cat > /tmp/${rktFlag.name}.service <<EOF
 [Unit]
 Description=etcd with rkt
@@ -904,16 +925,55 @@ ExecStart=` + execRkt + ' ' + '--trust-keys-from-https' + ' ' + '--dir=/var/lib/
     `;
         }
 
-        cmd += 'coreos.com/etcd:' + this.inputEtcdVersionRkt + ' ' + '--' + ' \\' + `
+        cmd += 'coreos.com/etcd:' + etcdVer + ' ' + '--' + ' \\' + `
     ` + this.getEtcdAllFlags(ds, cs, etcdFlag, true, false) + `
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
+sudo mkdir -p ${ds}
 sudo mv /tmp/${rktFlag.name}.service /etc/systemd/system/${rktFlag.name}.service`;
 
         return cmd;
+    }
+    ///////////////////////////////////////////////////
+
+    ///////////////////////////////////////////////////
+    // https://github.com/coreos/coreos-overlay/tree/master/app-admin/etcd-wrapper/files
+    getCoreOSEtcdWrapper(etcdDataDir: string, certsDir: string, etcdVer: string, etcdFlag: etcdFlag) {
+        let cs = certsDir;
+        if (this.inputSecure && cs.endsWith('/')) {
+            cs = cs.substring(0, cs.length - 1);
+        }
+
+        let cmd = `cat > /tmp/override-${etcdFlag.name}.conf <<EOF
+[Service]
+Environment="ETCD_IMAGE_TAG=${etcdVer}"
+Environment="ETCD_DATA_DIR=${etcdDataDir}"
+Environment="ETCD_SSL_DIR=${cs}"
+Environment="ETCD_OPTS=${this.getEtcdAllFlags(etcdDataDir, cs, etcdFlag, true, false)}"
+EOF
+
+sudo mkdir -p /etc/systemd/system/etcd-member.service.d
+sudo mv /tmp/override-${etcdFlag.name}.conf /etc/systemd/system/etcd-member.service.d/override.conf
+
+sudo systemd-delta --type=extended`;
+
+        return cmd;
+    }
+
+    getCoreOSEtcdWrapperResult() {
+        return `sudo systemctl daemon-reload
+sudo systemctl enable etcd-member.service
+sudo systemctl start etcd-member.service
+
+sudo systemctl status etcd-member.service -l --no-pager
+sudo journalctl -u etcd-member.service -l --no-pager|less
+sudo journalctl -f -u etcd-member.service
+
+sudo systemctl stop etcd-member.service
+sudo systemctl disable etcd-member.service`;
     }
     ///////////////////////////////////////////////////
 }
