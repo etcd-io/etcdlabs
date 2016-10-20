@@ -399,7 +399,7 @@ func TestServer(t *testing.T) {
 	}()
 
 	println()
-	time.Sleep(3 * time.Second)
+	time.Sleep(5 * time.Second)
 	fmt.Println("restart node1...")
 	func() {
 		req := ClientRequest{
@@ -461,7 +461,7 @@ func TestServer(t *testing.T) {
 	}()
 
 	println()
-	time.Sleep(3 * time.Second)
+	time.Sleep(7 * time.Second)
 	fmt.Println("expected errors from restarting same node1...")
 	func() {
 		req := ClientRequest{

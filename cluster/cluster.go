@@ -521,7 +521,7 @@ func (c *Cluster) updateNodeStatus() {
 
 			ctx, cancel = context.WithTimeout(c.rootCtx, time.Second)
 			var hresp *pb.HashResponse
-			hresp, err = mc.Hash(ctx, &pb.HashRequest{})
+			hresp, err = mc.Hash(ctx, &pb.HashRequest{}, grpc.FailFast(false))
 			cancel()
 			if err != nil {
 				c.nodes[i].statusLock.Lock()
