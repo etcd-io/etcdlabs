@@ -529,6 +529,12 @@ sudo chmod -R a+rw ${dataDir}
 `;
     }
 
+    getEtcdDataDirCommandCoreOS(dataDir: string) {
+        return `# sudo rm -rf ${dataDir}
+sudo mkdir -p ${dataDir}
+`;
+    }
+
     getCFSSLKeysCopyCommand(certsDir: string) {
         return `# after transferring certs to remote machines
 
