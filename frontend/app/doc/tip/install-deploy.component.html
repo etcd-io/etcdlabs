@@ -522,7 +522,7 @@
 					</div>
 					<div *ngFor="let flag of rktFlags; let i = index;">
 						<div *ngIf="inputClusterSize > i">
-							<pre class="code-dark">{{getEtcdRktSystemdServiceFile(inputRktExecDir, inputEtcdDataDirRkt, inputEtcdCertsDirRkt, etcdFlags[i], flag)}}</pre>
+							<pre class="code-dark">{{getEtcdRktSystemdServiceFile(inputRktExecDir, inputEtcdDataDirRkt, inputEtcdCertsDirRkt, inputEtcdVersionRkt, etcdFlags[i], inputRktVersion, flag)}}</pre>
 							<div class="osx-window">
 								<div class="window-narrow">
 									<div class="titlebar">
@@ -593,6 +593,7 @@
 					</p>
 
 					<br>
+					<md-input type="text" [(ngModel)]="inputEtcdVersionCoreOS" placeholder="etcd version"></md-input>
 					<md-input type="text" [(ngModel)]="inputEtcdDataDirCoreOS" placeholder="etcd data dir"></md-input>
 					<md-input type="text" *ngIf="inputSecure" [(ngModel)]="inputEtcdCertsDirCoreOS" placeholder="etcd certs dir"></md-input>
 					<br>
@@ -628,9 +629,24 @@
 							</div>
 						</div>
 					</div>
-					<p>
-						TODO: deploy with etcd-wrapper
-					</p>
+					<div *ngFor="let flag of etcdFlags; let i = index;">
+						<div *ngIf="inputClusterSize > i">
+							<pre class="code-dark">{{getCoreOSEtcdWrapper(inputEtcdDataDirCoreOS, inputEtcdCertsDirCoreOS, inputEtcdVersionCoreOS, etcdFlags[i])}}</pre>
+							<div class="osx-window">
+								<div class="window-narrow">
+									<div class="titlebar">
+										<div class="buttons">
+											<div class="closebtn"><span><strong></strong></span></div>
+											<div class="minimize"><span><strong></strong></span></div>
+											<div class="zoom"><span><strong></strong></span></div>
+										</div><span class="title-bar-text">terminal</span></div>
+									<div class="content">
+										<pre class="osx-terminal-contents">{{getCoreOSEtcdWrapperResult()}}</pre>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
 
 					Check status:
 					<br>
