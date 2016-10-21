@@ -66,20 +66,7 @@ export class parentComponent {
 
         this.moreItems = [
             new sidebarItem(
-                'Performance',
-                'benchmark results, performance analysis',
-                `/doc/${this.version.etcdVersionURL}/performance`,
-                'no-text-decoration'
-            ),
-            new sidebarItem(
-                'Reliability',
-                `etcd's #1 goal is Reliability, and this is how we ensure that`,
-                `/doc/${this.version.etcdVersionURL}/reliability`,
-                'no-text-decoration'
-            ),
-
-            new sidebarItem(
-                'Comparison',
+                'etcd in comparison',
                 `etcd in comparison with other databases`,
                 `/doc/${this.version.etcdVersionURL}/comparison`,
                 'no-text-decoration'

@@ -49,6 +49,12 @@ a {
     font-style: italic;
 }
 
+.unknown {
+    color: #424242;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 12px;
+}
+
 .code-link {
     color: dodgerblue;
     text-decoration: none !important;
@@ -116,18 +122,18 @@ h2 .faq-title {
     font-size: 20px;
 }
 
+.next-to-header-title {
+    color: dimgrey;
+    text-decoration: none !important;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13px;
+}
+
 .versions-link-main {
     color: black;
     text-decoration: none !important;
     font-family: 'Open Sans', sans-serif;
     font-size: 15px;
-}
-
-.versions-link-normal {
-    color: dimgrey;
-    text-decoration: none !important;
-    font-family: 'Open Sans', sans-serif;
-    font-size: 13px;
 }
 
 .versions-link-other {
