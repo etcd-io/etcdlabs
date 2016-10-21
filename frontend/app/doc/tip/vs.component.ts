@@ -2,11 +2,11 @@ import { Component } from '@angular/core';
 import { parentComponent } from './common.component';
 
 @Component({
-    selector: 'app-performance',
-    templateUrl: 'performance.component.html',
+    selector: 'app-vs',
+    templateUrl: 'vs.component.html',
     styleUrls: ['common.component.css'],
 })
-export class PerformanceTipComponent extends parentComponent {
+export class VSTipComponent extends parentComponent {
     constructor() {
         super();
     }

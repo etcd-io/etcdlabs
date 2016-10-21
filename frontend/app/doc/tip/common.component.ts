@@ -79,9 +79,9 @@ export class parentComponent {
             ),
 
             new sidebarItem(
-                'Comparison',
+                'etcd vs.',
                 `etcd in comparison with other databases`,
-                `/doc/${this.version.etcdVersionURL}/comparison`,
+                `/doc/${this.version.etcdVersionURL}/vs`,
                 'no-text-decoration'
             ),
             new sidebarItem(
