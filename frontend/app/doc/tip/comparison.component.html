@@ -1,0 +1,170 @@
+<md-sidenav-layout>
+    <md-sidenav #sidenav [opened]="true" mode="side" class="doc-sidenav">
+        <md-list>
+            <a routerLink="/doc/{{version.etcdVersionURL}}">
+                <h3 md-subheader>Getting Started ({{version.etcdVersion}})</h3>
+            </a>
+            <md-list-item *ngFor="let item of getStartedItems">
+                <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
+            </md-list-item>
+
+            <md-divider></md-divider>
+
+            <h3 md-subheader>More</h3>
+            <md-list-item *ngFor="let item of moreItems">
+                <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
+            </md-list-item>
+        </md-list>
+    </md-sidenav>
+
+    <div class="doc-group">
+        <router-outlet></router-outlet>
+
+        <h4>etcd in comparison <span class="next-to-header-title">(last update Nov 1, 2016)</span></h4>
+        <br>
+        <p>
+            In 2006, Google published Chubby<sup>[1]</sup> distributed lock service built on Paxos<sup>[2]</sup>. Then resulted in Zookeeper, etcd, and Consul.
+        </p>
+        <br>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Zookeeper</th>
+                    <th>etcd</th>
+                    <th>Consul</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">Code</th>
+                    <td><a href="https://git-wip-us.apache.org/repos/asf?p=zookeeper.git" target="_blank" class="normal-link">apache/zookeeper</a></td>
+                    <td><a href="https://github.com/coreos/etcd" target="_blank" class="normal-link">coreos/etcd</a></td>
+                    <td><a href="https://github.com/hashicorp/consul" target="_blank" class="normal-link">hashicorp/consul</a></td>
+                </tr>
+                <tr>
+                    <th scope="row">First Commit</th>
+                    <td>Oct 28, 2007</td>
+                    <td>Jun 2, 2013</td>
+                    <td>Nov 3, 2013</td>
+                </tr>
+                <tr>
+                    <th scope="row">License</th>
+                    <td>Apache-2.0</td>
+                    <td>Apache-2.0</td>
+                    <td>Apache-2.0</td>
+                </tr>
+                <tr>
+                    <th scope="row">Version</th>
+                    <td><a href="http://zookeeper.apache.org/doc/r3.4.9/" target="_blank" class="normal-link">r3.4.9</a></td>
+                    <td><a href="https://github.com/coreos/etcd/releases/tag/v3.1.0-rc.0" target="_blank" class="normal-link">v3.1.0</a></td>
+                    <td><a href="https://github.com/hashicorp/consul/releases/tag/v0.7.0" target="_blank" class="normal-link">v0.7.0</a></td>
+                </tr>
+                <tr>
+                    <th scope="row">Consensus Protocol</th>
+                    <td>Zab<sup>[3]</sup></td>
+                    <td>Raft<sup>[4]</sup><sup>[5]</sup></td>
+                    <td>Raft<sup>[4]</sup><sup>[6]</sup></td>
+                </tr>
+                <tr>
+                    <th scope="row">RPC</th>
+                    <td><a href="https://zookeeper.apache.org/doc/trunk/zookeeperAdmin.html#Communication+using+the+Netty+framework" target="_blank" class="normal-link">NIO, Netty</a></td>
+                    <td><a href="http://www.grpc.io" target="_blank" class="normal-link">gRPC</a>, <a href="https://http2.github.io" target="_blank" class="normal-link">HTTP/2</a></td>
+                    <td>HTTP</td>
+                </tr>
+                <tr>
+                    <th scope="row">Language</th>
+                    <td>Java ???</td>
+                    <td>Go 1.7.3</td>
+                    <td>Go ???</td>
+                </tr>
+                <tr>
+                    <th scope="row">Storage</th>
+                    <td>Key-value, in-memory, WAL</td>
+                    <td>Key-value, <a href="https://github.com/boltdb/bolt" target="_blank" class="normal-link">Bolt</a>, <a href="https://github.com/coreos/etcd/blob/master/wal/doc.go" target="_blank" class="normal-link">WAL</a></td>
+                    <td>Key-value, <a href="https://github.com/boltdb/bolt" target="_blank" class="normal-link">Bolt</a></td>
+                </tr>
+                <tr>
+                    <th scope="row">Database Snapshot</th>
+                    <td>On-disk snapshot</td>
+                    <td>On-disk snapshot (incremental)</td>
+                    <td>On-disk snapshot</td>
+                </tr>
+                <tr>
+                    <th scope="row">Dynamic Reconfiguration</th>
+                    <td>Yes</td>
+                    <td>Yes</td>
+                    <td>Yes</td>
+                </tr>
+                <tr>
+                    <th scope="row">Built-in DNS</th>
+                    <td>No</td>
+                    <td>No</td>
+                    <td>Yes</td>
+                </tr>
+                <tr>
+                    <th scope="row">Leadership Transfer</th>
+                    <td>No</td>
+                    <td>Yes</td>
+                    <td>No</td>
+                </tr>
+                <tr>
+                    <th scope="row">Transaction</th>
+                    <td>Yes</td>
+                    <td>Yes</td>
+                    <td>Yes</td>
+                </tr>
+                <tr>
+                    <th scope="row">MVCC<sup>[7]</sup></th>
+                    <td>No</td>
+                    <td>Yes</td>
+                    <td>No</td>
+                </tr>
+                <tr>
+                    <th scope="row">Distributed Lock</th>
+                    <td>Yes</td>
+                    <td>Yes</td>
+                    <td>Yes</td>
+                </tr>
+                <tr>
+                    <th scope="row">Watch</th>
+                    <td>Polling</td>
+                    <td>Streaming</td>
+                    <td>Polling</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <br>
+        <hr align="left" class="footer-top-line">
+        <footer>
+            [1] Mike Burrows: "<a href="http://static.googleusercontent.com/media/research.google.com/en//archive/chubby-osdi06.pdf" target="_blank" class="footer-link">The Chubby lock service for loosely-coupled distributed systems</a>," at 7th USENIX
+            Symposium on Operating System Design and Implementation (OSDI), chapter 2, page 3, November 2006.
+            <br> [2] Leslie Lamport: "<a href="http://research.microsoft.com/en-us/um/people/lamport/pubs/lamport-paxos.pdf" target="_blank" class="footer-link">The Part-Time Parliament</a>," ACM Transactions on Computer Systems, volume 16, number 2,
+            pages 133–169, May 1998.
+            <br> [3] Flavio P. Junqueira, Benjamin C. Reed, and Marco Serafini: "<a href="https://pdfs.semanticscholar.org/b02c/6b00bd5dbdbd951fddb00b906c82fa80f0b3.pdf" target="_blank" class="footer-link">Zab: High-performance broadcast for primary-backup systems</a>,"
+            at DSN'11, IEEE/IFIP International Conference on Dependable Systems & Networks, June 2011.
+            <br> [4] Diego Ongaro and John K Ousterhout: "<a href="https://raft.github.io/raft.pdf" target="_blank" class="footer-link">In Search of an Understandable Consensus Algorithm (Extended Version)</a>," at USENIX Annual Technical Conference (ATC),
+            June 2014.
+            <br> [5] etcd Authors: "<a href="https://github.com/coreos/etcd/tree/master/raft" target="_blank" class="footer-link">coreos/etcd/raft</a>," github.com.
+            <br> [6] HashiCorp: "<a href="https://github.com/hashicorp/raft" target="_blank" class="footer-link">github.com/hashicorp/raft</a>," github.com.
+            <br> [7] Bruce Momjian: "<a href="http://momjian.us/main/presentations/internals.html#mvcc" target="_blank" class="footer-link">MVCC Unmasked</a>," momjian.us, July 2014.
+        </footer>
+        <br><br>
+
+
+        <br>
+        <h4>Performance</h4>
+        <p>
+            ...
+        </p>
+        <br>
+
+        <br>
+        <h4>etcd Reliability</h4>
+        <p>
+            ...
+        </p>
+
+    </div>
+</md-sidenav-layout>

@@ -64,8 +64,8 @@ export class VersionsTipComponent extends parentComponent {
                 ),
                 new versionItem(
                     false,
-                    'v3.0.12',
-                    'https://github.com/coreos/etcd/releases/tag/v3.0.12',
+                    'v3.0.13',
+                    'https://github.com/coreos/etcd/releases/tag/v3.0.13',
                     'versions-link-main',
                     'https://github.com/coreos/etcd/tree/release-3.0/Documentation',
                     'versions-link-other'

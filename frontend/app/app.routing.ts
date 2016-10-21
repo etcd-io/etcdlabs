@@ -12,7 +12,7 @@ import { DocTipComponent } from './doc/tip/doc.component';
 import { InstallDeployTipComponent } from './doc/tip/install-deploy.component';
 import { QuickTutorialsTipComponent } from './doc/tip/quick-tutorials.component';
 import { FAQTipComponent } from './doc/tip/faq.component';
-import { VSTipComponent } from './doc/tip/vs.component';
+import { ComparisonTipComponent } from './doc/tip/comparison.component';
 import { VersionsTipComponent } from './doc/tip/versions.component';
 
 /*
@@ -48,7 +48,7 @@ const appRoutes: Routes = [
             { path: 'install-deploy', component: InstallDeployTipComponent },
             { path: 'quick-tutorials', component: QuickTutorialsTipComponent },
             { path: 'faq', component: FAQTipComponent },
-            { path: 'vs', component: VSTipComponent },
+            { path: 'comparison', component: ComparisonTipComponent },
             { path: 'versions', component: VersionsTipComponent },
         ],
     },
@@ -90,7 +90,7 @@ export const routedComponents = [
     InstallDeployTipComponent,
     QuickTutorialsTipComponent,
     FAQTipComponent,
-    VSTipComponent,
+    ComparisonTipComponent,
     VersionsTipComponent,
 
     BlogComponent,
