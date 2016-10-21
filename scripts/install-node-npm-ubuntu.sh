@@ -12,7 +12,7 @@ sudo apt-get -y update
 # curl -sL https://deb.nodesource.com/setup_6.x -o $HOME/nodesource_setup.sh
 
 # install nvm
-curl -sL https://raw.githubusercontent.com/creationix/nvm/v0.31.0/install.sh -o $HOME/install_nvm.sh
+curl -sL https://raw.githubusercontent.com/creationix/nvm/v0.32.1/install.sh -o $HOME/install_nvm.sh
 bash $HOME/install_nvm.sh
 source $HOME/.profile
 nvm ls-remote
@@ -21,7 +21,7 @@ nvm ls-remote
 # sudo apt-get install -y build-essential libssl-dev
 # sudo apt-get install -y nodejs
 # sudo apt-get install -y npm
-nvm install 6.7.0
+nvm install 6.9.1
 
 # check NodeJS version
 node -v
