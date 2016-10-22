@@ -25,52 +25,52 @@
 
         <article class="blog-contents">
             <br>
-            <p>
+            <p class="narrow-paragraph">
                 This was originally posted at <a href="https://coreos.com/blog/transactional-memory-with-etcd3.html" target="_blank" class="normal-link">coreos.com/blog/transactional-memory-with-etcd3</a>.
             </p>
 
             <br>
-            <p>
+            <p class="narrow-paragraph">
                 The new etcd3 API introduces powerful new primitives that advance the system’s capabilities beyond the limits of etcd2. As part of evaluating the effectiveness of etcd3, we spent considerable effort developing distributed concurrency algorithms using
                 the new API.
             </p>
-            <p>
+            <p class="narrow-paragraph">
                 etcd3’s access serialization is superior to etcd2’s isolation model. When applications update several related keys, it is common to require these updates be all or nothing to maintain application data constraints and invariants. In particular, etcd3’s
                 transaction operations and its multi-revision data store give etcd a vocabulary for expressing atomicity by reasoning about serializability over revisions. With etcd2, each key update independently commits to the data store; there is no
                 atomicity. To judge whether etcd3’s primitives are expressive and efficient, we implemented and benchmarked common distributed concurrency control "recipes".
             </p>
-            <p>
+            <p class="narrow-paragraph">
                 This post looks at the atomicity granted by etcd3’s new mini-transactions. We’ll cover etcd3 transactions and demonstrate atomic updates with transactions. Next, we’ll show how etcd’s revision metadata naturally maps to software transactional memory (STM)<sup>[1]</sup>                by outlining a simple client-side STM implementation. Finally, we’ll show this STM implementation is a performant alternative to distributed shared locks.
             </p>
 
             <br>
             <h3>Serializability</h3>
-            <p>
+            <p class="narrow-paragraph">
                 Distributed consensus systems like etcd process many concurrent requests from many concurrent clients. Atomicity guarantees that, despite concurrent readers and writers, the data model is consistent for every store revision. There’s a great deal of literature
                 discussing the variety of ways to enforce, or at least reason about, atomicity in a distributed system; the etcd3 API supports some of the more typical patterns.
             </p>
-            <p>
+            <p class="narrow-paragraph">
                 Serializability gives a point in time view of the entire key-value store. A set of serialized reads observes no new writes following the first access; the reads appear as if taken from a single snapshot. Serializing writes publishes a complete set of
                 updates at a single point in time, or not at all. Partial writes never materialize, and hence never corrupt application state.
             </p>
-            <p>
+            <p class="narrow-paragraph">
                 Let’s go through an example to illustrate the importance of atomicity for avoiding inconsistent data. The following code transfers a sum amount from one account to another:
             </p>
-            <pre class="code-light">{{getCode1()}}</pre>
-            <p>
+            <pre class="code-light narrow-paragraph">{{getCode1()}}</pre>
+            <p class="narrow-paragraph">
                 Although the example code is straightforward, concurrent processes will corrupt the application state under concurrent access, given an inopportune conflicting schedule. The diagram below shows an example conflicting schedule timeline for concurrent processes
                 P1 and P2 running <span class="code-light-snippet">nosyncXfer</span> using a shared etcd server process. Each box represents a process’s knowledge of etcd’s key state after receiving a message (indicated by an arrow). Here,
                 the process P2 receives "a" (bold) before P1 issues updates to "a" and "b", causing P2 to overcount with inconsistent data (red) when it writes back to etcd.
             </p>
-            <p style="text-align:center;"><img src="app/blog/2016/stm-image/diagram1.png" alt="diagram1" align="middle"></p>
-            <p>
+            <p class="narrow-paragraph" style="text-align:center;"><img src="app/blog/2016/stm-image/diagram1.png" alt="diagram1" align="middle"></p>
+            <p class="narrow-paragraph">
                 Most systems handle the atomicity needed by the example code either through distributed shared locks or a transaction facility. Ultimately, some mechanism enforces atomic accesses over sets of keys while also maintaining fault tolerance and avoiding runaway
                 performance degradation under contention. For etcd3, this atomicity mechanism is the transaction.
             </p>
 
             <br>
             <h3>etcd3 Transactions</h3>
-            <p>
+            <p class="narrow-paragraph">
                 etcd3 introduces transactions to the etcd API for handling atomic updates to sets of keys. An etcd3 transaction is a primitive operation that composes <span class="code-light-snippet">Get</span>, <span class="code-light-snippet">Put</span>,
                 and <span class="code-light-snippet">Delete</span> operations into transactional blocks guarded by predicates on the current etcd store contents. From this transaction primitive, it’s possible to build richer concurrency control algorithms.
                 For example, etcd transactions cleanly map to supporting client-side software transactional memory.
@@ -78,56 +78,56 @@
 
             <div style="line-height:3%;"><br></div>
             <h4>Primitive Transactions</h4>
-            <p>
+            <p class="narrow-paragraph">
                 An etcd transaction is a primitive encoded in the etcd protocol that lets a client submit multiple key-value operations within a single revision, the unit of serializability in etcd. In addition to batching operations, transactions are guarded; a transaction
                 controls which operations to commit based on conditions over the state of the etcd store.
             </p>
-            <p>
+            <p class="narrow-paragraph">
                 An etcd3 transaction is structured as follows:
             </p>
-            <pre class="code-light">Txn().If(cond1, cond2, ...).Then(op1, op2, ...,).Else(op1’, op2’, …)</pre>
-            <p>
+            <pre class="code-light narrow-paragraph">Txn().If(cond1, cond2, ...).Then(op1, op2, ...,).Else(op1’, op2’, …)</pre>
+            <p class="narrow-paragraph">
                 There are three components to a transaction: the conditional block, the success block, and the fail block. First, the condition block, given by <span class="code-light-snippet">If(cond1, cond2, …)</span>, guards the transaction. If all
                 the conditions (i.e., cond1, cond2, …) evaluate to true, then the transaction is said to succeed. If any condition evaluates to false, then the transaction is said to fail. The success block, given by <span class="code-light-snippet">Then(op1, op2, …)</span>,
                 applies all its operations (i.e., op1, op2, …) in a single revision if the transaction succeeds. The fail block, given by <span class="code-light-snippet">Else(op1’, op2’, …)</span>, applies all its operations (i.e., op1’, op2’, …) in
                 a single revision if the transaction fails.
             </p>
-            <p>
+            <p class="narrow-paragraph">
                 A condition block is a conjunction of conditions. Each condition has a comparison target (value, creation revision, modification revision, or version) for a key and a comparison operator (
                 <,=,>). Overwriting a superseded key, the problem in <span class="code-light-snippet">nosyncXfer</span>, is avoided by guarding the update so it fails if the key’s modification revision changed since the last fetch.
             </p>
-            <p>
+            <p class="narrow-paragraph">
                 Here’s the example code, rewritten to safely update the values using transactions:
             </p>
-            <pre class="code-light">{{getCode2()}}</pre>
-            <p>
+            <pre class="code-light narrow-paragraph">{{getCode2()}}</pre>
+            <p class="narrow-paragraph">
                 This code is an improvement over the original version. All <span class="code-light-snippet">Get</span> requests are wrapped in a transaction so interleaved writes cannot update <span class="code-light-snippet">from</span> while fetching
                 <span class="code-light-snippet">to</span>. Similarly, the <span class="code-light-snippet">Put</span> requests are also wrapped in a transaction to ensure <span class="code-light-snippet">from</span> and <span class="code-light-snippet">to</span>                have not been modified since they were last fetched. The upshot is a conflicting schedule that would have corrupted the data instead admits one transaction by modification revision (shown in braces) and retries the other:
             </p>
-            <p style="text-align:center;"><img src="app/blog/2016/stm-image/diagram2.png" alt="diagram2" align="middle"></p>
+            <p class="narrow-paragraph" style="text-align:center;"><img src="app/blog/2016/stm-image/diagram2.png" alt="diagram2" align="middle"></p>
 
             <div style="line-height:3%;"><br></div>
             <h4>Software Transactional Memory</h4>
-            <p>
+            <p class="narrow-paragraph">
                 Rewriting the example with transactions solves data corruption, but the code leaves much to be desired. The code is somewhat unnatural; manually submitting a transaction request for reads up front, tracking modification revisions, and explicitly retrying
                 are too clumsy for a boilerplate pattern. Ideally, safely working with the data would be as straightforward as working with regular, isolated memory.
             </p>
-            <p>
+            <p class="narrow-paragraph">
                 Wrapping accesses in transactions guarded by modification revision is hard-coding software transactional memory (STM). A STM system detects conflicts on memory accesses, the same as guarding by modification revision, and to recover, safely rolls back
                 any changes. In an optimistic STM system, a transactional context records all reads and buffers all writes to a read set and write set respectively. To commit a transaction, the system checks for any read conflicts (example below). A conflict
                 free transaction applies the write set to memory, but a conflict will retry or abort the transaction.
             </p>
-            <p style="text-align:center;"><img src="app/blog/2016/stm-image/diagram2.png" alt="diagram2" align="middle"></p>
-            <p>
+            <p class="narrow-paragraph" style="text-align:center;"><img src="app/blog/2016/stm-image/diagram2.png" alt="diagram2" align="middle"></p>
+            <p class="narrow-paragraph">
                 To illustrate the STM retry process, the diagram above revisits the conflicting schedule between P1 and P2, but using STM. As before, P1 updates both "a" and "b" between P2 receiving "a" and "b. P1’s commit to etcd increases the key modification revisions
                 to <span class="code-light-snippet">{{getCode3()}}</span>. When P2 tries to commit using STM, the stale read set revision for "a" (1) conflicts with the current revision (2) so the server rejects the commit. P2’s transaction
                 then retries by reloading the read set, reapplying the transaction, and then committing without conflict.
             </p>
-            <p>
+            <p class="narrow-paragraph">
                 The following code is the example rewritten to use etcd3’s client STM:
             </p>
-            <pre class="code-light">{{getCode4()}}</pre>
-            <p>
+            <pre class="code-light narrow-paragraph">{{getCode4()}}</pre>
+            <p class="narrow-paragraph">
                 The STM version is simpler: pass a function to the STM runtime and it handles the details. There’s less error handling; the STM layer automatically catches any etcd errors and aborts the transaction. The retry loop in the transaction example is also eliminated
                 because retries are automatically dispatched by the STM system. Scoping is simpler as well; a transaction can be aborted by returning out of the transaction function with an error or by canceling the transaction context (i.e., context.TODO()).
                 Finally, there’s less bookkeeping: juggling revision numbers and building transactions are also handled by the client STM code.
@@ -135,20 +135,20 @@
 
             <br>
             <h3>Implementing STM</h3>
-            <p>
+            <p class="narrow-paragraph">
                 etcd3’s STM is written on top of the v3 API primitives. To show the mechanics of an STM protocol using etcd3, we’ll outline a simple repeatable-read optimistic STM algorithm in under 70 lines of Go. This implementation includes features common to STM
                 such as transaction readset and writeset management, data access, commit, retry, and abort.
             </p>
-            <p>
+            <p class="narrow-paragraph">
                 There are several properties to expect from a STM system. First, transactions must be atomic; a commit is all or nothing. Second, transactions must have at least repeatable read isolation (full serializability, where all reads are at the same revision,
                 doesn’t matter for our example code). Third, it must be consistent; commits should detect data conflicts and retry the operation to resolve those conflicts.
             </p>
 
             <div style="line-height:3%;"><br></div>
             <h4>Transaction Loop</h4>
-            <p>The STM process is controlled by its transaction loop:</p>
-            <pre class="code-light">{{getCode5()}}</pre>
-            <p>
+            <p class="narrow-paragraph">The STM process is controlled by its transaction loop:</p>
+            <pre class="code-light narrow-paragraph">{{getCode5()}}</pre>
+            <p class="narrow-paragraph">
                 The transaction loop manages the lifetime of a STM transaction. A new transaction starts a transaction loop, and the call returns a future for the loop’s completion. The loop creates new bookkeeping data structures, runs the user-supplied apply function
                 to access some keys, then commits the transaction. If the STM runtime cannot access etcd (e.g., due to network failure) or the context is canceled, it uses Go’s panic/recover to cancel the transaction. If there is a conflict, the loop
                 repeats, trying again with a fresh transaction.
@@ -156,11 +156,11 @@
 
             <div style="line-height:3%;"><br></div>
             <h4>Read and Write Sets</h4>
-            <p>
+            <p class="narrow-paragraph">
                 The following structure describes the entire STM transaction context:
             </p>
-            <pre class="code-light">{{getCode6()}}</pre>
-            <p>
+            <pre class="code-light narrow-paragraph">{{getCode6()}}</pre>
+            <p class="narrow-paragraph">
                 An STM transaction context tracks a running transaction’s state. It keeps a client reference so data can be retrieved through transactional <span class="code-light-snippet">Get</span> and <span class="code-light-snippet">Put</span> requests.
                 These <span class="code-light-snippet">Get</span> and <span class="code-light-snippet">Put</span> requests filter through a readset (rset) and writeset (wset) for conflict detection in the commit phase. This transaction is also user-cancelable
                 through context cancellation.
@@ -168,11 +168,11 @@
 
             <div style="line-height:3%;"><br></div>
             <h4>Get and Put</h4>
-            <p>
+            <p class="narrow-paragraph">
                 The STM <span class="code-light-snippet">Get</span> and <span class="code-light-snippet">Put</span> methods monitor and buffer accesses to etcd keys:
             </p>
-            <pre class="code-light">{{getCode7()}}</pre>
-            <p>
+            <pre class="code-light narrow-paragraph">{{getCode7()}}</pre>
+            <p class="narrow-paragraph">
                 <span class="code-light-snippet">Get</span> and <span class="code-light-snippet">Put</span> track the data governed by the transaction. For <span class="code-light-snippet">Put</span>, the key’s value is stored to the write set, deferring
                 the actual update until the transactional commit. For <span class="code-light-snippet">Get</span>, the key’s value is based on its last observed value: from the write set if overwritten, from the read set if cached, or compulsorily from
                 etcd if absent. All compulsory reads populate the read set to give repeatable-read isolation and track the key’s revision for conflict resolution.
@@ -180,39 +180,39 @@
 
             <div style="line-height:3%;"><br></div>
             <h4>Commit</h4>
-            <p>
+            <p class="narrow-paragraph">
                 When the apply completes, the changes commit back to etcd through a transaction:
             </p>
-            <pre class="code-light">{{getCode8()}}</pre>
-            <p>
+            <pre class="code-light narrow-paragraph">{{getCode8()}}</pre>
+            <p class="narrow-paragraph">
                 The commit transaction is built from both the read and write sets. To detect conflicts, the transaction is guarded by the modification revisions of all read keys; if any key has been updated, the transaction fails. If no conflicts are detected, the transaction
                 flushes the write set to etcd and succeeds.
             </p>
 
             <br>
             <h3>Performance of STM on etcd</h3>
-            <p>
+            <p class="narrow-paragraph">
                 This section measures the performance of STM on etcd. If the STM is working as intended, its request throughput for the example code should scale with the number of keys. Likewise, request throughput will remain steady for a distributed lock. Next, we
                 take a deeper look at the impact of STM isolation policy by comparing the rate of conflict for repeatable read isolation against serialized isolation.
             </p>
-            <p>
+            <p class="narrow-paragraph">
                 Request throughput of key pair updates for different serialization policies:
             </p>
-            <p style="text-align:center;">
+            <p class="narrow-paragraph" style="text-align:center;">
                 <img src="app/blog/2016/stm-image/stm.png" alt="stm">
             </p>
-            <p>
+            <p class="narrow-paragraph">
                 The figure above shows benchmark results from modeling the example code, taken with the etcd3 benchmark tool “stm” command. As expected, lock throughput remains constant and STM throughput scales as the number of keys increases. Compared to read-committed
                 accesses, which corrupt data because their reads never conflict, serializable STM only adds 20% overhead. Compared to locks, STM is more than 15x faster at scale. Surprisingly, repeatable read isolation, despite being weaker isolation
                 and presumably needing fewer retries, had worse performance than serializable STM. This is possibly because the serialized isolation implementation prefetches the read set on retry, whereas repeatable read fetches keys as needed.
             </p>
-            <p>
+            <p class="narrow-paragraph">
                 Read conflict retry rate for serialized and repeatable read STM policies:
             </p>
-            <p style="text-align:center;">
+            <p class="narrow-paragraph" style="text-align:center;">
                 <img src="app/blog/2016/stm-image/stm-retry.png" alt="stm-retry">
             </p>
-            <p>
+            <p class="narrow-paragraph">
                 The rate of retries, shown above, demonstrates the effect of different isolation levels. With few keys, there are many conflicts, and repeatable reads have fewer retries than serialized isolation because that conflict policy permits more interleaved writes.
                 As the key count goes, up the chance for conflict decreases and repeatable reads have less of an advantage. Eventually, serialized isolation has fewer retries than repeatable reads because its faster retry logic prefetches the read set,
                 saving a round trip and shortening the conflict window.
@@ -220,16 +220,16 @@
 
             <br>
             <h3>What’s Next?</h3>
-            <p>
+            <p class="narrow-paragraph">
                 This post showed how to use etcd3’s transactions as a mechanism for enforcing serializability. Additionally, the multi-revision store and transaction operations new to etcd3 are expressive enough to build higher-order abstractions such as software transactional
                 memory. Likewise, these primitives have good performance, even with etcd3’s additional functionality. STM request throughput scales and quickly overtakes lock request throughput.
             </p>
-            <p>
+            <p class="narrow-paragraph">
                 Although etcd3 is still relatively new, etcd3 transactions are already used by real applications. For container orchestration, Kubernetes’s new etcd3 backend benefits from transactions by being able to consistently model relationships among API objects
                 and atomically patch multiple object attributes at once. For storage, the Torus distributed storage system is built from the ground up to issue consistent block metadata updates with etcd3 transactions. We’re excited to see how the community
                 will use etcd3’s transactions in the future.
             </p>
-            <p>
+            <p class="narrow-paragraph">
                 Interested in trying out etcd3 transactions? The code for etcd is open source and freely available at the <a href="https://github.com/coreos/etcd" target="_blank" class="normal-link">etcd github project page</a>. More information on etcd3
                 can be found in the <a href="https://github.com/coreos/etcd/blob/master/Documentation/docs.md" target="_blank" class="normal-link">etcd3 documentation</a>. The source code for etcd3’s client STM used for performance testing may be found
                 in the v3 client <a href="https://github.com/coreos/etcd/tree/master/clientv3/concurrency" target="_blank" class="normal-link">concurrency package</a>.
@@ -237,7 +237,7 @@
 
             <br>
             <hr align="left" class="footer-top-line">
-            <footer>
+            <footer class="narrow-footer">
                 [1] "<a href="https://en.wikipedia.org/wiki/Software_transactional_memory" target="_blank" class="footer-link">Software transactional memory</a>," Wikipedia.
             </footer>
         </article>

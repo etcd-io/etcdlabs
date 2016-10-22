@@ -22,7 +22,7 @@
 
         <h4>Install and Deploy etcd <span class="next-to-header-title">(latest {{etcdVersionLatestRelease}})</span></h4>
         <br>
-        <p>
+        <p class="narrow-paragraph">
             This is an example workflow to install and deploy etcd.
         </p>
 
@@ -78,14 +78,8 @@
                 <template md-tab-content>
 					<br>
 					<h5>Why?</h5>
-					<p>
-						If etcd stores information that should not be public, encryption is highly recommended.
-					</p>
-					<p>
-						etcd supports SSL/TLS and authentication for clients-to-server and peer-to-peer communication.
-					</p>
-					<p>
-						Here's how to generate self-signed TLS certificates with
+					<p class="narrow-paragraph">
+						If etcd stores information that should not be public, encryption is highly recommended. etcd supports SSL/TLS and authentication for clients-to-server and peer-to-peer communication. Here's how to generate self-signed TLS certificates with
 						<a href="https://github.com/cloudflare/cfssl" target="_blank" class="normal-link">cfssl</a>.
 					</p>
 
@@ -197,7 +191,7 @@
 				</template>
                 <template md-tab-content>
 					<br>
-					<p>
+					<p class="narrow-paragraph">
 						etcd is written in Go. To build from source, you need Go 1.7+. This assumes host OS is Linux.
 					</p>
 					<p>
@@ -217,7 +211,7 @@
 						</div>
 					</div>
 					<br>
-					<p>
+					<p class="narrow-paragraph">
 						Now let's build etcd from source.
 					</p>
 					<p>
@@ -250,11 +244,8 @@
                 <template md-tab-content>
 					<br>
 					<h5>Why?</h5>
-					<p>
-						etcd writes data to disk. Such stateful application is complicated to run in container.
-					</p>
-					<p>
-						Bare metal or virtual machine is the simplest way to run etcd.
+					<p class="narrow-paragraph">
+						etcd writes data to disk. Such stateful application is complicated to run in container. Bare metal or virtual machine is the simplest way to run etcd.
 					</p>
 
 					<br>
@@ -358,7 +349,7 @@
                 <template md-tab-content>
 					<br>
 					<h5>Why?</h5>
-					<p>
+					<p class="narrow-paragraph">
 						<a href="https://en.wikipedia.org/wiki/Systemd" target="_blank" class="normal-link">systemd</a> can help bootstrap
 						etcd cluster.
 					</p>
@@ -460,7 +451,7 @@
                 <template md-tab-content>
 					<br>
 					<h5>Why?</h5>
-					<p>
+					<p class="narrow-paragraph">
 						Application container gives much portability to initial development phase.
 					</p>
 
@@ -559,20 +550,8 @@
 
 					<br>
 					<h5>More</h5>
-					<p>
-						Application container gives much portability to initial development phase.
-					</p>
-					<p>
-						But operating and scaling container requires much more work.
-					</p>
-					<p>
-						<a href="http://kubernetes.io/" target="_blank" class="normal-link">Kubernetes</a> manages such complex container environments.
-					</p>
-					<p>
-						More on Kubernetes? Please visit <a href="http://kubernetes.io/docs" target="_blank" class="normal-link">Official Kubernetes Guides</a>.
-					</p>
-					<p>
-						Fully managed etcd cluster? Please visit <a href="https://github.com/coreos/kube-etcd-controller" target="_blank" class="normal-link">kube-etcd-controller</a>.
+					<p class="narrow-paragraph">
+						Application container gives much portability to initial development phase. But operating and scaling container requires much more work. <a href="http://kubernetes.io/" target="_blank" class="normal-link">Kubernetes</a> manages such complex container environments. More on Kubernetes? Please visit <a href="http://kubernetes.io/docs" target="_blank" class="normal-link">Official Kubernetes Guides</a>. Fully managed etcd cluster? Please visit <a href="https://github.com/coreos/kube-etcd-controller" target="_blank" class="normal-link">kube-etcd-controller</a>.
 					</p>
 				</template>
             </md-tab>
@@ -585,11 +564,8 @@
                 <template md-tab-content>
 					<br>
 					<h5>Why?</h5>
-					<p>
-						CoreOS is a lightweight Linux operating system for automated security updates and scalable cluster deployment.
-					</p>
-					<p>
-						System and security patches are regularly pushed to CoreOS Linux machines without requiring intervention by administrators.
+					<p class="narrow-paragraph">
+						CoreOS is a lightweight Linux operating system for automated security updates and scalable cluster deployment. System and security patches are regularly pushed to CoreOS Linux machines without requiring intervention by administrators.
 					</p>
 
 					<br>
@@ -668,12 +644,11 @@
 
 					<br>
 					<h5>More</h5>
-					<p>
+					<p class="narrow-paragraph">
 						Please visit <a href="https://coreos.com/why" target="_blank" class="normal-link">CoreOS</a>.
 					</p>
 				</template>
             </md-tab>
-
 
         </md-tab-group>
     </div>

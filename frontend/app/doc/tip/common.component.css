@@ -122,6 +122,14 @@ h2 .faq-title {
     font-size: 20px;
 }
 
+.narrow-paragraph {
+    max-width: 1000px;
+}
+
+.narrow-footer {
+    max-width: 800px;
+}
+
 .next-to-header-title {
     color: dimgrey;
     text-decoration: none !important;
@@ -428,7 +436,7 @@ section.features .feature-grid .feature h3 {
 }
 
 section.features .feature-grid .feature p {
-    font-size: .875rem;
+    font-size: 1.0rem;
     line-height: 1.5rem;
     color: #000
 }

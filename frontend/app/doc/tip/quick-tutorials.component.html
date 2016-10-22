@@ -27,7 +27,7 @@
                 <template md-tab-content>
 
 					<br>
-					<p>
+					<p class="narrow-paragraph">
 						Simplest way to access <span class="code-light-snippet">etcd</span> is <span class="code-light-snippet">etcdctl</span>.
 					</p>
 					<div class="osx-window">
@@ -46,7 +46,7 @@
 
 					<br><br>
 					<h5>Write</h5>
-					<p>
+					<p class="narrow-paragraph">
 						Write keys with <span class="code-light-snippet-red">put</span> command. Here's demo.
 					</p>
 					<div class="inner">
@@ -75,12 +75,9 @@
 
 					<br><br><br>
 					<h5>Read</h5>
-					<p>
+					<p class="narrow-paragraph">
 						Read keys with <span class="code-light-snippet-red">get</span> command. Default consistency level is linearizable read,
-						which goes through consensus protocol to get latest value from leader.
-					</p>
-					<p>
-						etcd stores data in a multiversion persistent key-value store: <span class="code-light-snippet-red">--rev</span> flag
+						which goes through consensus protocol to get latest value from leader. etcd stores data in a multiversion persistent key-value store: <span class="code-light-snippet-red">--rev</span> flag
 						to get previous values.
 					</p>
 					<div class="inner">
@@ -109,12 +106,9 @@
 
 					<br><br><br>
 					<h5>Delete</h5>
-					<p>
+					<p class="narrow-paragraph">
 						Use <span class="code-light-snippet-red">del</span> command to delete keys. It returns the number of keys deleted if
 						any.
-					</p>
-					<p>
-						TODO: delete all keys
 					</p>
 					<div class="inner">
 						<div class="block block-graphic">
@@ -142,7 +136,7 @@
 
 					<br><br><br>
 					<h5>Transactional write</h5>
-					<p>
+					<p class="narrow-paragraph">
 						Use <span class="code-light-snippet-red">txn</span> command to wrap multiple requests into one transaction.
 					</p>
 					<div class="inner">
@@ -170,11 +164,8 @@
 
 					<br><br><br>
 					<h5>Lease</h5>
-					<p>
-						Use <span class="code-light-snippet-red">lease</span> command to write keys with Time-To-Live (TTL).
-					</p>
-					<p>
-						When TTL expires, keys are deleted automatically.
+					<p class="narrow-paragraph">
+						Use <span class="code-light-snippet-red">lease</span> command to write keys with Time-To-Live (TTL). When TTL expires, keys are deleted automatically.
 					</p>
 					<div class="inner">
 						<div class="block block-graphic">
@@ -211,7 +202,7 @@
 
 					<br><br>
 					<h5>Watch</h5>
-					<p>
+					<p class="narrow-paragraph">
 						Use <span class="code-light-snippet-red">watch</span> command to get notified of future changes on keys.
 					</p>
 					<div class="inner">
@@ -240,7 +231,7 @@
 
 					<br><br><br>
 					<h5>Lock</h5>
-					<p>
+					<p class="narrow-paragraph">
 						Use <span class="code-light-snippet-red">lock</span> command for distributed locks.
 					</p>
 					<div class="inner">
@@ -269,7 +260,7 @@
 
 					<br><br><br>
 					<h5>Election</h5>
-					<p>
+					<p class="narrow-paragraph">
 						Use <span class="code-light-snippet-red">elect</span> for leader election.
 					</p>
 					<div class="inner">
@@ -307,14 +298,8 @@
 
 					<br><br>
 					<h5>Member add, remove</h5>
-					<p>
-						Use <span class="code-light-snippet-red">member</span> command for member reconfiguration.
-					</p>
-					<p>
-						Make sure to remove member first before adding any.
-					</p>
-					<p>
-						Make sure to start the new member with <span class="code-light-snippet-red">--initial-cluster-state=existing</span> flag.
+					<p class="narrow-paragraph">
+						Use <span class="code-light-snippet-red">member</span> command for member reconfiguration. Make sure to remove member first before adding any. And make sure to start the new member with <span class="code-light-snippet-red">--initial-cluster-state=existing</span> flag.
 					</p>
 					<div class="inner">
 						<div class="block block-graphic">
@@ -341,7 +326,7 @@
 
 					<br><br><br>
 					<h5>Compact</h5>
-					<p>
+					<p class="narrow-paragraph">
 						Use <span class="code-light-snippet-red">compact</span> to compact old records.
 					</p>
 					<div class="inner">

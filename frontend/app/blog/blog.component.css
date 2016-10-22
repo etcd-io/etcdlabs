@@ -10,6 +10,14 @@ md-sidenav-layout {
     min-height: 600px;
 }
 
+.narrow-paragraph {
+    max-width: 1000px;
+}
+
+.narrow-footer {
+    max-width: 800px;
+}
+
 .blog-sidenav {
     padding: 10px;
     min-width: 150px;

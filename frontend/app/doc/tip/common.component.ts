@@ -51,6 +51,12 @@ export class parentComponent {
                 'no-text-decoration'
             ),
             new sidebarItem(
+                'Kubernetes',
+                'run etcd with Kubernetes',
+                `/doc/${this.version.etcdVersionURL}/kubernetes`,
+                'no-text-decoration'
+            ),
+            new sidebarItem(
                 'Quick Tutorials',
                 'write, read, watch, lock, election, membership, maintenance',
                 `/doc/${this.version.etcdVersionURL}/quick-tutorials`,

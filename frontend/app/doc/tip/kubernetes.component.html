@@ -1,0 +1,65 @@
+<md-sidenav-layout>
+    <md-sidenav #sidenav [opened]="true" mode="side" class="doc-sidenav">
+        <md-list>
+            <a routerLink="/doc/{{version.etcdVersionURL}}">
+                <h3 md-subheader>Getting Started ({{version.etcdVersion}})</h3>
+            </a>
+            <md-list-item *ngFor="let item of getStartedItems">
+                <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
+            </md-list-item>
+
+            <md-divider></md-divider>
+
+            <h3 md-subheader>More</h3>
+            <md-list-item *ngFor="let item of moreItems">
+                <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
+            </md-list-item>
+        </md-list>
+    </md-sidenav>
+
+    <div class="doc-group">
+        <router-outlet></router-outlet>
+
+        <h4>Install and Deploy etcd with Kubernetes</h4>
+        <br>
+        <p class="narrow-paragraph">
+            This is an example workflow to install and deploy etcd with Kubernetes.
+        </p>
+
+        <p class="narrow-paragraph">
+            TODO: ...
+        </p>
+
+
+        <md-tab-group>
+
+            <md-tab>
+                <template md-tab-label>
+					TODO 1
+				</template>
+                <template md-tab-content>
+					<br>
+					<h5>Why?</h5>
+					<p class="narrow-paragraph">
+						...
+					</p>
+				</template>
+            </md-tab>
+
+            <md-tab>
+                <template md-tab-label>
+					TODO 2
+				</template>
+                <template md-tab-content>
+					<br>
+					<h5>Why?</h5>
+					<p class="narrow-paragraph">
+						...
+					</p>
+				</template>
+            </md-tab>
+
+        </md-tab-group>
+
+    </div>
+</md-sidenav-layout>
