@@ -191,12 +191,19 @@
 				</template>
                 <template md-tab-content>
 					<br>
+					<h5>Why?</h5>
+					<p class="narrow-paragraph">
+						To try out the latest features and changes in etcd.
+					</p>
+
+					<br>
+					<h5>Build etcd</h5>
 					<p class="narrow-paragraph">
 						etcd is written in Go. To build from source, you need Go 1.7+. This assumes host OS is Linux.
 					</p>
-					<p>
-						<md-input type="text" [(ngModel)]="inputGoVersion" placeholder="Go version"></md-input>
-					</p>
+					<br>
+					<md-input type="text" [(ngModel)]="inputGoVersion" placeholder="Go version"></md-input>
+					<br>
 					<div class="osx-window">
 						<div class="window">
 							<div class="titlebar">
@@ -324,7 +331,9 @@
 						</div>
 					</div>
 
+					<br>
 					Check status:
+					<br>
 					<div class="osx-window">
 						<div class="window-mid">
 							<div class="titlebar">
@@ -427,7 +436,9 @@
 						</div>
 					</div>
 
+					<br>
 					Check status:
+					<br>
 					<div class="osx-window">
 						<div class="window-mid">
 							<div class="titlebar">
@@ -452,7 +463,7 @@
 					<br>
 					<h5>Why?</h5>
 					<p class="narrow-paragraph">
-						Application container gives much portability to initial development phase.
+						Application container gives much portability to initial development phase. Here's how to run etcd with <a href="https://github.com/coreos/rkt" target="_blank" class="normal-link">rkt</a>.
 					</p>
 
 					<br>
@@ -530,9 +541,9 @@
 						</div>
 					</div>
 
+					<br>
 					Check status:
-					<br>
-					<br>
+					<br><br>
 					<md-input type="text" [(ngModel)]="inputEtcdRktExecDir" placeholder="etcdctl exec dir"></md-input>
 					<div class="osx-window">
 						<div class="window-mid">
@@ -565,7 +576,7 @@
 					<br>
 					<h5>Why?</h5>
 					<p class="narrow-paragraph">
-						CoreOS is a lightweight Linux operating system for automated security updates and scalable cluster deployment. System and security patches are regularly pushed to CoreOS Linux machines without requiring intervention by administrators.
+						<a href="https://coreos.com/why" target="_blank" class="normal-link">CoreOS</a> is a lightweight Linux operating system for automated security updates and scalable cluster deployment. System and security patches are regularly pushed to CoreOS Linux machines without requiring intervention by administrators.
 					</p>
 
 					<br>
@@ -624,9 +635,9 @@
 						</div>
 					</div>
 
+					<br>
 					Check status:
-					<br>
-					<br>
+					<br><br>
 					<md-input type="text" [(ngModel)]="inputEtcdRktExecDir" placeholder="etcdctl exec dir"></md-input>
 					<div class="osx-window">
 						<div class="window-mid">
