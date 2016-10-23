@@ -13,6 +13,8 @@
     <div class="doc-group">
         <router-outlet></router-outlet>
 
+        <div id="top"></div>
+
         <div class="inner">
             <div class="block block-copy half">
 
@@ -93,6 +95,7 @@
             <br> [2] Mike Burrows: "<a href="http://static.googleusercontent.com/media/research.google.com/en//archive/chubby-osdi06.pdf" target="_blank" class="footer-link">The Chubby lock service for loosely-coupled distributed systems</a>," at 7th
             USENIX Symposium on Operating System Design and Implementation (OSDI), November 2006.
         </footer>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/faq#top" class="normal-link">↑ top</a></div>
         <br><br>
 
         <div id="etcd-to-use"></div>
@@ -101,6 +104,7 @@
             etcd is designed to store a small amount of meta-data in consistent, fault-tolerant way. Distributed systems use etcd as the root of scheduling and service discovery configuration storage. <a href="https://godoc.org/github.com/coreos/etcd/clientv3/concurrency"
                 target="_blank" class="normal-link">Distributed lock</a> is implemented on top of etcd, useful for master election in other distributed databases.
         </p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/faq#top" class="normal-link">↑ top</a></div>
         <br>
 
         <div id="etcd-not-to-use"></div>
@@ -112,6 +116,7 @@
         <p class="narrow-paragraph">
             etcd is not a relational SQL database. etcd uses <i>key</i> as the primary index: clients can range- and prefix-scan on the keys. etcd does not have a secondary index.
         </p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/faq#top" class="normal-link">↑ top</a></div>
         <br>
 
         <div id="etcd-consensus"></div>
@@ -125,6 +130,7 @@
             [1] Diego Ongaro and John K Ousterhout: "<a href="https://raft.github.io/raft.pdf" target="_blank" class="footer-link">In Search of an Understandable Consensus Algorithm (Extended Version)</a>," at USENIX Annual Technical Conference (ATC),
             June 2014.
         </footer>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/faq#top" class="normal-link">↑ top</a></div>
         <br><br>
 
         <div id="etcd-cap"></div>
@@ -177,6 +183,7 @@
             number 2, pages 91–122, May 1994.
             <br> [4] Peter Bailis and Kyle Kingsbury: "<a href="http://queue.acm.org/detail.cfm?id=2655736" target="_blank" class="footer-link">The Network is Reliable</a>," ACM Queue, volume 12, number 7, July 2014.
         </footer>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/faq#top" class="normal-link">↑ top</a></div>
         <br><br>
 
         <div id="etcd-consistency"></div>
@@ -219,6 +226,7 @@
             Raft is leader-based, and the leader handles all client requests. Client does not need to know which node is the leader. Request to follower is automatically forwarded to leader. Raft algorithm divides time into terms, and each term begins with an election
             to choose one leader. If leader becomes unavailable, cluster immediately elects a new leader or automatically transfers the leadership to a follower. This requires no human intervention.
         </p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/faq#top" class="normal-link">↑ top</a></div>
         <br>
 
         <div id="etcd-failure-tolerance"></div>
@@ -232,6 +240,7 @@
         <footer class="narrow-footer">
             [1] Diego Ongaro: "<a href="https://ramcloud.stanford.edu/~ongaro/thesis.pdf" target="_blank" class="footer-link">Consensus: Bridging Theory and Practice</a>," Stanford University Ph.D. Dissertation, chapter 3, page 22, August 2014.
         </footer>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/faq#top" class="normal-link">↑ top</a></div>
         <br><br>
 
         <div id="etcd-use-case-coreos"></div>
@@ -240,6 +249,7 @@
             Application running on <a href="https://coreos.com/why/" target="_blank" class="normal-link">CoreOS</a> gets automatic, no-downtime Linux kernel updates. CoreOS uses
             <a href="https://github.com/coreos/locksmith" target="_blank" class="normal-link">locksmith</a> to coordinate updates. locksmith stores semephore values in etcd to ensure that only subset of cluster are rebooting at any given time.
         </p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/faq#top" class="normal-link">↑ top</a></div>
         <br>
 
         <div id="etcd-use-case-kubernetes"></div>
@@ -256,6 +266,7 @@
             A quorum is the majority of nodes in a cluster. When <span class="code-light-snippet">n</span> is the cluster size, quorum is <span class="code-light-snippet">(n/2)+1</span>. 2 is the quorum both for <span class="code-light-snippet">3</span>            and <span class="code-light-snippet">4</span>. Since Raft cluster becomes unavailable if the quorum of nodes is unavailable, adding another node to 3-node cluster does not add any value in terms of fault tolerance. And adding 1 node to single-node
             cluster increases the quorum size and causes leader election; if a wrong node were added by mistake, the cluster would lose its leader and not be able to make any progress. Always start with an odd number of nodes.
         </p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/faq#top" class="normal-link">↑ top</a></div>
         <br>
 
         <div id="max-cluster-size"></div>
@@ -269,6 +280,7 @@
             [1] Mike Burrows: "<a href="http://static.googleusercontent.com/media/research.google.com/en//archive/chubby-osdi06.pdf" target="_blank" class="footer-link">The Chubby lock service for loosely-coupled distributed systems</a>," at 7th USENIX
             Symposium on Operating System Design and Implementation (OSDI), chapter 2, page 3, November 2006.
         </footer>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/faq#top" class="normal-link">↑ top</a></div>
         <br><br>
 
         <div id="best-deployment-practice"></div>
@@ -283,6 +295,7 @@
             [1] Mike Burrows: "<a href="http://static.googleusercontent.com/media/research.google.com/en//archive/chubby-osdi06.pdf" target="_blank" class="footer-link">The Chubby lock service for loosely-coupled distributed systems</a>," at 7th USENIX
             Symposium on Operating System Design and Implementation (OSDI), November 2006.
         </footer>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/faq#top" class="normal-link">↑ top</a></div>
         <br><br>
 
         <div id="remove-member-first"></div>
@@ -307,6 +320,7 @@
         <footer class="narrow-footer">
             [1] "<a href="https://github.com/coreos/etcd/issues/6114" target="_blank" class="footer-link">Adding replacement member before removing</a>," etcd GitHub issue.
         </footer>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/faq#top" class="normal-link">↑ top</a></div>
         <br><br>
 
         <div id="why-so-strict-about-membership-change"></div>
@@ -320,6 +334,7 @@
         <footer class="narrow-footer">
             [1] "<a href="https://github.com/coreos/etcd/issues/6103" target="_blank" class="footer-link">Can't add or remove node in unhealthy cluster</a>," etcd GitHub issue.
         </footer>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/faq#top" class="normal-link">↑ top</a></div>
         <br><br>
 
         <div id="flag-client-urls"></div>
@@ -343,6 +358,7 @@
             [1] "<a href="https://github.com/coreos/etcd/issues/6539" target="_blank" class="footer-link">advertise-client-urls question</a>," etcd GitHub issue.
             <br> [2] "<a href="https://github.com/coreos/etcd/pull/6583#issuecomment-251768299" target="_blank" class="footer-link">github.com/coreos/etcd/pull/6583</a>," etcd GitHub comment.
         </footer>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/faq#top" class="normal-link">↑ top</a></div>
         <br><br>
 
         <div id="apply-too-long-unavailable"></div>
@@ -357,6 +373,7 @@
         <footer class="narrow-footer">
             [1] "<a href="https://github.com/coreos/etcd/issues/6555" target="_blank" class="footer-link">etcdctl is not tolerant to etcd delays under heavy IO</a>," etcd GitHub issue.
         </footer>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/faq#top" class="normal-link">↑ top</a></div>
         <br><br>
 
         <div id="request-cluster-id-mismatch"></div>
@@ -369,6 +386,7 @@
         <footer class="narrow-footer">
             [1] "<a href="https://github.com/coreos/etcd/issues/6181" target="_blank" class="footer-link">request cluster ID mismatch</a>," etcd GitHub issue.
         </footer>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/faq#top" class="normal-link">↑ top</a></div>
         <br><br>
 
 
@@ -377,6 +395,7 @@
         <p class="narrow-paragraph">
             Best way to reach us is via <a href="https://github.com/coreos/etcd/issues" target="_blank" class="normal-link">GitHub Issues</a>.
         </p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/faq#top" class="normal-link">↑ top</a></div>
         <br>
 
         <div id="etcdlabs"></div>
@@ -385,6 +404,7 @@
             This website contains <a href="https://github.com/coreos/etcd" target="_blank" class="normal-link">etcd</a> documentation, tutorials, and demos. This is completely <a href="https://github.com/coreos/etcdlabs" target="_blank" class="normal-link">open-source</a>.
             Contribution is always welcomed!
         </p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/faq#top" class="normal-link">↑ top</a></div>
         <br>
 
     </div>
