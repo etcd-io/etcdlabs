@@ -204,6 +204,7 @@ h2 .faq-title {
     padding: 8px;
     margin: 1em 0px 1em;
     word-wrap: normal;
+    max-width: 1100px;
 }
 
 
@@ -539,4 +540,43 @@ section {
     height: 100%;
     left: 0;
     top: 0
+}
+
+
+/*
+blog
+*/
+
+.article-title {
+    color: grey;
+    font-family: Sans-Serif;
+}
+
+.article-date {
+    color: #999;
+    font-family: Sans-Serif;
+    font-size: 14px;
+}
+
+.article-author {
+    color: darkgray;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13px;
+    font-style: italic;
+}
+
+.article-author-link {
+    color: darkgray;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13px;
+    font-style: italic;
+    text-decoration: none !important;
+}
+
+.article-contents p {
+    color: black;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 300;
+    font-style: normal;
 }

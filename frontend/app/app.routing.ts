@@ -14,14 +14,8 @@ import { KubernetesTipComponent } from './doc/tip/kubernetes.component';
 import { QuickTutorialsTipComponent } from './doc/tip/quick-tutorials.component';
 import { FAQTipComponent } from './doc/tip/faq.component';
 import { ComparisonTipComponent } from './doc/tip/comparison.component';
+import { STMTipComponent } from './doc/tip/stm.component';
 import { VersionsTipComponent } from './doc/tip/versions.component';
-
-/*
-blog
-*/
-import { BlogComponent } from './blog/blog.component';
-import { AnnouncingEtcdV31Component } from './blog/2016/v3.1.component';
-import { STMComponent } from './blog/2016/stm.component';
 
 /*
 play
@@ -51,23 +45,8 @@ const appRoutes: Routes = [
             { path: 'quick-tutorials', component: QuickTutorialsTipComponent },
             { path: 'faq', component: FAQTipComponent },
             { path: 'comparison', component: ComparisonTipComponent },
+            { path: 'stm', component: STMTipComponent },
             { path: 'versions', component: VersionsTipComponent },
-        ],
-    },
-
-    // etcd blog
-    { path: 'blogs', redirectTo: '/blog', pathMatch: 'full' },
-    { path: 'blog', component: AnnouncingEtcdV31Component }, // update whenever we have a new post
-    {
-        path: 'blog',
-        children: [
-            {
-                path: '2016',
-                children: [
-                    { path: 'v31', component: AnnouncingEtcdV31Component },
-                    { path: 'stm', component: STMComponent },
-                ],
-            }
         ],
     },
 
@@ -94,11 +73,8 @@ export const routedComponents = [
     QuickTutorialsTipComponent,
     FAQTipComponent,
     ComparisonTipComponent,
+    STMTipComponent,
     VersionsTipComponent,
-
-    BlogComponent,
-    AnnouncingEtcdV31Component,
-    STMComponent,
 
     PlayComponent,
 

@@ -1,17 +1,10 @@
 <md-sidenav-layout>
-    <md-sidenav #left [opened]="true" mode="side" class="doc-sidenav">
+    <md-sidenav #sidenav [opened]="true" mode="side" class="doc-sidenav">
         <md-list>
             <a routerLink="/doc/{{version.etcdVersionURL}}">
                 <h3 md-subheader>Getting Started ({{version.etcdVersion}})</h3>
             </a>
             <md-list-item *ngFor="let item of getStartedItems">
-                <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
-            </md-list-item>
-
-            <md-divider></md-divider>
-
-            <h3 md-subheader>More</h3>
-            <md-list-item *ngFor="let item of moreItems">
                 <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
             </md-list-item>
         </md-list>

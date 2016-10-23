@@ -40,7 +40,6 @@ export class parentComponent {
     version = this.versioner.getVersion();
 
     getStartedItems: sidebarItem[];
-    moreItems: sidebarItem[];
 
     constructor() {
         this.getStartedItems = [
@@ -68,13 +67,17 @@ export class parentComponent {
                 `/doc/${this.version.etcdVersionURL}/faq`,
                 'no-text-decoration'
             ),
-        ];
 
-        this.moreItems = [
             new sidebarItem(
                 'etcd in comparison',
                 `etcd in comparison with other databases`,
                 `/doc/${this.version.etcdVersionURL}/comparison`,
+                'no-text-decoration'
+            ),
+            new sidebarItem(
+                'etcd STM',
+                `etcd Software Transactional Memory`,
+                `/doc/${this.version.etcdVersionURL}/stm`,
                 'no-text-decoration'
             ),
             new sidebarItem(
@@ -91,6 +94,7 @@ export class parentComponent {
     }
 
     getAllSidebarItems() {
-        return this.getStartedItems.concat(this.moreItems);
+        // return this.getStartedItems.concat(this.moreItems);
+        return this.getStartedItems;
     }
 }
