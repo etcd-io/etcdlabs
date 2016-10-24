@@ -122,6 +122,14 @@ h2 .faq-title {
     font-size: 20px;
 }
 
+.narrow-paragraph {
+    max-width: 1000px;
+}
+
+.narrow-footer {
+    max-width: 800px;
+}
+
 .next-to-header-title {
     color: dimgrey;
     text-decoration: none !important;
@@ -196,6 +204,7 @@ h2 .faq-title {
     padding: 8px;
     margin: 1em 0px 1em;
     word-wrap: normal;
+    max-width: 1100px;
 }
 
 
@@ -428,7 +437,7 @@ section.features .feature-grid .feature h3 {
 }
 
 section.features .feature-grid .feature p {
-    font-size: .875rem;
+    font-size: 1.0rem;
     line-height: 1.5rem;
     color: #000
 }
@@ -531,4 +540,43 @@ section {
     height: 100%;
     left: 0;
     top: 0
+}
+
+
+/*
+blog
+*/
+
+.article-title {
+    color: grey;
+    font-family: Sans-Serif;
+}
+
+.article-date {
+    color: #999;
+    font-family: Sans-Serif;
+    font-size: 14px;
+}
+
+.article-author {
+    color: darkgray;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13px;
+    font-style: italic;
+}
+
+.article-author-link {
+    color: darkgray;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13px;
+    font-style: italic;
+    text-decoration: none !important;
+}
+
+.article-contents p {
+    color: black;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 300;
+    font-style: normal;
 }

@@ -339,7 +339,14 @@ go version`;
             divide = '';
         }
 
-        let txt = `GIT_PATH=github.com/coreos/etcd
+        let txt = 'if [ "${GOPATH}" == "" ]; then' + `
+    ` + 'echo "GOPATH does not exist!"' + `
+    ` + 'exit 255' + `
+` + 'else' + `
+    ` + 'echo "GOPATH: ${GOPATH}"' + `
+fi
+
+GIT_PATH=github.com/coreos/etcd
 
 USER_NAME=${this.inputGitUser}
 BRANCH_NAME=${this.inputGitBranch}

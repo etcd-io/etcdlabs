@@ -7,13 +7,6 @@
             <md-list-item *ngFor="let item of getStartedItems">
                 <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
             </md-list-item>
-
-            <md-divider></md-divider>
-
-            <h3 md-subheader>More</h3>
-            <md-list-item *ngFor="let item of moreItems">
-                <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
-            </md-list-item>
         </md-list>
     </md-sidenav>
 
@@ -22,11 +15,11 @@
 
         <h4>etcd in comparison <span class="next-to-header-title">(last update Nov 1, 2016)</span></h4>
         <br>
-        <p>
+        <p class="narrow-paragraph">
             In 2006, Google published Chubby<sup>[1]</sup> distributed lock service built on Paxos<sup>[2]</sup>, which resulted in Zookeeper, etcd, and Consul.
         </p>
         <br>
-        <table class="table">
+        <table class="table narrow-paragraph">
             <thead>
                 <tr>
                     <th></th>
@@ -55,16 +48,10 @@
                     <td>Apache-2.0</td>
                 </tr>
                 <tr>
-                    <th scope="row">Version</th>
-                    <td><a href="http://zookeeper.apache.org/doc/r3.4.9/" target="_blank" class="normal-link">r3.4.9</a></td>
-                    <td><a href="https://github.com/coreos/etcd/releases/tag/v3.1.0-rc.0" target="_blank" class="normal-link">v3.1.0</a></td>
-                    <td><a href="https://github.com/hashicorp/consul/releases/tag/v0.7.0" target="_blank" class="normal-link">v0.7.0</a></td>
-                </tr>
-                <tr>
                     <th scope="row">Consensus Protocol</th>
                     <td>Zab<sup>[3]</sup></td>
-                    <td>Raft<sup>[4]</sup><sup>[5]</sup></td>
-                    <td>Raft<sup>[4]</sup><sup>[6]</sup></td>
+                    <td><a href="https://github.com/coreos/etcd/tree/master/raft" target="_blank" class="normal-link">Raft</a><sup>[4]</sup></td>
+                    <td><a href="https://github.com/hashicorp/raft" target="_blank" class="normal-link">Raft</a><sup>[4]</sup>, <a href="https://github.com/hashicorp/raft" target="_blank" class="normal-link">Gossip</a><sup>[5]</sup></td>
                 </tr>
                 <tr>
                     <th scope="row">Language</th>
@@ -72,10 +59,16 @@
                     <td>Go</td>
                     <td>Go</td>
                 </tr>
+                <tr>
+                    <th scope="row">Issues</th>
+                    <td><a href="https://issues.apache.org/jira/browse/ZOOKEEPER" target="_blank" class="normal-link">Zookeeper/JIRA</a></td>
+                    <td><a href="https://github.com/coreos/etcd/issues" target="_blank" class="normal-link">etcd/issues</a></td>
+                    <td><a href="https://github.com/hashicorp/consul/issues" target="_blank" class="normal-link">consul/issues</a></td>
+                </tr>
             </tbody>
         </table>
         <hr align="left" class="footer-top-line">
-        <footer>
+        <footer class="narrow-footer">
             [1] Mike Burrows: "<a href="http://static.googleusercontent.com/media/research.google.com/en//archive/chubby-osdi06.pdf" target="_blank" class="footer-link">The Chubby lock service for loosely-coupled distributed systems</a>," at 7th USENIX
             Symposium on Operating System Design and Implementation (OSDI), chapter 2, page 3, November 2006.
             <br> [2] Leslie Lamport: "<a href="http://research.microsoft.com/en-us/um/people/lamport/pubs/lamport-paxos.pdf" target="_blank" class="footer-link">The Part-Time Parliament</a>," ACM Transactions on Computer Systems, volume 16, number 2,
@@ -84,19 +77,21 @@
             at DSN'11, IEEE/IFIP International Conference on Dependable Systems & Networks, June 2011.
             <br> [4] Diego Ongaro and John K Ousterhout: "<a href="https://raft.github.io/raft.pdf" target="_blank" class="footer-link">In Search of an Understandable Consensus Algorithm (Extended Version)</a>," at USENIX Annual Technical Conference (ATC),
             June 2014.
-            <br> [5] etcd Authors: "<a href="https://github.com/coreos/etcd/tree/master/raft" target="_blank" class="footer-link">coreos/etcd/raft</a>," github.com.
-            <br> [6] HashiCorp: "<a href="https://github.com/hashicorp/raft" target="_blank" class="footer-link">github.com/hashicorp/raft</a>," github.com.
+            <br> [5] Abhinandan Das, Indranil Gupta, Ashish Motivala: "<a href="http://www.cs.cornell.edu/~asdas/research/dsn02-swim.pdf" target="_blank" class="footer-link">SWIM: Scalable Weakly-consistent Infection-style Process Group Membership Protocol</a>,"
+            at DSN '02: Proceedings of the 2002 International Conference on Dependable Systems and Networks, June 2002.
         </footer>
         <br><br>
 
         <br><br>
         <h4>Feature</h4>
         <br>
-        <p>
-            ...
+        <p class="narrow-paragraph">
+            In practice, etcd is already integrated into a large-scale distributed system, Kubernetes, and we have implemented distributed coordination primitives including distributed locks, elections, and software transactional memory, to ensure the etcd API is
+            flexible enough to support a variety of applications.
         </p>
+
         <br>
-        <table class="table">
+        <table class="table narrow-paragraph">
             <thead>
                 <tr>
                     <th></th>
@@ -107,34 +102,22 @@
             </thead>
             <tbody>
                 <tr>
-                    <th scope="row">Dynamic Reconfiguration</th>
+                    <th scope="row">Atomic Read/Write</th>
                     <td>Yes</td>
                     <td>Yes</td>
                     <td>Yes</td>
                 </tr>
                 <tr>
-                    <th scope="row">Built-in DNS</th>
-                    <td>No</td>
-                    <td>No</td>
-                    <td>Yes</td>
-                </tr>
-                <tr>
-                    <th scope="row">Leadership Transfer</th>
-                    <td>No</td>
-                    <td>Yes</td>
-                    <td>No</td>
-                </tr>
-                <tr>
-                    <th scope="row">Transaction</th>
+                    <th scope="row">Leases</th>
                     <td>Yes</td>
                     <td>Yes</td>
                     <td>Yes</td>
                 </tr>
                 <tr>
-                    <th scope="row">MVCC<sup>[1]</sup></th>
-                    <td>No</td>
+                    <th scope="row">Watch</th>
                     <td>Yes</td>
-                    <td>No</td>
+                    <td>Yes</td>
+                    <td>Yes</td>
                 </tr>
                 <tr>
                     <th scope="row">Distributed Lock</th>
@@ -143,27 +126,55 @@
                     <td>Yes</td>
                 </tr>
                 <tr>
-                    <th scope="row">Watch</th>
-                    <td>Polling</td>
-                    <td>Streaming</td>
-                    <td>Polling</td>
+                    <th scope="row">Dynamic Reconfiguration</th>
+                    <td>Yes</td>
+                    <td>Yes</td>
+                    <td>Yes</td>
+                </tr>
+                <tr>
+                    <th scope="row">DNS</th>
+                    <td>No</td>
+                    <td>No</td>
+                    <td><a href="https://www.consul.io/docs/agent/dns.html" target="_blank" class="normal-link">Yes</a></td>
+                </tr>
+                <tr>
+                    <th scope="row">Proxy</th>
+                    <td>No</td>
+                    <td><a href="https://github.com/coreos/etcd/blob/master/Documentation/op-guide/grpc_proxy.md" target="_blank" class="normal-link">Yes</a></td>
+                    <td>No</td>
+                </tr>
+                <tr>
+                    <th scope="row">Mirror</th>
+                    <td>No</td>
+                    <td><a href="https://github.com/coreos/etcd/blob/master/etcdctl/doc/mirror_maker.md" target="_blank" class="normal-link">Yes</a></td>
+                    <td>No</td>
+                </tr>
+                <tr>
+                    <th scope="row">Quota</th>
+                    <td>No</td>
+                    <td><a href="https://github.com/coreos/etcd/tree/master/etcdctl#alarm-subcommand" target="_blank" class="normal-link">Yes</a></td>
+                    <td>No</td>
+                </tr>
+                <tr>
+                    <th scope="row">Leadership Transfer</th>
+                    <td>No</td>
+                    <td>Yes<sup>[1]</sup></td>
+                    <td>No</td>
                 </tr>
             </tbody>
         </table>
         <hr align="left" class="footer-top-line">
-        <footer>
-            [1] Bruce Momjian: "<a href="http://momjian.us/main/presentations/internals.html#mvcc" target="_blank" class="footer-link">MVCC Unmasked</a>," momjian.us, July 2014.
+        <footer class="narrow-footer">
+            [1] Diego Ongaro: "<a href="https://ramcloud.stanford.edu/~ongaro/thesis.pdf" target="_blank" class="footer-link">Consensus: Bridging Theory and Practice</a>," Stanford University Ph.D. Dissertation, chapter 3, page 28, August 2014.
         </footer>
         <br><br>
 
+
         <br><br>
-        <h4>Performance</h4>
+        <h4>Performance & Reliability</h4>
+
         <br>
-        <p>
-            ...
-        </p>
-        <br>
-        <table class="table">
+        <table class="table narrow-paragraph">
             <thead>
                 <tr>
                     <th></th>
@@ -174,32 +185,138 @@
             </thead>
             <tbody>
                 <tr>
+                    <th scope="row">RPC</th>
+                    <td><a href="https://zookeeper.apache.org/doc/trunk/zookeeperAdmin.html#Communication+using+the+Netty+framework" target="_blank" class="normal-link">NIO, Netty</a></td>
+                    <td><a href="http://www.grpc.io" target="_blank" class="normal-link">gRPC</a>, <a href="https://http2.github.io" target="_blank" class="normal-link">HTTP/2</a></td>
+                    <td>HTTP</td>
+                </tr>
+                <tr>
                     <th scope="row">Storage</th>
                     <td>Key-value, in-memory, WAL</td>
                     <td>Key-value, <a href="https://github.com/boltdb/bolt" target="_blank" class="normal-link">Bolt</a>, <a href="https://github.com/coreos/etcd/blob/master/wal/doc.go" target="_blank" class="normal-link">WAL</a></td>
                     <td>Key-value, <a href="https://github.com/boltdb/bolt" target="_blank" class="normal-link">Bolt</a></td>
                 </tr>
                 <tr>
+                    <th scope="row">MVCC<sup>[1]</sup></th>
+                    <td>No</td>
+                    <td>Yes</td>
+                    <td>No</td>
+                </tr>
+                <tr>
                     <th scope="row">Database Snapshot</th>
                     <td>On-disk snapshot</td>
-                    <td>On-disk snapshot (incremental)</td>
+                    <td>On-disk snapshot</td>
                     <td>On-disk snapshot</td>
                 </tr>
                 <tr>
-                    <th scope="row">RPC</th>
-                    <td><a href="https://zookeeper.apache.org/doc/trunk/zookeeperAdmin.html#Communication+using+the+Netty+framework" target="_blank" class="normal-link">NIO, Netty</a></td>
-                    <td><a href="http://www.grpc.io" target="_blank" class="normal-link">gRPC</a>, <a href="https://http2.github.io" target="_blank" class="normal-link">HTTP/2</a></td>
-                    <td>HTTP</td>
+                    <th scope="row">Version</th>
+                    <td><a href="http://zookeeper.apache.org/doc/r3.4.9/" target="_blank" class="normal-link">r3.4.9</a></td>
+                    <td><a href="https://github.com/coreos/etcd/releases/tag/v3.1.0" target="_blank" class="normal-link">v3.1.0</a></td>
+                    <td><a href="https://github.com/hashicorp/consul/releases/tag/v0.7.0" target="_blank" class="normal-link">v0.7.0</a></td>
+                </tr>
+                <tr>
+                    <th scope="row">Write<sup>[2]</sup></th>
+                    <td>?</td>
+                    <td>?</td>
+                    <td>?</td>
+                </tr>
+                <tr>
+                    <th scope="row">Serializable Read<sup>[3]</sup></th>
+                    <td>?</td>
+                    <td>?</td>
+                    <td>?</td>
+                </tr>
+                <tr>
+                    <th scope="row">Linearizable Read<sup>[4]</sup></th>
+                    <td>?</td>
+                    <td>?</td>
+                    <td>?</td>
                 </tr>
             </tbody>
         </table>
+        <hr align="left" class="footer-top-line">
+        <footer class="narrow-footer">
+            [1] Bruce Momjian: "<a href="http://momjian.us/main/presentations/internals.html#mvcc" target="_blank" class="footer-link">MVCC Unmasked</a>," momjian.us, July 2014.
+            <br> [2] ...
+            <br> [3] ...
+            <br> [4] ...
+        </footer>
         <br>
 
-        <br><br>
-        <h4>Reliability</h4>
         <br>
-        <p>
-            ...
+        <h5>Comparison</h5>
+        <p class="narrow-paragraph">
+            TODO: graphs...
+        </p>
+
+        <br>
+        <h5>RPCs</h5>
+        <p class="narrow-paragraph">
+            etcd base server interface uses <a href="http://www.grpc.io" target="_blank" class="normal-link">gRPC</a> instead of JSON for increased efficiency. Support for JSON endpoints is maintained through a <a href="https://github.com/coreos/etcd/blob/master/Documentation/dev-guide/api_grpc_gateway.md"
+                target="_blank" class="normal-link">gRPC gateway</a>. gRPC protocol message is defined using <a href="https://developers.google.com/protocol-buffers" target="_blank" class="normal-link">protobuf</a>, which simplifies the generation of efficient
+            RPC stub code and makes protocol extensions easier to manage. For comparison, even after optimizing etcd v2's client-side JSON parsing, etcd v3 gRPC still holds a 2x message processing performance edge over etcd v2. Likewise, gRPC is better
+            at handling connections. Where gRPC uses HTTP/2 to multiplex multiple streams of RPCs over a single TCP connection, a JSON client must establish a new connection for every request.
+        </p>
+
+        <br>
+        <h5>Leases</h5>
+        <p class="narrow-paragraph">
+            Keys expire in etcd v2 through a time-to-live (TTL) mechanism. For every key with a TTL, a client must periodically refresh the key to keep it from being automatically deleted when the TTL expires. Each refresh establishes a new connection and issues
+            a consensus proposal to etcd to update the key. To keep all TTL keys alive, an idling cluster must have a minimum request throughput of the number of TTL keys divided by the average TTL.
+        </p>
+        <p class="narrow-paragraph">
+            etcd v3 implements key expiry TTLs with a lightweight streaming lease keepalive model. Instead of a key having a TTL, a lease with a TTL is attached to a key. When the lease's TTL expires, it deletes all attached keys. This model reduces keep-alive traffic
+            when multiple keys are attached to the same lease. The keep-alive connection thrashing in etcd v2 is avoided by multiplexing keep-alives on a lease's single gRPC stream. Likewise, keep-alives are processed by the leader, avoiding any consensus
+            overhead when idling.
+        </p>
+
+        <br>
+        <h5>Watchers</h5>
+        <p class="narrow-paragraph">
+            etcd watchers also uses streams and multiplexes events over key intervals. A watch in etcd waits for changes to keys. Unlike systems such as ZooKeeper or Consul that return one event per watch request, etcd can continuously watch from the current revision.
+            In etcd v2, these streaming watches use <b>long polling</b> over HTTP, forcing the etcd v2 server to wastefully hold open a TCP connection per watch. When an application with thousands of clients watches thousands of keys, it can
+            quickly exhaust etcd v2 server socket and memory resources.
+        </p>
+        <p class="narrow-paragraph">
+            The etcd v3 API multiplexes watches on a single connection. Instead of opening a new connection, a client registers a watcher on a bidirectional gRPC stream. The stream delivers events tagged with a watcher's registered ID. Multiple watch streams can
+            even share the same TCP connection. Multiplexing and stream connection sharing reduce etcd v3's memory footprint by at least an order of magnitude.
+        </p>
+
+        <br>
+        <h5>Data model with reliable events</h5>
+        <p class="narrow-paragraph">
+            Like any key-value store, etcd's data model maps keys to values. The etcd v2 model only keeps the most recent key-value mappings available; older versions are discarded. However, applications which track all key changes or scan the entire key space need
+            a reliable event stream to consistently reconstruct past key states. To avoid prematurely dropping events so that these applications can work even if briefly disconnected, etcd v2 maintains a short global sliding window of events. However,
+            if a watch begins on a revision that the window passed over, the watch may miss discarded events.
+        </p>
+        <p class="narrow-paragraph">
+            etcd v3 does away with this unpredictable window, instead retaining historical key revisions through a new multi-version concurrency control model. The retention policy for this history can be configured by cluster administrators for fine-grained storage
+            management. Usually etcd v3 discards old revisions of keys on a timer. A typical etcd v3 cluster retains superseded key data for hours. To reliably handle longer client disconnection, not just transient network disruptions, watchers simply
+            resume from the last observed historical revision. To read from the store at a particular point-in-time, key read requests may be tagged with a revision that will return the key's value at the given revision.
+        </p>
+        <p class="narrow-paragraph">
+            In addition to preserving historical data in the key value store, etcd v3 trades etcd v2's hierarchical key structure for a flat binary key space. In practice, applications tended to either fetch individual keys, or to recursively fetch all keys under
+            a directory. Usage patterns didn't justify the overhead of maintaining hierarchy information. etcd v3 instead uses key ranges that search for keys in an interval. This interval model supports both querying on prefixes and, with a convention
+            for key naming, listing keys as if from a directory.
+        </p>
+
+        <br>
+        <h5>Multiversion concurrency control (MVCC)</h5>
+        <p class="narrow-paragraph">
+            When multiple clients concurrently read and modify a key or a set of keys, it is important to have synchronization primitives to prevent data races from corrupting application state. For this purpose, etcd v2 offers both load-link/store-conditional and
+            compare-and-swap operations; a client specifies a previous revision index or previous value to match before updating a key. Although these operations suffice for simple semaphores and limited atomic updates, they are inadequate for describing
+            more sophisticated approaches to serializing data access, such as distributed locks and transactional memory.
+        </p>
+        <p class="narrow-paragraph">
+            etcd v3 can serialize multiple operations into a single conditional mini-transaction. Each transaction includes a conjunction of conditional guards (e.g., checks on key version, value, modified revision, and creation revision), a list of the operations
+            to apply when all conditions evaluate to true (i.e., Get, Put, Delete), and a list of operations to apply if any of the conditions evaluate to false. Transactions make distributed locks safe in etcd v3 because accesses can be conditional based
+            on whether the client still holds its lock. This means that even if a client loses its claim on a lock, whether due to clock skew or missing expiration events, etcd v3 will refuse to honor the stale request.
+        </p>
+
+        <br>
+        <h5>etcd Reliability</h5>
+        <p class="narrow-paragraph">
+            Reliability is etcd's highest priority. TODO: Functional tester ...
         </p>
         <br>
 

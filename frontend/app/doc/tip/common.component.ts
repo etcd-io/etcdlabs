@@ -40,18 +40,23 @@ export class parentComponent {
     version = this.versioner.getVersion();
 
     getStartedItems: sidebarItem[];
-    moreItems: sidebarItem[];
 
     constructor() {
         this.getStartedItems = [
             new sidebarItem(
-                'Install, Deploy',
+                'Install and deploy',
                 'set up etcd cluster: bare metal, virtual machine, systemd, rkt',
                 `/doc/${this.version.etcdVersionURL}/install-deploy`,
                 'no-text-decoration'
             ),
             new sidebarItem(
-                'Quick Tutorials',
+                'Kubernetes',
+                'manage etcd with Kubernetes',
+                `/doc/${this.version.etcdVersionURL}/kubernetes`,
+                'no-text-decoration'
+            ),
+            new sidebarItem(
+                'Quick tutorials',
                 'write, read, watch, lock, election, membership, maintenance',
                 `/doc/${this.version.etcdVersionURL}/quick-tutorials`,
                 'no-text-decoration'
@@ -62,9 +67,7 @@ export class parentComponent {
                 `/doc/${this.version.etcdVersionURL}/faq`,
                 'no-text-decoration'
             ),
-        ];
 
-        this.moreItems = [
             new sidebarItem(
                 'etcd in comparison',
                 `etcd in comparison with other databases`,
@@ -72,7 +75,13 @@ export class parentComponent {
                 'no-text-decoration'
             ),
             new sidebarItem(
-                'Versions',
+                'etcd STM',
+                `etcd Software Transactional Memory`,
+                `/doc/${this.version.etcdVersionURL}/stm`,
+                'no-text-decoration'
+            ),
+            new sidebarItem(
+                'Other versions',
                 'looking for documentation of other versions?',
                 `/doc/${this.version.etcdVersionURL}/versions`,
                 'no-text-decoration'
@@ -85,6 +94,7 @@ export class parentComponent {
     }
 
     getAllSidebarItems() {
-        return this.getStartedItems.concat(this.moreItems);
+        // return this.getStartedItems.concat(this.moreItems);
+        return this.getStartedItems;
     }
 }

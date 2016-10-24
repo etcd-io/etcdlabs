@@ -1,0 +1,53 @@
+<md-sidenav-layout>
+    <md-sidenav #sidenav [opened]="true" mode="side" class="doc-sidenav">
+        <md-list>
+            <a routerLink="/doc/{{version.etcdVersionURL}}">
+                <h3 md-subheader>Getting Started ({{version.etcdVersion}})</h3>
+            </a>
+            <md-list-item *ngFor="let item of getStartedItems">
+                <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
+            </md-list-item>
+        </md-list>
+    </md-sidenav>
+
+    <div class="doc-group">
+        <router-outlet></router-outlet>
+
+        <h4>Manage etcd with Kubernetes</h4>
+        <br>
+        <p class="narrow-paragraph">
+            This is an example workflow to manage etcd with <a href="http://kubernetes.io" target="_blank" class="normal-link">Kubernetes</a>.
+        </p>
+
+        <md-tab-group>
+
+            <md-tab>
+                <template md-tab-label>
+					TODO 1
+				</template>
+                <template md-tab-content>
+					<br>
+					<h5>Why?</h5>
+					<p class="narrow-paragraph">
+						...
+					</p>
+				</template>
+            </md-tab>
+
+            <md-tab>
+                <template md-tab-label>
+					TODO 2
+				</template>
+                <template md-tab-content>
+					<br>
+					<h5>Why?</h5>
+					<p class="narrow-paragraph">
+						...
+					</p>
+				</template>
+            </md-tab>
+
+        </md-tab-group>
+
+    </div>
+</md-sidenav-layout>
