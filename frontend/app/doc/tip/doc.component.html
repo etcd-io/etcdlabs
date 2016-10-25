@@ -17,10 +17,29 @@
 
         <md-list>
             <md-list-item *ngFor="let docItem of docItems; let i = index;">
-                <!--<md-icon md-list-avatar svgSrc="https://raw.githubusercontent.com/coreos/etcd/master/logos/etcd-glyph-color.svg" *ngIf="i == 0"></md-icon>-->
                 <p md-line class="doc-title">{{docItem.title}}</p>
                 <p md-line class="doc-description">{{docItem.description}}</p>
             </md-list-item>
         </md-list>
+
+        <br>
+        <md-tab-group>
+            <md-tab *ngFor="let majorVersionItem of majorVersionItems">
+                <template md-tab-label>{{majorVersionItem.version}}</template>
+                <template md-tab-content>
+					<md-list>
+						<md-list-item *ngFor="let versionItem of majorVersionItem.versionItems">
+							<p md-line class="{{versionItem.versionHTMLClassLinkMain}}">
+								<a href="{{versionItem.releaseLink}}" class="{{versionItem.versionHTMLClassLinkRelease}}" target="_blank">{{versionItem.version}}</a>
+							</p>
+							<p md-line>
+								<a *ngIf="!versionItem.isRoutable" href="{{versionItem.docLink}}" class="{{versionItem.versionHTMLClassLinkDoc}}" target="_blank">Documentation</a>
+								<a *ngIf="versionItem.isRoutable" routerLink="{{versionItem.docLink}}" class="{{versionItem.versionHTMLClassLinkDoc}}">Documentation</a>
+							</p>
+						</md-list-item>
+					</md-list>
+				</template>
+            </md-tab>
+        </md-tab-group>
     </div>
 </md-sidenav-layout>

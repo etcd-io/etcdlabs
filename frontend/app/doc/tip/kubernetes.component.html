@@ -24,14 +24,43 @@
 
             <md-tab>
                 <template md-tab-label>
-					TODO 1
+					Prerequisite
 				</template>
                 <template md-tab-content>
 					<br>
-					<h5>Why?</h5>
+
 					<p class="narrow-paragraph">
-						...
+                        For this exercise, we will use total X <a href="https://coreos.com" target="_blank" class="normal-link">CoreOS</a> machines: 3 for etcd cluster, 1 for Kubernetes API server, 3 for workers to deploy etcd.
 					</p>
+					<p class="narrow-paragraph">
+						Kubernetes API server depends on etcd: Have 3-node etcd cluster ready following <a routerLink="/doc/{{version.etcdVersionURL}}/install-deploy" class="normal-link">install-deploy guide</a>.
+					</p>
+					<p class="narrow-paragraph">
+						Kubernetes runs all applications in containers. We will use <a href="https://github.com/coreos/rkt" target="_blank" class="normal-link">rkt</a> for container runtime.
+					</p>
+					<p class="narrow-paragraph">
+                        First install Kubernetes binaries:
+					</p>
+					<md-input type="text" [(ngModel)]="inputKubernetesVersion" placeholder="Kubernetes version"></md-input>
+					<md-input type="text" [(ngModel)]="inputKubernetesGOOS" placeholder="GOOS"></md-input>
+					<md-input type="text" [(ngModel)]="inputKubernetesGOARCH" placeholder="GOARCH"></md-input>
+					<md-input type="text" [(ngModel)]="inputKubernetesExecDir" placeholder="exec dir"></md-input>
+					<br>
+
+					<div class="osx-window">
+						<div class="window">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{getKubernetesCommandInstall()}}</pre>
+							</div>
+						</div>
+					</div>
+
 				</template>
             </md-tab>
 

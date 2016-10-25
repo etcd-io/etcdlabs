@@ -112,8 +112,6 @@
         <p class="narrow-paragraph">
             etcd can only handle small chunks data: configuration file, JSON, YAML, etc. etcd limits the size of request in 1.5MB (see <a href="https://github.com/coreos/etcd/blob/master/etcdserver/v3_server.go#L34-L38" target="_blank" class="code-link">maxRequestBytes</a>).
             And default storage size limit is 2GB (see <a href="https://github.com/coreos/etcd/blob/master/mvcc/backend/backend.go#L46-L53" target="_blank" class="code-link">DefaultQuotaBytes</a>). These are the tradeoffs that etcd makes for strong consistency.
-        </p>
-        <p class="narrow-paragraph">
             etcd is not a relational SQL database. etcd uses <i>key</i> as the primary index: clients can range- and prefix-scan on the keys. etcd does not have a secondary index.
         </p>
         <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/faq#top" class="normal-link">↑ top</a></div>
