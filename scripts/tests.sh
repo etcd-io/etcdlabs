@@ -6,11 +6,14 @@ if ! [[ "$0" =~ "scripts/test.sh" ]]; then
     exit 255
 fi
 
+echo "running tslint..."
+yarn lint
+
 IGNORE_PKGS="(vendor)"
 TESTS=`find . -name \*_test.go | while read a; do dirname $a; done | sort | uniq | egrep -v "$IGNORE_PKGS"`
 
 # TODO: run with multi-CPU (not right now because of port conflict)
-echo "Running tests...";
+echo "Running tests..."
 go test -v -cpu 1 $TESTS;
 go test -v -cpu 1 -race $TESTS;
 

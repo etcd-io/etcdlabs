@@ -56,7 +56,7 @@ import { routing, routedComponents } from './app.routing';
     MdTabsModule.forRoot(),
     MdToolbarModule.forRoot(),
     MdTooltipModule.forRoot(),
-    
+
     OverlayModule.forRoot(),
     PortalModule.forRoot(),
     RtlModule.forRoot(),

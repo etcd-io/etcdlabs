@@ -1,13 +1,13 @@
 import { Component } from '@angular/core';
-import { parentComponent, sidebarItem } from './common.component';
+import { ParentComponent, SidebarItem } from './common.component';
 
 @Component({
     selector: 'app-doc',
     templateUrl: 'doc.component.html',
     styleUrls: ['common.component.css'],
 })
-export class DocTipComponent extends parentComponent {
-    docItems: sidebarItem[];
+export class DocTipComponent extends ParentComponent {
+    docItems: SidebarItem[];
     constructor() {
         super();
         this.docItems = super.getAllSidebarItems();

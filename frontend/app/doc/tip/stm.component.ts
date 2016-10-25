@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
-import { parentComponent } from './common.component';
+import { ParentComponent } from './common.component';
 
 @Component({
     selector: 'app-stm',
     templateUrl: 'stm.component.html',
     styleUrls: ['common.component.css'],
 })
-export class STMTipComponent extends parentComponent {
+export class STMTipComponent extends ParentComponent {
     constructor() {
         super();
     }

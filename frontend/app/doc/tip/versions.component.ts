@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
-import { parentComponent } from './common.component';
+import { ParentComponent } from './common.component';
 
-export class versionItem {
+export class VersionItem {
     isRoutable: boolean;
     version: string;
     versionHTMLClassLinkRelease: string;
@@ -26,10 +26,10 @@ export class versionItem {
     }
 }
 
-export class majorVersionItem {
+export class MajorVersionItem {
     version: string;
-    versionItems: versionItem[];
-    constructor(version: string, versionItems: versionItem[]) {
+    versionItems: VersionItem[];
+    constructor(version: string, versionItems: VersionItem[]) {
         this.version = version;
         this.versionItems = versionItems;
     }
@@ -40,13 +40,13 @@ export class majorVersionItem {
     templateUrl: 'versions.component.html',
     styleUrls: ['common.component.css'],
 })
-export class VersionsTipComponent extends parentComponent {
-    majorVersionItems: majorVersionItem[];
+export class VersionsTipComponent extends ParentComponent {
+    majorVersionItems: MajorVersionItem[];
     constructor() {
         super();
         this.majorVersionItems = [
-            new majorVersionItem('v3', [
-                new versionItem(
+            new MajorVersionItem('v3', [
+                new VersionItem(
                     true,
                     'tip',
                     'https://github.com/coreos/etcd',
@@ -54,7 +54,7 @@ export class VersionsTipComponent extends parentComponent {
                     '/doc/tip',
                     'versions-link-other'
                 ),
-                new versionItem(
+                new VersionItem(
                     false,
                     'v3.1.0',
                     'https://github.com/coreos/etcd/releases/tag/v3.1.0',
@@ -62,7 +62,7 @@ export class VersionsTipComponent extends parentComponent {
                     '/doc/v31',
                     'versions-link-other'
                 ),
-                new versionItem(
+                new VersionItem(
                     false,
                     'v3.0.13',
                     'https://github.com/coreos/etcd/releases/tag/v3.0.13',
@@ -70,7 +70,7 @@ export class VersionsTipComponent extends parentComponent {
                     'https://github.com/coreos/etcd/tree/release-3.0/Documentation',
                     'versions-link-other'
                 ),
-                new versionItem(
+                new VersionItem(
                     false,
                     'v3.0.0',
                     'https://github.com/coreos/etcd/releases/tag/v3.0.0',
@@ -79,8 +79,8 @@ export class VersionsTipComponent extends parentComponent {
                     'versions-link-other'
                 ),
             ]),
-            new majorVersionItem('v2', [
-                new versionItem(
+            new MajorVersionItem('v2', [
+                new VersionItem(
                     false,
                     'v2.3.7',
                     'https://github.com/coreos/etcd/releases/tag/v2.3.7',

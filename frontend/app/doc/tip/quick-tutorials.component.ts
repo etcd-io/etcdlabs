@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
-import { parentComponent } from './common.component';
+import { ParentComponent } from './common.component';
 
 @Component({
     selector: 'app-quick-tutorials',
     templateUrl: 'quick-tutorials.component.html',
     styleUrls: ['common.component.css'],
 })
-export class QuickTutorialsTipComponent extends parentComponent {
+export class QuickTutorialsTipComponent extends ParentComponent {
     constructor() {
         super();
     }
@@ -25,7 +25,7 @@ export class QuickTutorialsTipComponent extends parentComponent {
 
 ` + 'etcdctl --endpoints=${ENDPOINTS} get foo' + `
 ` + 'etcdctl --endpoints=${ENDPOINTS} get foo --write-out=json' + `
-` + 'etcdctl --endpoints=${ENDPOINTS} get foo --prefix'
+` + 'etcdctl --endpoints=${ENDPOINTS} get foo --prefix';
     }
 
     getEtcdctlRead() {
