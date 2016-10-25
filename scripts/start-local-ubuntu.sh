@@ -20,6 +20,9 @@ sleep 5s
 cat /tmp/etcdlabs.log
 cat /tmp/etcdlabs-yarn.log
 
+echo ""
+echo "Ready!"
+
 <<COMMENT
 tail -f /tmp/etcdlabs.log
 tail -f /tmp/etcdlabs-yarn.log
