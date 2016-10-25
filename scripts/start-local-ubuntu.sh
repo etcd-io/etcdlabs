@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -ex
+set -e
 
 if ! [[ "$0" =~ "scripts/start-local-ubuntu.sh" ]]; then
     echo "must be run from repository root"
@@ -14,13 +14,13 @@ nohup ./etcdlabs >> /tmp/etcdlabs.log 2>&1 &
 
 sleep 5s
 echo "starting frontend"
-nohup npm start >> /tmp/etcdlabs-npm.log 2>&1 &
+nohup yarn start >> /tmp/etcdlabs-yarn.log 2>&1 &
 
 sleep 5s
 cat /tmp/etcdlabs.log
-cat /tmp/etcdlabs-npm.log
+cat /tmp/etcdlabs-yarn.log
 
 <<COMMENT
 tail -f /tmp/etcdlabs.log
-tail -f /tmp/etcdlabs-npm.log
+tail -f /tmp/etcdlabs-yarn.log
 COMMENT
