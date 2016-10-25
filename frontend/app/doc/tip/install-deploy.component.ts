@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
-import { parentComponent } from './common.component';
+import { ParentComponent } from './common.component';
 
-export class etcdFlag {
+export class EtcdFlag {
     name: string;
 
     protocol: string;
@@ -60,7 +60,7 @@ export class etcdFlag {
 }
 
 
-export class rktFlag {
+export class RktFlag {
     name: string;
 
     constructor(
@@ -76,7 +76,7 @@ export class rktFlag {
     templateUrl: 'install-deploy.component.html',
     styleUrls: ['common.component.css'],
 })
-export class InstallDeployTipComponent extends parentComponent {
+export class InstallDeployTipComponent extends ParentComponent {
     ////////////////////////////////////
     inputCFSSLExecDir: string;
     inputEtcdCertsDir: string;
@@ -134,7 +134,7 @@ export class InstallDeployTipComponent extends parentComponent {
 
     inputClusterSize: number;
 
-    etcdFlags: etcdFlag[];
+    etcdFlags: EtcdFlag[];
     ////////////////////////////////////
 
     ////////////////////////////////////
@@ -142,7 +142,7 @@ export class InstallDeployTipComponent extends parentComponent {
     inputEtcdVersionRkt: string;
     inputRktVersion: string;
 
-    rktFlags: rktFlag[];
+    rktFlags: RktFlag[];
     ////////////////////////////////////
 
     ////////////////////////////////////
@@ -208,7 +208,7 @@ export class InstallDeployTipComponent extends parentComponent {
         this.inputClusterSize = 3;
 
         this.etcdFlags = [
-            new etcdFlag(
+            new EtcdFlag(
                 'my-etcd-1',
                 this.inputSecure,
                 'YOUR_IP_1',
@@ -217,7 +217,7 @@ export class InstallDeployTipComponent extends parentComponent {
                 'my-etcd-token',
                 'new'
             ),
-            new etcdFlag(
+            new EtcdFlag(
                 'my-etcd-2',
                 this.inputSecure,
                 'YOUR_IP_2',
@@ -226,7 +226,7 @@ export class InstallDeployTipComponent extends parentComponent {
                 'my-etcd-token',
                 'new'
             ),
-            new etcdFlag(
+            new EtcdFlag(
                 'my-etcd-3',
                 this.inputSecure,
                 'YOUR_IP_3',
@@ -235,7 +235,7 @@ export class InstallDeployTipComponent extends parentComponent {
                 'my-etcd-token',
                 'new'
             ),
-            new etcdFlag(
+            new EtcdFlag(
                 'my-etcd-4',
                 this.inputSecure,
                 'YOUR_IP_4',
@@ -244,7 +244,7 @@ export class InstallDeployTipComponent extends parentComponent {
                 'my-etcd-token',
                 'new'
             ),
-            new etcdFlag(
+            new EtcdFlag(
                 'my-etcd-5',
                 this.inputSecure,
                 'YOUR_IP_5',
@@ -253,7 +253,7 @@ export class InstallDeployTipComponent extends parentComponent {
                 'my-etcd-token',
                 'new'
             ),
-            new etcdFlag(
+            new EtcdFlag(
                 'my-etcd-6',
                 this.inputSecure,
                 'YOUR_IP_6',
@@ -262,7 +262,7 @@ export class InstallDeployTipComponent extends parentComponent {
                 'my-etcd-token',
                 'new'
             ),
-            new etcdFlag(
+            new EtcdFlag(
                 'my-etcd-7',
                 this.inputSecure,
                 'YOUR_IP_7',
@@ -278,28 +278,28 @@ export class InstallDeployTipComponent extends parentComponent {
         this.inputRktVersion = 'v1.17.0';
 
         this.rktFlags = [
-            new rktFlag(
+            new RktFlag(
                 'my-etcd-rkt-1'
             ),
-            new rktFlag(
+            new RktFlag(
                 'my-etcd-rkt-2'
             ),
-            new rktFlag(
+            new RktFlag(
                 'my-etcd-rkt-3'
             ),
-            new rktFlag(
+            new RktFlag(
                 'my-etcd-rkt-4'
             ),
-            new rktFlag(
+            new RktFlag(
                 'my-etcd-rkt-5'
             ),
-            new rktFlag(
+            new RktFlag(
                 'my-etcd-rkt-6'
             ),
-            new rktFlag(
+            new RktFlag(
                 'my-etcd-rkt-7'
             ),
-        ]
+        ];
         ///////////////////////////////////////////////////
 
         ///////////////////////////////////////////////////
@@ -443,7 +443,7 @@ openssl x509 -in $HOME/test-certs/trusted-ca.pem -text -noout
 EOF`;
     }
 
-    getCFSSLKeys(flag: etcdFlag) {
+    getCFSSLKeys(flag: EtcdFlag) {
         let hostTxt = `    "localhost"`;
         if (flag.ipAddress !== 'localhost') {
             hostTxt += `,
@@ -636,7 +636,7 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
         return txt;
     }
 
-    getClientURL(flag: etcdFlag) {
+    getClientURL(flag: EtcdFlag) {
         if (this.inputSecure) {
             flag.protocol = 'https';
         } else {
@@ -645,7 +645,7 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
         return flag.protocol + '://' + flag.ipAddress + ':' + String(flag.clientPort);
     }
 
-    getPeerURL(flag: etcdFlag) {
+    getPeerURL(flag: EtcdFlag) {
         if (this.inputSecure) {
             flag.protocol = 'https';
         } else {
@@ -727,7 +727,7 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
     }
 
 
-    getEtcdAllFlags(dataDir: string, certsDir: string, flag: etcdFlag, skipDataDir: boolean, oneLine: boolean) {
+    getEtcdAllFlags(dataDir: string, certsDir: string, flag: EtcdFlag, skipDataDir: boolean, oneLine: boolean) {
         let flags: string[] = [];
         flags.push('--name' + ' ' + flag.name);
 
@@ -781,7 +781,7 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
         return txt;
     }
 
-    getEtcdFullCommand(execDir: string, dataDir: string, certsDir: string, flag: etcdFlag, skipDataDir: boolean, oneLine: boolean) {
+    getEtcdFullCommand(execDir: string, dataDir: string, certsDir: string, flag: EtcdFlag, skipDataDir: boolean, oneLine: boolean) {
         let divide = '/';
         if (execDir === '/') {
             divide = '';
@@ -802,7 +802,7 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
         return exec + ' ' + this.getEtcdAllFlags(ds, cs, flag, skipDataDir, oneLine);
     }
 
-    getEtcdctlFullCommand(execDir: string, certsDir: string, flag: etcdFlag) {
+    getEtcdctlFullCommand(execDir: string, certsDir: string, flag: EtcdFlag) {
         let divide = '/';
         if (execDir === '/') {
             divide = '';
@@ -827,7 +827,7 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
         return cmd;
     }
 
-    getEtcdSystemdServiceFile(execDir: string, certsDir: string, etcdDataDir: string, flag: etcdFlag) {
+    getEtcdSystemdServiceFile(execDir: string, certsDir: string, etcdDataDir: string, flag: EtcdFlag) {
         return `cat > /tmp/${flag.name}.service <<EOF
 [Unit]
 Description=etcd
@@ -892,9 +892,9 @@ GITHUB_URL=https://github.com/coreos/rkt/releases/download
         etcdDataDir: string,
         certsDir: string,
         etcdVer: string,
-        etcdFlag: etcdFlag,
+        etcdFlag: EtcdFlag,
         rktVer: string,
-        rktFlag: rktFlag
+        rktFlag: RktFlag
     ) {
         let divideRkt = '/';
         if (rktExecDir === '/') {
@@ -954,7 +954,7 @@ sudo mv /tmp/${rktFlag.name}.service /etc/systemd/system/${rktFlag.name}.service
 
     ///////////////////////////////////////////////////
     // https://github.com/coreos/coreos-overlay/tree/master/app-admin/etcd-wrapper/files
-    getCoreOSEtcdWrapper(etcdDataDir: string, certsDir: string, etcdVer: string, etcdFlag: etcdFlag) {
+    getCoreOSEtcdWrapper(etcdDataDir: string, certsDir: string, etcdVer: string, etcdFlag: EtcdFlag) {
         let cs = certsDir;
         if (this.inputSecure && cs.endsWith('/')) {
             cs = cs.substring(0, cs.length - 1);

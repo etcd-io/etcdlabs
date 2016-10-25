@@ -1,5 +1,3 @@
-import { Component } from '@angular/core';
-
 export class Version {
     goVersion: string;
     etcdVersion: string;
@@ -22,7 +20,7 @@ export class Versioner {
     }
 }
 
-export class sidebarItem {
+export class SidebarItem {
     title: string;
     description: string;
     url: string;
@@ -35,52 +33,52 @@ export class sidebarItem {
     }
 }
 
-export class parentComponent {
+export class ParentComponent {
     versioner = new Versioner();
     version = this.versioner.getVersion();
 
-    getStartedItems: sidebarItem[];
+    getStartedItems: SidebarItem[];
 
     constructor() {
         this.getStartedItems = [
-            new sidebarItem(
+            new SidebarItem(
                 'Install and deploy',
                 'set up etcd cluster: bare metal, virtual machine, systemd, rkt',
                 `/doc/${this.version.etcdVersionURL}/install-deploy`,
                 'no-text-decoration'
             ),
-            new sidebarItem(
+            new SidebarItem(
                 'Kubernetes',
                 'manage etcd with Kubernetes',
                 `/doc/${this.version.etcdVersionURL}/kubernetes`,
                 'no-text-decoration'
             ),
-            new sidebarItem(
+            new SidebarItem(
                 'Quick tutorials',
                 'write, read, watch, lock, election, membership, maintenance',
                 `/doc/${this.version.etcdVersionURL}/quick-tutorials`,
                 'no-text-decoration'
             ),
-            new sidebarItem(
+            new SidebarItem(
                 'FAQ',
                 'frequently asked questions',
                 `/doc/${this.version.etcdVersionURL}/faq`,
                 'no-text-decoration'
             ),
 
-            new sidebarItem(
+            new SidebarItem(
                 'etcd in comparison',
                 `etcd in comparison with other databases`,
                 `/doc/${this.version.etcdVersionURL}/comparison`,
                 'no-text-decoration'
             ),
-            new sidebarItem(
+            new SidebarItem(
                 'etcd STM',
                 `etcd Software Transactional Memory`,
                 `/doc/${this.version.etcdVersionURL}/stm`,
                 'no-text-decoration'
             ),
-            new sidebarItem(
+            new SidebarItem(
                 'Other versions',
                 'looking for documentation of other versions?',
                 `/doc/${this.version.etcdVersionURL}/versions`,
