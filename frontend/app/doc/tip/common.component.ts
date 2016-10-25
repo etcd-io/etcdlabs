@@ -65,7 +65,6 @@ export class ParentComponent {
                 `/doc/${this.version.etcdVersionURL}/faq`,
                 'no-text-decoration'
             ),
-
             new SidebarItem(
                 'etcd in comparison',
                 `etcd in comparison with other databases`,
@@ -76,12 +75,6 @@ export class ParentComponent {
                 'etcd STM',
                 `etcd Software Transactional Memory`,
                 `/doc/${this.version.etcdVersionURL}/stm`,
-                'no-text-decoration'
-            ),
-            new SidebarItem(
-                'Other versions',
-                'looking for documentation of other versions?',
-                `/doc/${this.version.etcdVersionURL}/versions`,
                 'no-text-decoration'
             ),
         ];

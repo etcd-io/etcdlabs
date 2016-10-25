@@ -15,7 +15,6 @@ import { QuickTutorialsTipComponent } from './doc/tip/quick-tutorials.component'
 import { FAQTipComponent } from './doc/tip/faq.component';
 import { ComparisonTipComponent } from './doc/tip/comparison.component';
 import { STMTipComponent } from './doc/tip/stm.component';
-import { VersionsTipComponent } from './doc/tip/versions.component';
 
 /*
 play
@@ -46,7 +45,6 @@ const appRoutes: Routes = [
             { path: 'faq', component: FAQTipComponent },
             { path: 'comparison', component: ComparisonTipComponent },
             { path: 'stm', component: STMTipComponent },
-            { path: 'versions', component: VersionsTipComponent },
         ],
     },
 
@@ -74,7 +72,6 @@ export const routedComponents = [
     FAQTipComponent,
     ComparisonTipComponent,
     STMTipComponent,
-    VersionsTipComponent,
 
     PlayComponent,
 
