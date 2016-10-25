@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -ex
+set -e
 
 if ! [[ "$0" =~ "scripts/start-prod-ubuntu.sh" ]]; then
     echo "must be run from repository root"
@@ -21,13 +21,13 @@ nohup ./etcdlabs >> $HOME/etcdlabs.log 2>&1 &
 
 sleep 5s
 echo "starting frontend"
-nohup npm start >> $HOME/etcdlabs-npm.log 2>&1 &
+nohup yarn start >> $HOME/etcdlabs-yarn.log 2>&1 &
 
 sleep 5s
 cat $HOME/etcdlabs.log
-cat $HOME/etcdlabs-npm.log
+cat $HOME/etcdlabs-yarn.log
 
 <<COMMENT
 tail -f /tmp/etcdlabs.log
-tail -f /tmp/etcdlabs-npm.log
+tail -f /tmp/etcdlabs-yarn.log
 COMMENT

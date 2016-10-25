@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -ex
+set -e
 
 if ! [[ "$0" =~ "scripts/shutdown-local-ubuntu.sh" ]]; then
     echo "must be run from repository root"

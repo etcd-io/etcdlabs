@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -ex
+set -e
 
 <<COMMENT
 https://yarnpkg.com/en/docs/install
