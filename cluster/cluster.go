@@ -212,13 +212,18 @@ func Start(ccfg Config) (c *Cluster, err error) {
 		c.nodes[i].cfg = &nc
 	}
 
-	var wg sync.WaitGroup
-	wg.Add(c.size)
+	errc := make(chan error)
 	for i := 0; i < c.size; i++ {
 		go func(i int) {
-			defer wg.Done()
-
-			<-c.nodes[i].srv.Server.ReadyNotify()
+			var rerr error
+			select {
+			case <-c.nodes[i].srv.Server.ReadyNotify():
+			case rerr = <-c.nodes[i].srv.Err():
+			}
+			errc <- rerr
+			if rerr != nil {
+				return
+			}
 
 			c.nodes[i].stoppedStartedAt = time.Now()
 			c.nodes[i].status.State = FollowerNodeStatus
@@ -228,11 +233,24 @@ func Start(ccfg Config) (c *Cluster, err error) {
 			plog.Printf("started %s (client %s, peer %s)", c.nodes[i].cfg.Name, c.nodes[i].cfg.LCUrls[0].String(), c.nodes[i].cfg.LPUrls[0].String())
 		}(i)
 	}
-	wg.Wait()
+	cnt := 0
+	for rerr := range errc {
+		if rerr != nil {
+			err = rerr
+			return
+		}
+
+		cnt++
+		if cnt == c.size {
+			close(errc)
+			break
+		}
+	}
 
 	time.Sleep(time.Second)
 
 	plog.Print("checking leader")
+	var wg sync.WaitGroup
 	wg.Add(c.size)
 	for i := 0; i < c.size; i++ {
 		go func(i int) {
