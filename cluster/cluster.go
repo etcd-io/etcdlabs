@@ -222,6 +222,7 @@ func Start(ccfg Config) (c *Cluster, err error) {
 			}
 			errc <- rerr
 			if rerr != nil {
+				plog.Warning("embed.Etcd failed to start", rerr, "at", c.nodes[i].cfg.Name, c.nodes[i].cfg.LCUrls[0].String())
 				return
 			}
 
