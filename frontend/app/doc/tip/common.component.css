@@ -183,6 +183,13 @@ h2 .faq-title {
     font-size: 14px;
 }
 
+.code-light-snippet-small {
+    background: #f5f5f5;
+    color: #366354;
+    font-family: monospace;
+    font-size: 12px;
+}
+
 .code-light-snippet-red {
     background: #f5f5f5;
     color: #F44336;

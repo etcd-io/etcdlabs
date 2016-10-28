@@ -13,6 +13,25 @@
     <div class="doc-group">
         <router-outlet></router-outlet>
 
+        <div id="top"></div>
+
+        <a href="/doc/{{version.etcdVersionURL}}/comparison#etcd-in-comparison" class="faq-list">etcd in comparison</a>
+        <br>
+        <a href="/doc/{{version.etcdVersionURL}}/comparison#compare-consensus-algorithm" class="faq-list">Compare: Consensus Algorithm</a>
+        <br>
+        <a href="/doc/{{version.etcdVersionURL}}/comparison#compare-features" class="faq-list">Compare: Features</a>
+        <br>
+        <a href="/doc/{{version.etcdVersionURL}}/comparison#compare-performance-reliability" class="faq-list">Compare: Performance & Reliability</a>
+        <br>
+        <a href="/doc/{{version.etcdVersionURL}}/comparison#compare-benchmark-results" class="faq-list">Compare: Benchmark Results</a>
+        <br>
+        <a href="/doc/{{version.etcdVersionURL}}/comparison#etcd-performance-reliability" class="faq-list">etcd Performance & Reliability</a>
+        <br>
+        <a href="/doc/{{version.etcdVersionURL}}/comparison#etcd-reliability" class="faq-list">etcd Reliability</a>
+        <br>
+
+        <br><br>
+        <div id="etcd-in-comparison"></div>
         <h4>etcd in comparison <span class="next-to-header-title">(last update Nov 1, 2016)</span></h4>
         <br>
         <p class="narrow-paragraph">
@@ -48,12 +67,6 @@
                     <td>Apache-2.0</td>
                 </tr>
                 <tr>
-                    <th scope="row">Consensus Protocol</th>
-                    <td>Zab<sup>[3]</sup></td>
-                    <td><a href="https://github.com/coreos/etcd/tree/master/raft" target="_blank" class="normal-link">Raft</a><sup>[4]</sup></td>
-                    <td><a href="https://github.com/hashicorp/raft" target="_blank" class="normal-link">Raft</a><sup>[4]</sup>, <a href="https://github.com/hashicorp/raft" target="_blank" class="normal-link">Gossip</a><sup>[5]</sup></td>
-                </tr>
-                <tr>
                     <th scope="row">Language</th>
                     <td>Java</td>
                     <td>Go</td>
@@ -61,9 +74,15 @@
                 </tr>
                 <tr>
                     <th scope="row">Issues</th>
-                    <td><a href="https://issues.apache.org/jira/browse/ZOOKEEPER" target="_blank" class="normal-link">Zookeeper/JIRA</a></td>
+                    <td><a href="https://issues.apache.org/jira/browse/ZOOKEEPER/?selectedTab=com.atlassian.jira.jira-projects-plugin:issues-panel" target="_blank" class="normal-link">Zookeeper/JIRA</a></td>
                     <td><a href="https://github.com/coreos/etcd/issues" target="_blank" class="normal-link">etcd/issues</a></td>
                     <td><a href="https://github.com/hashicorp/consul/issues" target="_blank" class="normal-link">consul/issues</a></td>
+                </tr>
+                <tr>
+                    <th scope="row">Version</th>
+                    <td><a href="http://zookeeper.apache.org/doc/r3.4.9/" target="_blank" class="normal-link">r3.4.9</a></td>
+                    <td><a href="https://github.com/coreos/etcd/releases/tag/v3.1.0" target="_blank" class="normal-link">v3.1.0</a></td>
+                    <td><a href="https://github.com/hashicorp/consul/releases/tag/v0.7.0" target="_blank" class="normal-link">v0.7.0</a></td>
                 </tr>
             </tbody>
         </table>
@@ -73,23 +92,15 @@
             Symposium on Operating System Design and Implementation (OSDI), chapter 2, page 3, November 2006.
             <br> [2] Leslie Lamport: "<a href="http://research.microsoft.com/en-us/um/people/lamport/pubs/lamport-paxos.pdf" target="_blank" class="footer-link">The Part-Time Parliament</a>," ACM Transactions on Computer Systems, volume 16, number 2,
             pages 133–169, May 1998.
-            <br> [3] Flavio P. Junqueira, Benjamin C. Reed, and Marco Serafini: "<a href="https://pdfs.semanticscholar.org/b02c/6b00bd5dbdbd951fddb00b906c82fa80f0b3.pdf" target="_blank" class="footer-link">Zab: High-performance broadcast for primary-backup systems</a>,"
-            at DSN'11, IEEE/IFIP International Conference on Dependable Systems & Networks, June 2011.
-            <br> [4] Diego Ongaro and John K Ousterhout: "<a href="https://raft.github.io/raft.pdf" target="_blank" class="footer-link">In Search of an Understandable Consensus Algorithm (Extended Version)</a>," at USENIX Annual Technical Conference (ATC),
-            June 2014.
-            <br> [5] Abhinandan Das, Indranil Gupta, Ashish Motivala: "<a href="http://www.cs.cornell.edu/~asdas/research/dsn02-swim.pdf" target="_blank" class="footer-link">SWIM: Scalable Weakly-consistent Infection-style Process Group Membership Protocol</a>,"
-            at DSN '02: Proceedings of the 2002 International Conference on Dependable Systems and Networks, June 2002.
         </footer>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/comparison#top" class="normal-link">↑ top</a></div>
         <br><br>
 
-        <br><br>
-        <h4>Feature</h4>
-        <br>
-        <p class="narrow-paragraph">
-            In practice, etcd is already integrated into a large-scale distributed system, Kubernetes, and we have implemented distributed coordination primitives including distributed locks, elections, and software transactional memory, to ensure the etcd API is
-            flexible enough to support a variety of applications.
-        </p>
 
+
+        <br><br>
+        <div id="compare-consensus-algorithm"></div>
+        <h4>Compare: Consensus Algorithm</h4>
         <br>
         <table class="table narrow-paragraph">
             <thead>
@@ -102,15 +113,95 @@
             </thead>
             <tbody>
                 <tr>
+                    <th scope="row">Consensus Protocol</th>
+                    <td>Zab<sup>[1]</sup></td>
+                    <td>Raft<sup>[2]</sup></td>
+                    <td>Raft<sup>[2]</sup></td>
+                </tr>
+                <tr>
+                    <th scope="row">Gossip Protocol</th>
+                    <td>No</td>
+                    <td>No</td>
+                    <td>SWIM<sup>[3]</sup></td>
+                </tr>
+                <tr>
+                    <th scope="row">Dynamic Reconfiguration</th>
+                    <td>Yes</td>
+                    <td>Yes</td>
+                    <td>Yes</td>
+                </tr>
+                <tr>
+                    <th scope="row">Leadership Transfer</th>
+                    <td>No</td>
+                    <td>Yes<sup>[4]</sup></td>
+                    <td>No</td>
+                </tr>
+                <tr>
+                    <th scope="row">Read-only optimization</th>
+                    <td>No</td>
+                    <td>Yes<sup>[5]</sup></td>
+                    <td>No</td>
+                </tr>
+                <tr>
+                    <th scope="row">Pre-Vote algorithm</th>
+                    <td>Yes<sup>[6]</sup></td>
+                    <td>Yes<sup>[7]</sup></td>
+                    <td>No</td>
+                </tr>
+            </tbody>
+        </table>
+        <hr align="left" class="footer-top-line">
+        <footer class="narrow-footer">
+            [1] Flavio P. Junqueira, Benjamin C. Reed, and Marco Serafini: "<a href="https://pdfs.semanticscholar.org/b02c/6b00bd5dbdbd951fddb00b906c82fa80f0b3.pdf" target="_blank" class="footer-link">Zab: High-performance broadcast for primary-backup systems</a>,"
+            at DSN'11, IEEE/IFIP International Conference on Dependable Systems & Networks, June 2011.
+            <br> [2] Diego Ongaro: "<a href="https://ramcloud.stanford.edu/~ongaro/thesis.pdf" target="_blank" class="footer-link">Consensus: Bridging Theory and Practice</a>," Stanford University Ph.D. Dissertation, August 2014.
+            <br> [3] Abhinandan Das, Indranil Gupta, Ashish Motivala: "<a href="http://www.cs.cornell.edu/~asdas/research/dsn02-swim.pdf" target="_blank" class="footer-link">SWIM: Scalable Weakly-consistent Infection-style Process Group Membership Protocol</a>,"
+            at DSN '02: Proceedings of the 2002 International Conference on Dependable Systems and Networks, June 2002.
+            <br> [4] Diego Ongaro: "<a href="https://ramcloud.stanford.edu/~ongaro/thesis.pdf" target="_blank" class="footer-link">Consensus: Bridging Theory and Practice</a>," Stanford University Ph.D. Dissertation, chapter 3, page 28, August 2014.
+            <br> [5] Diego Ongaro: "<a href="https://ramcloud.stanford.edu/~ongaro/thesis.pdf" target="_blank" class="footer-link">Consensus: Bridging Theory and Practice</a>," Stanford University Ph.D. Dissertation, chapter 6, page 72, August 2014.
+            <br> [6] Flavio P. Junqueira, Benjamin C. Reed, and Marco Serafini: "<a href="https://pdfs.semanticscholar.org/b02c/6b00bd5dbdbd951fddb00b906c82fa80f0b3.pdf" target="_blank" class="footer-link">Zab: High-performance broadcast for primary-backup systems</a>,"
+            at DSN'11, IEEE/IFIP International Conference on Dependable Systems & Networks, page 249, June 2011.
+            <br> [7] Diego Ongaro: "<a href="https://ramcloud.stanford.edu/~ongaro/thesis.pdf" target="_blank" class="footer-link">Consensus: Bridging Theory and Practice</a>," Stanford University Ph.D. Dissertation, chapter 9, page 136, August 2014.
+        </footer>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/comparison#top" class="normal-link">↑ top</a></div>
+        <br><br>
+
+
+        <br><br>
+        <div id="compare-features"></div>
+        <h4>Compare: Features</h4>
+        <br>
+        <p class="narrow-paragraph">
+            In practice, etcd is already integrated into a large-scale distributed system, Kubernetes, and we have implemented distributed coordination primitives including distributed locks, elections, and software transactional memory, to ensure the etcd API is
+            flexible enough to support a variety of applications.
+        </p>
+        <br>
+        <table class="table narrow-paragraph">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Zookeeper</th>
+                    <th>etcd</th>
+                    <th>Consul</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">Reserved Keywords</th>
+                    <td>Yes<sup>[1]</sup></td>
+                    <td>No</td>
+                    <td>No</td>
+                </tr>
+                <tr>
                     <th scope="row">Atomic Read/Write</th>
                     <td>Yes</td>
                     <td>Yes</td>
                     <td>Yes</td>
                 </tr>
                 <tr>
-                    <th scope="row">Leases</th>
-                    <td>Yes</td>
-                    <td>Yes</td>
+                    <th scope="row">Lease</th>
+                    <td><a href="http://zookeeper.apache.org/doc/r3.4.9/zookeeperProgrammers.html#Ephemeral+Nodes" target="_blank" class="normal-link">Yes</a></td>
+                    <td><a href="https://github.com/coreos/etcd/tree/master/etcdctl#lease-subcommand" target="_blank" class="normal-link">Yes</a></td>
                     <td>Yes</td>
                 </tr>
                 <tr>
@@ -126,21 +217,45 @@
                     <td>Yes</td>
                 </tr>
                 <tr>
-                    <th scope="row">Dynamic Reconfiguration</th>
+                    <th scope="row">SSL</th>
+                    <td>TLS</td>
+                    <td>TLS</td>
+                    <td>TLS</td>
+                </tr>
+                <tr>
+                    <th scope="row">Acess Control</th>
+                    <td><a href="http://zookeeper.apache.org/doc/r3.4.9/zookeeperProgrammers.html#sc_ZooKeeperAccessControl" target="_blank" class="normal-link">ACL</a></td>
+                    <td><a href="https://github.com/coreos/etcd/tree/master/etcdctl#auth-enable-or-disable" target="_blank" class="normal-link">Authentication</a></td>
+                    <td><a href="https://www.consul.io/docs/internals/acl.html" target="_blank" class="normal-link">ACL</a></td>
+                </tr>
+                <tr>
+                    <th scope="row">Auto-compaction</th>
+                    <td><a href="http://zookeeper.apache.org/doc/r3.4.9/zookeeperAdmin.html#sc_strengthsAndLimitations" target="_blank" class="normal-link">Yes</a></td>
+                    <td><a href="https://github.com/coreos/etcd/blob/master/Documentation/op-guide/maintenance.md" target="_blank" class="normal-link">Yes</a><sup>[2]</sup></td>
                     <td>Yes</td>
-                    <td>Yes</td>
-                    <td>Yes</td>
+                </tr>
+                <tr>
+                    <th scope="row">Space Quota</th>
+                    <td><a href="http://zookeeper.apache.org/doc/r3.4.9/zookeeperQuotas.html" target="_blank" class="normal-link">Yes</a></td>
+                    <td><a href="https://github.com/coreos/etcd/tree/master/etcdctl#alarm-subcommand" target="_blank" class="normal-link">Yes</a></td>
+                    <td>No</td>
                 </tr>
                 <tr>
                     <th scope="row">DNS</th>
                     <td>No</td>
-                    <td>No</td>
+                    <td>No<sup>[3]</sup></td>
                     <td><a href="https://www.consul.io/docs/agent/dns.html" target="_blank" class="normal-link">Yes</a></td>
                 </tr>
                 <tr>
-                    <th scope="row">Proxy</th>
+                    <th scope="row">Monitoring</th>
+                    <td><a href="http://zookeeper.apache.org/doc/r3.4.9/zookeeperAdmin.html#sc_monitoring" target="_blank" class="normal-link">mntr command</a></td>
+                    <td><a href="https://github.com/coreos/etcd/blob/master/Documentation/metrics.md" target="_blank" class="normal-link">Prometheus metrics</a></td>
+                    <td><a href="https://www.consul.io/docs/agent/telemetry.html" target="_blank" class="normal-link">Telemetry</a></td>
+                </tr>
+                <tr>
+                    <th scope="row">Snapshot Backup</th>
                     <td>No</td>
-                    <td><a href="https://github.com/coreos/etcd/blob/master/Documentation/op-guide/grpc_proxy.md" target="_blank" class="normal-link">Yes</a></td>
+                    <td><a href="https://github.com/coreos/etcd/blob/master/Documentation/op-guide/maintenance.md#snapshot-backup" target="_blank" class="normal-link">Yes</a></td>
                     <td>No</td>
                 </tr>
                 <tr>
@@ -150,29 +265,38 @@
                     <td>No</td>
                 </tr>
                 <tr>
-                    <th scope="row">Quota</th>
+                    <th scope="row">Proxy</th>
                     <td>No</td>
-                    <td><a href="https://github.com/coreos/etcd/tree/master/etcdctl#alarm-subcommand" target="_blank" class="normal-link">Yes</a></td>
+                    <td><a href="https://github.com/coreos/etcd/blob/master/Documentation/op-guide/grpc_proxy.md" target="_blank" class="normal-link">Yes</a></td>
                     <td>No</td>
                 </tr>
                 <tr>
-                    <th scope="row">Leadership Transfer</th>
+                    <th scope="row">Zookeeper Proxy</th>
+                    <td>N/A</td>
+                    <td><a href="https://github.com/coreos/zetcd" target="_blank" class="normal-link">coreos/zetcd</a></td>
                     <td>No</td>
-                    <td>Yes<sup>[1]</sup></td>
+                </tr>
+                <tr>
+                    <th scope="row">Consul Proxy</th>
                     <td>No</td>
+                    <td><a href="https://github.com/coreos/cetcd" target="_blank" class="normal-link">coreos/cetcd</a></td>
+                    <td>N/A</td>
                 </tr>
             </tbody>
         </table>
         <hr align="left" class="footer-top-line">
         <footer class="narrow-footer">
-            [1] Diego Ongaro: "<a href="https://ramcloud.stanford.edu/~ongaro/thesis.pdf" target="_blank" class="footer-link">Consensus: Bridging Theory and Practice</a>," Stanford University Ph.D. Dissertation, chapter 3, page 28, August 2014.
+            [1] The token <span class="code-light-snippet-small">zookeeper</span> is reserved. Also <span class="code-light-snippet-small">/a/b/./c</span> is invalid in Zookeeper.
+            <br> [2] In addition to auto-purging Raft logs, etcd also supports on-disk storage compaction.
+            <br> [3] etcd provides discovery service for bootstrapping etcd cluster. Please visit https://discovery.etcd.io.
         </footer>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/comparison#top" class="normal-link">↑ top</a></div>
         <br><br>
 
 
         <br><br>
-        <h4>Performance & Reliability</h4>
-
+        <div id="compare-performance-reliability"></div>
+        <h4>Compare: Performance & Reliability</h4>
         <br>
         <table class="table narrow-paragraph">
             <thead>
@@ -188,7 +312,7 @@
                     <th scope="row">RPC</th>
                     <td><a href="https://zookeeper.apache.org/doc/trunk/zookeeperAdmin.html#Communication+using+the+Netty+framework" target="_blank" class="normal-link">NIO, Netty</a></td>
                     <td><a href="http://www.grpc.io" target="_blank" class="normal-link">gRPC</a>, <a href="https://http2.github.io" target="_blank" class="normal-link">HTTP/2</a></td>
-                    <td>HTTP</td>
+                    <td>HTTP/1</td>
                 </tr>
                 <tr>
                     <th scope="row">Storage</th>
@@ -209,46 +333,117 @@
                     <td>On-disk snapshot</td>
                 </tr>
                 <tr>
-                    <th scope="row">Version</th>
-                    <td><a href="http://zookeeper.apache.org/doc/r3.4.9/" target="_blank" class="normal-link">r3.4.9</a></td>
-                    <td><a href="https://github.com/coreos/etcd/releases/tag/v3.1.0" target="_blank" class="normal-link">v3.1.0</a></td>
-                    <td><a href="https://github.com/hashicorp/consul/releases/tag/v0.7.0" target="_blank" class="normal-link">v0.7.0</a></td>
+                    <th scope="row">Request Size Limit</th>
+                    <td>Undefined</td>
+                    <td>1.5 MB<sup>[2]</sup></td>
+                    <td>512 KB<sup>[3]</sup></td>
                 </tr>
                 <tr>
-                    <th scope="row">Write<sup>[2]</sup></th>
+                    <th scope="row">Storage Size Limit</th>
+                    <td>Undefined<sup>[4]</sup></td>
+                    <td>Default 2GB, Maximum 8GB<sup>[5]</sup></td>
+                    <td>Undefined</td>
+                </tr>
+                <tr>
+                    <th scope="row">Write<sup>[6]</sup></th>
                     <td>?</td>
                     <td>?</td>
                     <td>?</td>
                 </tr>
                 <tr>
-                    <th scope="row">Serializable Read<sup>[3]</sup></th>
+                    <th scope="row">Serializable Read<sup>[7]</sup></th>
                     <td>?</td>
                     <td>?</td>
                     <td>?</td>
                 </tr>
                 <tr>
-                    <th scope="row">Linearizable Read<sup>[4]</sup></th>
+                    <th scope="row">Linearizable Read<sup>[8]</sup></th>
                     <td>?</td>
                     <td>?</td>
                     <td>?</td>
+                </tr>
+                <tr>
+                    <th scope="row">Public Testing Cluster</th>
+                    <td>No</td>
+                    <td><a href="http://dash.etcd.io" target="_blank" class="normal-link">dash.etcd.io</a></td>
+                    <td>No</td>
                 </tr>
             </tbody>
         </table>
         <hr align="left" class="footer-top-line">
         <footer class="narrow-footer">
             [1] Bruce Momjian: "<a href="http://momjian.us/main/presentations/internals.html#mvcc" target="_blank" class="footer-link">MVCC Unmasked</a>," momjian.us, July 2014.
-            <br> [2] ...
-            <br> [3] ...
-            <br> [4] ...
+            <br> [2] etcd has hard-coded <span class="code-light-snippet-small">maxRequestBytes</span> value to avoid blocking Raft stream. Server returns <span class="code-light-snippet-small">ErrRequestTooLarge</span> error to the exceeding client request.
+            <br> [3] Consul has hard-coded <span class="code-light-snippet-small">maxKVSize</span> value. Server returns <span class="code-light-snippet-small">Value for key X is too large</span> error to the exceeding client request.
+            <br> [4] Zookeeper guide recommends to limit Java heap size to avoid disk swap, since Zookeeper stores data in-memory.
+            <br> [5] etcd default space quota is 2GB, which can be configured up to 8GB. If etcd exceeds space quota, cluster becomes maintenance mode only allowing read and delete client requests. This is to prevent degrading etcd performance.
+            <br> [6] Write 2 million entries (each entry is 8-byte key, 256-byte value) with 1,000 concurrent TCP connections, while etcd uses only 100 connections.
+            <br> [7] 2 million read requests (each entry is 8-byte key, 256-byte value) with 1,000 concurrent TCP connections, while etcd uses only 100 connections. It is serializable read, where server returns data without going through consensus, so
+            possibly serving stale data.
+            <br> [8] 2 million read requests (each entry is 8-byte key, 256-byte value) with 1,000 concurrent TCP connections, while etcd uses only 100 connections. It is linearizable read, where majority of cluster has to agree on the same value before
+            it returns.
         </footer>
-        <br>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/comparison#top" class="normal-link">↑ top</a></div>
+        <br><br>
 
+        <br><br>
+        <div id="compare-benchmark-results"></div>
+        <h4>Compare: Benchmark Results</h4>
+        <p class="narrow-paragraph">
+            All tests are run with Google Cloud Compute Engine virtual machines: 3 machines are used for database server, each of which has 8 vCPUs, 16GB Memory, and 150GB SSD on Ubuntu 16.10. 1 machine is used for sending client requests, which has 16 vCPUs, 30GB
+            Memory, and 150GB SSD on Ubuntu 16.10. Zookeeper is run with Java 8 (Java(TM) SE Runtime Environment TODO, Java HotSpot(TM) 64-Bit Server VM TODO, javac TODO). etcd is compiled with Go 1.7.3. Consul is compiled with Go TODO. Want to run your
+            own benchmarks? Please try <a href="https://github.com/coreos/etcd/tree/master/tools/benchmark" target="_blank" class="normal-link">etcd benchmark</a> and <a href="https://github.com/coreos/dbtester" target="_blank" class="normal-link">dbtester</a>.
+        </p>
         <br>
-        <h5>Comparison</h5>
+        <h5>Write</h5>
+        <br>
+        <h6>Latency</h6>
+        <br>
+        <h6>Throughput</h6>
+        <br>
+        <h6>CPU</h6>
+        <br>
+        <h6>Memory</h6>
+        <br>
         <p class="narrow-paragraph">
             TODO: graphs...
         </p>
 
+        <br>
+        <h5>Serializable Read</h5>
+        <br>
+        <h6>Latency</h6>
+        <br>
+        <h6>Throughput</h6>
+        <br>
+        <h6>CPU</h6>
+        <br>
+        <h6>Memory</h6>
+        <br>
+        <p class="narrow-paragraph">
+            TODO: graphs...
+        </p>
+
+        <br>
+        <h5>Linearizable Read</h5>
+        <br>
+        <h6>Latency</h6>
+        <br>
+        <h6>Throughput</h6>
+        <br>
+        <h6>CPU</h6>
+        <br>
+        <h6>Memory</h6>
+        <br>
+        <p class="narrow-paragraph">
+            TODO: graphs...
+        </p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/comparison#top" class="normal-link">↑ top</a></div>
+        <br><br>
+
+        <br><br>
+        <div id="etcd-performance-reliability"></div>
+        <h4>etcd Performance & Reliability</h4>
         <br>
         <h5>RPCs</h5>
         <p class="narrow-paragraph">
@@ -257,7 +452,6 @@
             RPC stub code and makes protocol extensions easier to manage. For comparison, even after optimizing etcd v2's client-side JSON parsing, etcd v3 gRPC still holds a 2x message processing performance edge over etcd v2. Likewise, gRPC is better
             at handling connections. Where gRPC uses HTTP/2 to multiplex multiple streams of RPCs over a single TCP connection, a JSON client must establish a new connection for every request.
         </p>
-
         <br>
         <h5>Leases</h5>
         <p class="narrow-paragraph">
@@ -269,7 +463,6 @@
             when multiple keys are attached to the same lease. The keep-alive connection thrashing in etcd v2 is avoided by multiplexing keep-alives on a lease's single gRPC stream. Likewise, keep-alives are processed by the leader, avoiding any consensus
             overhead when idling.
         </p>
-
         <br>
         <h5>Watchers</h5>
         <p class="narrow-paragraph">
@@ -281,7 +474,6 @@
             The etcd v3 API multiplexes watches on a single connection. Instead of opening a new connection, a client registers a watcher on a bidirectional gRPC stream. The stream delivers events tagged with a watcher's registered ID. Multiple watch streams can
             even share the same TCP connection. Multiplexing and stream connection sharing reduce etcd v3's memory footprint by at least an order of magnitude.
         </p>
-
         <br>
         <h5>Data model with reliable events</h5>
         <p class="narrow-paragraph">
@@ -299,7 +491,6 @@
             a directory. Usage patterns didn't justify the overhead of maintaining hierarchy information. etcd v3 instead uses key ranges that search for keys in an interval. This interval model supports both querying on prefixes and, with a convention
             for key naming, listing keys as if from a directory.
         </p>
-
         <br>
         <h5>Multiversion concurrency control (MVCC)</h5>
         <p class="narrow-paragraph">
@@ -312,13 +503,17 @@
             to apply when all conditions evaluate to true (i.e., Get, Put, Delete), and a list of operations to apply if any of the conditions evaluate to false. Transactions make distributed locks safe in etcd v3 because accesses can be conditional based
             on whether the client still holds its lock. This means that even if a client loses its claim on a lock, whether due to clock skew or missing expiration events, etcd v3 will refuse to honor the stale request.
         </p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/comparison#top" class="normal-link">↑ top</a></div>
+        <br><br>
 
-        <br>
-        <h5>etcd Reliability</h5>
+        <br><br>
+        <div id="etcd-reliability"></div>
+        <h4>etcd Reliability</h4>
         <p class="narrow-paragraph">
             Reliability is etcd's highest priority. TODO: Functional tester ...
         </p>
-        <br>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/comparison#top" class="normal-link">↑ top</a></div>
+        <br><br>
 
     </div>
 </md-sidenav-layout>

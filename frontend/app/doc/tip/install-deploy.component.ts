@@ -275,7 +275,7 @@ export class InstallDeployTipComponent extends ParentComponent {
 
         ///////////////////////////////////////////////////
         this.inputEtcdVersionRkt = this.etcdVersionLatestRelease;
-        this.inputRktVersion = 'v1.17.0';
+        this.inputRktVersion = 'v1.18.0';
 
         this.rktFlags = [
             new RktFlag(
