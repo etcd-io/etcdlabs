@@ -38,6 +38,7 @@ export class ParentComponent {
     version = this.versioner.getVersion();
 
     getStartedItems: SidebarItem[];
+    operationItems: SidebarItem[];
 
     constructor() {
         this.getStartedItems = [
@@ -78,6 +79,52 @@ export class ParentComponent {
                 'no-text-decoration'
             ),
         ];
+
+        // TODO
+        this.operationItems = [
+            new SidebarItem(
+                'Tuning etcd',
+                'things to consider when configuring etcd',
+                `/doc/${this.version.etcdVersionURL}/tuning-etcd`,
+                'no-text-decoration'
+            ),
+            new SidebarItem(
+                'Mirror Maker',
+                'mirroring etcd cluster',
+                `/doc/${this.version.etcdVersionURL}/mirror-maker`,
+                'no-text-decoration'
+            ),
+            new SidebarItem(
+                'gRPC Proxy',
+                'stateless etcd reverse proxy at gRPC layer (L7)',
+                `/doc/${this.version.etcdVersionURL}/grpc-proxy`,
+                'no-text-decoration'
+            ),
+            new SidebarItem(
+                'Maintenance',
+                'compaction, backup, defragmentation, space quota',
+                `/doc/${this.version.etcdVersionURL}/maintenance`,
+                'no-text-decoration'
+            ),
+            new SidebarItem(
+                'Upgrade etcd',
+                'upgrade, migrate etcd to latest versions',
+                `/doc/${this.version.etcdVersionURL}/upgrade-etcd`,
+                'no-text-decoration'
+            ),
+            new SidebarItem(
+                'Runtime Reconfiguration',
+                'dynamic reconfiguration of etcd cluster membership',
+                `/doc/${this.version.etcdVersionURL}/runtime-reconfiguration`,
+                'no-text-decoration'
+            ),
+            new SidebarItem(
+                'Disaster Recovery',
+                'handle outages on etcd',
+                `/doc/${this.version.etcdVersionURL}/disaster-recovery`,
+                'no-text-decoration'
+            ),
+        ];
     }
 
     getVersion() {
@@ -85,7 +132,6 @@ export class ParentComponent {
     }
 
     getAllSidebarItems() {
-        // return this.getStartedItems.concat(this.moreItems);
-        return this.getStartedItems;
+        return this.getStartedItems.concat(this.operationItems);
     }
 }

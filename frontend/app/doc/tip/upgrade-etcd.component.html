@@ -1,0 +1,35 @@
+<md-sidenav-layout>
+    <md-sidenav #sidenav [opened]="true" mode="side" class="doc-sidenav">
+        <md-list dense>
+            <a routerLink="/doc/{{version.etcdVersionURL}}">
+                <h3 md-subheader>Getting Started ({{version.etcdVersion}})</h3>
+            </a>
+            <md-list-item *ngFor="let item of getStartedItems">
+                <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
+            </md-list-item>
+
+            <md-divider></md-divider>
+            <h3 md-subheader>Operation Guides</h3>
+            <md-list-item *ngFor="let item of operationItems">
+                <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
+            </md-list-item>
+        </md-list>
+    </md-sidenav>
+
+    <div class="doc-group">
+        <router-outlet></router-outlet>
+
+        <h4>Upgrade etcd</h4>
+        <p class="narrow-paragraph"></p>
+        <p class="narrow-paragraph"></p>
+        <p class="narrow-paragraph"></p>
+        <p class="narrow-paragraph"></p>
+        <p class="narrow-paragraph"></p>
+        <p class="narrow-paragraph"></p>
+
+        <br>
+        <h5>Time Parameters</h5>
+        <p class="narrow-paragraph"></p>
+
+    </div>
+</md-sidenav-layout>

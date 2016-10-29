@@ -1,10 +1,16 @@
 <md-sidenav-layout>
     <md-sidenav #sidenav [opened]="true" mode="side" class="doc-sidenav">
-        <md-list>
+        <md-list dense>
             <a routerLink="/doc/{{version.etcdVersionURL}}">
                 <h3 md-subheader>Getting Started ({{version.etcdVersion}})</h3>
             </a>
             <md-list-item *ngFor="let item of getStartedItems">
+                <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
+            </md-list-item>
+
+            <md-divider></md-divider>
+            <h3 md-subheader>Operation Guides</h3>
+            <md-list-item *ngFor="let item of operationItems">
                 <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
             </md-list-item>
         </md-list>
@@ -54,7 +60,7 @@
             P1 and P2 running <span class="code-light-snippet">nosyncXfer</span> using a shared etcd server process. Each box represents a process’s knowledge of etcd’s key state after receiving a message (indicated by an arrow). Here, the
             process P2 receives "a" (bold) before P1 issues updates to "a" and "b", causing P2 to overcount with inconsistent data (red) when it writes back to etcd.
         </p>
-        <p class="narrow-paragraph" style="text-align:center;"><img src="app/doc/tip/stm-image/diagram1.png" alt="diagram1" align="middle"></p>
+        <p class="narrow-paragraph" style="text-align:center;"><img src="app/doc/tip/images/stm-diagram1.png" alt="stm-diagram1" align="middle"></p>
         <p class="narrow-paragraph">
             Most systems handle the atomicity needed by the example code either through distributed shared locks or a transaction facility. Ultimately, some mechanism enforces atomic accesses over sets of keys while also maintaining fault tolerance and avoiding runaway
             performance degradation under contention. For etcd3, this atomicity mechanism is the transaction.
@@ -96,7 +102,7 @@
             This code is an improvement over the original version. All <span class="code-light-snippet">Get</span> requests are wrapped in a transaction so interleaved writes cannot update <span class="code-light-snippet">from</span> while fetching
             <span class="code-light-snippet">to</span>. Similarly, the <span class="code-light-snippet">Put</span> requests are also wrapped in a transaction to ensure <span class="code-light-snippet">from</span> and <span class="code-light-snippet">to</span>            have not been modified since they were last fetched. The upshot is a conflicting schedule that would have corrupted the data instead admits one transaction by modification revision (shown in braces) and retries the other:
         </p>
-        <p class="narrow-paragraph" style="text-align:center;"><img src="app/doc/tip/stm-image/diagram2.png" alt="diagram2" align="middle"></p>
+        <p class="narrow-paragraph" style="text-align:center;"><img src="app/doc/tip/images/stm-diagram2.png" alt="stm-diagram2" align="middle"></p>
 
         <div style="line-height:3%;"><br></div>
         <h4>Software Transactional Memory</h4>
@@ -109,7 +115,7 @@
             any changes. In an optimistic STM system, a transactional context records all reads and buffers all writes to a read set and write set respectively. To commit a transaction, the system checks for any read conflicts (example below). A conflict
             free transaction applies the write set to memory, but a conflict will retry or abort the transaction.
         </p>
-        <p class="narrow-paragraph" style="text-align:center;"><img src="app/doc/tip/stm-image/diagram2.png" alt="diagram2" align="middle"></p>
+        <p class="narrow-paragraph" style="text-align:center;"><img src="app/doc/tip/images/stm-diagram2.png" alt="stm-diagram2" align="middle"></p>
         <p class="narrow-paragraph">
             To illustrate the STM retry process, the diagram above revisits the conflicting schedule between P1 and P2, but using STM. As before, P1 updates both "a" and "b" between P2 receiving "a" and "b. P1’s commit to etcd increases the key modification revisions
             to <span class="code-light-snippet">{{getCode3()}}</span>. When P2 tries to commit using STM, the stale read set revision for "a" (1) conflicts with the current revision (2) so the server rejects the commit. P2’s transaction then
@@ -191,7 +197,7 @@
             Request throughput of key pair updates for different serialization policies:
         </p>
         <p class="narrow-paragraph" style="text-align:center;">
-            <img src="app/doc/tip/stm-image/stm.png" alt="stm">
+            <img src="app/doc/tip/images/stm.png" alt="stm">
         </p>
         <p class="narrow-paragraph">
             The figure above shows benchmark results from modeling the example code, taken with the etcd3 benchmark tool “stm” command. As expected, lock throughput remains constant and STM throughput scales as the number of keys increases. Compared to read-committed
@@ -202,7 +208,7 @@
             Read conflict retry rate for serialized and repeatable read STM policies:
         </p>
         <p class="narrow-paragraph" style="text-align:center;">
-            <img src="app/doc/tip/stm-image/stm-retry.png" alt="stm-retry">
+            <img src="app/doc/tip/images/stm-retry.png" alt="stm-retry">
         </p>
         <p class="narrow-paragraph">
             The rate of retries, shown above, demonstrates the effect of different isolation levels. With few keys, there are many conflicts, and repeatable reads have fewer retries than serialized isolation because that conflict policy permits more interleaved writes.

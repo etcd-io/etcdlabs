@@ -1,0 +1,91 @@
+<md-sidenav-layout>
+    <md-sidenav #sidenav [opened]="true" mode="side" class="doc-sidenav">
+        <md-list dense>
+            <a routerLink="/doc/{{version.etcdVersionURL}}">
+                <h3 md-subheader>Getting Started ({{version.etcdVersion}})</h3>
+            </a>
+            <md-list-item *ngFor="let item of getStartedItems">
+                <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
+            </md-list-item>
+
+            <md-divider></md-divider>
+            <h3 md-subheader>Operation Guides</h3>
+            <md-list-item *ngFor="let item of operationItems">
+                <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
+            </md-list-item>
+        </md-list>
+    </md-sidenav>
+
+    <div class="doc-group">
+        <router-outlet></router-outlet>
+
+
+        <h4>gRPC Proxy</h4>
+        <p class="narrow-paragraph">
+            The gRPC proxy is a stateless etcd reverse proxy operating at the gRPC layer (L7). The proxy is designed to reduce the total processing load on the core etcd cluster. For horizontal scalability, it coalesces watch and lease API requests. To protect the
+            cluster against abusive clients, it caches key range requests.
+        </p>
+        <p class="narrow-paragraph">
+            The gRPC proxy supports multiple etcd server endpoints. When the proxy starts, it randomly picks one etcd server endpoint to use. This endpoint serves all requests until the proxy detects an endpoint failure. If the gRPC proxy detects an endpoint failure,
+            it switches to a different endpoint, if available, to hide failures from its clients. Other retry policies, such as weighted round-robin, may be supported in the future.
+        </p>
+        <div class="osx-window">
+            <div class="window">
+                <div class="titlebar">
+                    <div class="buttons">
+                        <div class="closebtn"><span><strong></strong></span></div>
+                        <div class="minimize"><span><strong></strong></span></div>
+                        <div class="zoom"><span><strong></strong></span></div>
+                    </div><span class="title-bar-text">terminal</span></div>
+                <div class="content">
+                    <pre class="osx-terminal-contents"># specify etcd cluster endpoints, and address to serve proxy
+etcd grpc-proxy --endpoints="localhost:2379" --listen-addr="localhost:23790"
+</pre>
+                </div>
+            </div>
+        </div>
+
+        <br>
+        <h5>Scalable Watch API</h5>
+        <p class="narrow-paragraph">
+            The gRPC proxy coalesces multiple client watchers (<span class="code-light-snippet">c-watchers</span>) on the same key or range into a single watcher (<span class="code-light-snippet">s-watcher</span>) connected to an etcd server. The proxy
+            broadcasts all events from the <span class="code-light-snippet">s-watcher</span> to its <span class="code-light-snippet">c-watchers</span>.
+        </p>
+        <p class="narrow-paragraph">
+            Assuming N clients watch the same key, one gRPC proxy can reduce the watch load on the etcd server from N to 1. Users can deploy multiple gRPC proxies to further distribute server load.
+        </p>
+        <p class="narrow-paragraph">
+            In the following example, three clients watch on key A. The gRPC proxy coalesces the three watchers, creating a single watcher attached to the etcd server.
+        </p>
+        <p class="narrow-paragraph" style="text-align:center;"><img src="app/doc/tip/images/grpc-proxy.png" alt="grpc-proxy" align="middle" style="width:600px;height:470px;"></p>
+
+
+        <br>
+        <h5>Limitations</h5>
+        <p class="narrow-paragraph">
+            To effectively coalesce multiple client watchers into a single watcher, the gRPC proxy coalesces new <span class="code-light-snippet">c-watchers</span> into an existing <span class="code-light-snippet">s-watcher</span> when possible. This
+            coalesced <span class="code-light-snippet">s-watcher</span> may be out of sync with the etcd server due to network delays or buffered undelivered events. When the watch revision is unspecified, the gRPC proxy will not guarantee the <span class="code-light-snippet">c-watcher</span>            will start watching from the most recent store revision. For example, if a client watches from an etcd server with revision 1000, that watcher will begin at revision 1000. If a client watches from the gRPC proxy, may begin watching from revision
+            990.
+        </p>
+        <p class="narrow-paragraph">
+            Similar limitations apply to cancellation. When the watcher is cancelled, the etcd server’s revision may be greater than the cancellation response revision.
+        </p>
+        <p class="narrow-paragraph">
+            These two limitations should not cause problems for most use cases. In the future, there may be additional options to force the watcher to bypass the gRPC proxy for more accurate revision responses.
+        </p>
+
+
+        <br>
+        <h5>Scalable Lease API</h5>
+        <p class="narrow-paragraph">
+            TODO
+        </p>
+
+
+        <br>
+        <h5>Abusive Clients Protection</h5>
+        <p class="narrow-paragraph">
+            The gRPC proxy caches responses for requests when it does not break consistency requirements. This can protect the etcd server from abusive clients in tight for loops.
+        </p>
+    </div>
+</md-sidenav-layout>

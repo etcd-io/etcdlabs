@@ -792,7 +792,9 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
         if (ds.endsWith('/')) {
             ds = ds.substring(0, ds.length - 1);
         }
-        ds = ds + `/${flag.name}.data`;
+        if (flag.ipAddress === 'localhost') {
+            ds = ds + `/${flag.name}.data`;
+        }
 
         let cs = certsDir;
         if (this.inputSecure && cs.endsWith('/')) {
@@ -906,7 +908,9 @@ GITHUB_URL=https://github.com/coreos/rkt/releases/download
         if (ds.endsWith('/')) {
             ds = ds.substring(0, ds.length - 1);
         }
-        ds = ds + `/${etcdFlag.name}.data`;
+        if (etcdFlag.ipAddress === 'localhost') {
+            ds = ds + `/${etcdFlag.name}.data`;
+        }
 
         let cs = certsDir;
         if (this.inputSecure && cs.endsWith('/')) {
