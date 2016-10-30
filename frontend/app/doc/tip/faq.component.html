@@ -46,6 +46,11 @@
                 <a href="/doc/{{version.etcdVersionURL}}/faq#etcd-use-case-kubernetes" class="faq-list">Who uses etcd: Kubernetes</a>
                 <br>
 
+                <br>
+                <div class="faq-list-title">etcd</div>
+                <a href="/doc/{{version.etcdVersionURL}}/faq#revision" class="faq-list">What is revision in etcd?</a>
+                <br>
+
             </div>
             <div class="block block-copy half">
 
@@ -262,6 +267,17 @@
             <a href="http://kubernetes.io/docs/whatisk8s/" target="_blank" class="normal-link">Kubernetes</a> needs configuration storage for service discovery and cluster management. Kubernetes API server writes persistent cluster states in etcd. And
             uses etcd watch API to get notified whenever changes happen. Consistency is the key to ensure that services correctly schedule and operatate.
         </p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/faq#top" class="normal-link">↑ top</a></div>
+        <br>
+
+        <div id="revision"></div>
+        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#revision" class="faq-title">What is revision in etcd?</a></h2>
+        <p class="narrow-paragraph">
+            Each <span class="code-light-snippet">KeyValue</span> contains key and value in bytes with <span class="code-light-snippet">create_revision</span>, <span class="code-light-snippet">mod_revision</span>, and <span class="code-light-snippet">version</span>.
+            And there is <span class="code-light-snippet">Revision</span> field in <span class="code-light-snippet">etcdserverpb.ResponseHeader</span>. <span class="code-light-snippet">Revision</span> is the current revision of etcd. It is int64 and monotonically
+            increased for every backend modification (e.g., Put, Delete, Txn). Note that this <span class="code-light-snippet">Revision</span> is a global revision, not specific to a certain key. <span class="code-light-snippet">create_revision</span>            is the revision of last creation on a key. It is etcd's current revision at the time of the key creation. <span class="code-light-snippet">create_revision == 0</span> means that the key does not exist. <span class="code-light-snippet">mod_revision</span>            is the etcd revision of the last update to the key. <span class="code-light-snippet">version</span> is the number of times the key has been modified since creation.
+        </p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/faq#top" class="normal-link">↑ top</a></div>
         <br>
 
         <div id="odd-cluster-size"></div>
