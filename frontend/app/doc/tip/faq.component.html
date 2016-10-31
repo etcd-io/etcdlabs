@@ -50,11 +50,15 @@
                 <div class="faq-list-title">etcd</div>
                 <a href="/doc/{{version.etcdVersionURL}}/faq#revision" class="faq-list">What is revision in etcd?</a>
                 <br>
+                <a href="/doc/{{version.etcdVersionURL}}/faq#flag-client-urls" class="faq-list">listen-client-urls vs. advertise-client-urls</a>
+                <br>
 
             </div>
             <div class="block block-copy half">
 
                 <div class="faq-list-title">Operation, Membership</div>
+                <a href="/doc/{{version.etcdVersionURL}}/faq#quorum-fault-tolerance-table" class="faq-list">quorum, fault tolerance table</a>
+                <br>
                 <a href="/doc/{{version.etcdVersionURL}}/faq#odd-cluster-size" class="faq-list">Why odd number of cluster size?</a>
                 <br>
                 <a href="/doc/{{version.etcdVersionURL}}/faq#max-cluster-size" class="faq-list">What is maximum cluster size?</a>
@@ -64,11 +68,6 @@
                 <a href="/doc/{{version.etcdVersionURL}}/faq#remove-member-first" class="faq-list">Always remove first when replacing member?</a>
                 <br>
                 <a href="/doc/{{version.etcdVersionURL}}/faq#why-so-strict-about-membership-change" class="faq-list">Why so strict about membershp change?</a>
-                <br>
-
-                <br>
-                <div class="faq-list-title">Flags</div>
-                <a href="/doc/{{version.etcdVersionURL}}/faq#flag-client-urls" class="faq-list">listen-client-urls vs. advertise-client-urls</a>
                 <br>
 
                 <br>
@@ -280,6 +279,99 @@
         <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/faq#top" class="normal-link">↑ top</a></div>
         <br>
 
+        <div id="flag-client-urls"></div>
+        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#flag-client-urls" class="faq-title">listen-client-urls vs. advertise-client-urls</a></h2>
+        <p class="narrow-paragraph">
+            <span class="code-light-snippet">listen-client-urls</span> is the list of URLs to listen on for client requests: etcd clients request via these endpoints. <span class="code-light-snippet">advertise-client-urls</span> is the list of client
+            URLs to advertise to other members, proxies, clients of the cluster<sup>[1]</sup>. etcd distinguishes between listen URLs and advertise URLs. A listen URL determines which interface etcd will listen on to receive new connections. The advertise
+            URL is what the cluster broadcasts as the address for connecting to the cluster. For example, etcd can be configured to listen on <span class="code-light-snippet">0.0.0.0</span> (all interfaces) but advertise the IP of the machine so remote
+            systems can find it<sup>[2]</sup>.
+        </p>
+        <p class="narrow-paragraph">
+            A common mistake is setting <span class="code-light-snippet">advertise-client-urls</span> to localhost or default host. Please note that <span class="code-light-snippet">advertise-client-urls</span> is the list of endpoitns for remote clients
+            or traffic. For example if you run etcd on a server with IP's <span class="code-light-snippet">1.2.3.4</span> and <span class="code-light-snippet">4.5.6.7</span> but only want to serve client requests through <span class="code-light-snippet">1.2.3.4:2379</span>,
+            you'd pass <span class="code-light-snippet">--advertise-client-urls=http://1.2.3.4:2379</span> to etcd.
+        </p>
+        <p class="narrow-paragraph">
+            Suppose etcd is listening on <span class="code-light-snippet">127.0.0.1</span> and a public IP <span class="code-light-snippet">1.2.3.4</span>. If it advertises <span class="code-light-snippet">127.0.0.1</span> and <span class="code-light-snippet">1.2.3.4</span>            then clients that synchronize their endpoints with the cluster will try to connect to the cluster through <span class="code-light-snippet">127.0.0.1</span> in addition to <span class="code-light-snippet">1.2.3.4</span>.
+        </p>
+        <hr align="left" class="footer-top-line">
+        <footer class="narrow-footer">
+            [1] "<a href="https://github.com/coreos/etcd/issues/6539" target="_blank" class="footer-link">advertise-client-urls question</a>," etcd GitHub issue.
+            <br> [2] "<a href="https://github.com/coreos/etcd/pull/6583#issuecomment-251768299" target="_blank" class="footer-link">github.com/coreos/etcd/pull/6583</a>," etcd GitHub comment.
+        </footer>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/faq#top" class="normal-link">↑ top</a></div>
+        <br><br>
+
+        <div id="quorum-fault-tolerance-table"></div>
+        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#quorum-fault-tolerance-table" class="faq-title">quorum, fault tolerance table</a></h2>
+        <p class="narrow-paragraph">
+            It is recommended to have an odd number of members in a cluster. Having an odd cluster size doesn't change the number needed for majority, but you gain a higher tolerance for failure by adding the extra member. You can see this in practice when comparing
+            even and odd sized clusters:
+        </p>
+        <table class="table narrow-paragraph">
+            <thead>
+                <tr>
+                    <th>Cluster Size</th>
+                    <th>Majority</th>
+                    <th>Failure Tolerance</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>2</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>2</td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>3</td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>3</td>
+                    <td>2</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>4</td>
+                    <td>2</td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td>4</td>
+                    <td>3</td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td>5</td>
+                    <td>3</td>
+                </tr>
+                <tr>
+                    <td>9</td>
+                    <td>5</td>
+                    <td>4</td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="narrow-paragraph">
+            As you can see, adding another member to bring the size of cluster up to an odd size is always worth it. During a network partition, an odd number of members also guarantees that there will almost always be a majority of the cluster that can continue
+            to operate and be the source of truth when the partition ends.
+        </p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/faq#top" class="normal-link">↑ top</a></div>
+        <br>
+
         <div id="odd-cluster-size"></div>
         <h2><a href="/doc/{{version.etcdVersionURL}}/faq#odd-cluster-size" class="faq-title">Why odd number of cluster size?</a></h2>
         <p class="narrow-paragraph">
@@ -292,8 +384,8 @@
         <div id="max-cluster-size"></div>
         <h2><a href="/doc/{{version.etcdVersionURL}}/faq#max-cluster-size" class="faq-title">What is maximum cluster size?</a></h2>
         <p class="narrow-paragraph">
-            Theorectially, there is no hard limit. However, we recommend no more than 7 nodes. The more nodes cluster has, the more communication needs to happen, which would reduce overall performance. Google Chubby lock service<sup>[1]</sup>, which
-            is predecessor of etcd, typically runs 5 nodes in each cell.
+            Theorectially, there is no hard limit. However, we recommend no more than 7 nodes. Google Chubby lock service<sup>[1]</sup>, which is predecessor of etcd, typically runs 5 nodes in each cell. A 7-member cluster can provide enough fault tolerance
+            in most cases. While larger cluster provides better fault tolerance the write performance reduces since data needs to be replicated to more machines.
         </p>
         <hr align="left" class="footer-top-line">
         <footer class="narrow-footer">
@@ -357,30 +449,6 @@
         <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/faq#top" class="normal-link">↑ top</a></div>
         <br><br>
 
-        <div id="flag-client-urls"></div>
-        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#flag-client-urls" class="faq-title">listen-client-urls vs. advertise-client-urls</a></h2>
-        <p class="narrow-paragraph">
-            <span class="code-light-snippet">listen-client-urls</span> is the list of URLs to listen on for client requests: etcd clients request via these endpoints. <span class="code-light-snippet">advertise-client-urls</span> is the list of client
-            URLs to advertise to other members, proxies, clients of the cluster<sup>[1]</sup>. etcd distinguishes between listen URLs and advertise URLs. A listen URL determines which interface etcd will listen on to receive new connections. The advertise
-            URL is what the cluster broadcasts as the address for connecting to the cluster. For example, etcd can be configured to listen on <span class="code-light-snippet">0.0.0.0</span> (all interfaces) but advertise the IP of the machine so remote
-            systems can find it<sup>[2]</sup>.
-        </p>
-        <p class="narrow-paragraph">
-            A common mistake is setting <span class="code-light-snippet">advertise-client-urls</span> to localhost or default host. Please note that <span class="code-light-snippet">advertise-client-urls</span> is the list of endpoitns for remote clients
-            or traffic. For example if you run etcd on a server with IP's <span class="code-light-snippet">1.2.3.4</span> and <span class="code-light-snippet">4.5.6.7</span> but only want to serve client requests through <span class="code-light-snippet">1.2.3.4:2379</span>,
-            you'd pass <span class="code-light-snippet">--advertise-client-urls=http://1.2.3.4:2379</span> to etcd.
-        </p>
-        <p class="narrow-paragraph">
-            Suppose etcd is listening on <span class="code-light-snippet">127.0.0.1</span> and a public IP <span class="code-light-snippet">1.2.3.4</span>. If it advertises <span class="code-light-snippet">127.0.0.1</span> and <span class="code-light-snippet">1.2.3.4</span>            then clients that synchronize their endpoints with the cluster will try to connect to the cluster through <span class="code-light-snippet">127.0.0.1</span> in addition to <span class="code-light-snippet">1.2.3.4</span>.
-        </p>
-        <hr align="left" class="footer-top-line">
-        <footer class="narrow-footer">
-            [1] "<a href="https://github.com/coreos/etcd/issues/6539" target="_blank" class="footer-link">advertise-client-urls question</a>," etcd GitHub issue.
-            <br> [2] "<a href="https://github.com/coreos/etcd/pull/6583#issuecomment-251768299" target="_blank" class="footer-link">github.com/coreos/etcd/pull/6583</a>," etcd GitHub comment.
-        </footer>
-        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/faq#top" class="normal-link">↑ top</a></div>
-        <br><br>
-
         <div id="apply-too-long-unavailable"></div>
         <h2><a href="/doc/{{version.etcdVersionURL}}/faq#apply-too-long-unavailable" class="faq-title">apply entries took too long, unavailable or misconfigured</a></h2>
         <p class="narrow-paragraph">
@@ -408,7 +476,6 @@
         </footer>
         <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/faq#top" class="normal-link">↑ top</a></div>
         <br><br>
-
 
         <div id="other-questions"></div>
         <h2><a href="/doc/{{version.etcdVersionURL}}/faq#other-questions" class="faq-title">Any other questions?</a></h2>
