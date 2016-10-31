@@ -10,7 +10,7 @@ md-divider {
 }
 
 md-sidenav-layout {
-    min-height: 600px;
+    min-height: 650px;
 }
 
 .doc-sidenav {
@@ -181,6 +181,13 @@ h2 .faq-title {
     color: #366354;
     font-family: monospace;
     font-size: 14px;
+}
+
+.code-light-snippet-small {
+    background: #f5f5f5;
+    color: #366354;
+    font-family: monospace;
+    font-size: 12px;
 }
 
 .code-light-snippet-red {

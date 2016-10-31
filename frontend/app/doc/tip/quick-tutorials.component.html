@@ -1,10 +1,16 @@
 <md-sidenav-layout>
     <md-sidenav #sidenav [opened]="true" mode="side" class="doc-sidenav">
-        <md-list>
+        <md-list dense>
             <a routerLink="/doc/{{version.etcdVersionURL}}">
                 <h3 md-subheader>Getting Started ({{version.etcdVersion}})</h3>
             </a>
             <md-list-item *ngFor="let item of getStartedItems">
+                <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
+            </md-list-item>
+
+            <md-divider></md-divider>
+            <h3 md-subheader>Operation Guides</h3>
+            <md-list-item *ngFor="let item of operationItems">
                 <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
             </md-list-item>
         </md-list>
@@ -22,6 +28,9 @@
 					<br>
 					<p class="narrow-paragraph">
 						Simplest way to access <span class="code-light-snippet">etcd</span> is <span class="code-light-snippet">etcdctl</span>.
+					</p>
+					<p class="narrow-paragraph">
+						All commands can be found at <a href="https://github.com/coreos/etcd/tree/master/etcdctl" target="_blank" class="normal-link">etcd/etcdctl</a>.
 					</p>
 					<div class="osx-window">
 						<div class="window-narrow">

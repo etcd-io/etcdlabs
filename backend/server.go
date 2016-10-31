@@ -31,7 +31,7 @@ import (
 
 var (
 	rootPortMu sync.Mutex
-	rootPort   = 2379
+	rootPort   = 2389
 )
 
 func startCluster(rootCtx context.Context, rootCancel func()) (*cluster.Cluster, error) {

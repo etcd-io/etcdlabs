@@ -69,7 +69,7 @@ export class DocTipComponent extends ParentComponent {
                     'v3.0.13',
                     'https://github.com/coreos/etcd/releases/tag/v3.0.13',
                     'versions-link-main',
-                    'https://github.com/coreos/etcd/tree/release-3.0/Documentation',
+                    'https://coreos.com/etcd/docs/latest',
                     'versions-link-other'
                 ),
                 new VersionItem(

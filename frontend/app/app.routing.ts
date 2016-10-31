@@ -15,6 +15,13 @@ import { QuickTutorialsTipComponent } from './doc/tip/quick-tutorials.component'
 import { FAQTipComponent } from './doc/tip/faq.component';
 import { ComparisonTipComponent } from './doc/tip/comparison.component';
 import { STMTipComponent } from './doc/tip/stm.component';
+import { TuningEtcdTipComponent } from './doc/tip/tuning-etcd.component';
+import { MirrorMakerTipComponent } from './doc/tip/mirror-maker.component';
+import { GRPCProxyTipComponent } from './doc/tip/grpc-proxy.component';
+import { MaintenanceTipComponent } from './doc/tip/maintenance.component';
+import { UpgradeEtcdTipComponent } from './doc/tip/upgrade-etcd.component';
+import { RuntimeReconfigurationTipComponent } from './doc/tip/runtime-reconfiguration.component';
+import { DisasterRecoveryTipComponent } from './doc/tip/disaster-recovery.component';
 
 /*
 play
@@ -45,6 +52,13 @@ const appRoutes: Routes = [
             { path: 'faq', component: FAQTipComponent },
             { path: 'comparison', component: ComparisonTipComponent },
             { path: 'stm', component: STMTipComponent },
+            { path: 'tuning-etcd', component: TuningEtcdTipComponent },
+            { path: 'mirror-maker', component: MirrorMakerTipComponent },
+            { path: 'grpc-proxy', component: GRPCProxyTipComponent },
+            { path: 'maintenance', component: MaintenanceTipComponent },
+            { path: 'upgrade-etcd', component: UpgradeEtcdTipComponent },
+            { path: 'runtime-reconfiguration', component: RuntimeReconfigurationTipComponent },
+            { path: 'disaster-recovery', component: DisasterRecoveryTipComponent },
         ],
     },
 
@@ -72,6 +86,13 @@ export const routedComponents = [
     FAQTipComponent,
     ComparisonTipComponent,
     STMTipComponent,
+    TuningEtcdTipComponent,
+    MirrorMakerTipComponent,
+    GRPCProxyTipComponent,
+    MaintenanceTipComponent,
+    UpgradeEtcdTipComponent,
+    RuntimeReconfigurationTipComponent,
+    DisasterRecoveryTipComponent,
 
     PlayComponent,
 

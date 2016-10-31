@@ -1,0 +1,261 @@
+<md-sidenav-layout>
+    <md-sidenav #sidenav [opened]="true" mode="side" class="doc-sidenav">
+        <md-list dense>
+            <a routerLink="/doc/{{version.etcdVersionURL}}">
+                <h3 md-subheader>Getting Started ({{version.etcdVersion}})</h3>
+            </a>
+            <md-list-item *ngFor="let item of getStartedItems">
+                <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
+            </md-list-item>
+
+            <md-divider></md-divider>
+            <h3 md-subheader>Operation Guides</h3>
+            <md-list-item *ngFor="let item of operationItems">
+                <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
+            </md-list-item>
+        </md-list>
+    </md-sidenav>
+
+    <div class="doc-group">
+        <router-outlet></router-outlet>
+
+        <h4>Maintenance</h4>
+        <p class="narrow-paragraph">
+            An etcd cluster needs periodic maintenance to remain reliable. Depending on an etcd application's needs, this maintenance can usually be automated and performed without downtime or significantly degraded performance.
+        </p>
+        <p class="narrow-paragraph">
+            All etcd maintenance manages storage resources consumed by the etcd keyspace. Failure to adequately control the keyspace size is guarded by storage space quotas; if an etcd member runs low on space, a quota will trigger cluster-wide alarms which will
+            put the system into a limited-operation maintenance mode. To avoid running out of space for writes to the keyspace, the etcd keyspace history must be compacted. Storage space itself may be reclaimed by defragmenting etcd members. Finally,
+            periodic snapshot backups of etcd member state makes it possible to recover any unintended logical data loss or corruption caused by operational error.
+        </p>
+
+
+        <br>
+        <h5>History Compaction</h5>
+        <p class="narrow-paragraph">
+            Since etcd keeps an exact history of its keyspace, this history should be periodically compacted to avoid performance degradation and eventual storage space exhaustion. Compacting the keyspace history drops all information about keys superseded prior
+            to a given keyspace revision. The space used by these keys then becomes available for additional writes to the keyspace.
+        </p>
+        <p class="narrow-paragraph">
+            The keyspace can be compacted automatically with etcd's time windowed history retention policy, or manually with <span class="code-light-snippet">etcdctl</span>. The <span class="code-light-snippet">etcdctl</span> method provides fine-grained
+            control over the compacting process whereas automatic compacting fits applications that only need key history for some length of time.
+        </p>
+        <p class="narrow-paragraph">
+            etcd can be set to automatically compact the keyspace with the <span class="code-light-snippet">--auto-compaction</span> option with a period of hours:
+        </p>
+        <div class="osx-window">
+            <div class="window-narrow">
+                <div class="titlebar">
+                    <div class="buttons">
+                        <div class="closebtn"><span><strong></strong></span></div>
+                        <div class="minimize"><span><strong></strong></span></div>
+                        <div class="zoom"><span><strong></strong></span></div>
+                    </div><span class="title-bar-text">terminal</span></div>
+                <div class="content">
+                    <pre class="osx-terminal-contents"># keep one hour of history
+$ etcd --auto-compaction-retention=1
+</pre>
+                </div>
+            </div>
+        </div>
+        <p class="narrow-paragraph">
+            An <span class="code-light-snippet">etcdctl</span> initiated compaction works as follows:
+        </p>
+        <div class="osx-window">
+            <div class="window-narrow">
+                <div class="titlebar">
+                    <div class="buttons">
+                        <div class="closebtn"><span><strong></strong></span></div>
+                        <div class="minimize"><span><strong></strong></span></div>
+                        <div class="zoom"><span><strong></strong></span></div>
+                    </div><span class="title-bar-text">terminal</span></div>
+                <div class="content">
+                    <pre class="osx-terminal-contents"># compact up to revision 3
+$ ETCDCTL_API=3 etcdctl compact 3
+</pre>
+                </div>
+            </div>
+        </div>
+        <p class="narrow-paragraph">
+            Revisions prior to the compaction revision become inaccessible:
+        </p>
+        <div class="osx-window">
+            <div class="window">
+                <div class="titlebar">
+                    <div class="buttons">
+                        <div class="closebtn"><span><strong></strong></span></div>
+                        <div class="minimize"><span><strong></strong></span></div>
+                        <div class="zoom"><span><strong></strong></span></div>
+                    </div><span class="title-bar-text">terminal</span></div>
+                <div class="content">
+                    <pre class="osx-terminal-contents">$ ETCDCTL_API=3 etcdctl get --rev=2 somekey
+Error:  rpc error: code = 11 desc = etcdserver: mvcc: required revision has been compacted
+</pre>
+                </div>
+            </div>
+        </div>
+
+        <br>
+        <h5>Defragmentation</h5>
+        <p class="narrow-paragraph">
+            After compacting the keyspace, the backend database may exhibit internal fragmentation. Any internal fragmentation is space that is free to use by the backend but still consumes storage space. The process of defragmentation releases this storage space
+            back to the file system. Defragmentation is issued on a per-member so that cluster-wide latency spikes may be avoided.
+        </p>
+        <p class="narrow-paragraph">
+            Compacting old revisions internally fragments etcd by leaving gaps in backend database. Fragmented space is available for use by etcd but unavailable to the host filesystem.
+        </p>
+        <p class="narrow-paragraph">
+            To defragment an etcd member, use the <span class="code-light-snippet">etcdctl defrag</span> command:
+        </p>
+        <div class="osx-window">
+            <div class="window-narrow">
+                <div class="titlebar">
+                    <div class="buttons">
+                        <div class="closebtn"><span><strong></strong></span></div>
+                        <div class="minimize"><span><strong></strong></span></div>
+                        <div class="zoom"><span><strong></strong></span></div>
+                    </div><span class="title-bar-text">terminal</span></div>
+                <div class="content">
+                    <pre class="osx-terminal-contents">$ ETCDCTL_API=3 etcdctl defrag
+Finished defragmenting etcd member[127.0.0.1:2379]
+</pre>
+                </div>
+            </div>
+        </div>
+
+
+        <br>
+        <h5>Space Quota</h5>
+        <p class="narrow-paragraph">
+            The space quota in etcd ensures the cluster operates in a reliable fashion. Without a space quota, etcd may suffer from poor performance if the keyspace grows excessively large, or it may simply run out of storage space, leading to unpredictable cluster
+            behavior. If the keyspace's backend database for any member exceeds the space quota, etcd raises a cluster-wide alarm that puts the cluster into a maintenance mode which only accepts key reads and deletes. Only after freeing enough space in
+            the keyspace and defragmenting the backend database, along with clearing the space quota alarm can the cluster resume normal operation.
+        </p>
+        <p class="narrow-paragraph">
+            By default, etcd sets a conservative space quota suitable for most applications, but it may be configured on the command line, in bytes:
+        </p>
+        <div class="osx-window">
+            <div class="window-narrow">
+                <div class="titlebar">
+                    <div class="buttons">
+                        <div class="closebtn"><span><strong></strong></span></div>
+                        <div class="minimize"><span><strong></strong></span></div>
+                        <div class="zoom"><span><strong></strong></span></div>
+                    </div><span class="title-bar-text">terminal</span></div>
+                <div class="content">
+                    <pre class="osx-terminal-contents"># set a very small 16MB quota
+$ etcd --quota-backend-bytes=$((16*1024*1024))
+</pre>
+                </div>
+            </div>
+        </div>
+        <p class="narrow-paragraph">
+            The space quota can be triggered with a loop:
+        </p>
+        <div class="osx-window">
+            <div class="window">
+                <div class="titlebar">
+                    <div class="buttons">
+                        <div class="closebtn"><span><strong></strong></span></div>
+                        <div class="minimize"><span><strong></strong></span></div>
+                        <div class="zoom"><span><strong></strong></span></div>
+                    </div><span class="title-bar-text">terminal</span></div>
+                <div class="content">
+                    <pre class="osx-terminal-contents"># fill keyspace
+$ export ETCDCTL_API=3 
+$ while [ 1 ]; do dd if=/dev/urandom bs=1024 count=1024  | etcdctl put key  || break; done
+...
+Error:  rpc error: code = 8 desc = etcdserver: mvcc: database space exceede
+
+
+# confirm quota space is exceeded
+$ ETCDCTL_API=3 etcdctl --write-out=table endpoint status
++----------------+------------------+---------+---------+-----------+-----------+------------+
+|    ENDPOINT    |        ID        | VERSION | DB SIZE | IS LEADER | RAFT TERM | RAFT INDEX |
++----------------+------------------+---------+---------+-----------+-----------+------------+
+| 127.0.0.1:2379 | d3845ffbfa785ee1 |  3.1.0  | 17 MB   | true      |         2 |         34 |
++----------------+------------------+---------+---------+-----------+-----------+------------+
+
+
+# confirm alarm is raised
+$ ETCDCTL_API=3 etcdctl alarm list
+memberID:15241412574772223713 alarm:NOSPACE 
+</pre>
+                </div>
+            </div>
+        </div>
+        <p class="narrow-paragraph">
+            Removing excessive keyspace data and defragmenting the backend database will put the cluster back within the quota limits:
+        </p>
+        <div class="osx-window">
+            <div class="window">
+                <div class="titlebar">
+                    <div class="buttons">
+                        <div class="closebtn"><span><strong></strong></span></div>
+                        <div class="minimize"><span><strong></strong></span></div>
+                        <div class="zoom"><span><strong></strong></span></div>
+                    </div><span class="title-bar-text">terminal</span></div>
+                <div class="content">
+                    <pre class="osx-terminal-contents"># get current revision
+$ rev=$(ETCDCTL_API=3 etcdctl --endpoints=:2379 endpoint status --write-out="json" | egrep -o '"revision":[0-9]*' | egrep -o '[0-9]*')
+$ echo $rev
+11
+
+
+# compact away all old revisions
+$ ETCDCTL_API=3 etcdctl compact $rev
+compacted revision 11
+
+
+# defragment away excessive space
+$ ETCDCTL_API=3 etcdctl defrag
+Finished defragmenting etcd member[127.0.0.1:2379]
+
+
+# disarm alarm
+$ ETCDCTL_API=3 etcdctl alarm disarm
+memberID:15241412574772223713 alarm:NOSPACE 
+
+
+# test puts are allowed again
+$ ETCDCTL_API=3 etcdctl put newkey 123
+OK
+</pre>
+                </div>
+            </div>
+        </div>
+
+        <br>
+        <h5>Snapshot Backup</h5>
+        <p class="narrow-paragraph">
+            Snapshotting the etcd cluster on a regular basis serves as a durable backup for an etcd keyspace. By taking periodic snapshots of an etcd member's backend database, an etcd cluster can be recovered to a point in time with a known good state.
+        </p>
+        <p class="narrow-paragraph">
+            A snapshot is taken with <span class="code-light-snippet">etcdctl</span>:
+        </p>
+        <div class="osx-window">
+            <div class="window">
+                <div class="titlebar">
+                    <div class="buttons">
+                        <div class="closebtn"><span><strong></strong></span></div>
+                        <div class="minimize"><span><strong></strong></span></div>
+                        <div class="zoom"><span><strong></strong></span></div>
+                    </div><span class="title-bar-text">terminal</span></div>
+                <div class="content">
+                    <pre class="osx-terminal-contents">$ ETCDCTL_API=3 etcdctl snapshot save backup.db
+Snapshot saved at backup.db
+
+
+$ ETCDCTL_API=3 etcdctl --write-out=table snapshot status backup.db
++----------+----------+------------+------------+
+|   HASH   | REVISION | TOTAL KEYS | TOTAL SIZE |
++----------+----------+------------+------------+
+| e5d0e1c6 |       12 |          8 | 2.1 MB     |
++----------+----------+------------+------------+
+</pre>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</md-sidenav-layout>

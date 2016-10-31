@@ -1,10 +1,16 @@
 <md-sidenav-layout>
     <md-sidenav #sidenav [opened]="true" mode="side" class="doc-sidenav">
-        <md-list>
+        <md-list dense>
             <a routerLink="/doc/{{version.etcdVersionURL}}">
                 <h3 md-subheader>Getting Started ({{version.etcdVersion}})</h3>
             </a>
             <md-list-item *ngFor="let item of getStartedItems">
+                <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
+            </md-list-item>
+
+            <md-divider></md-divider>
+            <h3 md-subheader>Operation Guides</h3>
+            <md-list-item *ngFor="let item of operationItems">
                 <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
             </md-list-item>
         </md-list>
@@ -17,7 +23,7 @@
         <br>
         <p class="narrow-paragraph">
             Application container gives much portability to initial development phase. But operating and scaling container requires much more work. <a href="http://kubernetes.io/" target="_blank" class="normal-link">Kubernetes</a> manages such complex
-            container environments. This is an example workflow to manage etcd with <a href="http://kubernetes.io" target="_blank" class="normal-link">Kubernetes</a>.
+            container environments. This is an example workflow to manage etcd with Kubernetes.
         </p>
 
         <md-tab-group>
@@ -30,16 +36,18 @@
 					<br>
 
 					<p class="narrow-paragraph">
-                        For this exercise, we will use total X <a href="https://coreos.com" target="_blank" class="normal-link">CoreOS</a> machines: 3 for etcd cluster, 1 for Kubernetes API server, 3 for workers to deploy etcd.
+                        For this exercise, we will use total 9 <a href="https://coreos.com" target="_blank" class="normal-link">CoreOS</a> machines: 3 for etcd cluster, 3 for Kubernetes API server, 3 for workers to deploy etcd.
 					</p>
 					<p class="narrow-paragraph">
-						Kubernetes API server depends on etcd: Have 3-node etcd cluster ready following <a routerLink="/doc/{{version.etcdVersionURL}}/install-deploy" class="normal-link">install-deploy guide</a>.
+						Kubernetes API server depends on etcd. So have 3-node etcd cluster ready following instructions <a routerLink="/doc/{{version.etcdVersionURL}}/install-deploy" class="normal-link">here</a>.
 					</p>
 					<p class="narrow-paragraph">
 						Kubernetes runs all applications in containers. We will use <a href="https://github.com/coreos/rkt" target="_blank" class="normal-link">rkt</a> for container runtime.
 					</p>
+
+					<br>
 					<p class="narrow-paragraph">
-                        First install Kubernetes binaries:
+                        First install <a href="https://github.com/kubernetes/kubernetes/releases" target="_blank" class="normal-link">Kubernetes binaries</a>
 					</p>
 					<md-input type="text" [(ngModel)]="inputKubernetesVersion" placeholder="Kubernetes version"></md-input>
 					<md-input type="text" [(ngModel)]="inputKubernetesGOOS" placeholder="GOOS"></md-input>

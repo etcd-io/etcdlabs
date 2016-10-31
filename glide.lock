@@ -1,5 +1,5 @@
-hash: d3ec1c9ea55538ca586b37a41dedad3dfe478a3dffa4a260d1306c46cd7d0c77
-updated: 2016-10-25T13:21:44.97168036-07:00
+hash: e3d2ba9a974f49159c6fce9d01418bd725c3b103286bf53091801e0d5c7dde3b
+updated: 2016-10-28T22:33:18.367748839-07:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -12,7 +12,7 @@ imports:
 - name: github.com/cockroachdb/cmux
   version: 112f0506e7743d64a6eb8fedbcff13d9979bbf92
 - name: github.com/coreos/etcd
-  version: d7bc15300bcc6d86b948c6556c1e57826ea7efbb
+  version: 4a08678ce19fd017e61f3e41ff5093bbdf8723a7
   subpackages:
   - alarm
   - auth
@@ -93,6 +93,8 @@ imports:
   - proto
 - name: github.com/google/btree
   version: 925471ac9e2131377a91e1595defec898166fe49
+- name: github.com/grpc-ecosystem/go-grpc-prometheus
+  version: 6b7015e65d366bf3f19b2b2a000a831940f0f7e0
 - name: github.com/grpc-ecosystem/grpc-gateway
   version: f52d055dc48aec25854ed7d31862f78913cf17d1
   subpackages:

@@ -15,7 +15,7 @@ export class KubernetesTipComponent extends ParentComponent {
     constructor() {
         super();
 
-        this.inputKubernetesVersion = 'v1.5.0-alpha.1';
+        this.inputKubernetesVersion = 'v1.5.0-alpha.2';
         this.inputKubernetesGOOS = 'linux';
         this.inputKubernetesGOARCH = 'amd64';
         this.inputKubernetesExecDir = '/';
