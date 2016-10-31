@@ -19,6 +19,7 @@
     <div class="doc-group">
         <router-outlet></router-outlet>
 
+        <div id="top"></div>
         <h4>Maintenance</h4>
         <p class="narrow-paragraph">
             An etcd cluster needs periodic maintenance to remain reliable. Depending on an etcd application's needs, this maintenance can usually be automated and performed without downtime or significantly degraded performance.
@@ -28,9 +29,16 @@
             put the system into a limited-operation maintenance mode. To avoid running out of space for writes to the keyspace, the etcd keyspace history must be compacted. Storage space itself may be reclaimed by defragmenting etcd members. Finally,
             periodic snapshot backups of etcd member state makes it possible to recover any unintended logical data loss or corruption caused by operational error.
         </p>
+        <ul>
+            <li><a href="/doc/{{version.etcdVersionURL}}/maintenance#history-compaction" class="normal-link">History Compaction</a></li>
+            <li><a href="/doc/{{version.etcdVersionURL}}/maintenance#defragmentation" class="normal-link">Defragmentation</a></li>
+            <li><a href="/doc/{{version.etcdVersionURL}}/maintenance#space-quota" class="normal-link">Space Quota</a></li>
+            <li><a href="/doc/{{version.etcdVersionURL}}/maintenance#snapshot-backup" class="normal-link">Snapshot Backup</a></li>
+        </ul>
 
 
         <br>
+        <div id="history-compaction"></div>
         <h5>History Compaction</h5>
         <p class="narrow-paragraph">
             Since etcd keeps an exact history of its keyspace, this history should be periodically compacted to avoid performance degradation and eventual storage space exhaustion. Compacting the keyspace history drops all information about keys superseded prior
@@ -94,8 +102,11 @@ Error:  rpc error: code = 11 desc = etcdserver: mvcc: required revision has been
                 </div>
             </div>
         </div>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/maintenance#top" class="normal-link">↑ top</a></div>
+        <br>
 
         <br>
+        <div id="defragmentation"></div>
         <h5>Defragmentation</h5>
         <p class="narrow-paragraph">
             After compacting the keyspace, the backend database may exhibit internal fragmentation. Any internal fragmentation is space that is free to use by the backend but still consumes storage space. The process of defragmentation releases this storage space
@@ -122,9 +133,12 @@ Finished defragmenting etcd member[127.0.0.1:2379]
                 </div>
             </div>
         </div>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/maintenance#top" class="normal-link">↑ top</a></div>
+        <br>
 
 
         <br>
+        <div id="space-quota"></div>
         <h5>Space Quota</h5>
         <p class="narrow-paragraph">
             The space quota in etcd ensures the cluster operates in a reliable fashion. Without a space quota, etcd may suffer from poor performance if the keyspace grows excessively large, or it may simply run out of storage space, leading to unpredictable cluster
@@ -224,8 +238,11 @@ OK
                 </div>
             </div>
         </div>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/maintenance#top" class="normal-link">↑ top</a></div>
+        <br>
 
         <br>
+        <div id="snapshot-backup"></div>
         <h5>Snapshot Backup</h5>
         <p class="narrow-paragraph">
             Snapshotting the etcd cluster on a regular basis serves as a durable backup for an etcd keyspace. By taking periodic snapshots of an etcd member's backend database, an etcd cluster can be recovered to a point in time with a known good state.
@@ -256,6 +273,8 @@ $ ETCDCTL_API=3 etcdctl --write-out=table snapshot status backup.db
                 </div>
             </div>
         </div>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/maintenance#top" class="normal-link">↑ top</a></div>
+        <br>
 
     </div>
 </md-sidenav-layout>

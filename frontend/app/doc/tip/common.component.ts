@@ -43,7 +43,7 @@ export class ParentComponent {
     constructor() {
         this.getStartedItems = [
             new SidebarItem(
-                'Install and deploy',
+                'Install and Deploy',
                 'set up etcd cluster: bare metal, virtual machine, systemd, rkt',
                 `/doc/${this.version.etcdVersionURL}/install-deploy`,
                 'no-text-decoration'
@@ -55,7 +55,7 @@ export class ParentComponent {
                 'no-text-decoration'
             ),
             new SidebarItem(
-                'Quick tutorials',
+                'Quick Tutorials',
                 'write, read, watch, lock, election, membership, maintenance',
                 `/doc/${this.version.etcdVersionURL}/quick-tutorials`,
                 'no-text-decoration'
@@ -67,7 +67,7 @@ export class ParentComponent {
                 'no-text-decoration'
             ),
             new SidebarItem(
-                'etcd in comparison',
+                'etcd in Comparison',
                 `etcd in comparison with other databases`,
                 `/doc/${this.version.etcdVersionURL}/comparison`,
                 'no-text-decoration'

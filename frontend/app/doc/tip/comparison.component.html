@@ -20,25 +20,19 @@
         <router-outlet></router-outlet>
 
         <div id="top"></div>
-
-        <a href="/doc/{{version.etcdVersionURL}}/comparison#etcd-in-comparison" class="faq-list">etcd in comparison</a>
-        <br>
-        <a href="/doc/{{version.etcdVersionURL}}/comparison#compare-consensus-algorithm" class="faq-list">Compare: Consensus Algorithm</a>
-        <br>
-        <a href="/doc/{{version.etcdVersionURL}}/comparison#compare-features" class="faq-list">Compare: Features</a>
-        <br>
-        <a href="/doc/{{version.etcdVersionURL}}/comparison#compare-performance-reliability" class="faq-list">Compare: Performance & Reliability</a>
-        <br>
-        <a href="/doc/{{version.etcdVersionURL}}/comparison#compare-benchmark-results" class="faq-list">Compare: Benchmark Results</a>
-        <br>
-        <a href="/doc/{{version.etcdVersionURL}}/comparison#etcd-performance-reliability" class="faq-list">etcd Performance & Reliability</a>
-        <br>
-        <a href="/doc/{{version.etcdVersionURL}}/comparison#etcd-reliability" class="faq-list">etcd Reliability</a>
-        <br>
+        <ul>
+            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#etcd-in-comparison" class="faq-list">etcd in Comparison</a></li>
+            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#compare-consensus-algorithm" class="faq-list">Compare: Consensus Algorithm</a></li>
+            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#compare-features" class="faq-list">Compare: Features</a></li>
+            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#compare-performance-reliability" class="faq-list">Compare: Performance & Reliability</a></li>
+            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#compare-benchmark-results" class="faq-list">Compare: Benchmark Results</a></li>
+            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#etcd-performance-reliability" class="faq-list">etcd Performance & Reliability</a></li>
+            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#etcd-reliability" class="faq-list">etcd Reliability</a></li>
+        </ul>
 
         <br><br>
         <div id="etcd-in-comparison"></div>
-        <h4>etcd in comparison <span class="next-to-header-title">(last update Nov 1, 2016)</span></h4>
+        <h4>etcd in Comparison <span class="next-to-header-title">(last update Nov 1, 2016)</span></h4>
         <br>
         <p class="narrow-paragraph">
             In 2006, Google published Chubby<sup>[1]</sup> distributed lock service built on Paxos<sup>[2]</sup>, which resulted in Zookeeper, etcd, and Consul.
