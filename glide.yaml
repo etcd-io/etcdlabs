@@ -1,7 +1,7 @@
 package: github.com/coreos/etcdlabs
 import:
 - package: github.com/coreos/etcd
-  version: 4a08678ce19fd017e61f3e41ff5093bbdf8723a7
+  version: 136c02da71430e60fc9e04a1e033b95e7c3376c8
   subpackages:
   - clientv3
   - embed

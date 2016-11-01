@@ -19,7 +19,7 @@ fi
 # 2. make sure glide.yaml and glide.lock are updated
 
 GLIDE_ROOT="$GOPATH/src/github.com/Masterminds/glide"
-GLIDE_SHA=cfde1caa6b394a320fc65c5abc77646d18febff9
+GLIDE_SHA=21ff6d397ccca910873d8eaabab6a941c364cc70
 go get -d -u github.com/Masterminds/glide
 pushd "${GLIDE_ROOT}"
 	# git reset --hard HEAD
@@ -41,10 +41,10 @@ rm -rf ./vendor
 
 if [ -n "$1" ]; then
 	echo "glide get on $(echo $1)"
-	glide get --strip-vendor --skip-test $1
+	glide get --strip-vendor $1
 else
 	echo "glide update on *"
-	glide update --strip-vendor --skip-test
+	glide update --strip-vendor
 fi;
 
 glide vc --no-tests --only-code
