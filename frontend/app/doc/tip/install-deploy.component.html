@@ -152,6 +152,11 @@
 					<p *ngIf="etcdFlags[0].ipAddress == 'localhost'">
 						Seems like cert is configured for localhost. Please make sure to specify remote hosts, if any.
 					</p>
+
+					<br>
+					<textarea type="text" style="max-width: 550px;" class="form-control" placeholder="More hosts to sign (line-separated)" rows="5" [(ngModel)]="inputCFSSLMoreHosts"></textarea>
+					<br>
+
 					<div *ngFor="let flag of etcdFlags; let i = index;">
 						<div *ngIf="inputClusterSize > i">
 							<pre class="code-dark">{{getCFSSLKeys(flag)}}</pre>
@@ -397,7 +402,6 @@
 					<p *ngIf="etcdFlags[0].ipAddress == 'localhost'">
 						Seems like etcd is configured to run in localhost. Please make sure ports and data directory do not conflict!
 					</p>
-
 					<div *ngFor="let flag of etcdFlags; let i = index;">
 						<div *ngIf="inputClusterSize > i">
 							<div class="osx-window">
@@ -506,9 +510,6 @@
 					<p *ngIf="etcdFlags[0].ipAddress == 'localhost'">
 						Seems like etcd is configured to run in localhost. Please make sure ports and data directory do not conflict!
 					</p>
-
-
-
 					<div *ngFor="let flag of rktFlags; let i = index;">
 						<div *ngIf="inputClusterSize > i">
 							<div class="osx-window">
@@ -579,7 +580,7 @@
 					<br>
 					<h5>More</h5>
 					<p class="narrow-paragraph">
-						Application container gives much portability to initial development phase. But operating and scaling container requires much more work. <a href="http://kubernetes.io/" target="_blank" class="normal-link">Kubernetes</a> manages such complex container environments. More on Kubernetes? Please visit <a href="http://kubernetes.io/docs" target="_blank" class="normal-link">Official Kubernetes Guides</a>. Fully managed etcd cluster? Please visit <a href="https://github.com/coreos/kube-etcd-controller" target="_blank" class="normal-link">kube-etcd-controller</a>.
+						Application container gives much portability to initial development phase. But operating and scaling container requires much more work. <a href="http://kubernetes.io/" target="_blank" class="normal-link">Kubernetes</a> manages such complex container environments. More on Kubernetes? Please visit <a href="http://kubernetes.io/docs" target="_blank" class="normal-link">Official Kubernetes Guides</a>. Fully managed etcd cluster? Please visit <a href="https://github.com/coreos/etcd-operator" target="_blank" class="normal-link">etcd-operator</a>.
 					</p>
 					<div align="right" class="narrow-footer"><a href="/doc/{{version.etcdVersionURL}}/install-deploy#top" class="normal-link">↑ top</a></div>
 				</template>
@@ -606,7 +607,6 @@
 					<p *ngIf="etcdFlags[0].ipAddress == 'localhost'">
 						Seems like etcd is configured to run in localhost. Please make sure ports and data directory do not conflict!
 					</p>
-
 					<div *ngFor="let flag of etcdFlags; let i = index;">
 						<div *ngIf="inputClusterSize > i">
 							<div class="osx-window">

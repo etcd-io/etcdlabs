@@ -36,8 +36,14 @@
 					<br>
 
 					<p class="narrow-paragraph">
-                        For this exercise, we will use total 9 <a href="https://coreos.com" target="_blank" class="normal-link">CoreOS</a> machines: 3 for etcd cluster, 3 for Kubernetes API server, 3 for workers to deploy etcd.
+                        For this exercise, we will use total 10 of <a href="https://coreos.com" target="_blank" class="normal-link">CoreOS</a> machines:
 					</p>
+					<ul>
+						<li>3 for etcd cluster</li>
+						<li>1 for <span class="code-light-snippet">kubectl</span></li>
+						<li>3 for Kubernetes API server</li>
+						<li>3 for workers to deploy etcd (or your distributed application)</li>
+					</ul>
 					<p class="narrow-paragraph">
 						Kubernetes API server depends on etcd. So have 3-node etcd cluster ready following instructions <a routerLink="/doc/{{version.etcdVersionURL}}/install-deploy" class="normal-link">here</a>.
 					</p>
