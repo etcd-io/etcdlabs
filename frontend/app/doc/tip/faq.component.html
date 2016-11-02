@@ -37,9 +37,13 @@
                 <br>
                 <a href="/doc/{{version.etcdVersionURL}}/faq#etcd-consistency" class="faq-list">Consistency model in etcd</a>
                 <br>
+                <a href="/doc/{{version.etcdVersionURL}}/faq#etcd-linearizable-serializable" class="faq-list">Linearizable, serializable read in etcd</a>
+                <br>
                 <a href="/doc/{{version.etcdVersionURL}}/faq#follower-leader" class="faq-list">Follower, leader in etcd</a>
                 <br>
                 <a href="/doc/{{version.etcdVersionURL}}/faq#etcd-failure-tolerance" class="faq-list">Failure tolerance in etcd</a>
+                <br>
+                <a href="/doc/{{version.etcdVersionURL}}/faq#etcd-clock-time" class="faq-list">Clock, time in etcd</a>
                 <br>
                 <a href="/doc/{{version.etcdVersionURL}}/faq#etcd-use-case-coreos" class="faq-list">Who uses etcd: CoreOS</a>
                 <br>
@@ -197,6 +201,32 @@
         <div id="etcd-consistency"></div>
         <h2><a href="/doc/{{version.etcdVersionURL}}/faq#etcd-consistency" class="faq-title">Consistency model in etcd</a></h2>
         <p class="narrow-paragraph">
+            etcd is not an eventually consistent database, where two different nodes can serve two different values (stale data). All etcd client requests go through leader and consensus protocol: writes must go through Raft protocol, while read requests can be served
+            by local node with weaker consistency (serializable read). Entry is <i>committed</i> when it has been replicated in majority of cluster. Clients won't be able to read that entry until it is committed, and each command is applied
+            in the same order. If an etcd cluster loses its leader, it cannot make any progress rejecting client requests. In eventually consistent systems, clients can request to any node, but the node might return stale data.
+        </p>
+        <p class="narrow-paragraph">
+            To be more precise, <b>etcd achieves sequential consistency</b><sup>[1]</sup>, where ordering of commands is preserverd for all clients. Some claim that Dynamo-style<sup>[2]</sup> databases (e.g., Riak and Cassandra) can also achieve strong
+            or sequential consistency by requiring quorum for reads and writes. This is not true. Last-write-wins<sup>[3]</sup> conflict resolution is not linearizable when clock skew happens. Multiple concurrent writes to the same key may arrive in different
+            order, different nodes. Committed transactions can be lost by the later writes before the record gets replicated (i.e., not durable).
+        </p>
+        <hr align="left" class="footer-top-line">
+        <footer class="narrow-footer">
+            [1] Hagit Attiya and Jennifer L Welch: "<a href="http://dl.acm.org/citation.cfm?id=176576" target="_blank" class="footer-link">Sequential Consistency versus Linearizability</a>," ACM Transactions on Computer Systems (TOCS), volume 12, number
+            2, pages 91–122, May 1994.
+            <br> [2] Giuseppe DeCandia, Deniz Hastorun, Madan Jampani, et al.: "<a href="http://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf" target="_blank" class="footer-link">Dynamo: Amazon's Highly Available Key-Value Store</a>,"
+            at 21st ACM Symposium on Operating Sys‐ tems Principles (SOSP), October 2007.
+            <br> [3] Jonathan Ellis: "<a href="http://www.datastax.com/dev/blog/why-cassandra-doesnt-need-vector-clocks" target="_blank" class="footer-link">Why Cassandra doesn’t need vector clocks</a>," datastax.com, 2 September 2013.
+        </footer>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/faq#top" class="normal-link">↑ top</a></div>
+        <br><br>
+
+        <div id="etcd-linearizable-serializable"></div>
+        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#etcd-linearizable-serializable" class="faq-title">Linearizable, serializable read in etcd</a></h2>
+        <p class="narrow-paragraph">
+            While writes to etcd must go through leader and consensus protocol, reads can bypass consensus and be served by follower, with weaker consistency but higher throughput.
+        </p>
+        <p class="narrow-paragraph">
             Linearizability<sup>[1]</sup> (also known as strong, atomic consistency) is an important requirement for implementing distributed locks. The basic idea is to make distributed nodes work like a single copy, with all operations being atomic.
             etcd provides two types of read consistency: linearizable (or <i>quorum</i>) read that requires majority to agree on the value before responding to client. Serializable read is returned from local node without going through consensus protocol.
             Serializable read normally has higher throughput but possibly serving stale data, whereas linearizable read always returns the latest value written.
@@ -207,25 +237,12 @@
             Then read queries as far as <span class="code-light-snippet">readIndex</span> can be served locally without talking to other replicas, but still with linearizability. This is more efficient because it avoids synchronous disk writes and still
             preserves the linearizability.
         </p>
-        <p class="narrow-paragraph">
-            etcd is not an eventually consistent database, where two different nodes can serve two different values (stale data). <b>etcd achieves sequential consistency</b><sup>[3]</sup>, where ordering of commands is preserverd for all clients. Some
-            claim that Dynamo-style<sup>[4]</sup> databases (e.g., Riak and Cassandra) can also achieve strong or sequential consistency by requiring quorum for reads and writes. This is not true. Last-write-wins<sup>[5]</sup> conflict resolution is not
-            linearizable when clock skew happens. Multiple concurrent writes to the same key may arrive in different order, different nodes. Committed transactions can be lost by the later writes before the record gets replicated (i.e., not durable).
-        </p>
-        <p class="narrow-paragraph">
-            All etcd writes go to leader, then fowarded to followers. Entry is <i>committed</i> when replicated in majority of cluster. Clients won't be able to read that entry until it is committed, and each command is applied in the same order.
-        </p>
-        <hr align="left" class="footer-top-line">
         <footer class="narrow-footer">
             [1] Maurice P Herlihy and Jeannette M Wing: "<a href="http://www.cs.cornell.edu/andru/cs711/2002fa/reading/linearizability.pdf" target="_blank" class="footer-link">Linearizability: A Correctness Condition for Concurrent Objects</a>," ACM Transactions
             on Programming Languages and Systems (TOPLAS), volume 12, number 3, pages 463–492, July 1990.
             <br> [2] Diego Ongaro: "<a href="https://ramcloud.stanford.edu/~ongaro/thesis.pdf" target="_blank" class="footer-link">Consensus: Bridging Theory and Practice</a>," Stanford University Ph.D. Dissertation, chapter 6, page 72, August 2014.
-            <br> [3] Hagit Attiya and Jennifer L Welch: "<a href="http://dl.acm.org/citation.cfm?id=176576" target="_blank" class="footer-link">Sequential Consistency versus Linearizability</a>," ACM Transactions on Computer Systems (TOCS), volume 12,
-            number 2, pages 91–122, May 1994.
-            <br> [4] Giuseppe DeCandia, Deniz Hastorun, Madan Jampani, et al.: "<a href="http://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf" target="_blank" class="footer-link">Dynamo: Amazon's Highly Available Key-Value Store</a>,"
-            at 21st ACM Symposium on Operating Sys‐ tems Principles (SOSP), October 2007.
-            <br> [5] Jonathan Ellis: "<a href="http://www.datastax.com/dev/blog/why-cassandra-doesnt-need-vector-clocks" target="_blank" class="footer-link">Why Cassandra doesn’t need vector clocks</a>," datastax.com, 2 September 2013.
         </footer>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/faq#top" class="normal-link">↑ top</a></div>
         <br><br>
 
         <div id="follower-leader"></div>
@@ -247,6 +264,19 @@
         <hr align="left" class="footer-top-line">
         <footer class="narrow-footer">
             [1] Diego Ongaro: "<a href="https://ramcloud.stanford.edu/~ongaro/thesis.pdf" target="_blank" class="footer-link">Consensus: Bridging Theory and Practice</a>," Stanford University Ph.D. Dissertation, chapter 3, page 22, August 2014.
+        </footer>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/faq#top" class="normal-link">↑ top</a></div>
+        <br><br>
+
+        <div id="etcd-clock-time"></div>
+        <h2><a href="/doc/{{version.etcdVersionURL}}/faq#etcd-clock-time" class="faq-title">Clock, time in etcd</a></h2>
+        <p class="narrow-paragraph">
+            etcd does not depend on clock time to ensure the consistency of cluster states, in case clock drift or message delay happens. etcd uses Raft term and index<sup>[1]</sup> as a logical clock. And lease backend uses TODO as a logical clock. Transporation
+            layer probes clock drift and prints out warnings if any.
+        </p>
+        <hr align="left" class="footer-top-line">
+        <footer class="narrow-footer">
+            [1] Diego Ongaro: "<a href="https://ramcloud.stanford.edu/~ongaro/thesis.pdf" target="_blank" class="footer-link">Consensus: Bridging Theory and Practice</a>," Stanford University Ph.D. Dissertation, chapter 3, page 15, August 2014.
         </footer>
         <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/faq#top" class="normal-link">↑ top</a></div>
         <br><br>
