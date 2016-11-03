@@ -211,7 +211,7 @@ h2 .faq-title {
     padding: 8px;
     margin: 1em 0px 1em;
     word-wrap: normal;
-    max-width: 1100px;
+    max-width: 1000px;
 }
 
 
@@ -243,7 +243,7 @@ https://codepen.io/JohJakob/pen/YPxgwo
 
 .osx-window .window-long {
     background: #fff;
-    max-width: 70em;
+    max-width: 1000px;
     margin-top: 20px;
     margin-bottom: 20px;
     border: 1px solid #acacac;

@@ -26,8 +26,8 @@
         <p class="narrow-paragraph">
             This was originally posted at <a href="https://coreos.com/blog/transactional-memory-with-etcd3.html" target="_blank" class="normal-link">coreos.com/blog/transactional-memory-with-etcd3</a>.
         </p>
-
         <br>
+
         <p class="narrow-paragraph">
             The new etcd3 API introduces powerful new primitives that advance the system’s capabilities beyond the limits of etcd2. As part of evaluating the effectiveness of etcd3, we spent considerable effort developing distributed concurrency algorithms using
             the new API.
@@ -42,7 +42,7 @@
         </p>
 
         <br>
-        <h3>Serializability</h3>
+        <h4>Serializability</h4>
         <p class="narrow-paragraph">
             Distributed consensus systems like etcd process many concurrent requests from many concurrent clients. Atomicity guarantees that, despite concurrent readers and writers, the data model is consistent for every store revision. There’s a great deal of literature
             discussing the variety of ways to enforce, or at least reason about, atomicity in a distributed system; the etcd3 API supports some of the more typical patterns.
@@ -67,7 +67,7 @@
         </p>
 
         <br>
-        <h3>etcd3 Transactions</h3>
+        <h4>etcd3 Transactions</h4>
         <p class="narrow-paragraph">
             etcd3 introduces transactions to the etcd API for handling atomic updates to sets of keys. An etcd3 transaction is a primitive operation that composes <span class="code-light-snippet">Get</span>, <span class="code-light-snippet">Put</span>,
             and <span class="code-light-snippet">Delete</span> operations into transactional blocks guarded by predicates on the current etcd store contents. From this transaction primitive, it’s possible to build richer concurrency control algorithms.
@@ -132,7 +132,7 @@
         </p>
 
         <br>
-        <h3>Implementing STM</h3>
+        <h4>Implementing STM</h4>
         <p class="narrow-paragraph">
             etcd3’s STM is written on top of the v3 API primitives. To show the mechanics of an STM protocol using etcd3, we’ll outline a simple repeatable-read optimistic STM algorithm in under 70 lines of Go. This implementation includes features common to STM
             such as transaction readset and writeset management, data access, commit, retry, and abort.
@@ -188,7 +188,7 @@
         </p>
 
         <br>
-        <h3>Performance of STM on etcd</h3>
+        <h4>Performance of STM on etcd</h4>
         <p class="narrow-paragraph">
             This section measures the performance of STM on etcd. If the STM is working as intended, its request throughput for the example code should scale with the number of keys. Likewise, request throughput will remain steady for a distributed lock. Next, we
             take a deeper look at the impact of STM isolation policy by comparing the rate of conflict for repeatable read isolation against serialized isolation.
@@ -217,7 +217,7 @@
         </p>
 
         <br>
-        <h3>What’s Next?</h3>
+        <h4>What’s Next?</h4>
         <p class="narrow-paragraph">
             This post showed how to use etcd3’s transactions as a mechanism for enforcing serializability. Additionally, the multi-revision store and transaction operations new to etcd3 are expressive enough to build higher-order abstractions such as software transactional
             memory. Likewise, these primitives have good performance, even with etcd3’s additional functionality. STM request throughput scales and quickly overtakes lock request throughput.

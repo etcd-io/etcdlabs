@@ -34,6 +34,7 @@
             <li><a href="/doc/{{version.etcdVersionURL}}/maintenance#defragmentation" class="normal-link">Defragmentation</a></li>
             <li><a href="/doc/{{version.etcdVersionURL}}/maintenance#space-quota" class="normal-link">Space Quota</a></li>
             <li><a href="/doc/{{version.etcdVersionURL}}/maintenance#snapshot-backup" class="normal-link">Snapshot Backup</a></li>
+            <li><a href="/doc/{{version.etcdVersionURL}}/maintenance#dashboard" class="normal-link">Dashboard</a></li>
         </ul>
 
 
@@ -273,6 +274,18 @@ $ ETCDCTL_API=3 etcdctl --write-out=table snapshot status backup.db
                 </div>
             </div>
         </div>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/maintenance#top" class="normal-link">↑ top</a></div>
+        <br>
+
+        <br>
+        <div id="dashboard"></div>
+        <h5>Dashboard</h5>
+        <p class="narrow-paragraph">
+            etcd provides various <a href="https://github.com/coreos/etcd/blob/master/Documentation/metrics.md" target="_blank" class="normal-link">metrics</a> using <a href="https://prometheus.io" target="_blank" class="normal-link">Prometheus</a>.
+        </p>
+        <p class="narrow-paragraph">
+            <a href="http://grafana.org" target="_blank" class="normal-link">Grafana</a> can be used to set up Prometheus dashboards; see <a href="https://github.com/coreos/etcd/blob/master/Documentation/metrics.md" target="_blank" class="normal-link">template</a>            and <a href="http://dash.etcd.io/dashboard/db/test-etcd" target="_blank" class="normal-link">sample dashboard</a>.
+        </p>
         <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/maintenance#top" class="normal-link">↑ top</a></div>
         <br>
 
