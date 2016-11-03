@@ -22,11 +22,11 @@
         <div id="top"></div>
         <ul>
             <li><a href="/doc/{{version.etcdVersionURL}}/comparison#etcd-in-comparison" class="faq-list">etcd in Comparison</a></li>
-            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#compare-consensus-algorithm" class="faq-list">Compare: Consensus Algorithm</a></li>
-            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#compare-features" class="faq-list">Compare: Features</a></li>
-            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#compare-performance-reliability" class="faq-list">Compare: Performance & Reliability</a></li>
+            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#consensus-algorithm" class="faq-list">Consensus Algorithm</a></li>
+            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#features" class="faq-list">Features</a></li>
+            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#performance-reliability" class="faq-list">Performance & Reliability</a></li>
             <li><a href="/doc/{{version.etcdVersionURL}}/comparison#benchmark-results" class="faq-list">Benchmark Results</a></li>
-            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#failure-injection-tests" class="faq-list">Failure Injection Tests</a></li>
+            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#etcd-tests" class="faq-list">How etcd is tested</a></li>
         </ul>
 
         <br><br>
@@ -98,8 +98,8 @@
 
 
         <br><br>
-        <div id="compare-consensus-algorithm"></div>
-        <h4>Compare: Consensus Algorithm</h4>
+        <div id="consensus-algorithm"></div>
+        <h4>Consensus Algorithm</h4>
         <br>
         <table class="table narrow-paragraph">
             <thead>
@@ -167,8 +167,8 @@
 
 
         <br><br>
-        <div id="compare-features"></div>
-        <h4>Compare: Features</h4>
+        <div id="features"></div>
+        <h4>Features</h4>
         <br>
         <p class="narrow-paragraph">
             In practice, etcd is already integrated into a large-scale distributed system, Kubernetes, and we have implemented distributed coordination primitives including distributed locks, elections, and software transactional memory, to ensure the etcd API is
@@ -286,7 +286,7 @@
         <hr align="left" class="footer-top-line">
         <footer class="narrow-footer">
             [1] The token <span class="code-light-snippet-small">zookeeper</span> is reserved. Also <span class="code-light-snippet-small">/a/b/./c</span> is invalid in Zookeeper. There are many other limitations on key names. See <a href="https://zookeeper.apache.org/doc/zookeeperProgrammers.html"
-                target="_blank" class="footer-link">ZooKeeper Data Model</a> for more detail.
+                target="_blank" class="footer-link">ZooKeeper Data Model</a>.
             <br> [2] In addition to auto-purging Raft logs, etcd also supports on-disk storage compaction.
             <br> [3] etcd provides discovery service for bootstrapping etcd cluster. Please visit <a href="https://discovery.etcd.io" target="_blank" class="footer-link">discovery.etcd.io</a>.
         </footer>
@@ -295,8 +295,8 @@
 
 
         <br><br>
-        <div id="compare-performance-reliability"></div>
-        <h4>Compare: Performance & Reliability</h4>
+        <div id="performance-reliability"></div>
+        <h4>Performance & Reliability</h4>
         <br>
         <h5>RPCs</h5>
         <p class="narrow-paragraph">
@@ -321,16 +321,20 @@
         <h5>Watchers</h5>
         <p class="narrow-paragraph">
             etcd watchers also uses streams and multiplexes events over key intervals. A watch in etcd waits for changes to keys. Unlike systems such as ZooKeeper or Consul that return one event per watch request, etcd can continuously watch from the current revision.
-            In etcd v2, these streaming watches use <b>long polling</b> over HTTP, forcing the etcd v2 server to wastefully hold open a TCP connection per watch. When an application with thousands of clients watches thousands of keys, it can
-            quickly exhaust etcd v2 server socket and memory resources.
+            In <b>etcd v2</b>, these streaming watches use <b>long polling</b> over HTTP, forcing the etcd v2 server to wastefully hold open a TCP connection per watch. When an application with thousands of clients watches thousands of keys,
+            it can quickly exhaust etcd v2 server socket and memory resources.
         </p>
         <p class="narrow-paragraph">
-            The etcd v3 API multiplexes watches on a single connection. Instead of opening a new connection, a client registers a watcher on a bidirectional gRPC stream. The stream delivers events tagged with a watcher's registered ID. Multiple watch streams can
-            even share the same TCP connection. Multiplexing and stream connection sharing reduce etcd v3's memory footprint by at least an order of magnitude.
+            <b>The etcd v3 API multiplexes watches on a single connection</b>. Instead of opening a new connection, a client registers a watcher on a bidirectional gRPC stream. The stream delivers events tagged with a watcher's registered ID. Multiple
+            watch streams can even share the same TCP connection. Multiplexing and stream connection sharing reduce etcd v3's memory footprint by at least an order of magnitude.
         </p>
         <p class="narrow-paragraph">
-            A Zookeeper client is expected to have a single long-lived connection, creating a session per application instance; see <a href="https://zookeeper.apache.org/doc/trunk/zookeeperProgrammers.html#ch_zkSessions" target="_blank" class="normal-link">Zookeeper Sessions</a>            for more deatil. Zookeeper watcher is tied to its session; if the client loses the session, it loses the events. Consul watch API uses long-polling to wait for potential changes; see <a href="https://www.consul.io/docs/agent/http.html" target="_blank"
-                class="normal-link">Blocking Queries</a> for more detail.
+            A Zookeeper client is expected to have a single long-lived connection, creating a session per application instance; see <a href="https://zookeeper.apache.org/doc/trunk/zookeeperProgrammers.html#ch_zkSessions" target="_blank" class="normal-link">Zookeeper Sessions</a>.
+            Zookeeper watcher is tied to this session; if the client loses the session or gets disconnected from server, it loses all the events. And Zookeeper watcher is one time trigger; if watcher receives an event, client must create another watcher
+            for future events. That is, any latency between changes happened and watcher creation can lead to missing events; see <a href="https://zookeeper.apache.org/doc/trunk/zookeeperProgrammers.html" target="_blank" class="normal-link">Things to Remember about Watches</a>            .
+        </p>
+        <p class="narrow-paragraph">
+            Consul watch API uses long-polling to wait for potential changes; see <a href="https://www.consul.io/docs/agent/http.html" target="_blank" class="normal-link">Blocking Queries</a>.
         </p>
         <br>
         <h5>Data model with reliable events</h5>
@@ -441,7 +445,7 @@
         <hr align="left" class="footer-top-line">
         <footer class="narrow-footer">
             [1] Bruce Momjian: "<a href="http://momjian.us/main/presentations/internals.html#mvcc" target="_blank" class="footer-link">MVCC Unmasked</a>," momjian.us, July 2014.
-            <br> [2] Zookeeper server and client have sanity checks to ensure that znodes size does not exceed 1MB, which includes all of its children. See <a href="http://zookeeper.apache.org/doc/r3.4.9/zookeeperProgrammers.html" target="_blank" class="footer-link">Data Access</a>            for more detail.
+            <br> [2] Zookeeper server and client have sanity checks to ensure that znodes size does not exceed 1MB, which includes all of its children; see <a href="http://zookeeper.apache.org/doc/r3.4.9/zookeeperProgrammers.html" target="_blank" class="footer-link">Data Access</a>.
             <br> [3] etcd has hard-coded <span class="code-light-snippet-small">maxRequestBytes</span> value to avoid blocking Raft stream. Server returns <span class="code-light-snippet-small">ErrRequestTooLarge</span> error to the exceeding client request.
             <br> [4] Consul has hard-coded <span class="code-light-snippet-small">maxKVSize</span> value. Server returns <span class="code-light-snippet-small">Value for key X is too large</span> error to the exceeding client request.
             <br> [5] Zookeeper guide recommends to limit Java heap size to avoid disk swap, since Zookeeper stores data in-memory.
@@ -511,10 +515,13 @@
         <br><br>
 
         <br><br>
-        <div id="failure-injection-tests"></div>
-        <h4>Failure Injection Tests</h4>
+        <div id="etcd-tests"></div>
+        <h4>How etcd is tested</h4>
         <p class="narrow-paragraph">
-            Reliability is etcd's highest priority. TODO: Functional tester ...
+            Reliability and robustness of etcd is our <b>highest</b> priority.
+        </p>
+        <p class="narrow-paragraph">
+            TODO: LOC
         </p>
         <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/comparison#top" class="normal-link">↑ top</a></div>
         <br><br>

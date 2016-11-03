@@ -49,8 +49,14 @@ export class ParentComponent {
                 'no-text-decoration'
             ),
             new SidebarItem(
+                'Kubernetes etcd-operator',
+                'fully managed etcd with Kubernetes',
+                `/doc/${this.version.etcdVersionURL}/kubernetes-etcd-operator`,
+                'no-text-decoration'
+            ),
+            new SidebarItem(
                 'Kubernetes',
-                'manage etcd with Kubernetes',
+                'how to run etcd with Kubernetes',
                 `/doc/${this.version.etcdVersionURL}/kubernetes`,
                 'no-text-decoration'
             ),
