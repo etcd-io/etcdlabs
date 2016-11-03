@@ -20,21 +20,24 @@
         <router-outlet></router-outlet>
 
         <div id="top"></div>
-        <ul>
-            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#etcd-in-comparison" class="faq-list">etcd in Comparison</a></li>
-            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#compare-consensus-algorithm" class="faq-list">Compare: Consensus Algorithm</a></li>
-            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#compare-features" class="faq-list">Compare: Features</a></li>
-            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#compare-performance-reliability" class="faq-list">Compare: Performance & Reliability</a></li>
-            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#benchmark-results" class="faq-list">Benchmark Results</a></li>
-            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#failure-injection-tests" class="faq-list">Failure Injection Tests</a></li>
-        </ul>
-
-        <br><br>
-        <div id="etcd-in-comparison"></div>
         <h4>etcd in Comparison <span class="next-to-header-title">(last update Nov 10, 2016)</span></h4>
         <br>
+        <ul>
+            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#chubby-zookeeper-etcd-consul" class="faq-list">Chubby, Zookeeper, etcd, Consul</a></li>
+            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#consensus-algorithm" class="faq-list">Consensus Algorithm</a></li>
+            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#features" class="faq-list">Features</a></li>
+            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#performance-reliability" class="faq-list">Performance & Reliability</a></li>
+            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#benchmark-results" class="faq-list">Benchmark Results</a></li>
+            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#etcd-tests" class="faq-list">How etcd is tested</a></li>
+        </ul>
+        <br>
+
+        <br><br>
+        <div id="chubby-zookeeper-etcd-consul"></div>
+        <h4>Chubby, Zookeeper, etcd, Consul</h4>
+        <br>
         <p class="narrow-paragraph">
-            In 2006, Google published Chubby<sup>[1]</sup> distributed lock service built on Paxos<sup>[2]</sup>, followed by Zookeeper, etcd, and Consul.
+            In 2006, Google published Chubby<sup>[1]</sup> distributed lock service built on Paxos<sup>[2]</sup>, then followed by Zookeeper, etcd, and Consul.
         </p>
         <br>
         <table class="table narrow-paragraph">
@@ -98,8 +101,8 @@
 
 
         <br><br>
-        <div id="compare-consensus-algorithm"></div>
-        <h4>Compare: Consensus Algorithm</h4>
+        <div id="consensus-algorithm"></div>
+        <h4>Consensus Algorithm</h4>
         <br>
         <table class="table narrow-paragraph">
             <thead>
@@ -167,8 +170,8 @@
 
 
         <br><br>
-        <div id="compare-features"></div>
-        <h4>Compare: Features</h4>
+        <div id="features"></div>
+        <h4>Features</h4>
         <br>
         <p class="narrow-paragraph">
             In practice, etcd is already integrated into a large-scale distributed system, Kubernetes, and we have implemented distributed coordination primitives including distributed locks, elections, and software transactional memory, to ensure the etcd API is
@@ -286,7 +289,7 @@
         <hr align="left" class="footer-top-line">
         <footer class="narrow-footer">
             [1] The token <span class="code-light-snippet-small">zookeeper</span> is reserved. Also <span class="code-light-snippet-small">/a/b/./c</span> is invalid in Zookeeper. There are many other limitations on key names. See <a href="https://zookeeper.apache.org/doc/zookeeperProgrammers.html"
-                target="_blank" class="footer-link">ZooKeeper Data Model</a> for more detail.
+                target="_blank" class="footer-link">ZooKeeper Data Model</a>.
             <br> [2] In addition to auto-purging Raft logs, etcd also supports on-disk storage compaction.
             <br> [3] etcd provides discovery service for bootstrapping etcd cluster. Please visit <a href="https://discovery.etcd.io" target="_blank" class="footer-link">discovery.etcd.io</a>.
         </footer>
@@ -295,8 +298,8 @@
 
 
         <br><br>
-        <div id="compare-performance-reliability"></div>
-        <h4>Compare: Performance & Reliability</h4>
+        <div id="performance-reliability"></div>
+        <h4>Performance & Reliability</h4>
         <br>
         <h5>RPCs</h5>
         <p class="narrow-paragraph">
@@ -321,16 +324,20 @@
         <h5>Watchers</h5>
         <p class="narrow-paragraph">
             etcd watchers also uses streams and multiplexes events over key intervals. A watch in etcd waits for changes to keys. Unlike systems such as ZooKeeper or Consul that return one event per watch request, etcd can continuously watch from the current revision.
-            In etcd v2, these streaming watches use <b>long polling</b> over HTTP, forcing the etcd v2 server to wastefully hold open a TCP connection per watch. When an application with thousands of clients watches thousands of keys, it can
-            quickly exhaust etcd v2 server socket and memory resources.
+            In <b>etcd v2</b>, these streaming watches use <b>long polling</b> over HTTP, forcing the etcd v2 server to wastefully hold open a TCP connection per watch. When an application with thousands of clients watches thousands of keys,
+            it can quickly exhaust etcd v2 server socket and memory resources.
         </p>
         <p class="narrow-paragraph">
-            The etcd v3 API multiplexes watches on a single connection. Instead of opening a new connection, a client registers a watcher on a bidirectional gRPC stream. The stream delivers events tagged with a watcher's registered ID. Multiple watch streams can
-            even share the same TCP connection. Multiplexing and stream connection sharing reduce etcd v3's memory footprint by at least an order of magnitude.
+            <b>The etcd v3 API multiplexes watches on a single connection</b>. Instead of opening a new connection, a client registers a watcher on a bidirectional gRPC stream. The stream delivers events tagged with a watcher's registered ID. Multiple
+            watch streams can even share the same TCP connection. Multiplexing and stream connection sharing reduce etcd v3's memory footprint by at least an order of magnitude.
         </p>
         <p class="narrow-paragraph">
-            A Zookeeper client is expected to have a single long-lived connection, creating a session per application instance; see <a href="https://zookeeper.apache.org/doc/trunk/zookeeperProgrammers.html#ch_zkSessions" target="_blank" class="normal-link">Zookeeper Sessions</a>            for more deatil. Zookeeper watcher is tied to its session; if the client loses the session, it loses the events. Consul watch API uses long-polling to wait for potential changes; see <a href="https://www.consul.io/docs/agent/http.html" target="_blank"
-                class="normal-link">Blocking Queries</a> for more detail.
+            A Zookeeper client is expected to have a single long-lived connection, creating a session per application instance; see <a href="https://zookeeper.apache.org/doc/trunk/zookeeperProgrammers.html#ch_zkSessions" target="_blank" class="normal-link">Zookeeper Sessions</a>.
+            Zookeeper watcher is tied to this session; if the client loses the session or gets disconnected from server, it loses all the events. And Zookeeper watcher is one time trigger; if watcher receives an event, client must create another watcher
+            for future events. That is, any latency between changes happened and watcher creation can lead to missing events; see <a href="https://zookeeper.apache.org/doc/trunk/zookeeperProgrammers.html" target="_blank" class="normal-link">Things to Remember about Watches</a>            .
+        </p>
+        <p class="narrow-paragraph">
+            Consul watch API uses long-polling to wait for potential changes; see <a href="https://www.consul.io/docs/agent/http.html" target="_blank" class="normal-link">Blocking Queries</a>.
         </p>
         <br>
         <h5>Data model with reliable events</h5>
@@ -441,7 +448,7 @@
         <hr align="left" class="footer-top-line">
         <footer class="narrow-footer">
             [1] Bruce Momjian: "<a href="http://momjian.us/main/presentations/internals.html#mvcc" target="_blank" class="footer-link">MVCC Unmasked</a>," momjian.us, July 2014.
-            <br> [2] Zookeeper server and client have sanity checks to ensure that znodes size does not exceed 1MB, which includes all of its children. See <a href="http://zookeeper.apache.org/doc/r3.4.9/zookeeperProgrammers.html" target="_blank" class="footer-link">Data Access</a>            for more detail.
+            <br> [2] Zookeeper server and client have sanity checks to ensure that znodes size does not exceed 1MB, which includes all of its children; see <a href="http://zookeeper.apache.org/doc/r3.4.9/zookeeperProgrammers.html" target="_blank" class="footer-link">Data Access</a>.
             <br> [3] etcd has hard-coded <span class="code-light-snippet-small">maxRequestBytes</span> value to avoid blocking Raft stream. Server returns <span class="code-light-snippet-small">ErrRequestTooLarge</span> error to the exceeding client request.
             <br> [4] Consul has hard-coded <span class="code-light-snippet-small">maxKVSize</span> value. Server returns <span class="code-light-snippet-small">Value for key X is too large</span> error to the exceeding client request.
             <br> [5] Zookeeper guide recommends to limit Java heap size to avoid disk swap, since Zookeeper stores data in-memory.
@@ -511,11 +518,93 @@
         <br><br>
 
         <br><br>
-        <div id="failure-injection-tests"></div>
-        <h4>Failure Injection Tests</h4>
+        <div id="etcd-tests"></div>
+        <h4>How etcd is tested</h4>
         <p class="narrow-paragraph">
-            Reliability is etcd's highest priority. TODO: Functional tester ...
+            Reliability and robustness of etcd is our <b>highest</b> priority. And it is ensured by various etcd testing suites: unit tests, integration tests, migration tests, end-to-end tests, benchmarks and regression tests, soak tests, stress tests,
+            functional tests, and so on.
         </p>
+        <p class="narrow-paragraph">
+            As of today, etcd consists of 85,113 lines of Go code<sup>[1]</sup>; more than half of code base, <i>48,786 lines</i>, are for tests and testing infrastructure. Especially, raft has 8,617 lines Go code, where 5,998 lines of them are tests.
+        </p>
+        <p class="narrow-paragraph">
+            Most rigorous one is our <a href="https://github.com/coreos/etcd/tree/master/tools/functional-tester" target="_blank" class="normal-link">functional tests</a>. This verifies the correct behavior of etcd under various system and network malfunctions.
+            It is extremely helpful<sup>[2]</sup> to find critical bugs in etcd, <i>before anyone else</i>; see a list of bugs that it has found at
+            <a href="https://github.com/coreos/etcd/issues?q=is%3Aissue+label%3Acomponent%2Ffunctional-tester+is%3Aclosed" target="_blank" class="normal-link">GitHub Issues</a>.
+        </p>
+        <p class="narrow-paragraph">
+            The tester ensures that etcd operates as expected during failure and after recovery. So it continuously injects failures to etcd cluster while stressing them with heavy workloads. And then compares database hashes of each node to see if cluster keeps
+            its data consistent. Some of the failures are:
+        </p>
+        <ul>
+            <li>Kill random node</li>
+            <li>Kill leader node</li>
+            <li>Kill majority of nodes in cluster</li>
+            <li>Kill all nodes</li>
+            <li>Kill node for a long time to trigger snapshot when it comes back</li>
+            <li>Network partition</li>
+            <li>Slow network</li>
+        </ul>
+        <p class="narrow-paragraph">
+            Furthermore, it also performs crash tests, such as power loss, I/O error, partial writes, and so on. It is impractical to run these tests with real power failures. So etcd crash testing is simulated with <a href="https://github.com/coreos/gofail"
+                target="_blank" class="normal-link">gofail</a>. etcd has tons of fail points in its code base, and tester triggers Go runtime panics in etcd. Some of the failures are:
+        </p>
+        <ul>
+            <li>panic before/after database commits an entry</li>
+            <li>panic before/after Raft follower sends message</li>
+            <li>panic before/after Raft leader sends message</li>
+            <li>panic before/after Raft saves entries</li>
+            <li>panic before/after Raft saves snapshot</li>
+            <li>panic before/after Raft applies entries</li>
+        </ul>
+        <p class="narrow-paragraph">
+            etcd functional-tester runs 24/7. One cluster gets about 8,000 failure injections per day, <i>1 failure injection for every 10-second</i>.
+        </p>
+        <p class="narrow-paragraph">
+            Please visit <a href="http://dash.etcd.io/" target="_blank" class="normal-link">dash.etcd.io</a> for realtime testing cluster dashboards.
+        </p>
+        <p class="narrow-paragraph">
+            Click <a href="http://dash.etcd.io/" target="_blank" class="normal-link">here</a> to refresh (last update ...)
+        </p>
+        <table class="table narrow-paragraph">
+            <thead>
+                <tr>
+                    <th>Testing Cluster</th>
+                    <th><a href="http://dash.etcd.io/dashboard/db/functional-tests" target="_blank" class="normal-link">3-node</a></th>
+                    <th><a href="http://dash.etcd.io/dashboard/db/functional-tests-5-node" target="_blank" class="normal-link">5-node</a></th>
+                    <th><a href="http://dash.etcd.io/dashboard/db/functional-tests-failpoints" target="_blank" class="normal-link">3-node failpoints</a></th>
+                    <th><a href="http://dash.etcd.io/dashboard/db/functional-tests-failpoints-5-node" target="_blank" class="normal-link">5-node failpoints</a></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">Total Injects</th>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <th scope="row">Current Injects</th>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <th scope="row">Current Failed Case</th>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+            </tbody>
+        </table>
+        <hr align="left" class="footer-top-line">
+        <footer class="narrow-footer">
+            [1] Includes comments and tests. Excludes vendor, auto-generated Protocol Buffer files.
+            <br> [2] Important bugs and debugging story can be found at <a href="https://github.com/coreos/etcdlabs/tree/master/debug-etcd" target="_blank" class="footer-link">etcdlabs/debug-etcd</a>.
+        </footer>
         <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/comparison#top" class="normal-link">↑ top</a></div>
         <br><br>
 
