@@ -20,21 +20,24 @@
         <router-outlet></router-outlet>
 
         <div id="top"></div>
+        <h4>etcd in Comparison <span class="next-to-header-title">(last update Nov 10, 2016)</span></h4>
+        <br>
         <ul>
-            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#etcd-in-comparison" class="faq-list">etcd in Comparison</a></li>
+            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#chubby-zookeeper-etcd-consul" class="faq-list">Chubby, Zookeeper, etcd, Consul</a></li>
             <li><a href="/doc/{{version.etcdVersionURL}}/comparison#consensus-algorithm" class="faq-list">Consensus Algorithm</a></li>
             <li><a href="/doc/{{version.etcdVersionURL}}/comparison#features" class="faq-list">Features</a></li>
             <li><a href="/doc/{{version.etcdVersionURL}}/comparison#performance-reliability" class="faq-list">Performance & Reliability</a></li>
             <li><a href="/doc/{{version.etcdVersionURL}}/comparison#benchmark-results" class="faq-list">Benchmark Results</a></li>
             <li><a href="/doc/{{version.etcdVersionURL}}/comparison#etcd-tests" class="faq-list">How etcd is tested</a></li>
         </ul>
+        <br>
 
         <br><br>
-        <div id="etcd-in-comparison"></div>
-        <h4>etcd in Comparison <span class="next-to-header-title">(last update Nov 10, 2016)</span></h4>
+        <div id="chubby-zookeeper-etcd-consul"></div>
+        <h4>Chubby, Zookeeper, etcd, Consul</h4>
         <br>
         <p class="narrow-paragraph">
-            In 2006, Google published Chubby<sup>[1]</sup> distributed lock service built on Paxos<sup>[2]</sup>, followed by Zookeeper, etcd, and Consul.
+            In 2006, Google published Chubby<sup>[1]</sup> distributed lock service built on Paxos<sup>[2]</sup>, then followed by Zookeeper, etcd, and Consul.
         </p>
         <br>
         <table class="table narrow-paragraph">
@@ -518,11 +521,90 @@
         <div id="etcd-tests"></div>
         <h4>How etcd is tested</h4>
         <p class="narrow-paragraph">
-            Reliability and robustness of etcd is our <b>highest</b> priority.
+            Reliability and robustness of etcd is our <b>highest</b> priority. And it is ensured by various etcd testing suites: unit tests, integration tests, migration tests, end-to-end tests, benchmarks and regression tests, soak tests, stress tests,
+            functional tests, and so on.
         </p>
         <p class="narrow-paragraph">
-            TODO: LOC
+            As of today, etcd consists of 85,113 lines of Go code<sup>[1]</sup>; more than half of code base, <i>48,786 lines</i>, are for tests and testing infrastructure. Especially, raft has 8,617 lines Go code, where 5,998 lines of them are tests.
         </p>
+        <p class="narrow-paragraph">
+            Most rigorous one is our <a href="https://github.com/coreos/etcd/tree/master/tools/functional-tester" target="_blank" class="normal-link">functional tests</a>. This verifies the correct behavior of etcd under various system and network malfunctions.
+            It is extremely helpful<sup>[2]</sup> to find critical bugs in etcd, <i>before anyone else</i>; see a list of bugs that it has found at
+            <a href="https://github.com/coreos/etcd/issues?q=is%3Aissue+label%3Acomponent%2Ffunctional-tester+is%3Aclosed" target="_blank" class="normal-link">GitHub Issues</a>.
+        </p>
+        <p class="narrow-paragraph">
+            The tester ensures that etcd operates as expected during failure and after recovery. So it continuously injects failures to etcd cluster while stressing them with heavy workloads. And then compares database hashes of each node to see if cluster keeps
+            its data consistent. Some of the failures are:
+        </p>
+        <ul>
+            <li>Kill random node</li>
+            <li>Kill leader node</li>
+            <li>Kill majority of nodes in cluster</li>
+            <li>Kill all nodes</li>
+            <li>Kill node for a long time to trigger snapshot when it comes back</li>
+            <li>Network partition</li>
+            <li>Slow network</li>
+        </ul>
+        <p class="narrow-paragraph">
+            Furthermore, it also performs crash tests, such as power loss, I/O error, partial writes, and so on. It is impractical to run these tests with real power failures. So etcd crash testing is simulated with <a href="https://github.com/coreos/gofail"
+                target="_blank" class="normal-link">gofail</a>. etcd has tons of fail points in its code base, and tester triggers Go runtime panics in etcd. Some of the failures are:
+        </p>
+        <ul>
+            <li>panic before/after database commits an entry</li>
+            <li>panic before/after Raft follower sends message</li>
+            <li>panic before/after Raft leader sends message</li>
+            <li>panic before/after Raft saves entries</li>
+            <li>panic before/after Raft saves snapshot</li>
+            <li>panic before/after Raft applies entries</li>
+        </ul>
+        <p class="narrow-paragraph">
+            etcd functional-tester runs 24/7. One cluster gets about 8,000 failure injections per day, <i>1 failure injection for every 10-second</i>.
+        </p>
+        <p class="narrow-paragraph">
+            Please visit <a href="http://dash.etcd.io/" target="_blank" class="normal-link">dash.etcd.io</a> for realtime testing cluster dashboards.
+        </p>
+        <p class="narrow-paragraph">
+            Click <a href="http://dash.etcd.io/" target="_blank" class="normal-link">here</a> to refresh (last update ...)
+        </p>
+        <table class="table narrow-paragraph">
+            <thead>
+                <tr>
+                    <th>Testing Cluster</th>
+                    <th><a href="http://dash.etcd.io/dashboard/db/functional-tests" target="_blank" class="normal-link">3-node</a></th>
+                    <th><a href="http://dash.etcd.io/dashboard/db/functional-tests-5-node" target="_blank" class="normal-link">5-node</a></th>
+                    <th><a href="http://dash.etcd.io/dashboard/db/functional-tests-failpoints" target="_blank" class="normal-link">3-node failpoints</a></th>
+                    <th><a href="http://dash.etcd.io/dashboard/db/functional-tests-failpoints-5-node" target="_blank" class="normal-link">5-node failpoints</a></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">Total Injects</th>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <th scope="row">Current Injects</th>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <th scope="row">Current Failed Case</th>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+            </tbody>
+        </table>
+        <hr align="left" class="footer-top-line">
+        <footer class="narrow-footer">
+            [1] Includes comments and tests. Excludes vendor, auto-generated Protocol Buffer files.
+            <br> [2] Important bugs and debugging story can be found at <a href="https://github.com/coreos/etcdlabs/tree/master/debug-etcd" target="_blank" class="footer-link">etcdlabs/debug-etcd</a>.
+        </footer>
         <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/comparison#top" class="normal-link">↑ top</a></div>
         <br><br>
 
