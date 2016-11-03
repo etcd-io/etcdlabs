@@ -29,4 +29,5 @@ npm -v
 
 <<COMMENT
 npm install
+npm rebuild node-sass
 COMMENT

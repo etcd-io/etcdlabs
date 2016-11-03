@@ -62,9 +62,9 @@ const appRoutes: Routes = [
         ],
     },
 
-    // TODO: dot routing https://github.com/angular/angular/issues/11842
-    { path: 'doc/v31', redirectTo: '/doc/tip', pathMatch: 'full' },
-    { path: 'doc/v32', redirectTo: '/doc/tip', pathMatch: 'full' },
+    // versioned docs
+    { path: 'doc/v3.1', redirectTo: '/doc/tip', pathMatch: 'full' },
+    { path: 'doc/v3.2', redirectTo: '/doc/tip', pathMatch: 'full' },
 
     // etcd playground
     { path: 'playground', redirectTo: '/play', pathMatch: 'full' },

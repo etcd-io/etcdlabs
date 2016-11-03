@@ -5,7 +5,11 @@ set -e
 https://yarnpkg.com/en/docs/install
 
 yarn init
+
 yarn install
+npm rebuild node-sass
+
+yarn start
 COMMENT
 
 sudo apt-key adv --keyserver pgp.mit.edu --recv D101F7899D41F3C3

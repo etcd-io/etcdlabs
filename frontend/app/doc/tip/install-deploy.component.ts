@@ -101,6 +101,8 @@ export class InstallDeployTipComponent extends ParentComponent {
     inputCFSSLKeyExpirationHour: number;
 
     inputCFSSLCommonName: string;
+
+    inputCFSSLMoreHosts: string;
     ////////////////////////////////////
 
     ////////////////////////////////////
@@ -164,6 +166,8 @@ export class InstallDeployTipComponent extends ParentComponent {
         this.inputCFSSLKeyExpirationHour = 87600;
 
         this.inputCFSSLCommonName = 'etcd';
+
+        this.inputCFSSLMoreHosts = '';
         ///////////////////////////////////////////////////
 
         ///////////////////////////////////////////////////
@@ -449,10 +453,30 @@ EOF`;
     }
 
     getCFSSLKeys(flag: EtcdFlag) {
-        let hostTxt = `    "localhost"`;
+        let hosts: string[] = [];
+        hosts.push('localhost');
         if (flag.ipAddress !== 'localhost') {
-            hostTxt += `,
-    "${flag.ipAddress}"`;
+            hosts.push(flag.ipAddress);
+        }
+        if (this.inputCFSSLMoreHosts !== '') {
+            let hs = this.inputCFSSLMoreHosts.split(/\r?\n/);
+            // hosts = hosts.concat(hs);
+            for (let _i = 0; _i < hs.length; _i++) {
+                if (hs[_i] !== '') {
+                    hosts.push(hs[_i]);
+                }
+            }
+        }
+
+        let hostTxt = `    `;
+        let lineBreak = `
+    `;
+        for (let _i = 0; _i < hosts.length; _i++) {
+            hostTxt += '"' + hosts[_i] + '"';
+            if (_i === hosts.length - 1) {
+                break;
+            }
+            hostTxt += ',' + lineBreak;
         }
 
         return `cat > $HOME/test-certs/${flag.name}-ca-csr.json <<EOF
@@ -550,7 +574,6 @@ sudo mkdir -p ${this.cleanDir(flag.dataDir)}
     getEtcdFlagToCFSSLKeyCopyCommand(flag: EtcdFlag) {
         return `# after transferring certs to remote machines
 
-# sudo rm -rf ${this.cleanDir(flag.certsDir)}
 sudo mkdir -p ${this.cleanDir(flag.certsDir)}
 sudo chown -R root:$(whoami) ${this.cleanDir(flag.certsDir)}
 sudo chmod -R a+rw ${this.cleanDir(flag.certsDir)}
