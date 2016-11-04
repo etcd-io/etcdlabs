@@ -923,7 +923,6 @@ Description=etcd with rkt
 Documentation=https://github.com/coreos/rkt
 
 [Service]
-Type=notify
 Restart=always
 RestartSec=5s
 TimeoutStartSec=0

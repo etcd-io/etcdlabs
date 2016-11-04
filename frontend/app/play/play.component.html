@@ -4,13 +4,13 @@
     <button md-raised-button (click)="clickShowUser()">{{userN}} user(s) online</button>
     <button md-raised-button>Uptime: {{serverUptime}}</button>
     <br>
-    <p *ngIf="showUser">
+    <div *ngIf="showUser">
         <md-list>
             <md-list-item *ngFor="let user of users;">
                 {{user}}
             </md-list-item>
         </md-list>
-    </p>
+    </div>
     <br>
 
     <div class="inner">

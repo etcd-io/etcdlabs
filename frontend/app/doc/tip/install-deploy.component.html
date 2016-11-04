@@ -190,7 +190,7 @@
 							</div>
 						</div>
 					</div>
-					<div align="right" class="narrow-footer"><a href="/doc/{{version.etcdVersionURL}}/install-deploy#top" class="normal-link">↑ top</a></div>
+					<div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/install-deploy#top" class="normal-link">↑ top</a></div>
 				</template>
             </md-tab>
 
@@ -249,7 +249,7 @@
 							</div>
 						</div>
 					</div>
-					<div align="right" class="narrow-footer"><a href="/doc/{{version.etcdVersionURL}}/install-deploy#top" class="normal-link">↑ top</a></div>
+					<div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/install-deploy#top" class="normal-link">↑ top</a></div>
 				</template>
             </md-tab>
 
@@ -359,7 +359,7 @@
 							</div>
 						</div>
 					</div>
-					<div align="right" class="narrow-footer"><a href="/doc/{{version.etcdVersionURL}}/install-deploy#top" class="normal-link">↑ top</a></div>
+					<div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/install-deploy#top" class="normal-link">↑ top</a></div>
 				</template>
             </md-tab>
 
@@ -432,6 +432,8 @@
 								</div>
 							</div>
 
+							<pre class="code-dark">{{getEtcdSystemdServiceFile(inputEtcdExecDirSystemd, flag)}}</pre>
+						
 							<div class="osx-window">
 								<div class="window-narrow">
 									<div class="titlebar">
@@ -445,8 +447,6 @@
 									</div>
 								</div>
 							</div>
-
-							<pre class="code-dark">{{getEtcdSystemdServiceFile(inputEtcdExecDirSystemd, flag)}}</pre>
 							<br>
 						</div>
 					</div>
@@ -467,7 +467,7 @@
 							</div>
 						</div>
 					</div>
-					<div align="right" class="narrow-footer"><a href="/doc/{{version.etcdVersionURL}}/install-deploy#top" class="normal-link">↑ top</a></div>
+					<div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/install-deploy#top" class="normal-link">↑ top</a></div>
 				</template>
             </md-tab>
 
@@ -540,6 +540,8 @@
 								</div>
 							</div>
 
+							<pre class="code-dark">{{getEtcdRktSystemdServiceFile(inputRktExecDir, inputEtcdVersionRkt, etcdFlags[i], inputRktVersion, flag)}}</pre>
+
 							<div class="osx-window">
 								<div class="window-narrow">
 									<div class="titlebar">
@@ -553,8 +555,6 @@
 									</div>
 								</div>
 							</div>
-
-							<pre class="code-dark">{{getEtcdRktSystemdServiceFile(inputRktExecDir, inputEtcdVersionRkt, etcdFlags[i], inputRktVersion, flag)}}</pre>
 							<br>
 						</div>
 					</div>
@@ -582,7 +582,7 @@
 					<p class="narrow-paragraph">
 						Application container gives much portability to initial development phase. But operating and scaling container requires much more work. <a href="http://kubernetes.io/" target="_blank" class="normal-link">Kubernetes</a> manages such complex container environments. More on Kubernetes? Please visit <a href="http://kubernetes.io/docs" target="_blank" class="normal-link">Official Kubernetes Guides</a>. Fully managed etcd cluster? Please visit <a href="https://github.com/coreos/etcd-operator" target="_blank" class="normal-link">etcd-operator</a>.
 					</p>
-					<div align="right" class="narrow-footer"><a href="/doc/{{version.etcdVersionURL}}/install-deploy#top" class="normal-link">↑ top</a></div>
+					<div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/install-deploy#top" class="normal-link">↑ top</a></div>
 				</template>
             </md-tab>
 
@@ -637,6 +637,8 @@
 								</div>
 							</div>
 
+							<pre class="code-dark">{{getCoreOSEtcdWrapper(inputEtcdVersionCoreOS, flag)}}</pre>
+
 							<div class="osx-window">
 								<div class="window-narrow">
 									<div class="titlebar">
@@ -650,8 +652,6 @@
 									</div>
 								</div>
 							</div>
-
-							<pre class="code-dark">{{getCoreOSEtcdWrapper(inputEtcdVersionCoreOS, flag)}}</pre>
 							<br>
 						</div>
 					</div>
@@ -679,7 +679,7 @@
 					<p class="narrow-paragraph">
 						Please visit <a href="https://coreos.com/why" target="_blank" class="normal-link">CoreOS</a>.
 					</p>
-					<div align="right" class="narrow-footer"><a href="/doc/{{version.etcdVersionURL}}/install-deploy#top" class="normal-link">↑ top</a></div>
+					<div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/install-deploy#top" class="normal-link">↑ top</a></div>
 				</template>
             </md-tab>
 

@@ -25,6 +25,16 @@
             Application container gives much portability to initial development phase. But operating and scaling container requires much more work. <a href="http://kubernetes.io/" target="_blank" class="normal-link">Kubernetes</a> manages such complex
             container environments. This is an example workflow to manage etcd with Kubernetes.
         </p>
+        <p class="narrow-paragraph">
+            Reference
+        </p>
+        <ul>
+            <li><a href="http://kubernetes.io/docs/getting-started-guides/scratch/" target="_blank" class="normal-link">Kubernetes: Creating a Custom Cluster from Scratch</a></li>
+            <li><a href="https://coreos.com/kubernetes/docs/latest/kubernetes-on-baremetal.html" target="_blank" class="normal-link">Kubernetes Installation on Bare Metal & CoreOS</a></li>
+            <li><a href="https://github.com/kelseyhightower/kubernetes-the-hard-way" target="_blank" class="normal-link">Kubernetes The Hard Way</a></li>
+            <li><a href="https://coreos.com/blog/introducing-operators.html" target="_blank" class="normal-link">Introducing Operators: Putting Operational Knowledge into Software</a></li>
+            <li><a href="https://coreos.com/blog/introducing-the-etcd-operator.html" target="_blank" class="normal-link">Introducing the etcd Operator: Simplify etcd cluster configuration and management</a></li>
+        </ul>
 
         <md-tab-group>
 
@@ -41,7 +51,7 @@
 					<ul>
 						<li>3 for etcd cluster</li>
 						<li>1 for <span class="code-light-snippet">kubectl</span></li>
-						<li>3 for Kubernetes API server</li>
+						<li>3 for master nodes (<span class="code-light-snippet">kube-apiserver</span>, <span class="code-light-snippet">kubelet</span>, etc.)</li>
 						<li>3 for workers to deploy etcd (or your distributed application)</li>
 					</ul>
 					<p class="narrow-paragraph">
@@ -53,7 +63,7 @@
 
 					<br>
 					<p class="narrow-paragraph">
-                        First install <a href="https://github.com/kubernetes/kubernetes/releases" target="_blank" class="normal-link">Kubernetes binaries</a>
+						First install <a href="https://github.com/kubernetes/kubernetes/releases" target="_blank" class="normal-link">Kubernetes binaries</a> (optional except <span class="code-light-snippet">kubectl</span>)
 					</p>
 					<md-input type="text" [(ngModel)]="inputKubernetesVersion" placeholder="Kubernetes version"></md-input>
 					<md-input type="text" [(ngModel)]="inputKubernetesGOOS" placeholder="GOOS"></md-input>
@@ -80,7 +90,59 @@
 
             <md-tab>
                 <template md-tab-label>
-					TODO 2
+					Master Nodes
+				</template>
+                <template md-tab-content>
+					<br>
+					<h5>Why?</h5>
+					<p class="narrow-paragraph">
+						...
+					</p>
+				</template>
+            </md-tab>
+
+            <md-tab>
+                <template md-tab-label>
+					Workers
+				</template>
+                <template md-tab-content>
+					<br>
+					<h5>Why?</h5>
+					<p class="narrow-paragraph">
+						...
+					</p>
+				</template>
+            </md-tab>
+
+            <md-tab>
+                <template md-tab-label>
+					kubectl
+				</template>
+                <template md-tab-content>
+					<br>
+					<h5>Why?</h5>
+					<p class="narrow-paragraph">
+						...
+					</p>
+				</template>
+            </md-tab>
+
+            <md-tab>
+                <template md-tab-label>
+					kubedns
+				</template>
+                <template md-tab-content>
+					<br>
+					<h5>Why?</h5>
+					<p class="narrow-paragraph">
+						...
+					</p>
+				</template>
+            </md-tab>
+
+            <md-tab>
+                <template md-tab-label>
+					Dashboard
 				</template>
                 <template md-tab-content>
 					<br>

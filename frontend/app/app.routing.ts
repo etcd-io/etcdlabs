@@ -10,7 +10,6 @@ doc
 */
 import { DocTipComponent } from './doc/tip/doc.component';
 import { InstallDeployTipComponent } from './doc/tip/install-deploy.component';
-import { KubernetesEtcdOperatorTipComponent } from './doc/tip/kubernetes-etcd-operator.component';
 import { KubernetesTipComponent } from './doc/tip/kubernetes.component';
 import { QuickTutorialsTipComponent } from './doc/tip/quick-tutorials.component';
 import { FAQTipComponent } from './doc/tip/faq.component';
@@ -48,7 +47,6 @@ const appRoutes: Routes = [
         children: [
             { path: '', component: DocTipComponent },
             { path: 'install-deploy', component: InstallDeployTipComponent },
-            { path: 'kubernetes-etcd-operator', component: KubernetesEtcdOperatorTipComponent },
             { path: 'kubernetes', component: KubernetesTipComponent },
             { path: 'quick-tutorials', component: QuickTutorialsTipComponent },
             { path: 'faq', component: FAQTipComponent },
@@ -83,7 +81,6 @@ export const routedComponents = [
 
     DocTipComponent,
     InstallDeployTipComponent,
-    KubernetesEtcdOperatorTipComponent,
     KubernetesTipComponent,
     QuickTutorialsTipComponent,
     FAQTipComponent,

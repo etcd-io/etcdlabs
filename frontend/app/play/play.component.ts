@@ -257,6 +257,8 @@ export class PlayComponent implements OnInit, AfterContentInit, AfterViewChecked
     }
     this.playgroundActive = true;
     this.sendLogLine('OK', 'Hello World! Connected to etcd cluster!');
+    this.sendLogLine('INFO', 'This is actual etcd cluster with limited resources.');
+    this.sendLogLine('WARN', 'Please note that IPs and user agents are recorded to prevent abuse.');
 
     this.startConnect();
 
