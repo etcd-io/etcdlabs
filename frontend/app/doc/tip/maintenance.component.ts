@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
-import { ParentComponent } from './common.component';
+import { ParentComponent } from './common/common.component';
 
 @Component({
     selector: 'app-maintenance',
     templateUrl: 'maintenance.component.html',
-    styleUrls: ['common.component.css'],
+    styleUrls: ['common/common.component.css'],
 })
 export class MaintenanceTipComponent extends ParentComponent {
     constructor() {

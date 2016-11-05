@@ -93,8 +93,9 @@
 					<br>
 					<h5>Install cfssl</h5>
 					<br>
-					<md-input type="text" [(ngModel)]="inputCFSSLVersion" placeholder="cfssl version"></md-input>
-					<md-input type="text" [(ngModel)]="inputCFSSLExecDir" placeholder="exec dir"></md-input>
+					<md-input type="text" [(ngModel)]="cfssl.version" placeholder="cfssl version"></md-input>
+					<md-input type="text" [(ngModel)]="cfssl.execDir" placeholder="exec dir"></md-input>
+					<md-input type="text" [(ngModel)]="cfssl.srcCertsDir" placeholder="certs dir"></md-input>
 					<br>
 					<div class="osx-window">
 						<div class="window">
@@ -105,29 +106,29 @@
 									<div class="zoom"><span><strong></strong></span></div>
 								</div><span class="title-bar-text">terminal</span></div>
 							<div class="content">
-								<pre class="osx-terminal-contents">{{getCFSSLInitial()}}</pre>
+								<pre class="osx-terminal-contents">{{cfssl.getInstallCommand()}}</pre>
 							</div>
 						</div>
 					</div>
 
 					<br>
 					<md-card-subtitle>Certificate Configuration</md-card-subtitle>
-					<md-input type="text" [(ngModel)]="inputCFSSLOrganization" placeholder="Organization"></md-input>
-					<md-input type="text" [(ngModel)]="inputCFSSLOrganizationUnit" placeholder="Organization Unit"></md-input>
-					<md-input type="text" [(ngModel)]="inputCFSSLLocationCity" placeholder="City"></md-input>
-					<md-input type="text" [(ngModel)]="inputCFSSLLocationState" placeholder="State"></md-input>
-					<md-input type="text" [(ngModel)]="inputCFSSLLocationCountry" placeholder="Country"></md-input>
+					<md-input type="text" [(ngModel)]="cfssl.organization" placeholder="Organization"></md-input>
+					<md-input type="text" [(ngModel)]="cfssl.organizationUnit" placeholder="Organization Unit"></md-input>
+					<md-input type="text" [(ngModel)]="cfssl.locationCity" placeholder="City"></md-input>
+					<md-input type="text" [(ngModel)]="cfssl.locationState" placeholder="State"></md-input>
+					<md-input type="text" [(ngModel)]="cfssl.locationCountry" placeholder="Country"></md-input>
 					<br>
-					<md-input type="text" [(ngModel)]="inputCFSSLKeyAlgorithm" placeholder="Key Algorithm"></md-input>
-					<md-input type="number" [(ngModel)]="inputCFSSLKeySize" placeholder="Key Size"></md-input>
-					<md-input type="number" [(ngModel)]="inputCFSSLKeyExpirationHour" placeholder="Key Expiration (hour)"></md-input>
+					<md-input type="text" [(ngModel)]="cfssl.keyAlgorithm" placeholder="Key Algorithm"></md-input>
+					<md-input type="number" [(ngModel)]="cfssl.keySize" placeholder="Key Size"></md-input>
+					<md-input type="number" [(ngModel)]="cfssl.keyExpirationHour" placeholder="Key Expiration (hour)"></md-input>
 					<br>
-					<md-input type="text" [(ngModel)]="inputCFSSLCommonName" placeholder="Common Name"></md-input>
+					<md-input type="text" [(ngModel)]="cfssl.commonName" placeholder="Common Name"></md-input>
 					<br>
 					<br>
 
 					<h5>Generate self-signed root CA certificate</h5>
-					<pre class="code-dark">{{getCFSSLRootCA()}}</pre>
+					<pre class="code-dark">{{cfssl.getRootCACommand()}}</pre>
 					Results:
 					<div class="osx-window">
 						<div class="window-narrow">
@@ -138,14 +139,14 @@
 									<div class="zoom"><span><strong></strong></span></div>
 								</div><span class="title-bar-text">terminal</span></div>
 							<div class="content">
-								<pre class="osx-terminal-contents">{{getCFSSLRootCAResult()}}</pre>
+								<pre class="osx-terminal-contents">{{cfssl.getRootCACommandResult()}}</pre>
 							</div>
 						</div>
 					</div>
 
 					<br>
 					<h5>Create a configuration file</h5>
-					<pre class="code-dark">{{getCFSSLConfig()}}</pre>
+					<pre class="code-dark">{{cfssl.getGenCertConfig()}}</pre>
 
 					<br>
 					<h5>Generate local-issued certificates with private keys</h5>
@@ -154,12 +155,12 @@
 					</p>
 
 					<br>
-					<textarea type="text" style="max-width: 550px;" class="form-control" placeholder="More hosts to sign (line-separated)" rows="7" [(ngModel)]="inputCFSSLMoreHosts"></textarea>
+					<textarea type="text" style="max-width: 550px;" class="form-control" placeholder="More hosts to sign (line-separated)" rows="7" [(ngModel)]="inputCFSSLMoreHostsTxt"></textarea>
 					<br>
 
 					<div *ngFor="let flag of etcdFlags; let i = index;">
 						<div *ngIf="inputClusterSize > i">
-							<pre class="code-dark">{{getCFSSLKeys(flag)}}</pre>
+							<pre class="code-dark">{{cfssl.getGenCertCommand(flag.name, flag.ipAddress, inputCFSSLMoreHostsTxt)}}</pre>
 						
 							<div class="osx-window">
 								<div class="window-narrow">
@@ -170,7 +171,7 @@
 											<div class="zoom"><span><strong></strong></span></div>
 										</div><span class="title-bar-text">terminal</span></div>
 									<div class="content">
-										<pre class="osx-terminal-contents">{{getEtcdFlagToCFSSLKeyCopyCommand(flag)}}</pre>
+										<pre class="osx-terminal-contents">{{cfssl.getCertsCopyCommand(flag.certsDir)}}</pre>
 									</div>
 								</div>
 							</div>
@@ -186,7 +187,7 @@
 									<div class="zoom"><span><strong></strong></span></div>
 								</div><span class="title-bar-text">terminal</span></div>
 							<div class="content">
-								<pre class="osx-terminal-contents">{{ggetCFSSLResults()}}</pre>
+								<pre class="osx-terminal-contents">{{getCFSSLResults()}}</pre>
 							</div>
 						</div>
 					</div>
@@ -212,7 +213,7 @@
 						etcd is written in Go. To build from source, you need Go 1.7+. This assumes host OS is Linux.
 					</p>
 					<br>
-					<md-input type="text" [(ngModel)]="inputGoVersion" placeholder="Go version"></md-input>
+					<md-input type="text" [(ngModel)]="go.version" placeholder="Go version"></md-input>
 					<br>
 					<div class="osx-window">
 						<div class="window">
@@ -223,7 +224,7 @@
 									<div class="zoom"><span><strong></strong></span></div>
 								</div><span class="title-bar-text">terminal</span></div>
 							<div class="content">
-								<pre class="osx-terminal-contents">{{getGoCommand()}}</pre>
+								<pre class="osx-terminal-contents">{{go.getInstallCommand()}}</pre>
 							</div>
 						</div>
 					</div>
@@ -333,7 +334,7 @@
 											<div class="zoom"><span><strong></strong></span></div>
 										</div><span class="title-bar-text">terminal</span></div>
 									<div class="content">
-										<pre class="osx-terminal-contents">{{getEtcdFlagToCFSSLKeyCopyCommand(flag)}}</pre>
+										<pre class="osx-terminal-contents">{{cfssl.getCertsCopyCommand(flag.certsDir)}}</pre>
 									</div>
 								</div>
 							</div>
@@ -427,7 +428,7 @@
 											<div class="zoom"><span><strong></strong></span></div>
 										</div><span class="title-bar-text">terminal</span></div>
 									<div class="content">
-										<pre class="osx-terminal-contents">{{getEtcdFlagToCFSSLKeyCopyCommand(flag)}}</pre>
+										<pre class="osx-terminal-contents">{{cfssl.getCertsCopyCommand(flag.certsDir)}}</pre>
 									</div>
 								</div>
 							</div>
@@ -485,8 +486,8 @@
 					<br>
 					<md-input type="text" [(ngModel)]="inputEtcdVersionRkt" placeholder="etcd version"></md-input>
 					<br>
-					<md-input type="text" [(ngModel)]="inputRktVersion" placeholder="rkt version"></md-input>
-					<md-input type="text" [(ngModel)]="inputRktExecDir" placeholder="rkt exec dir"></md-input>
+					<md-input type="text" [(ngModel)]="rkt.version" placeholder="rkt version"></md-input>
+					<md-input type="text" [(ngModel)]="rkt.execDir" placeholder="rkt exec dir"></md-input>
 					<br>
 
 					<br>
@@ -500,7 +501,7 @@
 									<div class="zoom"><span><strong></strong></span></div>
 								</div><span class="title-bar-text">terminal</span></div>
 							<div class="content">
-								<pre class="osx-terminal-contents">{{getRktInstallLinux(inputRktVersion, inputRktExecDir)}}</pre>
+								<pre class="osx-terminal-contents">{{rkt.getInstallCommandLinux()}}</pre>
 							</div>
 						</div>
 					</div>
@@ -535,12 +536,12 @@
 											<div class="zoom"><span><strong></strong></span></div>
 										</div><span class="title-bar-text">terminal</span></div>
 									<div class="content">
-										<pre class="osx-terminal-contents">{{getEtcdFlagToCFSSLKeyCopyCommand(etcdFlags[i])}}</pre>
+										<pre class="osx-terminal-contents">{{cfssl.getCertsCopyCommand(etcdFlags[i].certsDir)}}</pre>
 									</div>
 								</div>
 							</div>
 
-							<pre class="code-dark">{{getEtcdRktSystemdServiceFile(inputRktExecDir, inputEtcdVersionRkt, etcdFlags[i], inputRktVersion, flag)}}</pre>
+							<pre class="code-dark">{{getEtcdRktSystemdServiceFile(rkt.execDir, inputEtcdVersionRkt, etcdFlags[i], rkt.version, flag)}}</pre>
 
 							<div class="osx-window">
 								<div class="window-narrow">
@@ -589,7 +590,7 @@
 
             <md-tab>
                 <template md-tab-label>
-					CoreOS
+					CoreOS Linux
 				</template>
                 <template md-tab-content>
 					<br>
@@ -632,7 +633,7 @@
 											<div class="zoom"><span><strong></strong></span></div>
 										</div><span class="title-bar-text">terminal</span></div>
 									<div class="content">
-										<pre class="osx-terminal-contents">{{getEtcdFlagToCFSSLKeyCopyCommand(flag)}}</pre>
+										<pre class="osx-terminal-contents">{{cfssl.getCertsCopyCommand(flag.certsDir)}}</pre>
 									</div>
 								</div>
 							</div>

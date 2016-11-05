@@ -1,5 +1,4 @@
 export class Version {
-    goVersion: string;
     etcdVersion: string;
     etcdVersionURL: string;
     etcdVersionLatestRelease: string;
@@ -8,7 +7,6 @@ export class Version {
 
 export class Versioner {
     version: Version = {
-        goVersion: '1.7.3',
         etcdVersion: 'tip',
         etcdVersionURL: 'tip',
         etcdVersionLatestRelease: 'v3.1.0-rc.0',
@@ -80,7 +78,6 @@ export class ParentComponent {
             ),
         ];
 
-        // TODO
         this.operationItems = [
             new SidebarItem(
                 'Tuning etcd',

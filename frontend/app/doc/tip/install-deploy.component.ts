@@ -1,5 +1,8 @@
 import { Component } from '@angular/core';
-import { ParentComponent } from './common.component';
+import { ParentComponent } from './common/common.component';
+import { CFSSL } from './common/cfssl.component';
+import { Go } from './common/go.component';
+import { Rkt, RktFlag } from './common/rkt.component';
 
 export class EtcdFlag {
     name: string;
@@ -61,55 +64,31 @@ export class EtcdFlag {
 }
 
 
-export class RktFlag {
-    name: string;
-
-    constructor(
-        name: string,
-    ) {
-        this.name = name;
-    }
-}
-
 
 @Component({
     selector: 'app-install-deploy',
     templateUrl: 'install-deploy.component.html',
-    styleUrls: ['common.component.css'],
+    styleUrls: ['common/common.component.css'],
 })
 export class InstallDeployTipComponent extends ParentComponent {
     ////////////////////////////////////
-    inputCFSSLExecDir: string;
-    inputEtcdExecDirSource: string;
-    inputEtcdExecDirVM: string;
-    inputEtcdExecDirSystemd: string;
-    inputRktExecDir: string;
-    inputEtcdRktExecDir: string;
-    ////////////////////////////////////
-
-    ////////////////////////////////////
     // TLS setting properties
-    inputCFSSLVersion: string;
-    inputCFSSLOrganization: string;
-    inputCFSSLOrganizationUnit: string;
-    inputCFSSLLocationCity: string;
-    inputCFSSLLocationState: string;
-    inputCFSSLLocationCountry: string;
-
-    inputCFSSLKeyAlgorithm: string;
-    inputCFSSLKeySize: number;
-    inputCFSSLKeyExpirationHour: number;
-
-    inputCFSSLCommonName: string;
-
-    inputCFSSLMoreHosts: string;
+    cfssl: CFSSL;
+    inputCFSSLMoreHostsTxt: string;
     ////////////////////////////////////
 
     ////////////////////////////////////
     // build etcd from source
-    inputGoVersion: string;
+    go: Go;
     inputGitUser: string;
     inputGitBranch: string;
+    ////////////////////////////////////
+
+    ////////////////////////////////////
+    inputEtcdExecDirSource: string;
+    inputEtcdExecDirVM: string;
+    inputEtcdExecDirSystemd: string;
+    inputEtcdRktExecDir: string;
     ////////////////////////////////////
 
     ////////////////////////////////////
@@ -131,8 +110,8 @@ export class InstallDeployTipComponent extends ParentComponent {
     ////////////////////////////////////
     // rkt setting properties
     inputEtcdVersionRkt: string;
-    inputRktVersion: string;
 
+    rkt: Rkt;
     rktFlags: RktFlag[];
     ////////////////////////////////////
 
@@ -145,36 +124,36 @@ export class InstallDeployTipComponent extends ParentComponent {
         super();
 
         ///////////////////////////////////////////////////
-        this.inputCFSSLExecDir = '/usr/local/bin';
-        this.inputEtcdExecDirSource = '/';
-        this.inputEtcdExecDirVM = '/';
-        this.inputEtcdExecDirSystemd = '/';
-        this.inputRktExecDir = '/';
-        this.inputEtcdRktExecDir = '/';
+        this.cfssl = new CFSSL(
+            'R1.2',
+            '/usr/local/bin',
+            '$HOME/test-certs',
+            'etcd',
+            'etcd, security team',
+            'San Francisco',
+            'California',
+            'USA',
+            'rsa',
+            4096,
+            87600,
+            'etcd'
+        );
+        this.inputCFSSLMoreHostsTxt = '';
         ///////////////////////////////////////////////////
 
         ///////////////////////////////////////////////////
-        this.inputCFSSLVersion = 'R1.2';
-        this.inputCFSSLOrganization = 'etcd';
-        this.inputCFSSLOrganizationUnit = 'etcd, security team';
-        this.inputCFSSLLocationCity = 'San Francisco';
-        this.inputCFSSLLocationState = 'California';
-        this.inputCFSSLLocationCountry = 'USA';
-
-        this.inputCFSSLKeyAlgorithm = 'rsa';
-        this.inputCFSSLKeySize = 4096;
-        this.inputCFSSLKeyExpirationHour = 87600;
-
-        this.inputCFSSLCommonName = 'etcd';
-
-        this.inputCFSSLMoreHosts = '';
-        ///////////////////////////////////////////////////
-
-        ///////////////////////////////////////////////////
-        this.inputGoVersion = super.getVersion().goVersion;
+        this.go = new Go('1.7.3');
         this.inputGitUser = 'coreos';
         this.inputGitBranch = 'master';
         ///////////////////////////////////////////////////
+
+        ///////////////////////////////////////////////////
+        this.inputEtcdExecDirSource = '/';
+        this.inputEtcdExecDirVM = '/';
+        this.inputEtcdExecDirSystemd = '/';
+        this.inputEtcdRktExecDir = '/';
+        ///////////////////////////////////////////////////
+
 
         ///////////////////////////////////////////////////
         this.inputSecure = true;
@@ -270,8 +249,8 @@ export class InstallDeployTipComponent extends ParentComponent {
 
         ///////////////////////////////////////////////////
         this.inputEtcdVersionRkt = this.etcdVersionLatestRelease;
-        this.inputRktVersion = 'v1.18.0';
 
+        this.rkt = new Rkt('v1.18.0', '/');
         this.rktFlags = [
             new RktFlag(
                 'my-etcd-rkt-1'
@@ -316,7 +295,7 @@ export class InstallDeployTipComponent extends ParentComponent {
         if (ds === undefined) {
             return '';
         }
-        if (ds.endsWith('/')) {
+        if (ds !== '/' && ds.endsWith('/')) {
             ds = ds.substring(0, ds.length - 1);
         }
         return ds;
@@ -324,30 +303,6 @@ export class InstallDeployTipComponent extends ParentComponent {
     ///////////////////////////////////////////////////
 
     ///////////////////////////////////////////////////
-    getGoCommand() {
-        return `GO_VERSION=${this.inputGoVersion}
-
-sudo rm -f /usr/local/go/bin/go && sudo rm -rf /usr/local/go
-
-GOOGLE_URL=https://storage.googleapis.com/golang
-` + 'DOWNLOAD_URL=${GOOGLE_URL}' + `
-
-` + 'sudo curl -s ${DOWNLOAD_URL}/go$GO_VERSION.linux-amd64.tar.gz | sudo tar -v -C /usr/local/ -xz' + `
-
-` + 'if grep -q GOPATH "$(echo $HOME)/.bashrc"; then ' + `
-    echo "bashrc already has GOPATH";
-else
-    echo "adding GOPATH to bashrc";` + `
-    ` + 'echo "export GOPATH=$(echo $HOME)/go" >> $HOME/.bashrc;' + `
-    ` + 'PATH_VAR=$PATH":/usr/local/go/bin:$(echo $HOME)/go/bin";' + `
-    ` + 'echo "export PATH=$(echo $PATH_VAR)" >> $HOME/.bashrc;' + `
-    ` + 'source $HOME/.bashrc;' + `
-fi
-
-mkdir -p $GOPATH/bin/
-go version`;
-    }
-
     getEtcdBuildFromSource(execDir: string) {
         let divide = this.getDivider(execDir);
 
@@ -387,166 +342,21 @@ BRANCH_NAME=${this.inputGitBranch}
 
 
     ///////////////////////////////////////////////////
-    getCFSSLInitial() {
-        let divide = this.getDivider(this.inputCFSSLExecDir);
-
-        return `rm -f /tmp/cfssl* && rm -rf /tmp/test-certs && mkdir -p /tmp/test-certs
-
-curl -L https://pkg.cfssl.org/${this.inputCFSSLVersion}/cfssl_linux-amd64 -o /tmp/cfssl
-chmod +x /tmp/cfssl
-sudo mv /tmp/cfssl ` + this.inputCFSSLExecDir + `/cfssl
-
-curl -L https://pkg.cfssl.org/${this.inputCFSSLVersion}/cfssljson_linux-amd64 -o /tmp/cfssljson
-chmod +x /tmp/cfssljson
-sudo mv /tmp/cfssljson ` + this.inputCFSSLExecDir + `/cfssljson
-
-` + this.inputCFSSLExecDir + divide + `cfssl version
-` + this.inputCFSSLExecDir + divide + `cfssljson -h
-
-mkdir -p $HOME/test-certs/
-`;
-    }
-
-    getCFSSLRootCA() {
-        return `cat > $HOME/test-certs/trusted-ca-csr.json <<EOF
-{
-  "key": {
-    "algo": "${this.inputCFSSLKeyAlgorithm}",
-    "size": ${this.inputCFSSLKeySize}
-  },
-  "names": [
-    {
-      "O": "${this.inputCFSSLOrganization}",
-      "OU": "${this.inputCFSSLOrganizationUnit}",
-      "L": "${this.inputCFSSLLocationCity}",
-      "ST": "${this.inputCFSSLLocationState}",
-      "C": "${this.inputCFSSLLocationCountry}"
-    }
-  ],
-  "CN": "${this.inputCFSSLCommonName}"
-}
-EOF
-
-cfssl gencert --initca=true $HOME/test-certs/trusted-ca-csr.json | cfssljson --bare $HOME/test-certs/trusted-ca
-
-# verify
-openssl x509 -in $HOME/test-certs/trusted-ca.pem -text -noout
-`;
-    }
-
-    getCFSSLConfig() {
-        return `cat > $HOME/test-certs/gencert-config.json <<EOF
-{
-  "signing": {
-    "default": {
-        "usages": [
-          "signing",
-          "key encipherment",
-          "server auth",
-          "client auth"
-        ],
-        "expiry": "${this.inputCFSSLKeyExpirationHour}h"
-    }
-  }
-}
-EOF`;
-    }
-
-    getCFSSLKeys(flag: EtcdFlag) {
-        let hosts: string[] = [];
-        hosts.push('localhost');
-        if (flag.ipAddress !== 'localhost') {
-            hosts.push(flag.ipAddress);
-        }
-        if (this.inputCFSSLMoreHosts !== '') {
-            let hs = this.inputCFSSLMoreHosts.split(/\r?\n/);
-            // hosts = hosts.concat(hs);
-            for (let _i = 0; _i < hs.length; _i++) {
-                if (hs[_i] !== '') {
-                    hosts.push(hs[_i]);
-                }
-            }
-        }
-
-        let hostTxt = `    `;
-        let lineBreak = `
-    `;
-        for (let _i = 0; _i < hosts.length; _i++) {
-            hostTxt += '"' + hosts[_i] + '"';
-            if (_i === hosts.length - 1) {
-                break;
-            }
-            hostTxt += ',' + lineBreak;
-        }
-
-        return `cat > $HOME/test-certs/${flag.name}-ca-csr.json <<EOF
-{
-  "key": {
-    "algo": "${this.inputCFSSLKeyAlgorithm}",
-    "size": ${this.inputCFSSLKeySize}
-  },
-  "names": [
-    {
-      "O": "${this.inputCFSSLOrganization}",
-      "OU": "${this.inputCFSSLOrganizationUnit}",
-      "L": "${this.inputCFSSLLocationCity}",
-      "ST": "${this.inputCFSSLLocationState}",
-      "C": "${this.inputCFSSLLocationCountry}"
-    }
-  ],
-  "CN": "${this.inputCFSSLCommonName}",
-  "hosts": [
-${hostTxt}
-  ]
-}
-EOF
-
-cfssl gencert` + ' \\' + `
-    ` + '--ca $HOME/test-certs/trusted-ca.pem' + ' \\' + `
-    ` + '--ca-key $HOME/test-certs/trusted-ca-key.pem' + ' \\' + `
-    ` + '--config $HOME/test-certs/gencert-config.json' + ' \\' + `
-    ` + `$HOME/test-certs/${flag.name}-ca-csr.json | cfssljson --bare $HOME/test-certs/${flag.name}`;
-    }
-
-
-    getCFSSLRootCAResult() {
-        return `# CSR configuration
-$HOME/test-certs/trusted-ca-csr.json
-
-# CSR
-$HOME/test-certs/trusted-ca.csr
-
-# private key
-$HOME/test-certs/trusted-ca-key.pem
-
-# public key
-$HOME/test-certs/trusted-ca.pem`;
-    }
-
-    ggetCFSSLResults() {
-        let txt = `# CSR configuration
-$HOME/test-certs/trusted-ca-csr.json
-
-# CSR
-$HOME/test-certs/trusted-ca.csr
-
-# private key
-$HOME/test-certs/trusted-ca-key.pem
-
-# public key
-$HOME/test-certs/trusted-ca.pem
+    getCFSSLResults() {
+        let txt = this.cfssl.getRootCACommandResult() + `
 
 `;
+
         for (let _i = 0; _i < this.etcdFlags.length; _i++) {
             txt += `
 `;
-            txt += '$HOME/test-certs/' + this.etcdFlags[_i].name + '-ca-csr.json' + `
+            txt += this.cfssl.getCertsDir() + `/` + this.etcdFlags[_i].name + '-ca-csr.json' + `
 `;
-            txt += '$HOME/test-certs/' + this.etcdFlags[_i].name + '.csr' + `
+            txt += this.cfssl.getCertsDir() + `/` + this.etcdFlags[_i].name + '.csr' + `
 `;
-            txt += '$HOME/test-certs/' + this.etcdFlags[_i].name + '-key.pem' + `
+            txt += this.cfssl.getCertsDir() + `/` + this.etcdFlags[_i].name + '-key.pem' + `
 `;
-            txt += '$HOME/test-certs/' + this.etcdFlags[_i].name + '.pem' + `
+            txt += this.cfssl.getCertsDir() + `/` + this.etcdFlags[_i].name + '.pem' + `
 `;
             if (_i + 1 === this.inputClusterSize) {
                 break;
@@ -569,16 +379,6 @@ sudo chmod -R a+rw ${this.cleanDir(flag.dataDir)}
         return `# sudo rm -rf ${this.cleanDir(flag.dataDir)}
 sudo mkdir -p ${this.cleanDir(flag.dataDir)}
 `;
-    }
-
-    getEtcdFlagToCFSSLKeyCopyCommand(flag: EtcdFlag) {
-        return `# after transferring certs to remote machines
-
-sudo mkdir -p ${this.cleanDir(flag.certsDir)}
-sudo chown -R root:$(whoami) ${this.cleanDir(flag.certsDir)}
-sudo chmod -R a+rw ${this.cleanDir(flag.certsDir)}
-
-sudo cp $HOME/test-certs/* ${this.cleanDir(flag.certsDir)}`;
     }
 
     getSystemdResult(name: string) {
@@ -847,34 +647,7 @@ sudo mv /tmp/${flag.name}.service /etc/systemd/system/${flag.name}.service
 
 
     ///////////////////////////////////////////////////
-    getRktInstallLinux(rktVer: string, rktExecDir: string) {
-        let divide = this.getDivider(rktExecDir);
 
-        let txt = `RKT_VERSION=${rktVer}
-
-GITHUB_URL=https://github.com/coreos/rkt/releases/download
-
-` + 'DOWNLOAD_URL=${GITHUB_URL}' + `
-
-`;
-
-        txt += 'rm -f /tmp/rkt-${RKT_VERSION}.tar.gz' + `
-` + 'rm -rf /tmp/test-rkt-${RKT_VERSION} && mkdir -p /tmp/test-rkt-${RKT_VERSION}' + `
-
-` + 'curl -L ${DOWNLOAD_URL}/${RKT_VERSION}/rkt-${RKT_VERSION}.tar.gz -o /tmp/rkt-${RKT_VERSION}.tar.gz' + `
-` + 'tar xzvf /tmp/rkt-${RKT_VERSION}.tar.gz -C /tmp/test-rkt-${RKT_VERSION} --strip-components=1' + `
-
-`;
-        if (rktExecDir === '/') {
-            txt += '# sudo cp /tmp/test-rkt-${RKT_VERSION}/rkt /usr/local/bin' + `
-`;
-        }
-        txt += 'sudo cp /tmp/test-rkt-${RKT_VERSION}/rkt ' + rktExecDir + `
-
-` + rktExecDir + divide + `rkt version`;
-
-        return txt;
-    }
 
 
     getEtcdRktSystemdServiceFile(
