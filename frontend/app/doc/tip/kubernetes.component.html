@@ -51,8 +51,8 @@
 					<ul>
 						<li>3 for etcd cluster</li>
 						<li>1 for <span class="code-light-snippet">kubectl</span></li>
-						<li>3 for master nodes (<span class="code-light-snippet">kube-apiserver</span>, <span class="code-light-snippet">kubelet</span>, etc.)</li>
-						<li>3 for workers to deploy etcd (or your distributed application)</li>
+						<li>3 for master nodes (<span class="code-light-snippet">kube-apiserver</span>)</li>
+						<li>5 for workers to deploy etcd (<span class="code-light-snippet">kubelet</span>, your distributed applications, etc.)</li>
 					</ul>
 					<p class="narrow-paragraph">
 						Kubernetes API server depends on etcd. So have 3-node etcd cluster ready following instructions <a routerLink="/doc/{{version.etcdVersionURL}}/install-deploy" class="normal-link">here</a>.
