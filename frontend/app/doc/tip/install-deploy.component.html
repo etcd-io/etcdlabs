@@ -98,8 +98,8 @@
 					<h5>Install cfssl</h5>
 					<br>
 					<md-input type="text" [(ngModel)]="cfssl.version" placeholder="cfssl version"></md-input>
-					<md-input type="text" [(ngModel)]="cfssl.execDir" placeholder="exec dir"></md-input>
-					<md-input type="text" [(ngModel)]="cfssl.srcCertsDir" placeholder="certs dir"></md-input>
+					<md-input type="text" [(ngModel)]="cfssl.execDir" placeholder="cfssl exec dir"></md-input>
+					<md-input type="text" [(ngModel)]="cfssl.srcCertsDir" placeholder="source certs dir"></md-input>
 					<br>
 					<div class="osx-window">
 						<div class="window">
@@ -247,7 +247,7 @@
 					<p>
 						<md-input type="text" [(ngModel)]="inputGitUser" placeholder="Git User"></md-input>
 						<md-input type="text" [(ngModel)]="inputGitBranch" placeholder="Git Branch"></md-input>
-						<md-input type="text" [(ngModel)]="etcd.execDir" placeholder="exec dir"></md-input>
+						<md-input type="text" [(ngModel)]="etcd.execDir" placeholder="etcd exec dir"></md-input>
 					</p>
 					<div class="osx-window">
 						<div class="window-narrow">
@@ -280,7 +280,7 @@
 
 					<br>
 					<md-input type="text" [(ngModel)]="etcd.version" placeholder="etcd version"></md-input>
-					<md-input type="text" [(ngModel)]="etcd.execDir" placeholder="exec dir"></md-input>
+					<md-input type="text" [(ngModel)]="etcd.execDir" placeholder="etcd exec dir"></md-input>
 					<br>
 
 					<br>
@@ -391,7 +391,7 @@
 
 					<br>
 					<md-input type="text" [(ngModel)]="etcd.version" placeholder="etcd version"></md-input>
-					<md-input type="text" [(ngModel)]="etcd.execDir" placeholder="exec dir"></md-input>
+					<md-input type="text" [(ngModel)]="etcd.execDir" placeholder="etcd exec dir"></md-input>
 					<br>
 
 					<br>
@@ -496,8 +496,8 @@
 					</p>
 
 					<br>
-					<md-input type="text" [(ngModel)]="rkt.version" placeholder="rkt version"></md-input>
-					<md-input type="text" [(ngModel)]="rkt.execDir" placeholder="rkt exec dir"></md-input>
+					<md-input type="text" [(ngModel)]="etcd.rkt.version" placeholder="rkt version"></md-input>
+					<md-input type="text" [(ngModel)]="etcd.rkt.execDir" placeholder="rkt exec dir"></md-input>
 					<br>
 
 					<br>
@@ -511,7 +511,7 @@
 									<div class="zoom"><span><strong></strong></span></div>
 								</div><span class="title-bar-text">terminal</span></div>
 							<div class="content">
-								<pre class="osx-terminal-contents">{{rkt.getInstallCommandLinux()}}</pre>
+								<pre class="osx-terminal-contents">{{etcd.rkt.getInstallCommandLinux()}}</pre>
 							</div>
 						</div>
 					</div>
@@ -524,8 +524,26 @@
 					<br>
 					<md-input type="text" [(ngModel)]="etcd.version" placeholder="etcd version"></md-input>
 					<br>
-					<!--<md-input type="text" [(ngModel)]="customEtcdACI" placeholder="custom etcd ACI image"></md-input>-->
-					<textarea type="text" style="max-width: 750px;" class="form-control" placeholder="Custom etcd ACI image (optional)" rows="1" [(ngModel)]="customEtcdACI"></textarea>
+					<md-input
+						type="text"
+						[(ngModel)]="etcd.rkt.fetchURLPrefixToTrust"
+						placeholder="Fetch URL to trust (optional 'rkt trust')"
+						style="width: 750px;"
+					></md-input>
+					<br>
+					<md-input
+						type="text"
+						[(ngModel)]="etcd.rkt.publicKeyToTrust"
+						placeholder="Public key to trust (optional 'rkt trust')"
+						style="width: 750px;"
+					></md-input>
+					<br>
+					<md-input
+						type="text"
+						[(ngModel)]="etcd.rkt.customACI"
+						placeholder="Custom etcd ACI image (optional 'rkt trust')"
+						style="width: 750px;"
+					></md-input>
 					<br>
 					<div *ngFor="let flag of etcd.flags; let i = index;">
 						<div *ngIf="etcd.clusterSize > i">
@@ -557,7 +575,7 @@
 								</div>
 							</div>
 
-							<pre class="code-dark">{{etcd.getServiceFileRkt(rkt.version, rkt.execDir, flag, customEtcdACI)}}</pre>
+							<pre class="code-dark">{{etcd.getServiceFileRkt(flag)}}</pre>
 
 							<div class="osx-window">
 								<div class="window-narrow">

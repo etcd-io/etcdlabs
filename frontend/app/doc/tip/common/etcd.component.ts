@@ -1,3 +1,5 @@
+import { Rkt } from './rkt.component';
+
 function getDivider(execDir: string) {
     let divider = '/';
     if (execDir === undefined || execDir === '/') {
@@ -154,6 +156,8 @@ export class Etcd {
     // per-node configuration
     flags: EtcdFlag[];
 
+    rkt: Rkt;
+
     constructor(
         version: string,
         execDir: string,
@@ -166,6 +170,8 @@ export class Etcd {
         clusterSize: number,
 
         flags: EtcdFlag[],
+
+        rkt: Rkt,
     ) {
         this.version = version;
         this.execDir = execDir;
@@ -178,6 +184,8 @@ export class Etcd {
         this.clusterSize = clusterSize;
 
         this.flags = flags;
+
+        this.rkt = rkt;
     }
 
     getLatestReleaseVersion() {
@@ -472,17 +480,22 @@ sudo mv /tmp/${flag.name}.service /etc/systemd/system/${flag.name}.service
 `;
     }
 
-    getServiceFileRkt(rktVer: string, rktExecDir: string, flag: EtcdFlag, customEtcdACI: string) {
-        let divideRkt = getDivider(cleanDir(rktExecDir));
-        let execRkt = rktExecDir + divideRkt + 'rkt';
+    getServiceFileRkt(flag: EtcdFlag) {
+        let divideRkt = getDivider(this.rkt.getExecDir());
+        let execRkt = this.rkt.getExecDir() + divideRkt + 'rkt';
 
         let rktFlags: string[] = [];
-        rktFlags.push('--trust-keys-from-https');
-        rktFlags.push('--dir=/var/lib/rkt'); // optional '/var/lib/rkt' by default
+
+        if (this.rkt.customACI === '') {
+            rktFlags.push('--trust-keys-from-https');
+        }
+
+        // optional '/var/lib/rkt' is the default
+        rktFlags.push('--dir=/var/lib/rkt');
 
         let rktRunFlags: string[] = [];
         rktRunFlags.push('run');
-        rktRunFlags.push('--stage1-name' + ' ' + 'coreos.com/rkt/stage1-fly:' + rktVer.substring(1));
+        rktRunFlags.push('--stage1-name' + ' ' + 'coreos.com/rkt/stage1-fly:' + this.rkt.stripVersion());
         rktRunFlags.push('--net=host');
         rktRunFlags.push('--volume' + ' ' + 'data-dir,kind=host,source=' + flag.getDataDir());
         if (this.secure) {
@@ -490,12 +503,20 @@ sudo mv /tmp/${flag.name}.service /etc/systemd/system/${flag.name}.service
             rktRunFlags.push('--mount' + ' ' + 'volume=etcd-ssl-certs-dir,target=' + flag.getCertsDir());
         }
 
-        if (customEtcdACI !== '') {
-            // TODO: https://github.com/coreos/rkt/issues/3346
-            rktRunFlags.push('--insecure-options=image');
-            rktRunFlags.push(customEtcdACI + ' ' + '--');
+        // need 'rkt trust' command
+        if (this.rkt.fetchURLPrefixToTrust !== '' && this.rkt.publicKeyToTrust !== '' && this.rkt.customACI !== '') {
+            rktRunFlags.push(this.rkt.customACI + ' ' + '--');
         } else {
             rktRunFlags.push('coreos.com/etcd:' + this.version + ' ' + '--');
+        }
+
+        let cmd = '';
+
+        // need 'rkt trust' command
+        if (this.rkt.fetchURLPrefixToTrust !== '' && this.rkt.publicKeyToTrust !== '' && this.rkt.customACI !== '') {
+            cmd += this.rkt.getTrustCommandLinux() + `
+
+`;
         }
 
         let txt = execRkt;
@@ -509,7 +530,7 @@ sudo mv /tmp/${flag.name}.service /etc/systemd/system/${flag.name}.service
         }
         txt += lineBreak + this.getFlagTxt(flag, true, false);
 
-        let cmd = `cat > /tmp/${flag.name}.service <<EOF
+        cmd += `cat > /tmp/${flag.name}.service <<EOF
 [Unit]
 Description=etcd with rkt
 Documentation=https://github.com/coreos/rkt
