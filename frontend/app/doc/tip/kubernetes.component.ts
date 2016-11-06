@@ -16,6 +16,12 @@ export class KubernetesTipComponent extends ParentComponent {
 
     certsDir: string;
 
+    inputEtcdEndpointsTxt: string;
+
+    inputEtcdRootCAFile: string;
+    inputEtcdCertFile: string;
+    inputEtcdKeyFile: string;
+
     inputMoreMasterNodeIPsTxt: string;
 
     constructor() {
@@ -41,6 +47,15 @@ export class KubernetesTipComponent extends ParentComponent {
         );
 
         this.certsDir = '/etc/kubernetes/ssl';
+
+        this.inputEtcdEndpointsTxt = `ETCD_ENDPOINT_1
+ETCD_ENDPOINT_2
+ETCD_ENDPOINT_3
+`;
+
+        this.inputEtcdRootCAFile = 'etcd-root-ca.pem';
+        this.inputEtcdCertFile = 'my-etcd-1.pem';
+        this.inputEtcdKeyFile = 'my-etcd-1-key.pem';
 
         this.inputMoreMasterNodeIPsTxt = `MASTER_NODE_IP_1
 MASTER_NODE_IP_2

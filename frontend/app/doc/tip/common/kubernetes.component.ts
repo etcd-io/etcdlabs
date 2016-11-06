@@ -77,3 +77,123 @@ done
         return txt;
     }
 }
+
+// http://kubernetes.io/docs/admin/kube-apiserver/
+export class KubernetesAPIServerFlag {
+    name: string;
+
+    // --advertise-address
+    advertiseAddress: string;
+
+    // --apiserver-count
+    apiserverCount: number;
+
+    // --bind-address
+    bindAddress: string;
+
+    // --service-cluster-ip-range
+    serviceClusterIPRange: string;
+
+    // --service-node-port-range
+    serviceNodePortRange: string;
+
+    // --admission-control
+    admissionControl: string;
+
+    // --allow-privileged
+    allowPrivileged: boolean;
+
+    // --authorization-mode
+    authorizationMode: string;
+
+    // --kubelet-certificate-authority
+    // --tls-cert-file
+    // --tls-private-key-file
+    // --service-account-key-file
+
+    // --etcd-cafile
+    // --etcd-certfile
+    // --etcd-keyfile
+    // --etcd-quorum-read
+    // --etcd-servers
+    // --etcd-prefix "/registry"
+    // --storage-backend etcd3
+
+    constructor(
+        name: string,
+
+        advertiseAddress: string,
+        apiserverCount: number,
+
+        serviceClusterIPRange: string,
+        serviceNodePortRange: string,
+    ) {
+        this.name = name;
+
+        this.admissionControl = 'AlwaysAdmit';
+        this.advertiseAddress = advertiseAddress;
+        this.allowPrivileged = true;
+        this.apiserverCount = apiserverCount;
+        this.authorizationMode = 'AlwaysAllow';
+        this.bindAddress = '0.0.0.0';
+
+        this.serviceClusterIPRange = serviceClusterIPRange;
+        this.serviceNodePortRange = serviceNodePortRange;
+    }
+}
+
+// http://kubernetes.io/docs/admin/kube-controller-manager/
+export class KubernetesControllerManagerFlag {
+    name: string;
+
+    address: string;
+    allocateNodeCIDRs: boolean;
+    clusterCIDR: string;
+    clusterName: string;
+
+    leaderElect: boolean;
+    apiserverMaster: string;
+
+    serviceClusterIPRange: string;
+
+    constructor(
+        name: string,
+
+        clusterCIDR: string,
+        apiserverMaster: string,
+
+        serviceClusterIPRange: string,
+    ) {
+        this.name = name;
+
+        this.address = '0.0.0.0';
+        this.allocateNodeCIDRs = true;
+        this.clusterCIDR = clusterCIDR;
+        this.clusterName = this.name;
+
+        this.leaderElect = true;
+        this.apiserverMaster = apiserverMaster;
+
+        this.serviceClusterIPRange = serviceClusterIPRange;
+    }
+}
+
+
+// http://kubernetes.io/docs/admin/kube-scheduler/
+export class KubernetesSchedulerFlag {
+    name: string;
+
+    leaderElect: boolean;
+    apiserverMaster: string;
+
+    constructor(
+        name: string,
+
+        apiserverMaster: string,
+    ) {
+        this.name = name;
+
+        this.leaderElect = true;
+        this.apiserverMaster = apiserverMaster;
+    }
+}

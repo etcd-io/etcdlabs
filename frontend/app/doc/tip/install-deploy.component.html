@@ -57,15 +57,15 @@
                     <span *ngIf="flag.initialClusterState != 'new' && flag.initialClusterState != 'existing'" class="error-message">Cluster state must be either 'new' or 'existing'</span>
 
                     <br *ngIf="etcd.secure">
-                    <md-input *ngIf="etcd.secure" type="text" [(ngModel)]="flag.certsDir" placeholder="etcd certs directory"></md-input>
+                    <md-input *ngIf="etcd.secure" dividerColor="warn" type="text" [(ngModel)]="flag.certsDir" placeholder="etcd certs directory"></md-input>
                     <br *ngIf="etcd.secure">
-                    <md-input *ngIf="etcd.secure" type="text" [(ngModel)]="flag.clientCertFile" placeholder="client cert"></md-input>
-                    <md-input *ngIf="etcd.secure" type="text" [(ngModel)]="flag.clientKeyFile" placeholder="client key"></md-input>
-                    <md-input *ngIf="etcd.secure" type="text" [(ngModel)]="flag.clientTrustedCAFile" placeholder="client trusted CA"></md-input>
+                    <md-input *ngIf="etcd.secure" dividerColor="warn" type="text" [(ngModel)]="flag.clientRootCAFile" placeholder="client trusted root CA"></md-input>
+                    <md-input *ngIf="etcd.secure" dividerColor="warn" type="text" [(ngModel)]="flag.clientCertFile" placeholder="client cert (public)"></md-input>
+                    <md-input *ngIf="etcd.secure" dividerColor="warn" type="text" [(ngModel)]="flag.clientKeyFile" placeholder="client key (private)"></md-input>
                     <br *ngIf="etcd.secure">
-                    <md-input *ngIf="etcd.secure" type="text" [(ngModel)]="flag.peerCertFile" placeholder="peer cert"></md-input>
-                    <md-input *ngIf="etcd.secure" type="text" [(ngModel)]="flag.peerKeyFile" placeholder="peer key"></md-input>
-                    <md-input *ngIf="etcd.secure" type="text" [(ngModel)]="flag.peerTrustedCAFile" placeholder="peer trusted CA"></md-input>
+                    <md-input *ngIf="etcd.secure" dividerColor="warn" type="text" [(ngModel)]="flag.peerRootCAFile" placeholder="peer trusted root CA"></md-input>
+                    <md-input *ngIf="etcd.secure" dividerColor="warn" type="text" [(ngModel)]="flag.peerCertFile" placeholder="peer cert (public)"></md-input>
+                    <md-input *ngIf="etcd.secure" dividerColor="warn" type="text" [(ngModel)]="flag.peerKeyFile" placeholder="peer key (private)"></md-input>
                 </div>
             </div>
 
@@ -166,7 +166,15 @@
 					</p>
 
 					<br>
-					<textarea type="text" style="max-width: 550px;" class="form-control" placeholder="More hosts to sign (line-separated)" rows="7" [(ngModel)]="inputCFSSLMoreHostsTxt"></textarea>
+					<!--TODO: use md-textarea-->
+					<textarea
+						type="text"
+						style="max-width: 550px;"
+						class="form-control"
+						placeholder="More hosts to sign (line-separated)"
+						rows="7"
+						[(ngModel)]="inputCFSSLMoreHostsTxt"
+					></textarea>
 					<br>
 
 					<div *ngFor="let flag of etcd.flags; let i = index;">
@@ -203,6 +211,7 @@
 						</div>
 					</div>
 					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top" class="normal-link">↑ top</a></div>
+					<br>
 					<br>
 				</template>
             </md-tab>
@@ -263,6 +272,8 @@
 						</div>
 					</div>
 					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top" class="normal-link">↑ top</a></div>
+					<br>
+					<br>
 				</template>
             </md-tab>
 
@@ -373,6 +384,8 @@
 						</div>
 					</div>
 					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top" class="normal-link">↑ top</a></div>
+					<br>
+					<br>
 				</template>
             </md-tab>
 
@@ -481,8 +494,11 @@
 						</div>
 					</div>
 					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top" class="normal-link">↑ top</a></div>
+					<br>
+					<br>
 				</template>
             </md-tab>
+
 
             <md-tab>
                 <template md-tab-label>
@@ -525,6 +541,7 @@
 					<md-input type="text" [(ngModel)]="etcd.version" placeholder="etcd version"></md-input>
 					<br>
 					<md-input
+						dividerColor="warn"
 						type="text"
 						[(ngModel)]="etcd.rkt.fetchURLPrefixToTrust"
 						placeholder="Fetch URL to trust (optional 'rkt trust')"
@@ -532,6 +549,7 @@
 					></md-input>
 					<br>
 					<md-input
+						dividerColor="warn"
 						type="text"
 						[(ngModel)]="etcd.rkt.publicKeyToTrust"
 						placeholder="Public key to trust (optional 'rkt trust')"
@@ -539,6 +557,7 @@
 					></md-input>
 					<br>
 					<md-input
+						dividerColor="warn"
 						type="text"
 						[(ngModel)]="etcd.rkt.customACI"
 						placeholder="Custom etcd ACI image (optional 'rkt trust')"
@@ -611,6 +630,8 @@
 						</div>
 					</div>
 					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top" class="normal-link">↑ top</a></div>
+					<br>
+					<br>
 				</template>
             </md-tab>
 
@@ -701,6 +722,8 @@
 						</div>
 					</div>
 					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top" class="normal-link">↑ top</a></div>
+					<br>
+					<br>
 				</template>
             </md-tab>
 

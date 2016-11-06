@@ -25,7 +25,10 @@
         <br>
         <p class="narrow-paragraph">
             Application container gives much portability to initial development phase. But operating and scaling container requires much more work. <a href="http://kubernetes.io/" target="_blank" class="normal-link">Kubernetes</a> manages such complex
-            container environments. This is an example workflow to manage etcd with Kubernetes, in most manual way possible; see <a href="http://kubernetes.io/docs/getting-started-guides/minikube/" target="_blank" class="normal-link">Running Kubernetes Locally via Minikube</a>            and other guides below for easier ways.
+            container environments. This is an example workflow to deploy etcd on Kubernetes, in most manual way possible. And let Kubernetes operate etcd.
+        </p>
+        <p class="narrow-paragraph">
+            See <a href="http://kubernetes.io/docs/getting-started-guides/minikube/" target="_blank" class="normal-link">Running Kubernetes Locally via Minikube</a> and other guides below for easier ways.
         </p>
         <ul>
             <li><a href="http://kubernetes.io/docs/getting-started-guides/" target="_blank" class="normal-link">Kubernetes Guides</a></li>
@@ -51,35 +54,41 @@
 						And have following machines ready.
 					</p>
 					<ul>
-						<li>3~5 for etcd cluster; see <a routerLink="/doc/{{docVersion}}/install-deploy" class="normal-link">Install and Deploy</a></li>
+						<li>3~5 for etcd cluster with TLS enabled; see <a routerLink="/doc/{{docVersion}}/install-deploy" class="normal-link">etcd Install and Deploy</a></li>
 						<li>1 for <a href="http://kubernetes.io/docs/user-guide/kubectl-overview/" target="_blank" class="code-light-snippet">kubectl</a></li>
-						<li>3 for master nodes; see <a href="http://kubernetes.io/docs/admin/kube-apiserver/" target="_blank" class="code-light-snippet">kube-apiserver</a></li>
-						<li>10 for workers; see <a href="http://kubernetes.io/docs/admin/kubelet/" target="_blank" class="code-light-snippet">kubelet</a></li>
+						<li>3 for master nodes with <a href="http://kubernetes.io/docs/admin/kube-apiserver/" target="_blank" class="code-light-snippet">kube-apiserver</a></li>
+						<li>10 for workers with <a href="http://kubernetes.io/docs/admin/kubelet/" target="_blank" class="code-light-snippet">kubelet</a></li>
 					</ul>
-				</template>
-            </md-tab>
 
-            <md-tab>
-                <template md-tab-label>
-					Install
-				</template>
-                <template md-tab-content>
 					<br>
-
 					<p class="narrow-paragraph">
-						Since CoreOS Linux already comes with <a href="https://coreos.com/kubernetes/docs/latest/kubelet-wrapper.html" target="_blank" class="normal-link">Kubernetes wrapper</a>, only <span class="code-light-snippet">kubectl</span> needs to be installed.
+						First type etcd endpoints in <span class="code-light-snippet-red">scheme://host:port</span>
 					</p>
-					<p class="narrow-paragraph">
-						To install <a href="https://github.com/kubernetes/kubernetes/releases" target="_blank" class="normal-link">Kubernetes binaries</a>
-					</p>
-					<md-input type="text" [(ngModel)]="kubeInstall.version" placeholder="Kubernetes version"></md-input>
-					<md-input type="text" [(ngModel)]="kubeInstall.goOS" placeholder="GOOS"></md-input>
-					<md-input type="text" [(ngModel)]="kubeInstall.goARCH" placeholder="GOARCH"></md-input>
-					<md-input type="text" [(ngModel)]="kubeInstall.execDir" placeholder="exec dir"></md-input>
+					<!--TODO: use md-textarea-->
+					<textarea
+						type="text"
+						style="max-width: 550px;"
+						class="form-control"
+						placeholder="etcd endpoints (line-separated)"
+						rows="5"
+						[(ngModel)]="inputEtcdEndpointsTxt"
+					></textarea>
 					<br>
-
+					<br>
+					<p class="narrow-paragraph">
+						Type etcd TLS certs for <a href="http://kubernetes.io/docs/admin/kube-apiserver/" target="_blank" class="code-light-snippet">kube-apiserver</a>
+					</p>
+					<md-input dividerColor="warn" type="text" [(ngModel)]="inputEtcdRootCAFile" placeholder="etcd trusted root CA"></md-input>
+					<br>
+					<md-input dividerColor="warn" type="text" [(ngModel)]="inputEtcdCertFile" placeholder="etcd cert (public)"></md-input>
+					<br>
+					<md-input dividerColor="warn" type="text" [(ngModel)]="inputEtcdKeyFile" placeholder="etcd key (private)"></md-input>
+					<br>
+					<br>
+                    <md-input type="text" dividerColor="warn" [(ngModel)]="certsDir" placeholder="Kubernetes certs directory"></md-input>
+					<br>
 					<div class="osx-window">
-						<div class="window">
+						<div class="window-narrow">
 							<div class="titlebar">
 								<div class="buttons">
 									<div class="closebtn"><span><strong></strong></span></div>
@@ -87,13 +96,17 @@
 									<div class="zoom"><span><strong></strong></span></div>
 								</div><span class="title-bar-text">terminal</span></div>
 							<div class="content">
-								<pre class="osx-terminal-contents">{{kubeInstall.getCommand()}}</pre>
+								<pre class="osx-terminal-contents">{{cfssl.getCertsPrepareCommand(certsDir)}}</pre>
 							</div>
 						</div>
 					</div>
 					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/kubernetes#top" class="normal-link">↑ top</a></div>
+					<br>
+					<br>
+
 				</template>
             </md-tab>
+
 
             <md-tab>
                 <template md-tab-label>
@@ -112,7 +125,7 @@
 					<br>
 					<md-input type="text" [(ngModel)]="cfssl.version" placeholder="cfssl version"></md-input>
 					<md-input type="text" [(ngModel)]="cfssl.execDir" placeholder="exec dir"></md-input>
-					<md-input type="text" [(ngModel)]="cfssl.srcCertsDir" placeholder="certs dir"></md-input>
+					<md-input type="text" [(ngModel)]="cfssl.srcCertsDir" placeholder="source certs dir"></md-input>
 					<br>
 					<div class="osx-window">
 						<div class="window">
@@ -171,7 +184,7 @@
 					<br>
 
 					<br>
-                    <md-input type="text" [(ngModel)]="certsDir" placeholder="Kubernetes certs directory"></md-input>
+                    <md-input type="text" dividerColor="warn" [(ngModel)]="certsDir" placeholder="Kubernetes certs directory"></md-input>
 					<br>
 					<div class="osx-window">
 						<div class="window-narrow">
@@ -188,8 +201,50 @@
 					</div>
 					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/kubernetes#top" class="normal-link">↑ top</a></div>
 					<br>
+					<br>
 				</template>
             </md-tab>
+
+
+            <md-tab>
+                <template md-tab-label>
+					Install
+				</template>
+                <template md-tab-content>
+					<br>
+
+					<p class="narrow-paragraph">
+						Since CoreOS Linux already comes with <a href="https://coreos.com/kubernetes/docs/latest/kubelet-wrapper.html" target="_blank" class="normal-link">Kubernetes wrapper</a>, only <span class="code-light-snippet">kubectl</span> needs to be installed.
+					</p>
+
+					<br>
+					<p class="narrow-paragraph">
+						To install <a href="https://github.com/kubernetes/kubernetes/releases" target="_blank" class="normal-link">Kubernetes binaries</a>
+					</p>
+					<md-input type="text" [(ngModel)]="kubeInstall.version" placeholder="Kubernetes version"></md-input>
+					<md-input type="text" [(ngModel)]="kubeInstall.goOS" placeholder="GOOS"></md-input>
+					<md-input type="text" [(ngModel)]="kubeInstall.goARCH" placeholder="GOARCH"></md-input>
+					<md-input type="text" [(ngModel)]="kubeInstall.execDir" placeholder="exec dir"></md-input>
+					<br>
+
+					<div class="osx-window">
+						<div class="window">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{kubeInstall.getCommand()}}</pre>
+							</div>
+						</div>
+					</div>
+					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/kubernetes#top" class="normal-link">↑ top</a></div>
+					<br>
+				</template>
+            </md-tab>
+
 
             <md-tab>
                 <template md-tab-label>
@@ -208,7 +263,15 @@
 					<br>
 					<h5>Set up TLS Assets</h5>
 					<br>
-					<textarea type="text" style="max-width: 550px;" class="form-control" placeholder="Master Node IPs (line-separated)" rows="5" [(ngModel)]="inputMoreMasterNodeIPsTxt"></textarea>
+					<!--TODO: use md-textarea-->
+					<textarea
+						type="text"
+						style="max-width: 550px;"
+						class="form-control"
+						placeholder="Master Node IPs (line-separated)"
+						rows="5"
+						[(ngModel)]="inputMoreMasterNodeIPsTxt"
+					></textarea>
 					<br>
 					<pre class="code-dark">{{cfssl.getGenCertCommand('kube-apiserver', 'kube-apiserver', '', inputMoreMasterNodeIPsTxt)}}</pre>
 
@@ -216,7 +279,7 @@
 					<p class="narrow-paragraph">
 						And copy these certs to master nodes:
 					</p>
-                    <md-input type="text" [(ngModel)]="certsDir" placeholder="Kubernetes certs directory"></md-input>
+                    <md-input type="text" dividerColor="warn" [(ngModel)]="certsDir" placeholder="Kubernetes certs directory"></md-input>
 					<br>
 					<div class="osx-window">
 						<div class="window-narrow">
@@ -253,10 +316,19 @@
 					<p class="narrow-paragraph">
 						...
 					</p>
+
+					<br>
+					<h5>TODO</h5>
+					<p class="narrow-paragraph">
+						...
+					</p>
+
 					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/kubernetes#top" class="normal-link">↑ top</a></div>
+					<br>
 					<br>
 				</template>
             </md-tab>
+
 
             <md-tab>
                 <template md-tab-label>
@@ -274,10 +346,19 @@
 					<p class="narrow-paragraph">
 						...
 					</p>
+
+					<br>
+					<h5>TODO</h5>
+					<p class="narrow-paragraph">
+						...
+					</p>
+
 					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/kubernetes#top" class="normal-link">↑ top</a></div>
+					<br>
 					<br>
 				</template>
             </md-tab>
+
 
             <md-tab>
                 <template md-tab-label>
@@ -293,7 +374,15 @@
 					<br>
 					<h5>Set up TLS Assets</h5>
 					<br>
-					<textarea type="text" style="max-width: 550px;" class="form-control" placeholder="Master Node IPs (line-separated)" rows="5" [(ngModel)]="inputMoreMasterNodeIPsTxt"></textarea>
+					<!--TODO: use md-textarea-->
+					<textarea
+						type="text"
+						style="max-width: 550px;"
+						class="form-control"
+						placeholder="Master Node IPs (line-separated)"
+						rows="5"
+						[(ngModel)]="inputMoreMasterNodeIPsTxt"
+					></textarea>
 					<br>
 					<pre class="code-dark">{{cfssl.getGenCertCommand('kubectl', 'kubectl', '', inputMoreMasterNodeIPsTxt)}}</pre>
 
@@ -301,7 +390,7 @@
 					<p class="narrow-paragraph">
 						And copy these certs to <span class="code-light-snippet">kubectl</span> nodes:
 					</p>
-                    <md-input type="text" [(ngModel)]="certsDir" placeholder="Kubernetes certs directory"></md-input>
+                    <md-input type="text" dividerColor="warn" [(ngModel)]="certsDir" placeholder="Kubernetes certs directory"></md-input>
 					<br>
 					<div class="osx-window">
 						<div class="window-narrow">
@@ -338,10 +427,19 @@
 					<p class="narrow-paragraph">
 						...
 					</p>
+
+					<br>
+					<h5>TODO</h5>
+					<p class="narrow-paragraph">
+						...
+					</p>
+
 					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/kubernetes#top" class="normal-link">↑ top</a></div>
+					<br>
 					<br>
 				</template>
             </md-tab>
+
 
             <md-tab>
                 <template md-tab-label>
@@ -359,10 +457,19 @@
 					<p class="narrow-paragraph">
 						...
 					</p>
+
+					<br>
+					<h5>TODO</h5>
+					<p class="narrow-paragraph">
+						...
+					</p>
+
 					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/kubernetes#top" class="normal-link">↑ top</a></div>
+					<br>
 					<br>
 				</template>
             </md-tab>
+
 
             <md-tab>
                 <template md-tab-label>
@@ -380,7 +487,15 @@
 					<p class="narrow-paragraph">
 						...
 					</p>
+
+					<br>
+					<h5>TODO</h5>
+					<p class="narrow-paragraph">
+						...
+					</p>
+
 					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/kubernetes#top" class="normal-link">↑ top</a></div>
+					<br>
 					<br>
 				</template>
             </md-tab>

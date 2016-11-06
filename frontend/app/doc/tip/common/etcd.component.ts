@@ -46,13 +46,13 @@ export class EtcdFlag {
 
     initialCluster: string;
 
+    clientRootCAFile: string;
     clientCertFile: string;
     clientKeyFile: string;
-    clientTrustedCAFile: string;
 
+    peerRootCAFile: string;
     peerCertFile: string;
     peerKeyFile: string;
-    peerTrustedCAFile: string;
 
     constructor(
         name: string,
@@ -81,13 +81,13 @@ export class EtcdFlag {
 
         this.certsDir = certsDir;
 
+        this.clientRootCAFile = rootCAPrefix + '.pem';
         this.clientCertFile = this.name + '.pem';
         this.clientKeyFile = this.name + '-key.pem';
-        this.clientTrustedCAFile = rootCAPrefix + '.pem';
 
+        this.peerRootCAFile = rootCAPrefix + '.pem';
         this.peerCertFile = this.name + '.pem';
         this.peerKeyFile = this.name + '-key.pem';
-        this.peerTrustedCAFile = rootCAPrefix + '.pem';
     }
 
     getDataDir() {
@@ -396,13 +396,14 @@ GOOGLE_URL=https://storage.googleapis.com/etcd
 
         if (this.secure) {
             flags.push('--client-cert-auth');
+            flags.push('--trusted-ca-file' + ' ' + flag.getCertsDir() + '/' + flag.clientRootCAFile);
             flags.push('--cert-file' + ' ' + flag.getCertsDir() + '/' + flag.clientCertFile);
             flags.push('--key-file' + ' ' + flag.getCertsDir() + '/' + flag.clientKeyFile);
-            flags.push('--trusted-ca-file' + ' ' + flag.getCertsDir() + '/' + flag.clientTrustedCAFile);
+
             flags.push('--peer-client-cert-auth');
+            flags.push('--peer-trusted-ca-file' + ' ' + flag.getCertsDir() + '/' + flag.peerRootCAFile);
             flags.push('--peer-cert-file' + ' ' + flag.getCertsDir() + '/' + flag.peerCertFile);
             flags.push('--peer-key-file' + ' ' + flag.getCertsDir() + '/' + flag.peerKeyFile);
-            flags.push('--peer-trusted-ca-file' + ' ' + flag.getCertsDir() + '/' + flag.peerTrustedCAFile);
         }
 
         if (this.enableProfile) {
@@ -446,9 +447,9 @@ GOOGLE_URL=https://storage.googleapis.com/etcd
     ` + '--endpoints' + ' ' + this.getClientEndpointsTxt() + ' \\' + `
     `;
         if (this.secure) {
-            cmd += '--cert' + ' ' + flag.getCertsDir() + '/' + flag.clientCertFile + ' \\' + `
+            cmd += '--cacert' + ' ' + flag.getCertsDir() + '/' + flag.clientRootCAFile + ' \\' + `
+    ` + '--cert' + ' ' + flag.getCertsDir() + '/' + flag.clientCertFile + ' \\' + `
     ` + '--key' + ' ' + flag.getCertsDir() + '/' + flag.clientKeyFile + ' \\' + `
-    ` + '--cacert' + ' ' + flag.getCertsDir() + '/' + flag.clientTrustedCAFile + ' \\' + `
     `;
         }
         cmd += 'endpoint health';

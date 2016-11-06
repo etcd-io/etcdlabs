@@ -119,7 +119,9 @@ mkdir -p ${this.getCertsDir()}
     }
 
     getRootCACommand() {
-        return `cat > ${this.getCertsDir()}/${this.rootCAPrefix}-csr.json <<EOF
+        return `mkdir -p ${this.getCertsDir()}
+
+cat > ${this.getCertsDir()}/${this.rootCAPrefix}-csr.json <<EOF
 {
   "key": {
     "algo": "${this.keyAlgorithm}",
@@ -171,11 +173,11 @@ ${this.getCertsDir()}/${this.rootCAPrefix}-csr.json
 # CSR
 ${this.getCertsDir()}/${this.rootCAPrefix}.csr
 
-# self-signed root CA private key
-${this.getCertsDir()}/${this.rootCAPrefix}-key.pem
-
 # self-signed root CA public key
 ${this.getCertsDir()}/${this.rootCAPrefix}.pem
+
+# self-signed root CA private key
+${this.getCertsDir()}/${this.rootCAPrefix}-key.pem
 
 # cert-generation configuration for other TLS assets
 ${this.getCertsDir()}/${this.gencertFileName}
@@ -200,7 +202,9 @@ ${this.getCertsDir()}/${this.gencertFileName}
             hostTxt += ',' + lineBreak;
         }
 
-        return `cat > ${this.getCertsDir()}/${name}-ca-csr.json <<EOF
+        return `mkdir -p ${this.getCertsDir()}
+
+cat > ${this.getCertsDir()}/${name}-ca-csr.json <<EOF
 {
   "key": {
     "algo": "${this.keyAlgorithm}",
