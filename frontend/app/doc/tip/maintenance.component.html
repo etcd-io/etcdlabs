@@ -1,8 +1,8 @@
 <md-sidenav-layout>
     <md-sidenav #sidenav [opened]="true" mode="side" class="doc-sidenav">
         <md-list dense>
-            <a routerLink="/doc/{{version.etcdVersionURL}}">
-                <h3 md-subheader>Getting Started ({{version.etcdVersion}})</h3>
+            <a routerLink="/doc/{{docVersion}}">
+                <h3 md-subheader>Getting Started ({{docVersion}})</h3>
             </a>
             <md-list-item *ngFor="let item of getStartedItems">
                 <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
@@ -30,11 +30,11 @@
             periodic snapshot backups of etcd member state makes it possible to recover any unintended logical data loss or corruption caused by operational error.
         </p>
         <ul>
-            <li><a href="/doc/{{version.etcdVersionURL}}/maintenance#history-compaction" class="normal-link">History Compaction</a></li>
-            <li><a href="/doc/{{version.etcdVersionURL}}/maintenance#defragmentation" class="normal-link">Defragmentation</a></li>
-            <li><a href="/doc/{{version.etcdVersionURL}}/maintenance#space-quota" class="normal-link">Space Quota</a></li>
-            <li><a href="/doc/{{version.etcdVersionURL}}/maintenance#snapshot-backup" class="normal-link">Snapshot Backup</a></li>
-            <li><a href="/doc/{{version.etcdVersionURL}}/maintenance#dashboard" class="normal-link">Dashboard</a></li>
+            <li><a href="/doc/{{docVersion}}/maintenance#history-compaction" class="normal-link">History Compaction</a></li>
+            <li><a href="/doc/{{docVersion}}/maintenance#defragmentation" class="normal-link">Defragmentation</a></li>
+            <li><a href="/doc/{{docVersion}}/maintenance#space-quota" class="normal-link">Space Quota</a></li>
+            <li><a href="/doc/{{docVersion}}/maintenance#snapshot-backup" class="normal-link">Snapshot Backup</a></li>
+            <li><a href="/doc/{{docVersion}}/maintenance#dashboard" class="normal-link">Dashboard</a></li>
         </ul>
 
 
@@ -103,7 +103,7 @@ Error:  rpc error: code = 11 desc = etcdserver: mvcc: required revision has been
                 </div>
             </div>
         </div>
-        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/maintenance#top" class="normal-link">↑ top</a></div>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/maintenance#top" class="normal-link">↑ top</a></div>
         <br>
 
         <br>
@@ -134,7 +134,7 @@ Finished defragmenting etcd member[127.0.0.1:2379]
                 </div>
             </div>
         </div>
-        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/maintenance#top" class="normal-link">↑ top</a></div>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/maintenance#top" class="normal-link">↑ top</a></div>
         <br>
 
 
@@ -239,7 +239,7 @@ OK
                 </div>
             </div>
         </div>
-        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/maintenance#top" class="normal-link">↑ top</a></div>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/maintenance#top" class="normal-link">↑ top</a></div>
         <br>
 
         <br>
@@ -274,7 +274,7 @@ $ ETCDCTL_API=3 etcdctl --write-out=table snapshot status backup.db
                 </div>
             </div>
         </div>
-        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/maintenance#top" class="normal-link">↑ top</a></div>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/maintenance#top" class="normal-link">↑ top</a></div>
         <br>
 
         <br>
@@ -286,7 +286,7 @@ $ ETCDCTL_API=3 etcdctl --write-out=table snapshot status backup.db
         <p class="narrow-paragraph">
             <a href="http://grafana.org" target="_blank" class="normal-link">Grafana</a> can be used to set up Prometheus dashboards; see <a href="https://github.com/coreos/etcd/blob/master/Documentation/metrics.md" target="_blank" class="normal-link">template</a>            and <a href="http://dash.etcd.io/dashboard/db/test-etcd" target="_blank" class="normal-link">sample dashboard</a>.
         </p>
-        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/maintenance#top" class="normal-link">↑ top</a></div>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/maintenance#top" class="normal-link">↑ top</a></div>
         <br>
 
     </div>

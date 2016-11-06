@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ParentComponent, SidebarItem } from './common.component';
+import { ParentComponent, SidebarItem } from './common/common.component';
 
 export class VersionItem {
     isRoutable: boolean;
@@ -38,13 +38,15 @@ export class MajorVersionItem {
 @Component({
     selector: 'app-doc',
     templateUrl: 'doc.component.html',
-    styleUrls: ['common.component.css'],
+    styleUrls: ['common/common.component.css'],
 })
 export class DocTipComponent extends ParentComponent {
+    docVersion: string;
     docItems: SidebarItem[];
     majorVersionItems: MajorVersionItem[];
     constructor() {
         super();
+        this.docVersion = super.getDocVersion();
         this.docItems = super.getAllSidebarItems();
         this.majorVersionItems = [
             new MajorVersionItem('v3', [

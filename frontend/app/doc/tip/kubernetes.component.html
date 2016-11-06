@@ -1,8 +1,8 @@
 <md-sidenav-layout>
     <md-sidenav #sidenav [opened]="true" mode="side" class="doc-sidenav">
         <md-list dense>
-            <a routerLink="/doc/{{version.etcdVersionURL}}">
-                <h3 md-subheader>Getting Started ({{version.etcdVersion}})</h3>
+            <a routerLink="/doc/{{docVersion}}">
+                <h3 md-subheader>Getting Started ({{docVersion}})</h3>
             </a>
             <md-list-item *ngFor="let item of getStartedItems">
                 <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
@@ -46,24 +46,35 @@
 					<br>
 
 					<p class="narrow-paragraph">
-                        For this exercise, we will use total 10 of <a href="https://coreos.com" target="_blank" class="normal-link">CoreOS</a> machines:
+                        For this exercise, we will use <a href="https://coreos.com" target="_blank" class="normal-link">CoreOS Linux</a> and <a href="https://github.com/coreos/rkt" target="_blank" class="normal-link">rkt</a> container runtime.
+					</p>
+					<p class="narrow-paragraph">
+						First set up etcd cluster following instructions <a routerLink="/doc/{{docVersion}}/install-deploy" class="normal-link">here</a>.
+					</p>
+					<p class="narrow-paragraph">
+						And have following machines ready.
 					</p>
 					<ul>
-						<li>3 for etcd cluster</li>
+						<li>3~5 for etcd cluster</li>
 						<li>1 for <span class="code-light-snippet">kubectl</span></li>
-						<li>3 for master nodes (<span class="code-light-snippet">kube-apiserver</span>, <span class="code-light-snippet">kubelet</span>, etc.)</li>
-						<li>3 for workers to deploy etcd (or your distributed application)</li>
+						<li>3 for master nodes (<span class="code-light-snippet">kube-apiserver</span>)</li>
+						<li>5 for workers to deploy etcd (<span class="code-light-snippet">kubelet</span>, your distributed applications, etc.)</li>
 					</ul>
-					<p class="narrow-paragraph">
-						Kubernetes API server depends on etcd. So have 3-node etcd cluster ready following instructions <a routerLink="/doc/{{version.etcdVersionURL}}/install-deploy" class="normal-link">here</a>.
-					</p>
-					<p class="narrow-paragraph">
-						Kubernetes runs all applications in containers. We will use <a href="https://github.com/coreos/rkt" target="_blank" class="normal-link">rkt</a> for container runtime.
-					</p>
+				</template>
+            </md-tab>
 
+            <md-tab>
+                <template md-tab-label>
+					Install
+				</template>
+                <template md-tab-content>
 					<br>
+
 					<p class="narrow-paragraph">
-						First install <a href="https://github.com/kubernetes/kubernetes/releases" target="_blank" class="normal-link">Kubernetes binaries</a> (optional except <span class="code-light-snippet">kubectl</span>)
+						CoreOS already comes with Kubernetes wrapper. For this exercise, only <span class="code-light-snippet">kubectl</span> needs to be installed.
+					</p>
+					<p class="narrow-paragraph">
+						To install <a href="https://github.com/kubernetes/kubernetes/releases" target="_blank" class="normal-link">Kubernetes binaries</a>.
 					</p>
 					<md-input type="text" [(ngModel)]="inputKubernetesVersion" placeholder="Kubernetes version"></md-input>
 					<md-input type="text" [(ngModel)]="inputKubernetesGOOS" placeholder="GOOS"></md-input>
@@ -84,7 +95,6 @@
 							</div>
 						</div>
 					</div>
-
 				</template>
             </md-tab>
 

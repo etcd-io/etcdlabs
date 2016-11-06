@@ -1,8 +1,8 @@
 <md-sidenav-layout>
     <md-sidenav #sidenav [opened]="true" mode="side" class="doc-sidenav">
         <md-list dense>
-            <a routerLink="/doc/{{version.etcdVersionURL}}">
-                <h3 md-subheader>Getting Started ({{version.etcdVersion}})</h3>
+            <a routerLink="/doc/{{docVersion}}">
+                <h3 md-subheader>Getting Started ({{docVersion}})</h3>
             </a>
             <md-list-item *ngFor="let item of getStartedItems">
                 <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
@@ -23,12 +23,12 @@
         <h4>etcd in Comparison <span class="next-to-header-title">(last update Nov 10, 2016)</span></h4>
         <br>
         <ul>
-            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#chubby-zookeeper-etcd-consul" class="faq-list">Chubby, Zookeeper, etcd, Consul</a></li>
-            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#consensus-algorithm" class="faq-list">Consensus Algorithm</a></li>
-            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#features" class="faq-list">Features</a></li>
-            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#performance-reliability" class="faq-list">Performance & Reliability</a></li>
-            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#benchmark-results" class="faq-list">Benchmark Results</a></li>
-            <li><a href="/doc/{{version.etcdVersionURL}}/comparison#etcd-tests" class="faq-list">How etcd is tested</a></li>
+            <li><a href="/doc/{{docVersion}}/comparison#chubby-zookeeper-etcd-consul" class="faq-list">Chubby, Zookeeper, etcd, Consul</a></li>
+            <li><a href="/doc/{{docVersion}}/comparison#consensus-algorithm" class="faq-list">Consensus Algorithm</a></li>
+            <li><a href="/doc/{{docVersion}}/comparison#features" class="faq-list">Features</a></li>
+            <li><a href="/doc/{{docVersion}}/comparison#performance-reliability" class="faq-list">Performance & Reliability</a></li>
+            <li><a href="/doc/{{docVersion}}/comparison#benchmark-results" class="faq-list">Benchmark Results</a></li>
+            <li><a href="/doc/{{docVersion}}/comparison#etcd-tests" class="faq-list">How etcd is tested</a></li>
         </ul>
         <br>
 
@@ -95,7 +95,7 @@
             <br> [2] Leslie Lamport: "<a href="http://research.microsoft.com/en-us/um/people/lamport/pubs/lamport-paxos.pdf" target="_blank" class="footer-link">The Part-Time Parliament</a>," ACM Transactions on Computer Systems, volume 16, number 2,
             pages 133–169, May 1998.
         </footer>
-        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/comparison#top" class="normal-link">↑ top</a></div>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/comparison#top" class="normal-link">↑ top</a></div>
         <br><br>
 
 
@@ -165,7 +165,7 @@
             at DSN'11, IEEE/IFIP International Conference on Dependable Systems & Networks, page 249, June 2011.
             <br> [7] Diego Ongaro: "<a href="https://ramcloud.stanford.edu/~ongaro/thesis.pdf" target="_blank" class="footer-link">Consensus: Bridging Theory and Practice</a>," Stanford University Ph.D. Dissertation, chapter 9, page 136, August 2014.
         </footer>
-        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/comparison#top" class="normal-link">↑ top</a></div>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/comparison#top" class="normal-link">↑ top</a></div>
         <br><br>
 
 
@@ -293,7 +293,7 @@
             <br> [2] In addition to auto-purging Raft logs, etcd also supports on-disk storage compaction.
             <br> [3] etcd provides discovery service for bootstrapping etcd cluster. Please visit <a href="https://discovery.etcd.io" target="_blank" class="footer-link">discovery.etcd.io</a>.
         </footer>
-        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/comparison#top" class="normal-link">↑ top</a></div>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/comparison#top" class="normal-link">↑ top</a></div>
         <br><br>
 
 
@@ -451,7 +451,7 @@
             <br> [2] Zookeeper server and client have sanity checks to ensure that znodes size does not exceed 1MB, which includes all of its children; see <a href="http://zookeeper.apache.org/doc/r3.4.9/zookeeperProgrammers.html" target="_blank" class="footer-link">Data Access</a>.
             <br> [3] etcd has hard-coded <span class="code-light-snippet-small">maxRequestBytes</span> value to avoid blocking Raft stream. Server returns <span class="code-light-snippet-small">ErrRequestTooLarge</span> error to the exceeding client request.
             <br> [4] Consul has hard-coded <span class="code-light-snippet-small">maxKVSize</span> value. Server returns <span class="code-light-snippet-small">Value for key X is too large</span> error to the exceeding client request.
-            <br> [5] Zookeeper guide recommends to limit Java heap size to avoid disk swap, since Zookeeper stores data in-memory.
+            <br> [5] Zookeeper documentation recommends to limit Java heap size to avoid disk swap since Zookeeper stores data in-memory; see <a href="https://zookeeper.apache.org/doc/r3.4.9/zookeeperAdmin.html#sc_zkMulitServerSetup" target="_blank" class="footer-link">Clustered (Multi-Server) Setup</a>.
             <br> [6] etcd default space quota is 2GB, which can be configured up to 8GB. If etcd exceeds space quota, cluster becomes maintenance mode only allowing read and delete client requests. This is to prevent degrading etcd performance.
             <br> [7] Write 2 million entries (each entry is 8-byte key, 256-byte value) with 1,000 concurrent TCP connections, while etcd uses only 100 connections.
             <br> [8] 2 million read requests (each entry is 8-byte key, 256-byte value) with 1,000 concurrent TCP connections, while etcd uses only 100 connections. It is serializable read, where server returns data without going through consensus, so
@@ -459,7 +459,7 @@
             <br> [9] 2 million read requests (each entry is 8-byte key, 256-byte value) with 1,000 concurrent TCP connections, while etcd uses only 100 connections. It is linearizable read, where majority of cluster has to agree on the same value before
             it returns.
         </footer>
-        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/comparison#top" class="normal-link">↑ top</a></div>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/comparison#top" class="normal-link">↑ top</a></div>
         <br><br>
 
         <br><br>
@@ -514,7 +514,7 @@
         <p class="narrow-paragraph">
             TODO: graphs...
         </p>
-        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/comparison#top" class="normal-link">↑ top</a></div>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/comparison#top" class="normal-link">↑ top</a></div>
         <br><br>
 
         <br><br>
@@ -605,7 +605,7 @@
             [1] Includes comments and tests. Excludes vendor, auto-generated Protocol Buffer files.
             <br> [2] Important bugs and debugging story can be found at <a href="https://github.com/coreos/etcdlabs/tree/master/debug-etcd" target="_blank" class="footer-link">etcdlabs/debug-etcd</a>.
         </footer>
-        <div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/comparison#top" class="normal-link">↑ top</a></div>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/comparison#top" class="normal-link">↑ top</a></div>
         <br><br>
 
     </div>

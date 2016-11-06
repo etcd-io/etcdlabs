@@ -1,13 +1,15 @@
 import { Component } from '@angular/core';
-import { ParentComponent } from './common.component';
+import { ParentComponent } from './common/common.component';
 
 @Component({
     selector: 'app-grpc-proxy',
     templateUrl: 'grpc-proxy.component.html',
-    styleUrls: ['common.component.css'],
+    styleUrls: ['common/common.component.css'],
 })
 export class GRPCProxyTipComponent extends ParentComponent {
+    docVersion: string;
     constructor() {
         super();
+        this.docVersion = super.getDocVersion();
     }
 }

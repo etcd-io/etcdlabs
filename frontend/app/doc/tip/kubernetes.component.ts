@@ -1,19 +1,43 @@
 import { Component } from '@angular/core';
-import { ParentComponent } from './common.component';
+import { ParentComponent } from './common/common.component';
 
 @Component({
     selector: 'app-kubernetes',
     templateUrl: 'kubernetes.component.html',
-    styleUrls: ['common.component.css'],
+    styleUrls: ['common/common.component.css'],
 })
 export class KubernetesTipComponent extends ParentComponent {
+    docVersion: string;
+
+    ////////////////////////////////////
     inputKubernetesVersion: string;
     inputKubernetesGOOS: string;
     inputKubernetesGOARCH: string;
     inputKubernetesExecDir: string;
+    ////////////////////////////////////
+
+    ////////////////////////////////////
+    inputCFSSLExecDir: string;
+
+    inputCFSSLVersion: string;
+    inputCFSSLOrganization: string;
+    inputCFSSLOrganizationUnit: string;
+    inputCFSSLLocationCity: string;
+    inputCFSSLLocationState: string;
+    inputCFSSLLocationCountry: string;
+
+    inputCFSSLKeyAlgorithm: string;
+    inputCFSSLKeySize: number;
+    inputCFSSLKeyExpirationHour: number;
+
+    inputCFSSLCommonName: string;
+
+    inputCFSSLMoreHosts: string;
+    ////////////////////////////////////
 
     constructor() {
         super();
+        this.docVersion = super.getDocVersion();
 
         this.inputKubernetesVersion = 'v1.5.0-alpha.2';
         this.inputKubernetesGOOS = 'linux';
