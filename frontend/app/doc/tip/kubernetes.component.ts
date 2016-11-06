@@ -7,6 +7,8 @@ import { ParentComponent } from './common/common.component';
     styleUrls: ['common/common.component.css'],
 })
 export class KubernetesTipComponent extends ParentComponent {
+    docVersion: string;
+
     ////////////////////////////////////
     inputKubernetesVersion: string;
     inputKubernetesGOOS: string;
@@ -35,6 +37,7 @@ export class KubernetesTipComponent extends ParentComponent {
 
     constructor() {
         super();
+        this.docVersion = super.getDocVersion();
 
         this.inputKubernetesVersion = 'v1.5.0-alpha.2';
         this.inputKubernetesGOOS = 'linux';

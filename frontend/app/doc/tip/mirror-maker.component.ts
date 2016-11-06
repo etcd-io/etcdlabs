@@ -7,7 +7,9 @@ import { ParentComponent } from './common/common.component';
     styleUrls: ['common/common.component.css'],
 })
 export class MirrorMakerTipComponent extends ParentComponent {
+    docVersion: string;
     constructor() {
         super();
+        this.docVersion = super.getDocVersion();
     }
 }

@@ -68,25 +68,29 @@ export class CFSSL {
         this.commonName = commonName;
     }
 
+    getExecDir() {
+        return cleanDir(this.execDir);
+    }
+
     getCertsDir() {
         return cleanDir(this.srcCertsDir);
     }
 
     getInstallCommand() {
-        let divide = getDivider(this.execDir);
+        let divide = getDivider(this.getExecDir());
 
         return `rm -f /tmp/cfssl* && rm -rf /tmp/test-certs && mkdir -p /tmp/test-certs
 
 curl -L https://pkg.cfssl.org/${this.version}/cfssl_linux-amd64 -o /tmp/cfssl
 chmod +x /tmp/cfssl
-sudo mv /tmp/cfssl ` + this.execDir + `/cfssl
+sudo mv /tmp/cfssl ` + this.getExecDir() + `/cfssl
 
 curl -L https://pkg.cfssl.org/${this.version}/cfssljson_linux-amd64 -o /tmp/cfssljson
 chmod +x /tmp/cfssljson
-sudo mv /tmp/cfssljson ` + this.execDir + `/cfssljson
+sudo mv /tmp/cfssljson ` + this.getExecDir() + `/cfssljson
 
-` + this.execDir + divide + `cfssl version
-` + this.execDir + divide + `cfssljson -h
+` + this.getExecDir() + divide + `cfssl version
+` + this.getExecDir() + divide + `cfssljson -h
 
 mkdir -p ${this.getCertsDir()}
 `;
@@ -206,7 +210,7 @@ cfssl gencert` + ' \\' + `
     ` + `${this.getCertsDir()}/${name}-ca-csr.json | cfssljson --bare ${this.getCertsDir()}/${name}`;
     }
 
-    getCertsCopyCommand(dstCertsDir: string) {
+    getCertsPrepareCommand(dstCertsDir: string) {
         return `# after transferring certs to remote machines
 
 sudo mkdir -p ${cleanDir(dstCertsDir)}

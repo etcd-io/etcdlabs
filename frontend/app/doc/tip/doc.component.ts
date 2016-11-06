@@ -41,10 +41,12 @@ export class MajorVersionItem {
     styleUrls: ['common/common.component.css'],
 })
 export class DocTipComponent extends ParentComponent {
+    docVersion: string;
     docItems: SidebarItem[];
     majorVersionItems: MajorVersionItem[];
     constructor() {
         super();
+        this.docVersion = super.getDocVersion();
         this.docItems = super.getAllSidebarItems();
         this.majorVersionItems = [
             new MajorVersionItem('v3', [

@@ -1,8 +1,8 @@
 <md-sidenav-layout>
     <md-sidenav #sidenav [opened]="true" mode="side" class="doc-sidenav">
         <md-list dense>
-            <a routerLink="/doc/{{version.etcdVersionURL}}">
-                <h3 md-subheader>Getting Started ({{version.etcdVersion}})</h3>
+            <a routerLink="/doc/{{docVersion}}">
+                <h3 md-subheader>Getting Started ({{docVersion}})</h3>
             </a>
             <md-list-item *ngFor="let item of getStartedItems">
                 <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
@@ -69,8 +69,7 @@
             actually dead or force removed through different members in the same cluster, etcd will end up with a diverged cluster with same clusterID. This is very dangerous and hard to debug/fix afterwards.
         </p>
         <p class="narrow-paragraph">
-            With a correct deployment, the possibility of permanent majority lose is very low. But it is a severe enough problem that worth special care. We strongly suggest reading the <a routerLink="/doc/{{version.etcdVersionURL}}/disaster-recovery"
-                class="normal-link">disaster recovery</a> documentation and prepare for permanent majority lose before putting etcd into production.
+            With a correct deployment, the possibility of permanent majority lose is very low. But it is a severe enough problem that worth special care. We strongly suggest reading the <a routerLink="/doc/{{docVersion}}/disaster-recovery" class="normal-link">disaster recovery</a>            documentation and prepare for permanent majority lose before putting etcd into production.
         </p>
 
 
@@ -112,7 +111,7 @@
         <h6>Cycle or upgrade multiple machines</h6>
         <p class="narrow-paragraph">
             If multiple cluster members need to move due to planned maintenance (hardware upgrades, network downtime, etc.), it is recommended to modify members one at a time. It is safe to remove the leader, however there is a brief period of downtime while the
-            election process takes place. If the cluster holds more than 50MB, it is recommended to <a href="/doc/{{version.etcdVersionURL}}/maintenance#snapshot-backup" class="normal-link">backup the member's data directory</a>.
+            election process takes place. If the cluster holds more than 50MB, it is recommended to <a href="/doc/{{docVersion}}/maintenance#snapshot-backup" class="normal-link">backup the member's data directory</a>.
         </p>
         <h6>Change the cluster size</h6>
         <p class="narrow-paragraph">
@@ -123,12 +122,12 @@
         <h6>Replace a failed machine</h6>
         <p class="narrow-paragraph">
             If a machine fails due to hardware failure, data directory corruption, or some other fatal situation, it should be replaced as soon as possible. Machines that have failed but haven't been removed adversely affect the quorum and reduce the tolerance for
-            an additional failure. To replace the machine, first remove the member from the cluster, and then add a new member in its place. If the cluster holds more than 50MB, it is recommended to <a href="/doc/{{version.etcdVersionURL}}/maintenance#snapshot-backup"
+            an additional failure. To replace the machine, first remove the member from the cluster, and then add a new member in its place. If the cluster holds more than 50MB, it is recommended to <a href="/doc/{{docVersion}}/maintenance#snapshot-backup"
                 class="normal-link">backup the member's data directory</a>.
         </p>
         <h6>Restart cluster from majority failure</h6>
         <p class="narrow-paragraph">
-            If the majority of the cluster is lost or all of the nodes have changed IP addresses, then manual action is necessary to recover safely. The basic steps in the recovery process is explained <a routerLink="/doc/{{version.etcdVersionURL}}/disaster-recovery"
+            If the majority of the cluster is lost or all of the nodes have changed IP addresses, then manual action is necessary to recover safely. The basic steps in the recovery process is explained <a routerLink="/doc/{{docVersion}}/disaster-recovery"
                 class="normal-link">here</a>.
         </p>
 

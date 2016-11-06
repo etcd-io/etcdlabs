@@ -1,8 +1,8 @@
 <md-sidenav-layout>
     <md-sidenav #sidenav [opened]="true" mode="side" class="doc-sidenav">
         <md-list dense>
-            <a routerLink="/doc/{{version.etcdVersionURL}}">
-                <h3 md-subheader>Getting Started ({{version.etcdVersion}})</h3>
+            <a routerLink="/doc/{{docVersion}}">
+                <h3 md-subheader>Getting Started ({{docVersion}})</h3>
             </a>
             <md-list-item *ngFor="let item of getStartedItems">
                 <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
@@ -19,26 +19,26 @@
     <div class="doc-group">
         <router-outlet></router-outlet>
 
-        <h4>Install and deploy etcd <span class="next-to-header-title">(latest {{etcdVersionLatestRelease}})</span></h4>
+        <h4>Install and deploy etcd</h4>
         <br>
         <p class="narrow-paragraph">
             This is an example workflow to install and deploy etcd.
         </p>
 
         <md-card>
-            <md-checkbox [(ngModel)]="inputSecure">Secure connection (HTTPS)</md-checkbox>
-            <md-checkbox [(ngModel)]="inputEnableProfile">Enable profiler</md-checkbox>
-            <md-checkbox [(ngModel)]="inputDebug">Debug mode</md-checkbox>
+            <md-checkbox [(ngModel)]="etcd.secure">Secure connection (HTTPS)</md-checkbox>
+            <md-checkbox [(ngModel)]="etcd.enableProfile">Enable profiler</md-checkbox>
+            <md-checkbox [(ngModel)]="etcd.debug">Debug mode</md-checkbox>
             <p></p>
-            <md-input type="number" [(ngModel)]="inputAutoCompact" placeholder="auto compaction (hour)"></md-input>
-            <md-input type="number" [(ngModel)]="inputClusterSize" placeholder="Cluster size (up to 7)"></md-input>
-            <span *ngIf="inputClusterSize > 7" class="error-message">This tool only supports up to 7 nodes</span>
-            <span *ngIf="inputClusterSize < 1" class="error-message">Minimum cluster size is 1</span>
-            <span *ngIf="inputClusterSize % 2 == 0" class="error-message">Cluster size should an odd number</span>
+            <md-input type="number" [(ngModel)]="etcd.autoCompactHour" placeholder="auto compaction (hour)"></md-input>
+            <md-input type="number" [(ngModel)]="etcd.clusterSize" placeholder="Cluster size (up to 7)"></md-input>
+            <span *ngIf="etcd.clusterSize > 7" class="error-message">This tool only supports up to 7 nodes</span>
+            <span *ngIf="etcd.clusterSize < 1" class="error-message">Minimum cluster size is 1</span>
+            <span *ngIf="etcd.clusterSize % 2 == 0" class="error-message">Cluster size should an odd number</span>
             <br>
 
-            <div *ngFor="let flag of etcdFlags; let i = index;">
-                <div *ngIf="inputClusterSize > i">
+            <div *ngFor="let flag of etcd.flags; let i = index;">
+                <div *ngIf="etcd.clusterSize > i">
                     <br>
                     <md-card-subtitle class="sub-sub-title">Node {{i+1}}</md-card-subtitle>
                     <md-input type="text" [(ngModel)]="flag.name" placeholder="etcd name"></md-input>
@@ -54,22 +54,22 @@
                     <md-input type="text" [(ngModel)]="flag.initialClusterState" placeholder="cluster state"></md-input>
                     <span *ngIf="flag.initialClusterState != 'new' && flag.initialClusterState != 'existing'" class="error-message">Cluster state must be either 'new' or 'existing'</span>
 
-                    <br *ngIf="inputSecure">
-                    <md-input *ngIf="inputSecure" type="text" [(ngModel)]="flag.certsDir" placeholder="etcd certs directory"></md-input>
-                    <br *ngIf="inputSecure">
-                    <md-input *ngIf="inputSecure" type="text" [(ngModel)]="flag.clientCertFile" placeholder="client cert"></md-input>
-                    <md-input *ngIf="inputSecure" type="text" [(ngModel)]="flag.clientKeyFile" placeholder="client key"></md-input>
-                    <md-input *ngIf="inputSecure" type="text" [(ngModel)]="flag.clientTrustedCAFile" placeholder="client trusted CA"></md-input>
-                    <br *ngIf="inputSecure">
-                    <md-input *ngIf="inputSecure" type="text" [(ngModel)]="flag.peerCertFile" placeholder="peer cert"></md-input>
-                    <md-input *ngIf="inputSecure" type="text" [(ngModel)]="flag.peerKeyFile" placeholder="peer key"></md-input>
-                    <md-input *ngIf="inputSecure" type="text" [(ngModel)]="flag.peerTrustedCAFile" placeholder="peer trusted CA"></md-input>
+                    <br *ngIf="etcd.secure">
+                    <md-input *ngIf="etcd.secure" type="text" [(ngModel)]="flag.certsDir" placeholder="etcd certs directory"></md-input>
+                    <br *ngIf="etcd.secure">
+                    <md-input *ngIf="etcd.secure" type="text" [(ngModel)]="flag.clientCertFile" placeholder="client cert"></md-input>
+                    <md-input *ngIf="etcd.secure" type="text" [(ngModel)]="flag.clientKeyFile" placeholder="client key"></md-input>
+                    <md-input *ngIf="etcd.secure" type="text" [(ngModel)]="flag.clientTrustedCAFile" placeholder="client trusted CA"></md-input>
+                    <br *ngIf="etcd.secure">
+                    <md-input *ngIf="etcd.secure" type="text" [(ngModel)]="flag.peerCertFile" placeholder="peer cert"></md-input>
+                    <md-input *ngIf="etcd.secure" type="text" [(ngModel)]="flag.peerKeyFile" placeholder="peer key"></md-input>
+                    <md-input *ngIf="etcd.secure" type="text" [(ngModel)]="flag.peerTrustedCAFile" placeholder="peer trusted CA"></md-input>
                 </div>
             </div>
 
             <br>
             <md-card-actions>
-                <a href="{{version.etcdFlagPage}}" target="_blank"><button md-button color="warn">More flags</button></a>
+                <a href="{{etcd.getFlagHelpURL()}}" target="_blank"><button md-button color="warn">More flags</button></a>
             </md-card-actions>
         </md-card>
 
@@ -150,7 +150,7 @@
 
 					<br>
 					<h5>Generate local-issued certificates with private keys</h5>
-					<p *ngIf="etcdFlags[0].ipAddress == 'localhost'">
+					<p *ngIf="etcd.flags[0].ipAddress == 'localhost'">
 						Seems like cert is configured for localhost. Please make sure to specify remote hosts, if any.
 					</p>
 
@@ -158,8 +158,8 @@
 					<textarea type="text" style="max-width: 550px;" class="form-control" placeholder="More hosts to sign (line-separated)" rows="7" [(ngModel)]="inputCFSSLMoreHostsTxt"></textarea>
 					<br>
 
-					<div *ngFor="let flag of etcdFlags; let i = index;">
-						<div *ngIf="inputClusterSize > i">
+					<div *ngFor="let flag of etcd.flags; let i = index;">
+						<div *ngIf="etcd.clusterSize > i">
 							<pre class="code-dark">{{cfssl.getGenCertCommand(flag.name, flag.ipAddress, inputCFSSLMoreHostsTxt)}}</pre>
 						
 							<div class="osx-window">
@@ -171,7 +171,7 @@
 											<div class="zoom"><span><strong></strong></span></div>
 										</div><span class="title-bar-text">terminal</span></div>
 									<div class="content">
-										<pre class="osx-terminal-contents">{{cfssl.getCertsCopyCommand(flag.certsDir)}}</pre>
+										<pre class="osx-terminal-contents">{{cfssl.getCertsPrepareCommand(flag.certsDir)}}</pre>
 									</div>
 								</div>
 							</div>
@@ -187,11 +187,11 @@
 									<div class="zoom"><span><strong></strong></span></div>
 								</div><span class="title-bar-text">terminal</span></div>
 							<div class="content">
-								<pre class="osx-terminal-contents">{{getCFSSLResults()}}</pre>
+								<pre class="osx-terminal-contents">{{etcd.getCFSSLFilesTxt()}}</pre>
 							</div>
 						</div>
 					</div>
-					<div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/install-deploy#top" class="normal-link">↑ top</a></div>
+					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top" class="normal-link">↑ top</a></div>
 				</template>
             </md-tab>
 
@@ -235,7 +235,7 @@
 					<p>
 						<md-input type="text" [(ngModel)]="inputGitUser" placeholder="Git User"></md-input>
 						<md-input type="text" [(ngModel)]="inputGitBranch" placeholder="Git Branch"></md-input>
-						<md-input type="text" [(ngModel)]="inputEtcdExecDirSource" placeholder="exec dir"></md-input>
+						<md-input type="text" [(ngModel)]="etcd.execDir" placeholder="exec dir"></md-input>
 					</p>
 					<div class="osx-window">
 						<div class="window-narrow">
@@ -246,11 +246,11 @@
 									<div class="zoom"><span><strong></strong></span></div>
 								</div><span class="title-bar-text">terminal</span></div>
 							<div class="content">
-								<pre class="osx-terminal-contents">{{getEtcdBuildFromSource(inputEtcdExecDirSource)}}</pre>
+								<pre class="osx-terminal-contents">{{etcd.getInstallCommandGitSource(inputGitUser, inputGitBranch)}}</pre>
 							</div>
 						</div>
 					</div>
-					<div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/install-deploy#top" class="normal-link">↑ top</a></div>
+					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top" class="normal-link">↑ top</a></div>
 				</template>
             </md-tab>
 
@@ -267,8 +267,8 @@
 					</p>
 
 					<br>
-					<md-input type="text" [(ngModel)]="inputEtcdVersionVM" placeholder="etcd version"></md-input>
-					<md-input type="text" [(ngModel)]="inputEtcdExecDirVM" placeholder="exec dir"></md-input>
+					<md-input type="text" [(ngModel)]="etcd.version" placeholder="etcd version"></md-input>
+					<md-input type="text" [(ngModel)]="etcd.execDir" placeholder="exec dir"></md-input>
 					<br>
 
 					<br>
@@ -282,7 +282,7 @@
 									<div class="zoom"><span><strong></strong></span></div>
 								</div><span class="title-bar-text">terminal</span></div>
 							<div class="content">
-								<pre class="osx-terminal-contents">{{getEtcdInstallLinux(inputEtcdVersionVM, inputEtcdExecDirVM)}}</pre>
+								<pre class="osx-terminal-contents">{{etcd.getInstallCommandLinux()}}</pre>
 							</div>
 						</div>
 					</div>
@@ -298,19 +298,19 @@
 									<div class="zoom"><span><strong></strong></span></div>
 								</div><span class="title-bar-text">terminal</span></div>
 							<div class="content">
-								<pre class="osx-terminal-contents">{{getEtcdInstallOSX(inputEtcdVersionVM, inputEtcdExecDirVM)}}</pre>
+								<pre class="osx-terminal-contents">{{etcd.getInstallCommandOSX()}}</pre>
 							</div>
 						</div>
 					</div>
 
 					<br>
 					<h5>Run with Bare metal, VM</h5>
-					<p *ngIf="etcdFlags[0].ipAddress == 'localhost'">
+					<p *ngIf="etcd.flags[0].ipAddress == 'localhost'">
 						Seems like etcd is configured to run in localhost. Please make sure ports and data directory do not conflict!
 					</p>
 
-					<div *ngFor="let flag of etcdFlags; let i = index;">
-						<div *ngIf="inputClusterSize > i">
+					<div *ngFor="let flag of etcd.flags; let i = index;">
+						<div *ngIf="etcd.clusterSize > i">
 							<div class="osx-window">
 								<div class="window-narrow">
 									<div class="titlebar">
@@ -320,12 +320,12 @@
 											<div class="zoom"><span><strong></strong></span></div>
 										</div><span class="title-bar-text">terminal</span></div>
 									<div class="content">
-										<pre class="osx-terminal-contents">{{getEtcdFlagToDataDirCommand(flag)}}</pre>
+										<pre class="osx-terminal-contents">{{flag.getDataDirPrepareCommand()}}</pre>
 									</div>
 								</div>
 							</div>
 
-							<div *ngIf="inputSecure" class="osx-window">
+							<div *ngIf="etcd.secure" class="osx-window">
 								<div class="window-narrow">
 									<div class="titlebar">
 										<div class="buttons">
@@ -334,12 +334,12 @@
 											<div class="zoom"><span><strong></strong></span></div>
 										</div><span class="title-bar-text">terminal</span></div>
 									<div class="content">
-										<pre class="osx-terminal-contents">{{cfssl.getCertsCopyCommand(flag.certsDir)}}</pre>
+										<pre class="osx-terminal-contents">{{cfssl.getCertsPrepareCommand(flag.certsDir)}}</pre>
 									</div>
 								</div>
 							</div>
 
-							<pre class="code-dark">{{getEtcdFullCommand(inputEtcdExecDirVM, flag, false, false)}}</pre>
+							<pre class="code-dark">{{etcd.getCommand(flag, false, false)}}</pre>
 							<br>
 						</div>
 					</div>
@@ -356,11 +356,11 @@
 									<div class="zoom"><span><strong></strong></span></div>
 								</div><span class="title-bar-text">terminal</span></div>
 							<div class="content">
-								<pre class="osx-terminal-contents">{{getEtcdctlFullCommand(inputEtcdExecDirVM, etcdFlags[0])}}</pre>
+								<pre class="osx-terminal-contents">{{etcd.getEndpointHealthCommand(etcd.flags[0])}}</pre>
 							</div>
 						</div>
 					</div>
-					<div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/install-deploy#top" class="normal-link">↑ top</a></div>
+					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top" class="normal-link">↑ top</a></div>
 				</template>
             </md-tab>
 
@@ -373,13 +373,13 @@
 					<br>
 					<h5>Why?</h5>
 					<p class="narrow-paragraph">
-						<a href="https://en.wikipedia.org/wiki/Systemd" target="_blank" class="normal-link">systemd</a> can help bootstrap
-						etcd cluster.
+						<a href="https://en.wikipedia.org/wiki/Systemd" target="_blank" class="normal-link">systemd</a> can help run
+						etcd with <a href="https://en.wikipedia.org/wiki/Init" target="_blank" class="normal-link">init</a> system.
 					</p>
 
 					<br>
-					<md-input type="text" [(ngModel)]="inputEtcdVersionSystemd" placeholder="etcd version"></md-input>
-					<md-input type="text" [(ngModel)]="inputEtcdExecDirSystemd" placeholder="exec dir"></md-input>
+					<md-input type="text" [(ngModel)]="etcd.version" placeholder="etcd version"></md-input>
+					<md-input type="text" [(ngModel)]="etcd.execDir" placeholder="exec dir"></md-input>
 					<br>
 
 					<br>
@@ -393,18 +393,18 @@
 									<div class="zoom"><span><strong></strong></span></div>
 								</div><span class="title-bar-text">terminal</span></div>
 							<div class="content">
-								<pre class="osx-terminal-contents">{{getEtcdInstallLinux(inputEtcdVersionSystemd, inputEtcdExecDirSystemd)}}</pre>
+								<pre class="osx-terminal-contents">{{etcd.getInstallCommandLinux()}}</pre>
 							</div>
 						</div>
 					</div>
 
 					<br>
 					<h5>Run with systemd</h5>
-					<p *ngIf="etcdFlags[0].ipAddress == 'localhost'">
+					<p *ngIf="etcd.flags[0].ipAddress == 'localhost'">
 						Seems like etcd is configured to run in localhost. Please make sure ports and data directory do not conflict!
 					</p>
-					<div *ngFor="let flag of etcdFlags; let i = index;">
-						<div *ngIf="inputClusterSize > i">
+					<div *ngFor="let flag of etcd.flags; let i = index;">
+						<div *ngIf="etcd.clusterSize > i">
 							<div class="osx-window">
 								<div class="window-narrow">
 									<div class="titlebar">
@@ -414,12 +414,12 @@
 											<div class="zoom"><span><strong></strong></span></div>
 										</div><span class="title-bar-text">terminal</span></div>
 									<div class="content">
-										<pre class="osx-terminal-contents">{{getEtcdFlagToDataDirCommand(flag)}}</pre>
+										<pre class="osx-terminal-contents">{{flag.getDataDirPrepareCommand()}}</pre>
 									</div>
 								</div>
 							</div>
 
-							<div *ngIf="inputSecure" class="osx-window">
+							<div *ngIf="etcd.secure" class="osx-window">
 								<div class="window-narrow">
 									<div class="titlebar">
 										<div class="buttons">
@@ -428,12 +428,12 @@
 											<div class="zoom"><span><strong></strong></span></div>
 										</div><span class="title-bar-text">terminal</span></div>
 									<div class="content">
-										<pre class="osx-terminal-contents">{{cfssl.getCertsCopyCommand(flag.certsDir)}}</pre>
+										<pre class="osx-terminal-contents">{{cfssl.getCertsPrepareCommand(flag.certsDir)}}</pre>
 									</div>
 								</div>
 							</div>
 
-							<pre class="code-dark">{{getEtcdSystemdServiceFile(inputEtcdExecDirSystemd, flag)}}</pre>
+							<pre class="code-dark">{{etcd.getServiceFile(flag)}}</pre>
 						
 							<div class="osx-window">
 								<div class="window-narrow">
@@ -444,7 +444,7 @@
 											<div class="zoom"><span><strong></strong></span></div>
 										</div><span class="title-bar-text">terminal</span></div>
 									<div class="content">
-										<pre class="osx-terminal-contents">{{getSystemdResult(flag.name)}}</pre>
+										<pre class="osx-terminal-contents">{{flag.getSystemdCommand()}}</pre>
 									</div>
 								</div>
 							</div>
@@ -464,11 +464,11 @@
 									<div class="zoom"><span><strong></strong></span></div>
 								</div><span class="title-bar-text">terminal</span></div>
 							<div class="content">
-								<pre class="osx-terminal-contents">{{getEtcdctlFullCommand(inputEtcdExecDirSystemd, etcdFlags[0])}}</pre>
+								<pre class="osx-terminal-contents">{{etcd.getEndpointHealthCommand(etcd.flags[0])}}</pre>
 							</div>
 						</div>
 					</div>
-					<div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/install-deploy#top" class="normal-link">↑ top</a></div>
+					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top" class="normal-link">↑ top</a></div>
 				</template>
             </md-tab>
 
@@ -484,7 +484,7 @@
 					</p>
 
 					<br>
-					<md-input type="text" [(ngModel)]="inputEtcdVersionRkt" placeholder="etcd version"></md-input>
+					<md-input type="text" [(ngModel)]="etcd.version" placeholder="etcd version"></md-input>
 					<br>
 					<md-input type="text" [(ngModel)]="rkt.version" placeholder="rkt version"></md-input>
 					<md-input type="text" [(ngModel)]="rkt.execDir" placeholder="rkt exec dir"></md-input>
@@ -508,11 +508,11 @@
 
 					<br>
 					<h5>Run with rkt</h5>
-					<p *ngIf="etcdFlags[0].ipAddress == 'localhost'">
+					<p *ngIf="etcd.flags[0].ipAddress == 'localhost'">
 						Seems like etcd is configured to run in localhost. Please make sure ports and data directory do not conflict!
 					</p>
 					<div *ngFor="let flag of rktFlags; let i = index;">
-						<div *ngIf="inputClusterSize > i">
+						<div *ngIf="etcd.clusterSize > i">
 							<div class="osx-window">
 								<div class="window-narrow">
 									<div class="titlebar">
@@ -522,12 +522,12 @@
 											<div class="zoom"><span><strong></strong></span></div>
 										</div><span class="title-bar-text">terminal</span></div>
 									<div class="content">
-										<pre class="osx-terminal-contents">{{getEtcdFlagToDataDirCommand(etcdFlags[i])}}</pre>
+										<pre class="osx-terminal-contents">{{etcd.flags[i].getDataDirPrepareCommand()}}</pre>
 									</div>
 								</div>
 							</div>
 
-							<div *ngIf="inputSecure" class="osx-window">
+							<div *ngIf="etcd.secure" class="osx-window">
 								<div class="window-narrow">
 									<div class="titlebar">
 										<div class="buttons">
@@ -536,12 +536,12 @@
 											<div class="zoom"><span><strong></strong></span></div>
 										</div><span class="title-bar-text">terminal</span></div>
 									<div class="content">
-										<pre class="osx-terminal-contents">{{cfssl.getCertsCopyCommand(etcdFlags[i].certsDir)}}</pre>
+										<pre class="osx-terminal-contents">{{cfssl.getCertsPrepareCommand(etcd.flags[i].certsDir)}}</pre>
 									</div>
 								</div>
 							</div>
 
-							<pre class="code-dark">{{getEtcdRktSystemdServiceFile(rkt.execDir, inputEtcdVersionRkt, etcdFlags[i], rkt.version, flag)}}</pre>
+							<pre class="code-dark">{{etcd.getServiceFileRkt(etcd.version, rkt.execDir, etcd.flags[i])}}</pre>
 
 							<div class="osx-window">
 								<div class="window-narrow">
@@ -552,7 +552,7 @@
 											<div class="zoom"><span><strong></strong></span></div>
 										</div><span class="title-bar-text">terminal</span></div>
 									<div class="content">
-										<pre class="osx-terminal-contents">{{getSystemdResult(flag.name)}}</pre>
+										<pre class="osx-terminal-contents">{{flag.getSystemdCommand()}}</pre>
 									</div>
 								</div>
 							</div>
@@ -562,8 +562,7 @@
 
 					<br>
 					Check status:
-					<br><br>
-					<md-input type="text" [(ngModel)]="inputEtcdRktExecDir" placeholder="etcdctl exec dir"></md-input>
+					<br>
 					<div class="osx-window">
 						<div class="window-mid">
 							<div class="titlebar">
@@ -573,7 +572,7 @@
 									<div class="zoom"><span><strong></strong></span></div>
 								</div><span class="title-bar-text">terminal</span></div>
 							<div class="content">
-								<pre class="osx-terminal-contents">{{getEtcdctlFullCommand(inputEtcdRktExecDir, etcdFlags[0])}}</pre>
+								<pre class="osx-terminal-contents">{{etcd.getEndpointHealthCommand(etcd.flags[0])}}</pre>
 							</div>
 						</div>
 					</div>
@@ -583,7 +582,7 @@
 					<p class="narrow-paragraph">
 						Application container gives much portability to initial development phase. But operating and scaling container requires much more work. <a href="http://kubernetes.io/" target="_blank" class="normal-link">Kubernetes</a> manages such complex container environments. More on Kubernetes? Please visit <a href="http://kubernetes.io/docs" target="_blank" class="normal-link">Official Kubernetes Guides</a>. Fully managed etcd cluster? Please visit <a href="https://github.com/coreos/etcd-operator" target="_blank" class="normal-link">etcd-operator</a>.
 					</p>
-					<div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/install-deploy#top" class="normal-link">↑ top</a></div>
+					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top" class="normal-link">↑ top</a></div>
 				</template>
             </md-tab>
 
@@ -600,16 +599,16 @@
 					</p>
 
 					<br>
-					<md-input type="text" [(ngModel)]="inputEtcdVersionCoreOS" placeholder="etcd version"></md-input>
+					<md-input type="text" [(ngModel)]="etcd.version" placeholder="etcd version"></md-input>
 					<br>
 
 					<br>
 					<h5>Run with CoreOS</h5>
-					<p *ngIf="etcdFlags[0].ipAddress == 'localhost'">
+					<p *ngIf="etcd.flags[0].ipAddress == 'localhost'">
 						Seems like etcd is configured to run in localhost. Please make sure ports and data directory do not conflict!
 					</p>
-					<div *ngFor="let flag of etcdFlags; let i = index;">
-						<div *ngIf="inputClusterSize > i">
+					<div *ngFor="let flag of etcd.flags; let i = index;">
+						<div *ngIf="etcd.clusterSize > i">
 							<div class="osx-window">
 								<div class="window-narrow">
 									<div class="titlebar">
@@ -619,12 +618,12 @@
 											<div class="zoom"><span><strong></strong></span></div>
 										</div><span class="title-bar-text">terminal</span></div>
 									<div class="content">
-										<pre class="osx-terminal-contents">{{getEtcdFlagToDataDirCommandCoreOS(flag)}}</pre>
+										<pre class="osx-terminal-contents">{{flag.getDataDirPrepareCommand()}}</pre>
 									</div>
 								</div>
 							</div>
 
-							<div *ngIf="inputSecure" class="osx-window">
+							<div *ngIf="etcd.secure" class="osx-window">
 								<div class="window-narrow">
 									<div class="titlebar">
 										<div class="buttons">
@@ -633,12 +632,12 @@
 											<div class="zoom"><span><strong></strong></span></div>
 										</div><span class="title-bar-text">terminal</span></div>
 									<div class="content">
-										<pre class="osx-terminal-contents">{{cfssl.getCertsCopyCommand(flag.certsDir)}}</pre>
+										<pre class="osx-terminal-contents">{{cfssl.getCertsPrepareCommand(flag.certsDir)}}</pre>
 									</div>
 								</div>
 							</div>
 
-							<pre class="code-dark">{{getCoreOSEtcdWrapper(inputEtcdVersionCoreOS, flag)}}</pre>
+							<pre class="code-dark">{{etcd.getServiceFileCoreOS(flag)}}</pre>
 
 							<div class="osx-window">
 								<div class="window-narrow">
@@ -649,7 +648,7 @@
 											<div class="zoom"><span><strong></strong></span></div>
 										</div><span class="title-bar-text">terminal</span></div>
 									<div class="content">
-										<pre class="osx-terminal-contents">{{getCoreOSEtcdWrapperResult()}}</pre>
+										<pre class="osx-terminal-contents">{{etcd.getServiceFileCoreOSCommand()}}</pre>
 									</div>
 								</div>
 							</div>
@@ -659,8 +658,7 @@
 
 					<br>
 					Check status:
-					<br><br>
-					<md-input type="text" [(ngModel)]="inputEtcdRktExecDir" placeholder="etcdctl exec dir"></md-input>
+					<br>
 					<div class="osx-window">
 						<div class="window-mid">
 							<div class="titlebar">
@@ -670,7 +668,7 @@
 									<div class="zoom"><span><strong></strong></span></div>
 								</div><span class="title-bar-text">terminal</span></div>
 							<div class="content">
-								<pre class="osx-terminal-contents">{{getEtcdctlFullCommand('/', etcdFlags[0])}}</pre>
+								<pre class="osx-terminal-contents">{{etcd.getEndpointHealthCommand(etcd.flags[0])}}</pre>
 							</div>
 						</div>
 					</div>
@@ -680,7 +678,7 @@
 					<p class="narrow-paragraph">
 						Please visit <a href="https://coreos.com/why" target="_blank" class="normal-link">CoreOS</a>.
 					</p>
-					<div align="right" class="narrow-paragraph"><a href="/doc/{{version.etcdVersionURL}}/install-deploy#top" class="normal-link">↑ top</a></div>
+					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top" class="normal-link">↑ top</a></div>
 				</template>
             </md-tab>
 

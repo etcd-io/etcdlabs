@@ -7,8 +7,10 @@ import { ParentComponent } from './common/common.component';
     styleUrls: ['common/common.component.css'],
 })
 export class QuickTutorialsTipComponent extends ParentComponent {
+    docVersion: string;
     constructor() {
         super();
+        this.docVersion = super.getDocVersion();
     }
 
     getEtcdctlSetup() {

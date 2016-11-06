@@ -6,17 +6,6 @@ function getDivider(execDir: string) {
     return divider;
 }
 
-function cleanDir(dir: string) {
-    let ds = dir;
-    if (ds === undefined) {
-        return '';
-    }
-    if (ds !== '/' && ds.endsWith('/')) {
-        ds = ds.substring(0, ds.length - 1);
-    }
-    return ds;
-}
-
 export class Rkt {
     version: string;
     execDir: string;
@@ -56,15 +45,5 @@ GITHUB_URL=https://github.com/coreos/rkt/releases/download
 ` + this.execDir + divide + `rkt version`;
 
         return txt;
-    }
-}
-
-export class RktFlag {
-    name: string;
-
-    constructor(
-        name: string,
-    ) {
-        this.name = name;
     }
 }

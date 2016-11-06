@@ -1,8 +1,8 @@
 <md-sidenav-layout>
     <md-sidenav #sidenav [opened]="true" mode="side" class="doc-sidenav">
         <md-list dense>
-            <a routerLink="/doc/{{version.etcdVersionURL}}">
-                <h3 md-subheader>Getting Started ({{version.etcdVersion}})</h3>
+            <a routerLink="/doc/{{docVersion}}">
+                <h3 md-subheader>Getting Started ({{docVersion}})</h3>
             </a>
             <md-list-item *ngFor="let item of getStartedItems">
                 <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
@@ -49,7 +49,7 @@
                         For this exercise, we will use <a href="https://coreos.com" target="_blank" class="normal-link">CoreOS Linux</a> and <a href="https://github.com/coreos/rkt" target="_blank" class="normal-link">rkt</a> container runtime.
 					</p>
 					<p class="narrow-paragraph">
-						First set up etcd cluster following instructions <a routerLink="/doc/{{version.etcdVersionURL}}/install-deploy" class="normal-link">here</a>.
+						First set up etcd cluster following instructions <a routerLink="/doc/{{docVersion}}/install-deploy" class="normal-link">here</a>.
 					</p>
 					<p class="narrow-paragraph">
 						And have following machines ready.

@@ -1,8 +1,8 @@
 <md-sidenav-layout>
     <md-sidenav #sidenav [opened]="true" mode="side" class="doc-sidenav">
         <md-list dense>
-            <a routerLink="/doc/{{version.etcdVersionURL}}">
-                <h3 md-subheader>Getting Started ({{version.etcdVersion}})</h3>
+            <a routerLink="/doc/{{docVersion}}">
+                <h3 md-subheader>Getting Started ({{docVersion}})</h3>
             </a>
             <md-list-item *ngFor="let item of getStartedItems">
                 <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
@@ -18,7 +18,7 @@
 
     <div class="doc-group">
         <router-outlet></router-outlet>
-        <h4>etcd (version {{version.etcdVersion}})</h4>
+        <h4>etcd (version {{docVersion}})</h4>
         <p>etcd is distributed reliable key-value store for the most critical data of a distributed system.</p>
 
         <md-list>
