@@ -45,16 +45,18 @@ export class InstallDeployTipComponent extends ParentComponent {
         this.cfssl = new CFSSL(
             'R1.2',
             '/usr/local/bin',
-            '$HOME/test-certs',
+            '$HOME/certs',
+            'etcd-root-ca',
+            'etcd-gencert.json',
             'etcd',
-            'etcd, security team',
+            'etcd security',
             'San Francisco',
             'California',
             'USA',
             'rsa',
             4096,
             87600,
-            'etcd'
+            'etcd-root-ca'
         );
         this.inputCFSSLMoreHostsTxt = '';
         ///////////////////////////////////////////////////
@@ -83,7 +85,8 @@ export class InstallDeployTipComponent extends ParentComponent {
                     2379,
                     2380,
                     'my-etcd-token',
-                    'new'
+                    'new',
+                    'etcd-root-ca'
                 ),
                 new EtcdFlag(
                     'my-etcd-2',
@@ -93,7 +96,8 @@ export class InstallDeployTipComponent extends ParentComponent {
                     2379,
                     2380,
                     'my-etcd-token',
-                    'new'
+                    'new',
+                    'etcd-root-ca'
                 ),
                 new EtcdFlag(
                     'my-etcd-3',
@@ -103,7 +107,8 @@ export class InstallDeployTipComponent extends ParentComponent {
                     2379,
                     2380,
                     'my-etcd-token',
-                    'new'
+                    'new',
+                    'etcd-root-ca'
                 ),
                 new EtcdFlag(
                     'my-etcd-4',
@@ -113,7 +118,8 @@ export class InstallDeployTipComponent extends ParentComponent {
                     2379,
                     2380,
                     'my-etcd-token',
-                    'new'
+                    'new',
+                    'etcd-root-ca'
                 ),
                 new EtcdFlag(
                     'my-etcd-5',
@@ -123,7 +129,8 @@ export class InstallDeployTipComponent extends ParentComponent {
                     2379,
                     2380,
                     'my-etcd-token',
-                    'new'
+                    'new',
+                    'etcd-root-ca'
                 ),
                 new EtcdFlag(
                     'my-etcd-6',
@@ -133,7 +140,8 @@ export class InstallDeployTipComponent extends ParentComponent {
                     2379,
                     2380,
                     'my-etcd-token',
-                    'new'
+                    'new',
+                    'etcd-root-ca'
                 ),
                 new EtcdFlag(
                     'my-etcd-7',
@@ -143,7 +151,8 @@ export class InstallDeployTipComponent extends ParentComponent {
                     2379,
                     2380,
                     'my-etcd-token',
-                    'new'
+                    'new',
+                    'etcd-root-ca'
                 ),
             ]
         );

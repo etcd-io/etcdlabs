@@ -62,7 +62,8 @@ export class EtcdFlag {
         peerPort: number,
 
         initialClusterToken: string,
-        initialClusterState: string
+        initialClusterState: string,
+        rootCAPrefix: string,
     ) {
         this.name = name;
         this.dataDir = dataDir;
@@ -80,11 +81,11 @@ export class EtcdFlag {
 
         this.clientCertFile = this.name + '.pem';
         this.clientKeyFile = this.name + '-key.pem';
-        this.clientTrustedCAFile = 'trusted-ca.pem';
+        this.clientTrustedCAFile = rootCAPrefix + '.pem';
 
         this.peerCertFile = this.name + '.pem';
         this.peerKeyFile = this.name + '-key.pem';
-        this.peerTrustedCAFile = 'trusted-ca.pem';
+        this.peerTrustedCAFile = rootCAPrefix + '.pem';
     }
 
     getDataDir() {

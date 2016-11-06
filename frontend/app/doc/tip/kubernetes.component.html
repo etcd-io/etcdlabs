@@ -19,6 +19,8 @@
     <div class="doc-group">
         <router-outlet></router-outlet>
 
+        <div id="top"></div>
+
         <h4>Manage etcd with Kubernetes</h4>
         <br>
         <p class="narrow-paragraph">
@@ -89,6 +91,103 @@
 							</div>
 						</div>
 					</div>
+					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/kubernetes#top" class="normal-link">↑ top</a></div>
+				</template>
+            </md-tab>
+
+            <md-tab>
+                <template md-tab-label>
+					TLS (cfssl)
+				</template>
+                <template md-tab-content>
+					<br>
+					<h5>Why?</h5>
+					<p class="narrow-paragraph">
+						If etcd and Kubernetes store information that should not be public, encryption is highly recommended. Kubernetes supports SSL/TLS for validating clients. Here's how to generate self-signed TLS certificates with
+						<a href="https://github.com/cloudflare/cfssl" target="_blank" class="normal-link">cfssl</a>.
+					</p>
+
+					<br>
+					<h5>Install cfssl</h5>
+					<br>
+					<md-input type="text" [(ngModel)]="cfssl.version" placeholder="cfssl version"></md-input>
+					<md-input type="text" [(ngModel)]="cfssl.execDir" placeholder="exec dir"></md-input>
+					<md-input type="text" [(ngModel)]="cfssl.srcCertsDir" placeholder="certs dir"></md-input>
+					<br>
+					<div class="osx-window">
+						<div class="window">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{cfssl.getInstallCommand()}}</pre>
+							</div>
+						</div>
+					</div>
+					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/kubernetes#top" class="normal-link">↑ top</a></div>
+					<br>
+
+					<br>
+					<h5>Generate self-signed root CA certificate</h5>
+					<p class="narrow-paragraph">
+						We will use this root CA to generate unique TLS assets for validating API server, worker nodes, and others. Unique certificates are less convenient to generate and deploy, but they do provide stronger security assurances and the most portable installation experience across multiple cloud-based and on-premises Kubernetes deployments.
+					</p>
+
+					<br>
+					<md-input type="text" [(ngModel)]="cfssl.organization" placeholder="Organization"></md-input>
+					<md-input type="text" [(ngModel)]="cfssl.organizationUnit" placeholder="Organization Unit"></md-input>
+					<md-input type="text" [(ngModel)]="cfssl.locationCity" placeholder="City"></md-input>
+					<md-input type="text" [(ngModel)]="cfssl.locationState" placeholder="State"></md-input>
+					<md-input type="text" [(ngModel)]="cfssl.locationCountry" placeholder="Country"></md-input>
+					<br>
+					<md-input type="text" [(ngModel)]="cfssl.keyAlgorithm" placeholder="Key Algorithm"></md-input>
+					<md-input type="number" [(ngModel)]="cfssl.keySize" placeholder="Key Size"></md-input>
+					<md-input type="number" [(ngModel)]="cfssl.keyExpirationHour" placeholder="Key Expiration (hour)"></md-input>
+					<br>
+					<md-input type="text" [(ngModel)]="cfssl.commonName" placeholder="Common Name"></md-input>
+					<br>
+					<br>
+
+					<pre class="code-dark">{{cfssl.getRootCACommand()}}</pre>
+
+					Results:
+					<div class="osx-window">
+						<div class="window-narrow">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{cfssl.getRootCACommandResult()}}</pre>
+							</div>
+						</div>
+					</div>
+					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/kubernetes#top" class="normal-link">↑ top</a></div>
+					<br>
+
+					<br>
+                    <md-input type="text" [(ngModel)]="certsDir" placeholder="Kubernetes certs directory"></md-input>
+					<br>
+					<div class="osx-window">
+						<div class="window-narrow">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{cfssl.getCertsPrepareCommand(certsDir)}}</pre>
+							</div>
+						</div>
+					</div>
+					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/kubernetes#top" class="normal-link">↑ top</a></div>
+					<br>
 				</template>
             </md-tab>
 
@@ -100,8 +199,62 @@
 					<br>
 					<h5>Why?</h5>
 					<p class="narrow-paragraph">
+						Master node is a centralized control plane for Kubernetes. <a href="http://kubernetes.io/docs/admin/kube-apiserver/" target="_blank" class="code-light-snippet">kube-apiserver</a> provides REST APIs for validating and configuring objects in Kubernetes, storing the cluster states in etcd. <a href="http://kubernetes.io/docs/admin/kube-scheduler/" target="_blank" class="code-light-snippet">kube-scheduler</a> takes various resource requirements and policy constraints and schedules container applications in distributed environments. <a href="http://kubernetes.io/docs/admin/kube-controller-manager/" target="_blank" class="code-light-snippet">kube-controller-manager</a> is a control loop that manages the state of the system. <span class="code-light-snippet">kube-scheduler</span> and <span class="code-light-snippet">kube-controller-manager</span> are tightly coupled with <span class="code-light-snippet">kube-apiserver</span>.
+					</p>
+					<p class="narrow-paragraph">
+					 	Running multiple master nodes is recommended for higher availability. Noe that even all master nodes being unavailable, workers keep operating with the last configuration, and update as soon as master node comes back.
+					</p>
+
+					<br>
+					<h5>Set up TLS Assets</h5>
+					<br>
+					<textarea type="text" style="max-width: 550px;" class="form-control" placeholder="Master Node IPs (line-separated)" rows="5" [(ngModel)]="inputMoreMasterNodeIPsTxt"></textarea>
+					<br>
+					<pre class="code-dark">{{cfssl.getGenCertCommand('kube-apiserver', 'kube-apiserver', '', inputMoreMasterNodeIPsTxt)}}</pre>
+
+					<br>
+					<p class="narrow-paragraph">
+						And copy these certs to master nodes:
+					</p>
+                    <md-input type="text" [(ngModel)]="certsDir" placeholder="Kubernetes certs directory"></md-input>
+					<br>
+					<div class="osx-window">
+						<div class="window-narrow">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{cfssl.getCertsPrepareCommand(certsDir)}}</pre>
+							</div>
+						</div>
+					</div>
+
+					<div class="osx-window">
+						<div class="window-narrow">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{cfssl.getCFSSLFilesTxt(certsDir, 'kube-apiserver')}}</pre>
+							</div>
+						</div>
+					</div>
+					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/kubernetes#top" class="normal-link">↑ top</a></div>
+					<br>
+
+					<br>
+					<h5>TODO</h5>
+					<p class="narrow-paragraph">
 						...
 					</p>
+					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/kubernetes#top" class="normal-link">↑ top</a></div>
+					<br>
 				</template>
             </md-tab>
 
@@ -115,6 +268,14 @@
 					<p class="narrow-paragraph">
 						...
 					</p>
+
+					<br>
+					<h5>TODO</h5>
+					<p class="narrow-paragraph">
+						...
+					</p>
+					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/kubernetes#top" class="normal-link">↑ top</a></div>
+					<br>
 				</template>
             </md-tab>
 
@@ -126,8 +287,59 @@
 					<br>
 					<h5>Why?</h5>
 					<p class="narrow-paragraph">
+						<a href="http://kubernetes.io/docs/user-guide/kubectl-overview/" target="_blank" class="code-light-snippet">kubectl</a> is a command-line program for interacting with Kubernetes.
+					</p>
+
+					<br>
+					<h5>Set up TLS Assets</h5>
+					<br>
+					<textarea type="text" style="max-width: 550px;" class="form-control" placeholder="Master Node IPs (line-separated)" rows="5" [(ngModel)]="inputMoreMasterNodeIPsTxt"></textarea>
+					<br>
+					<pre class="code-dark">{{cfssl.getGenCertCommand('kubectl', 'kubectl', '', inputMoreMasterNodeIPsTxt)}}</pre>
+
+					<br>
+					<p class="narrow-paragraph">
+						And copy these certs to <span class="code-light-snippet">kubectl</span> nodes:
+					</p>
+                    <md-input type="text" [(ngModel)]="certsDir" placeholder="Kubernetes certs directory"></md-input>
+					<br>
+					<div class="osx-window">
+						<div class="window-narrow">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{cfssl.getCertsPrepareCommand(certsDir)}}</pre>
+							</div>
+						</div>
+					</div>
+
+					<div class="osx-window">
+						<div class="window-narrow">
+							<div class="titlebar">
+								<div class="buttons">
+									<div class="closebtn"><span><strong></strong></span></div>
+									<div class="minimize"><span><strong></strong></span></div>
+									<div class="zoom"><span><strong></strong></span></div>
+								</div><span class="title-bar-text">terminal</span></div>
+							<div class="content">
+								<pre class="osx-terminal-contents">{{cfssl.getCFSSLFilesTxt(certsDir, 'kubectl')}}</pre>
+							</div>
+						</div>
+					</div>
+					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/kubernetes#top" class="normal-link">↑ top</a></div>
+					<br>
+
+					<br>
+					<h5>TODO</h5>
+					<p class="narrow-paragraph">
 						...
 					</p>
+					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/kubernetes#top" class="normal-link">↑ top</a></div>
+					<br>
 				</template>
             </md-tab>
 
@@ -141,6 +353,14 @@
 					<p class="narrow-paragraph">
 						...
 					</p>
+
+					<br>
+					<h5>TODO</h5>
+					<p class="narrow-paragraph">
+						...
+					</p>
+					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/kubernetes#top" class="normal-link">↑ top</a></div>
+					<br>
 				</template>
             </md-tab>
 
@@ -154,6 +374,14 @@
 					<p class="narrow-paragraph">
 						...
 					</p>
+
+					<br>
+					<h5>TODO</h5>
+					<p class="narrow-paragraph">
+						...
+					</p>
+					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/kubernetes#top" class="normal-link">↑ top</a></div>
+					<br>
 				</template>
             </md-tab>
 

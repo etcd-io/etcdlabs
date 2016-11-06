@@ -19,6 +19,8 @@
     <div class="doc-group">
         <router-outlet></router-outlet>
 
+        <div id="top-top"></div>
+
         <h4>Install and deploy etcd</h4>
         <br>
         <p class="narrow-paragraph">
@@ -72,6 +74,8 @@
                 <a href="{{etcd.getFlagHelpURL()}}" target="_blank"><button md-button color="warn">More flags</button></a>
             </md-card-actions>
         </md-card>
+        <br>
+        <div align="left" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top-top" class="normal-link">↑ top</a></div>
 
         <br><br>
         <div id="top"></div>
@@ -110,9 +114,17 @@
 							</div>
 						</div>
 					</div>
+					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top" class="normal-link">↑ top</a></div>
+					<br>
+
 
 					<br>
-					<md-card-subtitle>Certificate Configuration</md-card-subtitle>
+					<h5>Generate self-signed root CA certificate</h5>
+					<p class="narrow-paragraph">
+						We will use this root CA to generate other TLS assets for validating client-to-server and peer-to-peer communication. Unique certificates are less convenient to generate and deploy, but they do provide stronger security assurances and the most portable installation experience across multiple cloud-based and on-premises Kubernetes deployments.
+					</p>
+
+					<br>
 					<md-input type="text" [(ngModel)]="cfssl.organization" placeholder="Organization"></md-input>
 					<md-input type="text" [(ngModel)]="cfssl.organizationUnit" placeholder="Organization Unit"></md-input>
 					<md-input type="text" [(ngModel)]="cfssl.locationCity" placeholder="City"></md-input>
@@ -127,8 +139,8 @@
 					<br>
 					<br>
 
-					<h5>Generate self-signed root CA certificate</h5>
 					<pre class="code-dark">{{cfssl.getRootCACommand()}}</pre>
+
 					Results:
 					<div class="osx-window">
 						<div class="window-narrow">
@@ -143,12 +155,11 @@
 							</div>
 						</div>
 					</div>
-
+					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top" class="normal-link">↑ top</a></div>
 					<br>
-					<h5>Create a configuration file</h5>
-					<pre class="code-dark">{{cfssl.getGenCertConfig()}}</pre>
 
-					<br>
+
+					<br><br>
 					<h5>Generate local-issued certificates with private keys</h5>
 					<p *ngIf="etcd.flags[0].ipAddress == 'localhost'">
 						Seems like cert is configured for localhost. Please make sure to specify remote hosts, if any.
@@ -160,7 +171,7 @@
 
 					<div *ngFor="let flag of etcd.flags; let i = index;">
 						<div *ngIf="etcd.clusterSize > i">
-							<pre class="code-dark">{{cfssl.getGenCertCommand(flag.name, flag.ipAddress, inputCFSSLMoreHostsTxt)}}</pre>
+							<pre class="code-dark">{{cfssl.getGenCertCommand(flag.name, flag.name, flag.ipAddress, inputCFSSLMoreHostsTxt)}}</pre>
 						
 							<div class="osx-window">
 								<div class="window-narrow">
@@ -192,6 +203,7 @@
 						</div>
 					</div>
 					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top" class="normal-link">↑ top</a></div>
+					<br>
 				</template>
             </md-tab>
 
