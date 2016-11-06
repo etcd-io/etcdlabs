@@ -83,6 +83,8 @@
                 <br>
                 <a href="/doc/{{docVersion}}/faq#dashboard" class="faq-list">Does etcd provide dashboard?</a>
                 <br>
+                <a href="/doc/{{docVersion}}/faq#managed-etcd" class="faq-list">Fully managed etcd?</a>
+                <br>
 
                 <br>
                 <div class="faq-list-title">Errors, Warning</div>
@@ -394,7 +396,7 @@
         <div id="comparison"></div>
         <h2><a href="/doc/{{docVersion}}/faq#comparison" class="faq-title">How is etcd different than Zookeeper and Consul?</a></h2>
         <p class="narrow-paragraph">
-            See <a href="/doc/{{docVersion}}/comparison" class="normal-link">etcd in Comparison</a>.
+            See <a routerLink="/doc/{{docVersion}}/comparison" class="normal-link">etcd in Comparison</a>.
         </p>
         <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/faq#top" class="normal-link">↑ top</a></div>
         <br>
@@ -588,11 +590,19 @@
         <br><br>
 
         <div id="dashboard"></div>
-        <h2><a href="/doc/{{docVersion}}/faq#dashboard" class="faq-list">Does etcd provide dashboard?</a></h2>
+        <h2><a href="/doc/{{docVersion}}/faq#dashboard" class="faq-title">Does etcd provide dashboard?</a></h2>
         <p class="narrow-paragraph">
             etcd does not have any GUI tools. Instead etcd provides various <a href="https://github.com/coreos/etcd/blob/master/Documentation/metrics.md" target="_blank" class="normal-link">metrics</a> using <a href="https://prometheus.io" target="_blank"
                 class="normal-link">Prometheus</a>. And <a href="http://grafana.org" target="_blank" class="normal-link">Grafana</a> can be used to set up Prometheus dashboards; see <a href="https://github.com/coreos/etcd/blob/master/Documentation/metrics.md"
                 target="_blank" class="normal-link">template</a> and <a href="http://dash.etcd.io/dashboard/db/test-etcd" target="_blank" class="normal-link">sample dashboard</a>.
+        </p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/faq#top" class="normal-link">↑ top</a></div>
+        <br>
+
+        <div id="managed-etcd"></div>
+        <h2><a href="/doc/{{docVersion}}/faq#managed-etcd" class="faq-title">Fully managed etcd?</a></h2>
+        <p class="narrow-paragraph">
+            See <a routerLink="/doc/{{docVersion}}/kubernetes" class="normal-link">etcd in Kubernetes</a> and try <a href="https://github.com/coreos/etcd-operator" target="_blank" class="normal-link">etcd-operator</a>.
         </p>
         <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/faq#top" class="normal-link">↑ top</a></div>
         <br>
