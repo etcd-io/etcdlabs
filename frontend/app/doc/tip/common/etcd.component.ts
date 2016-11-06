@@ -471,7 +471,7 @@ sudo mv /tmp/${flag.name}.service /etc/systemd/system/${flag.name}.service
 `;
     }
 
-    getServiceFileRkt(rktVer: string, rktExecDir: string, flag: EtcdFlag) {
+    getServiceFileRkt(rktVer: string, rktExecDir: string, flag: EtcdFlag, customEtcdACI: string) {
         let divideRkt = getDivider(cleanDir(rktExecDir));
         let execRkt = rktExecDir + divideRkt + 'rkt';
 
@@ -479,31 +479,34 @@ sudo mv /tmp/${flag.name}.service /etc/systemd/system/${flag.name}.service
         rktFlags.push('--trust-keys-from-https');
         rktFlags.push('--dir=/var/lib/rkt'); // optional '/var/lib/rkt' by default
 
-        let vs = rktVer.substring(1);
         let rktRunFlags: string[] = [];
-        rktRunFlags.push('--stage1-name' + ' ' + 'coreos.com/rkt/stage1-fly:' + vs);
+        rktRunFlags.push('run');
+        rktRunFlags.push('--stage1-name' + ' ' + 'coreos.com/rkt/stage1-fly:' + rktVer.substring(1));
         rktRunFlags.push('--net=host');
         rktRunFlags.push('--volume' + ' ' + 'data-dir,kind=host,source=' + flag.getDataDir());
         if (this.secure) {
             rktRunFlags.push('--volume' + ' ' + 'etcd-ssl-certs-dir,kind=host,source=' + flag.getCertsDir());
             rktRunFlags.push('--mount' + ' ' + 'volume=etcd-ssl-certs-dir,target=' + flag.getCertsDir());
         }
-        let rktRunImage = 'coreos.com/etcd:' + this.version;
-        let flags = this.getCommand(flag, true, false);
+
+        if (customEtcdACI !== '') {
+            // TODO: https://github.com/coreos/rkt/issues/3346
+            rktRunFlags.push('--insecure-options=image');
+            rktRunFlags.push(customEtcdACI + ' ' + '--');
+        } else {
+            rktRunFlags.push('coreos.com/etcd:' + this.version + ' ' + '--');
+        }
 
         let txt = execRkt;
         let lineBreak = ' \\' + `
     `;
-
         for (let _i = 0; _i < rktFlags.length; _i++) {
             txt += lineBreak + rktFlags[_i];
         }
-        txt += lineBreak;
-        txt += 'run';
         for (let _i = 0; _i < rktRunFlags.length; _i++) {
             txt += lineBreak + rktRunFlags[_i];
         }
-        txt += lineBreak + rktRunImage + ' ' + '--' + lineBreak + flags;
+        txt += lineBreak + this.getFlagTxt(flag, true, false);
 
         let cmd = `cat > /tmp/${flag.name}.service <<EOF
 [Unit]

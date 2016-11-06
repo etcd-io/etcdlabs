@@ -484,8 +484,6 @@
 					</p>
 
 					<br>
-					<md-input type="text" [(ngModel)]="etcd.version" placeholder="etcd version"></md-input>
-					<br>
 					<md-input type="text" [(ngModel)]="rkt.version" placeholder="rkt version"></md-input>
 					<md-input type="text" [(ngModel)]="rkt.execDir" placeholder="rkt exec dir"></md-input>
 					<br>
@@ -511,7 +509,13 @@
 					<p *ngIf="etcd.flags[0].ipAddress == 'localhost'">
 						Seems like etcd is configured to run in localhost. Please make sure ports and data directory do not conflict!
 					</p>
-					<div *ngFor="let flag of rktFlags; let i = index;">
+					<br>
+					<md-input type="text" [(ngModel)]="etcd.version" placeholder="etcd version"></md-input>
+					<br>
+					<!--<md-input type="text" [(ngModel)]="customEtcdACI" placeholder="custom etcd ACI image"></md-input>-->
+					<textarea type="text" style="max-width: 750px;" class="form-control" placeholder="Custom etcd ACI image (optional)" rows="1" [(ngModel)]="customEtcdACI"></textarea>
+					<br>
+					<div *ngFor="let flag of etcd.flags; let i = index;">
 						<div *ngIf="etcd.clusterSize > i">
 							<div class="osx-window">
 								<div class="window-narrow">
@@ -522,7 +526,7 @@
 											<div class="zoom"><span><strong></strong></span></div>
 										</div><span class="title-bar-text">terminal</span></div>
 									<div class="content">
-										<pre class="osx-terminal-contents">{{etcd.flags[i].getDataDirPrepareCommand()}}</pre>
+										<pre class="osx-terminal-contents">{{flag.getDataDirPrepareCommand()}}</pre>
 									</div>
 								</div>
 							</div>
@@ -536,12 +540,12 @@
 											<div class="zoom"><span><strong></strong></span></div>
 										</div><span class="title-bar-text">terminal</span></div>
 									<div class="content">
-										<pre class="osx-terminal-contents">{{cfssl.getCertsPrepareCommand(etcd.flags[i].certsDir)}}</pre>
+										<pre class="osx-terminal-contents">{{cfssl.getCertsPrepareCommand(flag.certsDir)}}</pre>
 									</div>
 								</div>
 							</div>
 
-							<pre class="code-dark">{{etcd.getServiceFileRkt(etcd.version, rkt.execDir, etcd.flags[i])}}</pre>
+							<pre class="code-dark">{{etcd.getServiceFileRkt(rkt.version, rkt.execDir, flag, customEtcdACI)}}</pre>
 
 							<div class="osx-window">
 								<div class="window-narrow">
@@ -576,12 +580,6 @@
 							</div>
 						</div>
 					</div>
-
-					<br>
-					<h5>More</h5>
-					<p class="narrow-paragraph">
-						Application container gives much portability to initial development phase. But operating and scaling container requires much more work. <a href="http://kubernetes.io/" target="_blank" class="normal-link">Kubernetes</a> manages such complex container environments. More on Kubernetes? Please visit <a href="http://kubernetes.io/docs" target="_blank" class="normal-link">Official Kubernetes Guides</a>. Fully managed etcd cluster? Please visit <a href="https://github.com/coreos/etcd-operator" target="_blank" class="normal-link">etcd-operator</a>.
-					</p>
 					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top" class="normal-link">↑ top</a></div>
 				</template>
             </md-tab>
@@ -672,12 +670,6 @@
 							</div>
 						</div>
 					</div>
-
-					<br>
-					<h5>More</h5>
-					<p class="narrow-paragraph">
-						Please visit <a href="https://coreos.com/why" target="_blank" class="normal-link">CoreOS</a>.
-					</p>
 					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top" class="normal-link">↑ top</a></div>
 				</template>
             </md-tab>

@@ -34,6 +34,7 @@ export class InstallDeployTipComponent extends ParentComponent {
     ////////////////////////////////////
     // rkt setting properties
     rkt: Rkt;
+    customEtcdACI: string;
     ////////////////////////////////////
 
     constructor() {
@@ -150,6 +151,7 @@ export class InstallDeployTipComponent extends ParentComponent {
 
         ///////////////////////////////////////////////////
         this.rkt = new Rkt('v1.18.0', '/');
+        this.customEtcdACI = '';
         ///////////////////////////////////////////////////
     }
 }

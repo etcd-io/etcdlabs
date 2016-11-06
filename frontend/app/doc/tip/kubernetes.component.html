@@ -23,13 +23,10 @@
         <br>
         <p class="narrow-paragraph">
             Application container gives much portability to initial development phase. But operating and scaling container requires much more work. <a href="http://kubernetes.io/" target="_blank" class="normal-link">Kubernetes</a> manages such complex
-            container environments. This is an example workflow to manage etcd with Kubernetes.
-        </p>
-        <p class="narrow-paragraph">
-            Reference
+            container environments. This is an example workflow to manage etcd with Kubernetes, in most manual way possible; see <a href="http://kubernetes.io/docs/getting-started-guides/minikube/" target="_blank" class="normal-link">Running Kubernetes Locally via Minikube</a>            and other guides below for easier ways.
         </p>
         <ul>
-            <li><a href="http://kubernetes.io/docs/getting-started-guides/scratch/" target="_blank" class="normal-link">Kubernetes: Creating a Custom Cluster from Scratch</a></li>
+            <li><a href="http://kubernetes.io/docs/getting-started-guides/" target="_blank" class="normal-link">Kubernetes Guides</a></li>
             <li><a href="https://coreos.com/kubernetes/docs/latest/kubernetes-on-baremetal.html" target="_blank" class="normal-link">Kubernetes Installation on Bare Metal & CoreOS</a></li>
             <li><a href="https://github.com/kelseyhightower/kubernetes-the-hard-way" target="_blank" class="normal-link">Kubernetes The Hard Way</a></li>
             <li><a href="https://coreos.com/blog/introducing-operators.html" target="_blank" class="normal-link">Introducing Operators: Putting Operational Knowledge into Software</a></li>
@@ -49,16 +46,13 @@
                         For this exercise, we will use <a href="https://coreos.com" target="_blank" class="normal-link">CoreOS Linux</a> and <a href="https://github.com/coreos/rkt" target="_blank" class="normal-link">rkt</a> container runtime.
 					</p>
 					<p class="narrow-paragraph">
-						First set up etcd cluster following instructions <a routerLink="/doc/{{docVersion}}/install-deploy" class="normal-link">here</a>.
-					</p>
-					<p class="narrow-paragraph">
 						And have following machines ready.
 					</p>
 					<ul>
-						<li>3~5 for etcd cluster</li>
-						<li>1 for <span class="code-light-snippet">kubectl</span></li>
-						<li>3 for master nodes (<span class="code-light-snippet">kube-apiserver</span>)</li>
-						<li>5 for workers to deploy etcd (<span class="code-light-snippet">kubelet</span>, your distributed applications, etc.)</li>
+						<li>3~5 for etcd cluster; see <a routerLink="/doc/{{docVersion}}/install-deploy" class="normal-link">Install and Deploy</a></li>
+						<li>1 for <a href="http://kubernetes.io/docs/user-guide/kubectl-overview/" target="_blank" class="code-light-snippet">kubectl</a></li>
+						<li>3 for master nodes; see <a href="http://kubernetes.io/docs/admin/kube-apiserver/" target="_blank" class="code-light-snippet">kube-apiserver</a></li>
+						<li>10 for workers; see <a href="http://kubernetes.io/docs/admin/kubelet/" target="_blank" class="code-light-snippet">kubelet</a></li>
 					</ul>
 				</template>
             </md-tab>
@@ -71,15 +65,15 @@
 					<br>
 
 					<p class="narrow-paragraph">
-						CoreOS already comes with Kubernetes wrapper. For this exercise, only <span class="code-light-snippet">kubectl</span> needs to be installed.
+						Since CoreOS Linux already comes with <a href="https://coreos.com/kubernetes/docs/latest/kubelet-wrapper.html" target="_blank" class="normal-link">Kubernetes wrapper</a>, only <span class="code-light-snippet">kubectl</span> needs to be installed.
 					</p>
 					<p class="narrow-paragraph">
-						To install <a href="https://github.com/kubernetes/kubernetes/releases" target="_blank" class="normal-link">Kubernetes binaries</a>.
+						To install <a href="https://github.com/kubernetes/kubernetes/releases" target="_blank" class="normal-link">Kubernetes binaries</a>
 					</p>
-					<md-input type="text" [(ngModel)]="inputKubernetesVersion" placeholder="Kubernetes version"></md-input>
-					<md-input type="text" [(ngModel)]="inputKubernetesGOOS" placeholder="GOOS"></md-input>
-					<md-input type="text" [(ngModel)]="inputKubernetesGOARCH" placeholder="GOARCH"></md-input>
-					<md-input type="text" [(ngModel)]="inputKubernetesExecDir" placeholder="exec dir"></md-input>
+					<md-input type="text" [(ngModel)]="kubeInstall.version" placeholder="Kubernetes version"></md-input>
+					<md-input type="text" [(ngModel)]="kubeInstall.goOS" placeholder="GOOS"></md-input>
+					<md-input type="text" [(ngModel)]="kubeInstall.goARCH" placeholder="GOARCH"></md-input>
+					<md-input type="text" [(ngModel)]="kubeInstall.execDir" placeholder="exec dir"></md-input>
 					<br>
 
 					<div class="osx-window">
@@ -91,7 +85,7 @@
 									<div class="zoom"><span><strong></strong></span></div>
 								</div><span class="title-bar-text">terminal</span></div>
 							<div class="content">
-								<pre class="osx-terminal-contents">{{getKubernetesCommandInstall()}}</pre>
+								<pre class="osx-terminal-contents">{{kubeInstall.getCommand()}}</pre>
 							</div>
 						</div>
 					</div>

@@ -338,9 +338,15 @@
         <div id="system-requirements"></div>
         <h2><a href="/doc/{{docVersion}}/faq#system-requirements" class="faq-title">System Requirements</a></h2>
         <p class="narrow-paragraph">
-            etcd compiles to executable binary; no external dependency. Most stable production environment is Linux operating system with amd64 architecture. Since etcd writes data onto disk, SSD is highly recommended. Default storage size limit for etcd is 2GB,
-            configurable up to 8GB; see <a href="https://github.com/coreos/etcd/blob/master/mvcc/backend/backend.go#L46-L53" target="_blank" class="code-link">DefaultQuotaBytes</a>. Allocate as much heap size to avoid disk swap. At CoreOS,
-            etcd is usually deployed on dedicated CoreOS Linux machines, with dual-core processors, 2GB of RAM, and 80GB of SSD.
+            etcd compiles to executable binary; no external dependency.
+        </p>
+        <p class="narrow-paragraph">
+            Since etcd writes data to disk, SSD is highly recommended. Default storage size limit for etcd is 2GB, configurable up to 8GB; see <a href="https://github.com/coreos/etcd/blob/master/mvcc/backend/backend.go#L46-L53" target="_blank" class="code-link">DefaultQuotaBytes</a>.
+            And allocate as much heap size to avoid disk swap. At CoreOS, etcd cluster is usually deployed on dedicated CoreOS Linux machines, with dual-core processors, 2GB of RAM, and 80GB of SSD, <i>at the very least</i>. <b>It highly varies on
+            workloads; please test before production deployment</b>.
+        </p>
+        <p class="narrow-paragraph">
+            Most stable production environment is Linux operating system with amd64 architecture.
         </p>
         <table class="table narrow-paragraph">
             <thead>
