@@ -615,12 +615,46 @@
 {{etcd.getEndpointHealthCommand(etcd.flags[0])}}
 
 </pre>
-					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top" class="normal-link">↑ top</a></div>
-					<br>
-					<br>
 				</template>
+                <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top" class="normal-link">↑ top</a></div>
+                <br>
+                <br>
             </md-tab>
 
+
+            <md-tab>
+                <template md-tab-label>
+					etcd-operator
+				</template>
+                <template md-tab-content>
+					<br>
+					<h5>Why?</h5>
+					<p class="narrow-paragraph">
+						Application container gives much portability to initial development phase. But operating and scaling container requires much more work. <a href="http://kubernetes.io/" target="_blank" class="normal-link">Kubernetes</a> manages such complex container environments. <a href="https://github.com/coreos/etcd-operator" target="_blank" class="normal-link">etcd-operator</a> deploy and manage etcd on Kubernetes.
+					</p>
+					<pre *ngIf="etcd.secure" class="code-dark"># deploy etcd-operator
+kubectl create -f example/deployment.yaml
+kubectl get deployments
+kubectl get thirdpartyresources
+kubectl get pods
+
+# create etcd cluster in pods
+kubectl create -f example/example-etcd-cluster.yaml
+kubectl get pods
+kubectl get services
+
+# test with kubectl
+kubectl run --rm -i test \
+    --image quay.io/coreos/etcd \
+    --restart=Never -- \
+    /bin/sh -c "ETCDCTL_API=3 /usr/local/bin/etcdctl --endpoints=http://etcd-cluster-0000:2379,http://etcd-cluster-0001:2379,http://etcd-cluster-0002:2379 endpoint health"
+
+</pre>
+				</template>
+                <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top" class="normal-link">↑ top</a></div>
+                <br>
+                <br>
+            </md-tab>
         </md-tab-group>
     </div>
 </md-sidenav-layout>

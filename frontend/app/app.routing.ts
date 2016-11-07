@@ -10,7 +10,6 @@ doc
 */
 import { DocTipComponent } from './doc/tip/doc.component';
 import { InstallDeployTipComponent } from './doc/tip/install-deploy.component';
-import { KubernetesTipComponent } from './doc/tip/kubernetes.component';
 import { QuickTutorialsTipComponent } from './doc/tip/quick-tutorials.component';
 import { FAQTipComponent } from './doc/tip/faq.component';
 import { ComparisonTipComponent } from './doc/tip/comparison.component';
@@ -47,7 +46,6 @@ const appRoutes: Routes = [
         children: [
             { path: '', component: DocTipComponent },
             { path: 'install-deploy', component: InstallDeployTipComponent },
-            { path: 'kubernetes', component: KubernetesTipComponent },
             { path: 'quick-tutorials', component: QuickTutorialsTipComponent },
             { path: 'faq', component: FAQTipComponent },
             { path: 'comparison', component: ComparisonTipComponent },
@@ -81,7 +79,6 @@ export const routedComponents = [
 
     DocTipComponent,
     InstallDeployTipComponent,
-    KubernetesTipComponent,
     QuickTutorialsTipComponent,
     FAQTipComponent,
     ComparisonTipComponent,

@@ -158,4 +158,10 @@ export class InstallDeployTipComponent extends ParentComponent {
         );
         ///////////////////////////////////////////////////
     }
+
+    getEtcdOperator() {
+        return `
+
+`;
+    }
 }
