@@ -11,8 +11,8 @@ function cleanDir(dir: string) {
     if (ds === undefined) {
         return '';
     }
-    if (ds !== '/' && ds.endsWith('/')) {
-        ds = ds.substring(0, ds.length - 1);
+    if (ds !== '/' && String(ds).endsWith('/')) {
+        ds = String(ds).substring(0, ds.length - 1);
     }
     return ds;
 }
@@ -49,7 +49,7 @@ GOARCH=${this.goARCH}
 
 DOWNLOAD_URL=https://storage.googleapis.com/kubernetes-release/release
 
-BINS='kube-apiserver kube-controller-manager kube-scheduler kube-proxy kubelet kubectl'` + `
+BINS='kubelet kube-apiserver kube-controller-manager kube-scheduler kube-proxy kubectl'` + `
 
 ` + 'for K8S_BIN in ${BINS}; do' + `
     echo "Downloading" ` + '${K8S_BIN}' + `
@@ -64,13 +64,11 @@ BINS='kube-apiserver kube-controller-manager kube-scheduler kube-proxy kubelet k
         txt += 'sudo mv /tmp/${K8S_BIN} ' + this.getExecDir() + `
 done
 
+` + this.getExecDir() + divide + `kubelet --version
 ` + this.getExecDir() + divide + `kube-apiserver --version
 ` + this.getExecDir() + divide + `kube-controller-manager --version
 ` + this.getExecDir() + divide + `kube-scheduler --version
-
 ` + this.getExecDir() + divide + `kube-proxy --version
-` + this.getExecDir() + divide + `kubelet --version
-
 ` + this.getExecDir() + divide + `kubectl version
 `;
 
@@ -78,8 +76,13 @@ done
     }
 }
 
+// http://kubernetes.io/docs/admin/kubelet/
+export class KubeletFlag {
+
+}
+
 // http://kubernetes.io/docs/admin/kube-apiserver/
-export class KubernetesAPIServerFlag {
+export class KubeAPIServerFlag {
     name: string;
 
     // --advertise-address
@@ -143,7 +146,7 @@ export class KubernetesAPIServerFlag {
 }
 
 // http://kubernetes.io/docs/admin/kube-controller-manager/
-export class KubernetesControllerManagerFlag {
+export class KubeControllerManagerFlag {
     name: string;
 
     address: string;
@@ -180,7 +183,7 @@ export class KubernetesControllerManagerFlag {
 
 
 // http://kubernetes.io/docs/admin/kube-scheduler/
-export class KubernetesSchedulerFlag {
+export class KubeSchedulerFlag {
     name: string;
 
     leaderElect: boolean;

@@ -11,8 +11,8 @@ function cleanDir(dir: string) {
     if (ds === undefined) {
         return '';
     }
-    if (ds !== '/' && ds.endsWith('/')) {
-        ds = ds.substring(0, ds.length - 1);
+    if (ds !== '/' && String(ds).endsWith('/')) {
+        ds = String(ds).substring(0, ds.length - 1);
     }
     return ds;
 }
@@ -237,12 +237,12 @@ cfssl gencert` + ' \\' + `
 
     getCertsPrepareCommand(dstCertsDir: string) {
         return `# after transferring certs to remote machines
-
 sudo mkdir -p ${cleanDir(dstCertsDir)}
 sudo chown -R root:$(whoami) ${cleanDir(dstCertsDir)}
 sudo chmod -R a+rw ${cleanDir(dstCertsDir)}
-
-sudo cp ${this.getCertsDir()}/* ${cleanDir(dstCertsDir)}`;
+sudo chmod a+rw ${this.getCertsDir()}/*
+sudo cp ${this.getCertsDir()}/* ${cleanDir(dstCertsDir)}
+`;
     }
 
     getCFSSLFilesTxt(dstCertsDir: string, name: string) {

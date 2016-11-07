@@ -334,35 +334,18 @@
 
 					<div *ngFor="let flag of etcd.flags; let i = index;">
 						<div *ngIf="etcd.clusterSize > i">
-							<div class="osx-window">
-								<div class="window-narrow">
-									<div class="titlebar">
-										<div class="buttons">
-											<div class="closebtn"><span><strong></strong></span></div>
-											<div class="minimize"><span><strong></strong></span></div>
-											<div class="zoom"><span><strong></strong></span></div>
-										</div><span class="title-bar-text">terminal</span></div>
-									<div class="content">
-										<pre class="osx-terminal-contents">{{flag.getDataDirPrepareCommand()}}</pre>
-									</div>
-								</div>
-							</div>
+							<pre *ngIf="etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}}
 
-							<div *ngIf="etcd.secure" class="osx-window">
-								<div class="window-narrow">
-									<div class="titlebar">
-										<div class="buttons">
-											<div class="closebtn"><span><strong></strong></span></div>
-											<div class="minimize"><span><strong></strong></span></div>
-											<div class="zoom"><span><strong></strong></span></div>
-										</div><span class="title-bar-text">terminal</span></div>
-									<div class="content">
-										<pre class="osx-terminal-contents">{{cfssl.getCertsPrepareCommand(flag.certsDir)}}</pre>
-									</div>
-								</div>
-							</div>
+{{cfssl.getCertsPrepareCommand(flag.certsDir)}}
 
-							<pre class="code-dark">{{etcd.getCommand(flag, false, false)}}</pre>
+{{etcd.getCommand(flag, false, false)}}
+
+</pre>
+							<pre *ngIf="!etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}}
+
+{{etcd.getCommand(flag, false, false)}}
+
+</pre>
 							<br>
 						</div>
 					</div>
@@ -430,49 +413,20 @@
 					</p>
 					<div *ngFor="let flag of etcd.flags; let i = index;">
 						<div *ngIf="etcd.clusterSize > i">
-							<div class="osx-window">
-								<div class="window-narrow">
-									<div class="titlebar">
-										<div class="buttons">
-											<div class="closebtn"><span><strong></strong></span></div>
-											<div class="minimize"><span><strong></strong></span></div>
-											<div class="zoom"><span><strong></strong></span></div>
-										</div><span class="title-bar-text">terminal</span></div>
-									<div class="content">
-										<pre class="osx-terminal-contents">{{flag.getDataDirPrepareCommand()}}</pre>
-									</div>
-								</div>
-							</div>
+							<pre *ngIf="etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}}
 
-							<div *ngIf="etcd.secure" class="osx-window">
-								<div class="window-narrow">
-									<div class="titlebar">
-										<div class="buttons">
-											<div class="closebtn"><span><strong></strong></span></div>
-											<div class="minimize"><span><strong></strong></span></div>
-											<div class="zoom"><span><strong></strong></span></div>
-										</div><span class="title-bar-text">terminal</span></div>
-									<div class="content">
-										<pre class="osx-terminal-contents">{{cfssl.getCertsPrepareCommand(flag.certsDir)}}</pre>
-									</div>
-								</div>
-							</div>
+{{cfssl.getCertsPrepareCommand(flag.certsDir)}}
 
-							<pre class="code-dark">{{etcd.getServiceFile(flag)}}</pre>
-						
-							<div class="osx-window">
-								<div class="window-narrow">
-									<div class="titlebar">
-										<div class="buttons">
-											<div class="closebtn"><span><strong></strong></span></div>
-											<div class="minimize"><span><strong></strong></span></div>
-											<div class="zoom"><span><strong></strong></span></div>
-										</div><span class="title-bar-text">terminal</span></div>
-									<div class="content">
-										<pre class="osx-terminal-contents">{{flag.getSystemdCommand()}}</pre>
-									</div>
-								</div>
-							</div>
+{{etcd.getServiceFile(flag)}}
+
+{{flag.getSystemdCommand()}}
+</pre>
+							<pre *ngIf="!etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}}
+
+{{etcd.getServiceFile(flag)}}
+
+{{flag.getSystemdCommand()}}
+</pre>
 							<br>
 						</div>
 					</div>
@@ -566,49 +520,20 @@
 					<br>
 					<div *ngFor="let flag of etcd.flags; let i = index;">
 						<div *ngIf="etcd.clusterSize > i">
-							<div class="osx-window">
-								<div class="window-narrow">
-									<div class="titlebar">
-										<div class="buttons">
-											<div class="closebtn"><span><strong></strong></span></div>
-											<div class="minimize"><span><strong></strong></span></div>
-											<div class="zoom"><span><strong></strong></span></div>
-										</div><span class="title-bar-text">terminal</span></div>
-									<div class="content">
-										<pre class="osx-terminal-contents">{{flag.getDataDirPrepareCommand()}}</pre>
-									</div>
-								</div>
-							</div>
+							<pre *ngIf="etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}}
 
-							<div *ngIf="etcd.secure" class="osx-window">
-								<div class="window-narrow">
-									<div class="titlebar">
-										<div class="buttons">
-											<div class="closebtn"><span><strong></strong></span></div>
-											<div class="minimize"><span><strong></strong></span></div>
-											<div class="zoom"><span><strong></strong></span></div>
-										</div><span class="title-bar-text">terminal</span></div>
-									<div class="content">
-										<pre class="osx-terminal-contents">{{cfssl.getCertsPrepareCommand(flag.certsDir)}}</pre>
-									</div>
-								</div>
-							</div>
+{{cfssl.getCertsPrepareCommand(flag.certsDir)}}
 
-							<pre class="code-dark">{{etcd.getServiceFileRkt(flag)}}</pre>
+{{etcd.getServiceFileRkt(flag)}}
 
-							<div class="osx-window">
-								<div class="window-narrow">
-									<div class="titlebar">
-										<div class="buttons">
-											<div class="closebtn"><span><strong></strong></span></div>
-											<div class="minimize"><span><strong></strong></span></div>
-											<div class="zoom"><span><strong></strong></span></div>
-										</div><span class="title-bar-text">terminal</span></div>
-									<div class="content">
-										<pre class="osx-terminal-contents">{{flag.getSystemdCommand()}}</pre>
-									</div>
-								</div>
-							</div>
+{{flag.getSystemdCommand()}}
+</pre>
+							<pre *ngIf="!etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}}
+
+{{etcd.getServiceFileRkt(flag)}}
+
+{{flag.getSystemdCommand()}}
+</pre>
 							<br>
 						</div>
 					</div>
@@ -616,19 +541,18 @@
 					<br>
 					Check status:
 					<br>
-					<div class="osx-window">
-						<div class="window-mid">
-							<div class="titlebar">
-								<div class="buttons">
-									<div class="closebtn"><span><strong></strong></span></div>
-									<div class="minimize"><span><strong></strong></span></div>
-									<div class="zoom"><span><strong></strong></span></div>
-								</div><span class="title-bar-text">terminal</span></div>
-							<div class="content">
-								<pre class="osx-terminal-contents">{{etcd.getEndpointHealthCommand(etcd.flags[0])}}</pre>
-							</div>
-						</div>
-					</div>
+					<pre *ngIf="etcd.secure" class="code-dark">{{etcd.getInstallCommandLinux()}}
+
+{{cfssl.getCertsPrepareCommand(etcd.flags[0].certsDir)}}
+
+{{etcd.getEndpointHealthCommand(etcd.flags[0])}}
+
+</pre>
+					<pre *ngIf="!etcd.secure" class="code-dark">{{etcd.getInstallCommandLinux()}}
+
+{{etcd.getEndpointHealthCommand(etcd.flags[0])}}
+
+</pre>
 					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top" class="normal-link">↑ top</a></div>
 					<br>
 					<br>
@@ -658,49 +582,20 @@
 					</p>
 					<div *ngFor="let flag of etcd.flags; let i = index;">
 						<div *ngIf="etcd.clusterSize > i">
-							<div class="osx-window">
-								<div class="window-narrow">
-									<div class="titlebar">
-										<div class="buttons">
-											<div class="closebtn"><span><strong></strong></span></div>
-											<div class="minimize"><span><strong></strong></span></div>
-											<div class="zoom"><span><strong></strong></span></div>
-										</div><span class="title-bar-text">terminal</span></div>
-									<div class="content">
-										<pre class="osx-terminal-contents">{{flag.getDataDirPrepareCommand()}}</pre>
-									</div>
-								</div>
-							</div>
+							<pre *ngIf="etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}}
 
-							<div *ngIf="etcd.secure" class="osx-window">
-								<div class="window-narrow">
-									<div class="titlebar">
-										<div class="buttons">
-											<div class="closebtn"><span><strong></strong></span></div>
-											<div class="minimize"><span><strong></strong></span></div>
-											<div class="zoom"><span><strong></strong></span></div>
-										</div><span class="title-bar-text">terminal</span></div>
-									<div class="content">
-										<pre class="osx-terminal-contents">{{cfssl.getCertsPrepareCommand(flag.certsDir)}}</pre>
-									</div>
-								</div>
-							</div>
+{{cfssl.getCertsPrepareCommand(flag.certsDir)}}
 
-							<pre class="code-dark">{{etcd.getServiceFileCoreOS(flag)}}</pre>
+{{etcd.getServiceFileCoreOS(flag)}}
 
-							<div class="osx-window">
-								<div class="window-narrow">
-									<div class="titlebar">
-										<div class="buttons">
-											<div class="closebtn"><span><strong></strong></span></div>
-											<div class="minimize"><span><strong></strong></span></div>
-											<div class="zoom"><span><strong></strong></span></div>
-										</div><span class="title-bar-text">terminal</span></div>
-									<div class="content">
-										<pre class="osx-terminal-contents">{{etcd.getServiceFileCoreOSCommand()}}</pre>
-									</div>
-								</div>
-							</div>
+{{etcd.getServiceFileCoreOSCommand()}}
+</pre>
+							<pre *ngIf="!etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}}
+
+{{etcd.getServiceFileCoreOS(flag)}}
+
+{{etcd.getServiceFileCoreOSCommand()}}
+</pre>
 							<br>
 						</div>
 					</div>
@@ -708,19 +603,18 @@
 					<br>
 					Check status:
 					<br>
-					<div class="osx-window">
-						<div class="window-mid">
-							<div class="titlebar">
-								<div class="buttons">
-									<div class="closebtn"><span><strong></strong></span></div>
-									<div class="minimize"><span><strong></strong></span></div>
-									<div class="zoom"><span><strong></strong></span></div>
-								</div><span class="title-bar-text">terminal</span></div>
-							<div class="content">
-								<pre class="osx-terminal-contents">{{etcd.getEndpointHealthCommand(etcd.flags[0])}}</pre>
-							</div>
-						</div>
-					</div>
+					<pre *ngIf="etcd.secure" class="code-dark">{{etcd.getInstallCommandLinux()}}
+
+{{cfssl.getCertsPrepareCommand(etcd.flags[0].certsDir)}}
+
+{{etcd.getEndpointHealthCommand(etcd.flags[0])}}
+
+</pre>
+					<pre *ngIf="!etcd.secure" class="code-dark">{{etcd.getInstallCommandLinux()}}
+
+{{etcd.getEndpointHealthCommand(etcd.flags[0])}}
+
+</pre>
 					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top" class="normal-link">↑ top</a></div>
 					<br>
 					<br>

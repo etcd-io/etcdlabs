@@ -13,23 +13,27 @@ function cleanDir(dir: string) {
     if (ds === undefined) {
         return '';
     }
-    if (ds !== '/' && ds.endsWith('/')) {
-        ds = ds.substring(0, ds.length - 1);
+    if (ds !== '/' && String(ds).endsWith('/')) {
+        ds = String(ds).substring(0, ds.length - 1);
     }
     return ds;
 }
 
 function getSystemdCommand(service: string) {
-    return `sudo systemctl daemon-reload
+    return `# to start service
+sudo systemctl daemon-reload
 sudo systemctl enable ${service}.service
 sudo systemctl start ${service}.service
 
+# to get logs from service
 sudo systemctl status ${service}.service -l --no-pager
 sudo journalctl -u ${service}.service -l --no-pager|less
 sudo journalctl -f -u ${service}.service
 
+# to stop service
 sudo systemctl stop ${service}.service
-sudo systemctl disable ${service}.service`;
+sudo systemctl disable ${service}.service
+`;
 }
 
 export class EtcdFlag {
@@ -276,7 +280,8 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
         txt += 'sudo cp /tmp/test-etcd-${ETCD_VER}/etcd* ' + this.getExecDir() + `
 
 ` + this.getExecDir() + divide + `etcd --version
-` + this.getExecDir() + divide + `etcdctl --version`;
+` + this.getExecDir() + divide + `etcdctl --version
+`;
 
         return txt;
     }
@@ -307,7 +312,8 @@ GOOGLE_URL=https://storage.googleapis.com/etcd
         txt += 'sudo cp /tmp/test-etcd-${ETCD_VER}/etcd* ' + this.getExecDir() + `
 
 ` + this.getExecDir() + divide + `etcd --version
-` + this.getExecDir() + divide + `etcdctl --version`;
+` + this.getExecDir() + divide + `etcdctl --version
+`;
 
         return txt;
     }
@@ -457,7 +463,8 @@ GOOGLE_URL=https://storage.googleapis.com/etcd
     }
 
     getServiceFile(flag: EtcdFlag) {
-        return `cat > /tmp/${flag.name}.service <<EOF
+        return `# to write service file for etcd
+cat > /tmp/${flag.name}.service <<EOF
 [Unit]
 Description=etcd
 Documentation=https://github.com/coreos/etcd
@@ -505,7 +512,10 @@ sudo mv /tmp/${flag.name}.service /etc/systemd/system/${flag.name}.service
         }
 
         // need 'rkt trust' command
-        if (this.rkt.fetchURLPrefixToTrust !== '' && this.rkt.publicKeyToTrust !== '' && this.rkt.customACI !== '') {
+        if (this.rkt.customACI !== '') {
+            if (this.rkt.fetchURLPrefixToTrust == '' || this.rkt.publicKeyToTrust == '') {
+                rktRunFlags.push('--insecure-options' + ' ' + 'image');
+            }
             rktRunFlags.push(this.rkt.customACI + ' ' + '--');
         } else {
             rktRunFlags.push('coreos.com/etcd:' + this.version + ' ' + '--');
@@ -515,6 +525,11 @@ sudo mv /tmp/${flag.name}.service /etc/systemd/system/${flag.name}.service
 
         // need 'rkt trust' command
         if (this.rkt.fetchURLPrefixToTrust !== '' && this.rkt.publicKeyToTrust !== '' && this.rkt.customACI !== '') {
+            /*
+            coreos.com/etcd
+            https://pgp.mit.edu/pks/lookup?op=get&search=0x1DDD39C7EB70C24C&options=mr
+            https://storage.googleapis.com/etcd/tip/etcd-20161105-ecd4803.aci
+            */
             cmd += this.rkt.getTrustCommandLinux() + `
 
 `;
@@ -531,7 +546,8 @@ sudo mv /tmp/${flag.name}.service /etc/systemd/system/${flag.name}.service
         }
         txt += lineBreak + this.getFlagTxt(flag, true, false);
 
-        cmd += `cat > /tmp/${flag.name}.service <<EOF
+        cmd += `# to write service file for etcd with rkt
+cat > /tmp/${flag.name}.service <<EOF
 [Unit]
 Description=etcd with rkt
 Documentation=https://github.com/coreos/rkt
@@ -548,14 +564,17 @@ ExecStart=` + txt + `
 WantedBy=multi-user.target
 EOF
 
-sudo mv /tmp/${flag.name}.service /etc/systemd/system/${flag.name}.service`;
+sudo mv /tmp/${flag.name}.service /etc/systemd/system/${flag.name}.service
+
+`;
 
         return cmd;
     }
 
     // https://github.com/coreos/coreos-overlay/tree/master/app-admin/etcd-wrapper/files
     getServiceFileCoreOS(flag: EtcdFlag) {
-        let cmd = `cat > /tmp/override-${flag.name}.conf <<EOF
+        let cmd = `# to update etcd-member service file
+cat > /tmp/override-${flag.name}.conf <<EOF
 [Service]
 Environment="ETCD_IMAGE_TAG=${this.version}"
 Environment="ETCD_DATA_DIR=${flag.getDataDir()}"
@@ -565,7 +584,10 @@ EOF
 
 sudo mkdir -p /etc/systemd/system/etcd-member.service.d
 sudo mv /tmp/override-${flag.name}.conf /etc/systemd/system/etcd-member.service.d/override.conf
-# sudo systemd-delta --type=extended`;
+
+# to check service-file-override status
+sudo systemd-delta --type=extended
+`;
 
         return cmd;
     }

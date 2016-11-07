@@ -56,7 +56,7 @@
 					<ul>
 						<li>3~5 for etcd cluster with TLS enabled; see <a routerLink="/doc/{{docVersion}}/install-deploy" class="normal-link">etcd Install and Deploy</a></li>
 						<li>1 for <a href="http://kubernetes.io/docs/user-guide/kubectl-overview/" target="_blank" class="code-light-snippet">kubectl</a></li>
-						<li>3 for master nodes with <a href="http://kubernetes.io/docs/admin/kubelet/" target="_blank" class="code-light-snippet">kubelet</a></li> and <a href="http://kubernetes.io/docs/admin/kube-apiserver/" target="_blank" class="code-light-snippet">kube-apiserver</a></li>
+						<li>3 for master nodes with <a href="http://kubernetes.io/docs/admin/kubelet/" target="_blank" class="code-light-snippet">kubelet</a> and <a href="http://kubernetes.io/docs/admin/kube-apiserver/" target="_blank" class="code-light-snippet">kube-apiserver</a></li>
 						<li>10 for workers with <a href="http://kubernetes.io/docs/admin/kubelet/" target="_blank" class="code-light-snippet">kubelet</a></li>
 					</ul>
 
@@ -263,6 +263,9 @@
 					<br>
 					<h5>Set up TLS Assets</h5>
 					<br>
+					<p class="narrow-paragraph">
+						Type in master node IPs:
+					</p>
 					<!--TODO: use md-textarea-->
 					<textarea
 						type="text"
@@ -374,6 +377,9 @@
 					<br>
 					<h5>Set up TLS Assets</h5>
 					<br>
+					<p class="narrow-paragraph">
+						Type in master node IPs:
+					</p>
 					<!--TODO: use md-textarea-->
 					<textarea
 						type="text"
@@ -423,9 +429,9 @@
 					<br>
 
 					<br>
-					<h5>TODO</h5>
+					<h5>kubelet</h5>
 					<p class="narrow-paragraph">
-						...
+						<span class="code-light-snippet">kubelet</span> runs on master nodes with <span class="code-light-snippet">--register-schedulable=false</span> flag. It only communicates with <span class="code-light-snippet">kube-apiserver</span> and routes cluster works to task-specific workder nodes.
 					</p>
 
 					<br>
