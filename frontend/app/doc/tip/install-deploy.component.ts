@@ -44,16 +44,18 @@ export class InstallDeployTipComponent extends ParentComponent {
         this.cfssl = new CFSSL(
             'R1.2',
             '/usr/local/bin',
-            '$HOME/test-certs',
+            '$HOME/certs',
+            'etcd-root-ca',
+            'etcd-gencert.json',
             'etcd',
-            'etcd, security team',
+            'etcd security',
             'San Francisco',
             'California',
             'USA',
             'rsa',
             4096,
             87600,
-            'etcd'
+            'etcd-root-ca'
         );
         this.inputCFSSLMoreHostsTxt = '';
         ///////////////////////////////////////////////////
@@ -78,78 +80,88 @@ export class InstallDeployTipComponent extends ParentComponent {
                     'my-etcd-1',
                     '/var/lib/etcd',
                     '/etc/ssl/certs',
-                    'TEST_IP_1',
+                    '10.240.0.35',
                     2379,
                     2380,
                     'my-etcd-token',
-                    'new'
+                    'new',
+                    'etcd-root-ca'
                 ),
                 new EtcdFlag(
                     'my-etcd-2',
                     '/var/lib/etcd',
                     '/etc/ssl/certs',
-                    'TEST_IP_2',
+                    '10.240.0.36',
                     2379,
                     2380,
                     'my-etcd-token',
-                    'new'
+                    'new',
+                    'etcd-root-ca'
                 ),
                 new EtcdFlag(
                     'my-etcd-3',
                     '/var/lib/etcd',
                     '/etc/ssl/certs',
-                    'TEST_IP_3',
+                    '10.240.0.37',
                     2379,
                     2380,
                     'my-etcd-token',
-                    'new'
+                    'new',
+                    'etcd-root-ca'
                 ),
                 new EtcdFlag(
                     'my-etcd-4',
                     '/var/lib/etcd',
                     '/etc/ssl/certs',
-                    'TEST_IP_4',
+                    '10.240.0.38',
                     2379,
                     2380,
                     'my-etcd-token',
-                    'new'
+                    'new',
+                    'etcd-root-ca'
                 ),
                 new EtcdFlag(
                     'my-etcd-5',
                     '/var/lib/etcd',
                     '/etc/ssl/certs',
-                    'TEST_IP_5',
+                    '10.240.0.39',
                     2379,
                     2380,
                     'my-etcd-token',
-                    'new'
+                    'new',
+                    'etcd-root-ca'
                 ),
                 new EtcdFlag(
                     'my-etcd-6',
                     '/var/lib/etcd',
                     '/etc/ssl/certs',
-                    'TEST_IP_6',
+                    '10.240.0.40',
                     2379,
                     2380,
                     'my-etcd-token',
-                    'new'
+                    'new',
+                    'etcd-root-ca'
                 ),
                 new EtcdFlag(
                     'my-etcd-7',
                     '/var/lib/etcd',
                     '/etc/ssl/certs',
-                    'TEST_IP_7',
+                    '10.240.0.41',
                     2379,
                     2380,
                     'my-etcd-token',
-                    'new'
+                    'new',
+                    'etcd-root-ca'
                 ),
-            ]
+            ],
+            new Rkt('v1.18.0', '/', '', '', '')
         );
         ///////////////////////////////////////////////////
+    }
 
-        ///////////////////////////////////////////////////
-        this.rkt = new Rkt('v1.18.0', '/');
-        ///////////////////////////////////////////////////
+    getEtcdOperator() {
+        return `
+
+`;
     }
 }

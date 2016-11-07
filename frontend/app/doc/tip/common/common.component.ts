@@ -28,12 +28,6 @@ export class ParentComponent {
                 'no-text-decoration'
             ),
             new SidebarItem(
-                'Kubernetes',
-                'how to run etcd with Kubernetes',
-                `/doc/${this.docVersion}/kubernetes`,
-                'no-text-decoration'
-            ),
-            new SidebarItem(
                 'Quick Tutorials',
                 'write, read, watch, lock, election, membership, maintenance',
                 `/doc/${this.docVersion}/quick-tutorials`,

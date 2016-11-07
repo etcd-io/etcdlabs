@@ -52,6 +52,14 @@
 
                 <br>
                 <div class="faq-list-title">etcd</div>
+                <a href="/doc/{{docVersion}}/faq#system-requirements" class="faq-list">System requirements</a>
+                <br>
+                <a href="/doc/{{docVersion}}/faq#benchmark" class="faq-list">Benchmark etcd? Test workloads?</a>
+                <br>
+                <a href="/doc/{{docVersion}}/faq#comparison" class="faq-list">How is etcd different than Zookeeper and Consul?</a>
+                <br>
+                <a href="/doc/{{docVersion}}/faq#stm" class="faq-list">How does etcd implement transaction?</a>
+                <br>
                 <a href="/doc/{{docVersion}}/faq#revision" class="faq-list">What is revision in etcd?</a>
                 <br>
                 <a href="/doc/{{docVersion}}/faq#flag-client-urls" class="faq-list">listen-client-urls vs. advertise-client-urls</a>
@@ -61,8 +69,6 @@
             <div class="block block-copy half">
 
                 <div class="faq-list-title">Operation, Membership</div>
-                <a href="/doc/{{docVersion}}/faq#system-requirements" class="faq-list">System Requirements</a>
-                <br>
                 <a href="/doc/{{docVersion}}/faq#quorum-fault-tolerance-table" class="faq-list">Quorum, fault tolerance table</a>
                 <br>
                 <a href="/doc/{{docVersion}}/faq#odd-cluster-size" class="faq-list">Why odd number of cluster size?</a>
@@ -74,6 +80,10 @@
                 <a href="/doc/{{docVersion}}/faq#remove-member-first" class="faq-list">Always remove first when replacing member?</a>
                 <br>
                 <a href="/doc/{{docVersion}}/faq#why-so-strict-about-membership-change" class="faq-list">Why so strict about membershp change?</a>
+                <br>
+                <a href="/doc/{{docVersion}}/faq#dashboard" class="faq-list">Does etcd provide dashboard?</a>
+                <br>
+                <a href="/doc/{{docVersion}}/faq#managed-etcd" class="faq-list">Fully managed etcd?</a>
                 <br>
 
                 <br>
@@ -126,9 +136,10 @@
         <div id="etcd-not-to-use"></div>
         <h2><a href="/doc/{{docVersion}}/faq#etcd-not-to-use" class="faq-title">When not to use etcd</a></h2>
         <p class="narrow-paragraph">
-            etcd can only handle small chunks data: configuration file, JSON, YAML, etc. etcd limits the size of request in 1.5MB; see <a href="https://github.com/coreos/etcd/blob/master/etcdserver/v3_server.go#L34-L38" target="_blank" class="code-link">maxRequestBytes</a>.
-            And default storage size limit is 2GB, configurable up to 8GB; see <a href="https://github.com/coreos/etcd/blob/master/mvcc/backend/backend.go#L46-L53" target="_blank" class="code-link">DefaultQuotaBytes</a>. These are the tradeoffs that etcd
-            makes for strong consistency. etcd is not a relational SQL database. etcd uses <i>key</i> as the primary index: clients can range- and prefix-scan on the keys. etcd does not have a secondary index.
+            etcd can only handle small chunks data: configuration file, JSON, YAML, etc. etcd limits the size of request in 1.5MB; see <a href="https://github.com/coreos/etcd/blob/master/etcdserver/v3_server.go#L34-L38" target="_blank" class="code-light-snippet-red">maxRequestBytes</a>.
+            And default storage size limit is 2GB, configurable up to 8GB; see <a href="https://github.com/coreos/etcd/blob/master/mvcc/backend/backend.go#L46-L53" target="_blank" class="code-light-snippet-red">DefaultQuotaBytes</a> and <a href="https://github.com/coreos/etcd/blob/master/etcdmain/help.go"
+                target="_blank" class="code-light-snippet-red">--quota-backend-bytes</a>. These are the tradeoffs that etcd makes for strong consistency. etcd is not a relational SQL database. etcd uses <i>key</i> as the primary index: clients can range-
+            and prefix-scan on the keys. etcd does not have a secondary index.
         </p>
         <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/faq#top" class="normal-link">↑ top</a></div>
         <br>
@@ -301,46 +312,18 @@
         <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/faq#top" class="normal-link">↑ top</a></div>
         <br>
 
-        <div id="revision"></div>
-        <h2><a href="/doc/{{docVersion}}/faq#revision" class="faq-title">What is revision in etcd?</a></h2>
-        <p class="narrow-paragraph">
-            Each <span class="code-light-snippet">KeyValue</span> contains key and value in bytes with <span class="code-light-snippet">create_revision</span>, <span class="code-light-snippet">mod_revision</span>, and <span class="code-light-snippet">version</span>.
-            And there is <span class="code-light-snippet">Revision</span> field in <span class="code-light-snippet">etcdserverpb.ResponseHeader</span>. <span class="code-light-snippet">Revision</span> is the current revision of etcd. It is int64 and monotonically
-            increased for every backend modification (e.g., Put, Delete, Txn). Note that this <span class="code-light-snippet">Revision</span> is a global revision, not specific to a certain key. <span class="code-light-snippet">create_revision</span>            is the revision of last creation on a key. It is etcd's current revision at the time of the key creation. <span class="code-light-snippet">create_revision == 0</span> means that the key does not exist. <span class="code-light-snippet">mod_revision</span>            is the etcd revision of the last update to the key. <span class="code-light-snippet">version</span> is the number of times the key has been modified since creation.
-        </p>
-        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/faq#top" class="normal-link">↑ top</a></div>
-        <br>
-
-        <div id="flag-client-urls"></div>
-        <h2><a href="/doc/{{docVersion}}/faq#flag-client-urls" class="faq-title">listen-client-urls vs. advertise-client-urls</a></h2>
-        <p class="narrow-paragraph">
-            <span class="code-light-snippet">listen-client-urls</span> is the list of URLs to listen on for client requests: etcd clients request via these endpoints. <span class="code-light-snippet">advertise-client-urls</span> is the list of client
-            URLs to advertise to other members, proxies, clients of the cluster<sup>[1]</sup>. etcd distinguishes between listen URLs and advertise URLs. A listen URL determines which interface etcd will listen on to receive new connections. The advertise
-            URL is what the cluster broadcasts as the address for connecting to the cluster. For example, etcd can be configured to listen on <span class="code-light-snippet">0.0.0.0</span> (all interfaces) but advertise the IP of the machine so remote
-            systems can find it<sup>[2]</sup>.
-        </p>
-        <p class="narrow-paragraph">
-            A common mistake is setting <span class="code-light-snippet">advertise-client-urls</span> to localhost or default host. Please note that <span class="code-light-snippet">advertise-client-urls</span> is the list of endpoitns for remote clients
-            or traffic. For example if you run etcd on a server with IP's <span class="code-light-snippet">1.2.3.4</span> and <span class="code-light-snippet">4.5.6.7</span> but only want to serve client requests through <span class="code-light-snippet">1.2.3.4:2379</span>,
-            you'd pass <span class="code-light-snippet">--advertise-client-urls=http://1.2.3.4:2379</span> to etcd.
-        </p>
-        <p class="narrow-paragraph">
-            Suppose etcd is listening on <span class="code-light-snippet">127.0.0.1</span> and a public IP <span class="code-light-snippet">1.2.3.4</span>. If it advertises <span class="code-light-snippet">127.0.0.1</span> and <span class="code-light-snippet">1.2.3.4</span>            then clients that synchronize their endpoints with the cluster will try to connect to the cluster through <span class="code-light-snippet">127.0.0.1</span> in addition to <span class="code-light-snippet">1.2.3.4</span>.
-        </p>
-        <hr align="left" class="footer-top-line">
-        <footer class="narrow-footer">
-            [1] "<a href="https://github.com/coreos/etcd/issues/6539" target="_blank" class="footer-link">advertise-client-urls question</a>," etcd GitHub issue.
-            <br> [2] "<a href="https://github.com/coreos/etcd/pull/6583#issuecomment-251768299" target="_blank" class="footer-link">github.com/coreos/etcd/pull/6583</a>," etcd GitHub comment.
-        </footer>
-        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/faq#top" class="normal-link">↑ top</a></div>
-        <br><br>
-
         <div id="system-requirements"></div>
-        <h2><a href="/doc/{{docVersion}}/faq#system-requirements" class="faq-title">System Requirements</a></h2>
+        <h2><a href="/doc/{{docVersion}}/faq#system-requirements" class="faq-title">System requirements</a></h2>
         <p class="narrow-paragraph">
-            etcd compiles to executable binary; no external dependency. Most stable production environment is Linux operating system with amd64 architecture. Since etcd writes data onto disk, SSD is highly recommended. Default storage size limit for etcd is 2GB,
-            configurable up to 8GB; see <a href="https://github.com/coreos/etcd/blob/master/mvcc/backend/backend.go#L46-L53" target="_blank" class="code-link">DefaultQuotaBytes</a>. Allocate as much heap size to avoid disk swap. At CoreOS,
-            etcd is usually deployed on dedicated CoreOS Linux machines, with dual-core processors, 2GB of RAM, and 80GB of SSD.
+            etcd compiles to executable binary; no external dependency.
+        </p>
+        <p class="narrow-paragraph">
+            Since etcd writes data to disk, SSD is highly recommended. Default storage size limit is 2GB, configurable up to 8GB; see <a href="https://github.com/coreos/etcd/blob/master/mvcc/backend/backend.go#L46-L53" target="_blank" class="code-light-snippet-red">DefaultQuotaBytes</a>            and <a href="https://github.com/coreos/etcd/blob/master/etcdmain/help.go" target="_blank" class="code-light-snippet-red">--quota-backend-bytes</a>. And allocate as much heap size to avoid disk swap. At CoreOS, etcd cluster is usually deployed
+            on dedicated CoreOS Linux machines, with dual-core processors, 2GB of RAM, and 80GB of SSD <i>at the very least</i>. <b>It highly varies on
+            workloads; please test before production deployment</b>.
+        </p>
+        <p class="narrow-paragraph">
+            Most stable production environment is Linux operating system with amd64 architecture.
         </p>
         <table class="table narrow-paragraph">
             <thead>
@@ -401,6 +384,64 @@
         </p>
         <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/faq#top" class="normal-link">↑ top</a></div>
         <br>
+
+        <div id="benchmark"></div>
+        <h2><a href="/doc/{{docVersion}}/faq#benchmark" class="faq-title">Benchmark etcd? Test workloads?</a></h2>
+        <p class="narrow-paragraph">
+            See <a routerLink="/doc/{{docVersion}}/comparison" class="normal-link">etcd in Comparison</a> for benchmark results. And try <a href="https://github.com/coreos/etcd/tree/master/tools/benchmark" target="_blank" class="normal-link">benchmark</a>            CLI.
+        </p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/faq#top" class="normal-link">↑ top</a></div>
+        <br>
+
+        <div id="comparison"></div>
+        <h2><a href="/doc/{{docVersion}}/faq#comparison" class="faq-title">How is etcd different than Zookeeper and Consul?</a></h2>
+        <p class="narrow-paragraph">
+            See <a routerLink="/doc/{{docVersion}}/comparison" class="normal-link">etcd in Comparison</a>.
+        </p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/faq#top" class="normal-link">↑ top</a></div>
+        <br>
+
+        <div id="stm"></div>
+        <h2><a href="/doc/{{docVersion}}/faq#stm" class="faq-title">How does etcd implement transaction?</a></h2>
+        <p class="narrow-paragraph">
+            See <a routerLink="/doc/{{docVersion}}/stm" class="normal-link">etcd STM</a>.
+        </p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/faq#top" class="normal-link">↑ top</a></div>
+        <br>
+
+        <div id="revision"></div>
+        <h2><a href="/doc/{{docVersion}}/faq#revision" class="faq-title">What is revision in etcd?</a></h2>
+        <p class="narrow-paragraph">
+            Each <span class="code-light-snippet">KeyValue</span> contains key and value in bytes with <span class="code-light-snippet">create_revision</span>, <span class="code-light-snippet">mod_revision</span>, and <span class="code-light-snippet">version</span>.
+            And there is <span class="code-light-snippet">Revision</span> field in <span class="code-light-snippet">etcdserverpb.ResponseHeader</span>. <span class="code-light-snippet">Revision</span> is the current revision of etcd. It is int64 and monotonically
+            increased for every backend modification (e.g., Put, Delete, Txn). Note that this <span class="code-light-snippet">Revision</span> is a global revision, not specific to a certain key. <span class="code-light-snippet">create_revision</span>            is the revision of last creation on a key. It is etcd's current revision at the time of the key creation. <span class="code-light-snippet">create_revision == 0</span> means that the key does not exist. <span class="code-light-snippet">mod_revision</span>            is the etcd revision of the last update to the key. <span class="code-light-snippet">version</span> is the number of times the key has been modified since creation.
+        </p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/faq#top" class="normal-link">↑ top</a></div>
+        <br>
+
+        <div id="flag-client-urls"></div>
+        <h2><a href="/doc/{{docVersion}}/faq#flag-client-urls" class="faq-title">listen-client-urls vs. advertise-client-urls</a></h2>
+        <p class="narrow-paragraph">
+            <span class="code-light-snippet">listen-client-urls</span> is the list of URLs to listen on for client requests: etcd clients request via these endpoints. <span class="code-light-snippet">advertise-client-urls</span> is the list of client
+            URLs to advertise to other members, proxies, clients of the cluster<sup>[1]</sup>. etcd distinguishes between listen URLs and advertise URLs. A listen URL determines which interface etcd will listen on to receive new connections. The advertise
+            URL is what the cluster broadcasts as the address for connecting to the cluster. For example, etcd can be configured to listen on <span class="code-light-snippet">0.0.0.0</span> (all interfaces) but advertise the IP of the machine so remote
+            systems can find it<sup>[2]</sup>.
+        </p>
+        <p class="narrow-paragraph">
+            A common mistake is setting <span class="code-light-snippet">advertise-client-urls</span> to localhost or default host. Please note that <span class="code-light-snippet">advertise-client-urls</span> is the list of endpoitns for remote clients
+            or traffic. For example if you run etcd on a server with IP's <span class="code-light-snippet">1.2.3.4</span> and <span class="code-light-snippet">4.5.6.7</span> but only want to serve client requests through <span class="code-light-snippet">1.2.3.4:2379</span>,
+            you'd pass <span class="code-light-snippet">--advertise-client-urls=http://1.2.3.4:2379</span> to etcd.
+        </p>
+        <p class="narrow-paragraph">
+            Suppose etcd is listening on <span class="code-light-snippet">127.0.0.1</span> and a public IP <span class="code-light-snippet">1.2.3.4</span>. If it advertises <span class="code-light-snippet">127.0.0.1</span> and <span class="code-light-snippet">1.2.3.4</span>            then clients that synchronize their endpoints with the cluster will try to connect to the cluster through <span class="code-light-snippet">127.0.0.1</span> in addition to <span class="code-light-snippet">1.2.3.4</span>.
+        </p>
+        <hr align="left" class="footer-top-line">
+        <footer class="narrow-footer">
+            [1] "<a href="https://github.com/coreos/etcd/issues/6539" target="_blank" class="footer-link">advertise-client-urls question</a>," etcd GitHub issue.
+            <br> [2] "<a href="https://github.com/coreos/etcd/pull/6583#issuecomment-251768299" target="_blank" class="footer-link">github.com/coreos/etcd/pull/6583</a>," etcd GitHub comment.
+        </footer>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/faq#top" class="normal-link">↑ top</a></div>
+        <br><br>
 
         <div id="quorum-fault-tolerance-table"></div>
         <h2><a href="/doc/{{docVersion}}/faq#quorum-fault-tolerance-table" class="faq-title">Quorum, fault tolerance table</a></h2>
@@ -547,6 +588,25 @@
         </footer>
         <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/faq#top" class="normal-link">↑ top</a></div>
         <br><br>
+
+        <!--TODO: update link to etcd Grafana dashboard tempate-->
+        <div id="dashboard"></div>
+        <h2><a href="/doc/{{docVersion}}/faq#dashboard" class="faq-title">Does etcd provide dashboard?</a></h2>
+        <p class="narrow-paragraph">
+            etcd does not have any GUI tools. Instead etcd provides various <a href="https://github.com/coreos/etcd/blob/master/Documentation/metrics.md" target="_blank" class="normal-link">metrics</a> using <a href="https://prometheus.io" target="_blank"
+                class="normal-link">Prometheus</a>. And <a href="http://grafana.org" target="_blank" class="normal-link">Grafana</a> can be used to set up Prometheus dashboards; see <a href="https://github.com/coreos/etcd/blob/master/Documentation/metrics.md"
+                target="_blank" class="normal-link">template</a> and <a href="http://dash.etcd.io/dashboard/db/test-etcd" target="_blank" class="normal-link">sample dashboard</a>.
+        </p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/faq#top" class="normal-link">↑ top</a></div>
+        <br>
+
+        <div id="managed-etcd"></div>
+        <h2><a href="/doc/{{docVersion}}/faq#managed-etcd" class="faq-title">Fully managed etcd?</a></h2>
+        <p class="narrow-paragraph">
+            See <a routerLink="/doc/{{docVersion}}/kubernetes" class="normal-link">etcd in Kubernetes</a> and try <a href="https://github.com/coreos/etcd-operator" target="_blank" class="normal-link">etcd-operator</a>.
+        </p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/faq#top" class="normal-link">↑ top</a></div>
+        <br>
 
         <div id="apply-too-long-unavailable"></div>
         <h2><a href="/doc/{{docVersion}}/faq#apply-too-long-unavailable" class="faq-title">apply entries took too long, unavailable or misconfigured</a></h2>

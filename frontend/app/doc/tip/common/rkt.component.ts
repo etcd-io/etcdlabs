@@ -6,16 +6,59 @@ function getDivider(execDir: string) {
     return divider;
 }
 
+function cleanDir(dir: string) {
+    let ds = dir;
+    if (ds === undefined) {
+        return '';
+    }
+    if (ds !== '/' && String(ds).endsWith('/')) {
+        ds = String(ds).substring(0, ds.length - 1);
+    }
+    return ds;
+}
+
 export class Rkt {
     version: string;
     execDir: string;
 
+    fetchURLPrefixToTrust: string;
+    publicKeyToTrust: string;
+    customACI: string;
+
     constructor(
         version: string,
         execDir: string,
+
+        fetchURLPrefixToTrust: string,
+        publicKeyToTrust: string,
+        customACI: string,
     ) {
         this.version = version;
         this.execDir = execDir;
+
+        this.fetchURLPrefixToTrust = fetchURLPrefixToTrust;
+        this.publicKeyToTrust = publicKeyToTrust;
+        this.customACI = customACI;
+    }
+
+    getExecDir() {
+        return cleanDir(this.execDir);
+    }
+
+    stripVersion() {
+        return this.version.substring(1)
+    }
+
+    getTrustCommandLinux() {
+        let divide = getDivider(this.execDir);
+        let lineBreak = ' \\' + `
+    `;
+
+        let exec = 'sudo' + ' ' + this.getExecDir() + divide + 'rkt' + ' ' + 'trust' + lineBreak;
+        exec += '--prefix' + ' ' + this.fetchURLPrefixToTrust + lineBreak;
+        exec += `'` + this.publicKeyToTrust + `'`;
+
+        return exec;
     }
 
     getInstallCommandLinux() {

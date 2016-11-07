@@ -28,6 +28,8 @@
         </p>
         <br>
 
+        <div id="top"></div>
+
         <p class="narrow-paragraph">
             The new etcd3 API introduces powerful new primitives that advance the system’s capabilities beyond the limits of etcd2. As part of evaluating the effectiveness of etcd3, we spent considerable effort developing distributed concurrency algorithms using
             the new API.
@@ -65,6 +67,8 @@
             Most systems handle the atomicity needed by the example code either through distributed shared locks or a transaction facility. Ultimately, some mechanism enforces atomic accesses over sets of keys while also maintaining fault tolerance and avoiding runaway
             performance degradation under contention. For etcd3, this atomicity mechanism is the transaction.
         </p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/stm#top" class="normal-link">↑ top</a></div>
+        <br>
 
         <br>
         <h4>etcd3 Transactions</h4>
@@ -103,6 +107,8 @@
             <span class="code-light-snippet">to</span>. Similarly, the <span class="code-light-snippet">Put</span> requests are also wrapped in a transaction to ensure <span class="code-light-snippet">from</span> and <span class="code-light-snippet">to</span>            have not been modified since they were last fetched. The upshot is a conflicting schedule that would have corrupted the data instead admits one transaction by modification revision (shown in braces) and retries the other:
         </p>
         <p class="narrow-paragraph" style="text-align:center;"><img src="app/doc/tip/images/stm-diagram2.png" alt="stm-diagram2" align="middle"></p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/stm#top" class="normal-link">↑ top</a></div>
+        <br>
 
         <div style="line-height:3%;"><br></div>
         <h4>Software Transactional Memory</h4>
@@ -130,6 +136,8 @@
             because retries are automatically dispatched by the STM system. Scoping is simpler as well; a transaction can be aborted by returning out of the transaction function with an error or by canceling the transaction context (i.e., context.TODO()).
             Finally, there’s less bookkeeping: juggling revision numbers and building transactions are also handled by the client STM code.
         </p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/stm#top" class="normal-link">↑ top</a></div>
+        <br>
 
         <br>
         <h4>Implementing STM</h4>
@@ -151,6 +159,8 @@
             to access some keys, then commits the transaction. If the STM runtime cannot access etcd (e.g., due to network failure) or the context is canceled, it uses Go’s panic/recover to cancel the transaction. If there is a conflict, the loop repeats,
             trying again with a fresh transaction.
         </p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/stm#top" class="normal-link">↑ top</a></div>
+        <br>
 
         <div style="line-height:3%;"><br></div>
         <h4>Read and Write Sets</h4>
@@ -163,6 +173,8 @@
             These <span class="code-light-snippet">Get</span> and <span class="code-light-snippet">Put</span> requests filter through a readset (rset) and writeset (wset) for conflict detection in the commit phase. This transaction is also user-cancelable
             through context cancellation.
         </p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/stm#top" class="normal-link">↑ top</a></div>
+        <br>
 
         <div style="line-height:3%;"><br></div>
         <h4>Get and Put</h4>
@@ -175,6 +187,8 @@
             the actual update until the transactional commit. For <span class="code-light-snippet">Get</span>, the key’s value is based on its last observed value: from the write set if overwritten, from the read set if cached, or compulsorily from etcd
             if absent. All compulsory reads populate the read set to give repeatable-read isolation and track the key’s revision for conflict resolution.
         </p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/stm#top" class="normal-link">↑ top</a></div>
+        <br>
 
         <div style="line-height:3%;"><br></div>
         <h4>Commit</h4>
@@ -186,6 +200,8 @@
             The commit transaction is built from both the read and write sets. To detect conflicts, the transaction is guarded by the modification revisions of all read keys; if any key has been updated, the transaction fails. If no conflicts are detected, the transaction
             flushes the write set to etcd and succeeds.
         </p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/stm#top" class="normal-link">↑ top</a></div>
+        <br>
 
         <br>
         <h4>Performance of STM on etcd</h4>
@@ -215,6 +231,8 @@
             As the key count goes, up the chance for conflict decreases and repeatable reads have less of an advantage. Eventually, serialized isolation has fewer retries than repeatable reads because its faster retry logic prefetches the read set, saving
             a round trip and shortening the conflict window.
         </p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/stm#top" class="normal-link">↑ top</a></div>
+        <br>
 
         <br>
         <h4>What’s Next?</h4>
@@ -231,12 +249,16 @@
             Interested in trying out etcd3 transactions? The code for etcd is open source and freely available at the <a href="https://github.com/coreos/etcd" target="_blank" class="normal-link">etcd github project page</a>. The source code for etcd3’s
             client STM used for performance testing may be found in the v3 client <a href="https://github.com/coreos/etcd/tree/master/clientv3/concurrency" target="_blank" class="normal-link">concurrency package</a>.
         </p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/stm#top" class="normal-link">↑ top</a></div>
+        <br>
 
         <br>
         <hr align="left" class="footer-top-line">
         <footer class="narrow-footer">
             [1] "<a href="https://en.wikipedia.org/wiki/Software_transactional_memory" target="_blank" class="footer-link">Software transactional memory</a>," Wikipedia.
         </footer>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/stm#top" class="normal-link">↑ top</a></div>
+        <br>
 
     </div>
 </md-sidenav-layout>

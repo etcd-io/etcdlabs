@@ -11,16 +11,32 @@ function cleanDir(dir: string) {
     if (ds === undefined) {
         return '';
     }
-    if (ds !== '/' && ds.endsWith('/')) {
-        ds = ds.substring(0, ds.length - 1);
+    if (ds !== '/' && String(ds).endsWith('/')) {
+        ds = String(ds).substring(0, ds.length - 1);
     }
     return ds;
+}
+
+function getLines(txt: string) {
+    let lines: string[] = [];
+    if (txt !== '') {
+        let ls = txt.split(/\r?\n/);
+        for (let _i = 0; _i < ls.length; _i++) {
+            if (ls[_i] !== '') {
+                lines.push(ls[_i]);
+            }
+        }
+    }
+    return lines;
 }
 
 export class CFSSL {
     version: string;
     execDir: string;
     srcCertsDir: string;
+
+    rootCAPrefix: string;
+    gencertFileName: string;
 
     organization: string;
     organizationUnit: string;
@@ -39,6 +55,9 @@ export class CFSSL {
         execDir: string,
         srcCertsDir: string,
 
+        rootCAPrefix: string,
+        gencertFileName: string,
+
         organization: string,
         organizationUnit: string,
         locationCity: string,
@@ -54,6 +73,9 @@ export class CFSSL {
         this.version = version;
         this.execDir = execDir;
         this.srcCertsDir = srcCertsDir;
+
+        this.rootCAPrefix = rootCAPrefix;
+        this.gencertFileName = gencertFileName;
 
         this.organization = organization;
         this.organizationUnit = organizationUnit;
@@ -79,7 +101,7 @@ export class CFSSL {
     getInstallCommand() {
         let divide = getDivider(this.getExecDir());
 
-        return `rm -f /tmp/cfssl* && rm -rf /tmp/test-certs && mkdir -p /tmp/test-certs
+        return `rm -f /tmp/cfssl* && rm -rf /tmp/certs && mkdir -p /tmp/certs
 
 curl -L https://pkg.cfssl.org/${this.version}/cfssl_linux-amd64 -o /tmp/cfssl
 chmod +x /tmp/cfssl
@@ -97,7 +119,9 @@ mkdir -p ${this.getCertsDir()}
     }
 
     getRootCACommand() {
-        return `cat > ${this.getCertsDir()}/trusted-ca-csr.json <<EOF
+        return `mkdir -p ${this.getCertsDir()}
+
+cat > ${this.getCertsDir()}/${this.rootCAPrefix}-csr.json <<EOF
 {
   "key": {
     "algo": "${this.keyAlgorithm}",
@@ -115,30 +139,14 @@ mkdir -p ${this.getCertsDir()}
   "CN": "${this.commonName}"
 }
 EOF
-
-cfssl gencert --initca=true ${this.getCertsDir()}/trusted-ca-csr.json | cfssljson --bare ${this.getCertsDir()}/trusted-ca
+cfssl gencert --initca=true ${this.getCertsDir()}/${this.rootCAPrefix}-csr.json | cfssljson --bare ${this.getCertsDir()}/${this.rootCAPrefix}
 
 # verify
-openssl x509 -in ${this.getCertsDir()}/trusted-ca.pem -text -noout
-`;
-    }
+openssl x509 -in ${this.getCertsDir()}/${this.rootCAPrefix}.pem -text -noout
 
-    getRootCACommandResult() {
-        return `# CSR configuration
-${this.getCertsDir()}/trusted-ca-csr.json
 
-# CSR
-${this.getCertsDir()}/trusted-ca.csr
-
-# private key
-${this.getCertsDir()}/trusted-ca-key.pem
-
-# public key
-${this.getCertsDir()}/trusted-ca.pem`;
-    }
-
-    getGenCertConfig() {
-        return `cat > ${this.getCertsDir()}/gencert-config.json <<EOF
+# cert-generation configuration
+cat > ${this.getCertsDir()}/${this.gencertFileName} <<EOF
 {
   "signing": {
     "default": {
@@ -152,36 +160,51 @@ ${this.getCertsDir()}/trusted-ca.pem`;
     }
   }
 }
-EOF`;
+EOF
+
+`;
     }
 
-    getGenCertCommand(name: string, host: string, moreHostsTxt: string) {
-        let hosts: string[] = ['127.0.0.1', 'localhost'];
-        if (host !== '' && host !== 'localhost') {
-            hosts.push(host);
-        }
-        if (moreHostsTxt !== '') {
-            let hs = moreHostsTxt.split(/\r?\n/);
-            // hosts = hosts.concat(hs);
-            for (let _i = 0; _i < hs.length; _i++) {
-                if (hs[_i] !== '') {
-                    hosts.push(hs[_i]);
-                }
+    getRootCACommandResult() {
+        return `# CSR configuration
+${this.getCertsDir()}/${this.rootCAPrefix}-csr.json
+
+# CSR
+${this.getCertsDir()}/${this.rootCAPrefix}.csr
+
+# self-signed root CA public key
+${this.getCertsDir()}/${this.rootCAPrefix}.pem
+
+# self-signed root CA private key
+${this.getCertsDir()}/${this.rootCAPrefix}-key.pem
+
+# cert-generation configuration for other TLS assets
+${this.getCertsDir()}/${this.gencertFileName}
+`;
+    }
+
+    getGenCertCommand(name: string, commonName: string, hosts: string[]) {
+        let hs: string[] = ['127.0.0.1', 'localhost'];
+        for (let _i = 0; _i < hosts.length; _i++) {
+            if (hosts[_i] !== '' && hosts[_i] !== 'localhost') {
+                hs.push(hosts[_i]);
             }
         }
 
         let hostTxt = `    `;
         let lineBreak = `
     `;
-        for (let _i = 0; _i < hosts.length; _i++) {
-            hostTxt += '"' + hosts[_i] + '"';
-            if (_i === hosts.length - 1) {
+        for (let _i = 0; _i < hs.length; _i++) {
+            hostTxt += '"' + hs[_i] + '"';
+            if (_i === hs.length - 1) {
                 break;
             }
             hostTxt += ',' + lineBreak;
         }
 
-        return `cat > ${this.getCertsDir()}/${name}-ca-csr.json <<EOF
+        return `mkdir -p ${this.getCertsDir()}
+
+cat > ${this.getCertsDir()}/${name}-ca-csr.json <<EOF
 {
   "key": {
     "algo": "${this.keyAlgorithm}",
@@ -196,27 +219,50 @@ EOF`;
       "C": "${this.locationCountry}"
     }
   ],
-  "CN": "${this.commonName}",
+  "CN": "${commonName}",
   "hosts": [
 ${hostTxt}
   ]
 }
 EOF
-
 cfssl gencert` + ' \\' + `
-    --ca ${this.getCertsDir()}/trusted-ca.pem` + ' \\' + `
-    --ca-key ${this.getCertsDir()}/trusted-ca-key.pem` + ' \\' + `
-    --config ${this.getCertsDir()}/gencert-config.json` + ' \\' + `
-    ` + `${this.getCertsDir()}/${name}-ca-csr.json | cfssljson --bare ${this.getCertsDir()}/${name}`;
+    --ca ${this.getCertsDir()}/${this.rootCAPrefix}.pem` + ' \\' + `
+    --ca-key ${this.getCertsDir()}/${this.rootCAPrefix}-key.pem` + ' \\' + `
+    --config ${this.getCertsDir()}/${this.gencertFileName}` + ' \\' + `
+    ` + `${this.getCertsDir()}/${name}-ca-csr.json | cfssljson --bare ${this.getCertsDir()}/${name}
+
+`;
+    }
+
+    getGenCertCommandTxt(name: string, commonName: string, host: string, moreHostsTxt: string) {
+        let hosts: string[] = [];
+        if (host !== '' && host !== 'localhost') {
+            hosts.push(host);
+        }
+        if (moreHostsTxt !== '') {
+            hosts = hosts.concat(getLines(moreHostsTxt));
+        }
+        return this.getGenCertCommand(name, commonName, hosts);
     }
 
     getCertsPrepareCommand(dstCertsDir: string) {
         return `# after transferring certs to remote machines
-
 sudo mkdir -p ${cleanDir(dstCertsDir)}
 sudo chown -R root:$(whoami) ${cleanDir(dstCertsDir)}
 sudo chmod -R a+rw ${cleanDir(dstCertsDir)}
+sudo chmod a+rw ${this.getCertsDir()}/*
+sudo cp ${this.getCertsDir()}/* ${cleanDir(dstCertsDir)}
+`;
+    }
 
-sudo cp ${this.getCertsDir()}/* ${cleanDir(dstCertsDir)}`;
+    getCFSSLFilesTxt(dstCertsDir: string, name: string) {
+        let lineBreak = `
+`;
+        let txt = '';
+        txt += cleanDir(dstCertsDir) + `/` + name + '-ca-csr.json' + lineBreak;
+        txt += cleanDir(dstCertsDir) + `/` + name + '.csr' + lineBreak;
+        txt += cleanDir(dstCertsDir) + `/` + name + '-key.pem' + lineBreak;
+        txt += cleanDir(dstCertsDir) + `/` + name + '.pem';
+        return txt;
     }
 }
