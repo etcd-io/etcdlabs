@@ -25,10 +25,10 @@
         <br>
         <p class="narrow-paragraph">
             Application container gives much portability to initial development phase. But operating and scaling container requires much more work. <a href="http://kubernetes.io/" target="_blank" class="normal-link">Kubernetes</a> manages such complex
-            container environments. This is an example workflow to deploy etcd on Kubernetes, in most manual way possible. And let Kubernetes operate etcd.
+            container environments. This is an example workflow to deploy etcd on Kubernetes, <b>in most manual way possible</b>. The goal is manage etcd using Kubernetes.
         </p>
         <p class="narrow-paragraph">
-            See <a href="http://kubernetes.io/docs/getting-started-guides/minikube/" target="_blank" class="normal-link">Running Kubernetes Locally via Minikube</a> and other guides below for easier ways.
+            See <a href="http://kubernetes.io/docs/getting-started-guides/minikube/" target="_blank" class="normal-link">Running Kubernetes Locally via Minikube</a> and other guides for more.
         </p>
         <ul>
             <li><a href="http://kubernetes.io/docs/getting-started-guides/" target="_blank" class="normal-link">Kubernetes Guides</a></li>
@@ -71,18 +71,18 @@
 						class="form-control"
 						placeholder="etcd endpoints (line-separated)"
 						rows="5"
-						[(ngModel)]="inputEtcdEndpointsTxt"
+						[(ngModel)]="kubeAPIServer.etcdServersTxt"
 					></textarea>
 					<br>
 					<br>
 					<p class="narrow-paragraph">
 						Type etcd TLS certs for <a href="http://kubernetes.io/docs/admin/kube-apiserver/" target="_blank" class="code-light-snippet">kube-apiserver</a>
 					</p>
-					<md-input dividerColor="warn" type="text" [(ngModel)]="inputEtcdRootCAFile" placeholder="etcd trusted root CA"></md-input>
+					<md-input dividerColor="warn" type="text" [(ngModel)]="kubeAPIServer.etcdCAFile" placeholder="etcd trusted root CA"></md-input>
 					<br>
-					<md-input dividerColor="warn" type="text" [(ngModel)]="inputEtcdCertFile" placeholder="etcd cert (public)"></md-input>
+					<md-input dividerColor="warn" type="text" [(ngModel)]="kubeAPIServer.etcdCertFile" placeholder="etcd cert (public)"></md-input>
 					<br>
-					<md-input dividerColor="warn" type="text" [(ngModel)]="inputEtcdKeyFile" placeholder="etcd key (private)"></md-input>
+					<md-input dividerColor="warn" type="text" [(ngModel)]="kubeAPIServer.etcdKeyFile" placeholder="etcd key (private)"></md-input>
 					<br>
 					<br>
                     <md-input type="text" dividerColor="warn" [(ngModel)]="certsDir" placeholder="Kubernetes certs directory"></md-input>
@@ -213,11 +213,11 @@
                 <template md-tab-content>
 					<br>
 
-					<p class="narrow-paragraph">
+					<!--<p class="narrow-paragraph">
 						Since CoreOS Linux already comes with <a href="https://coreos.com/kubernetes/docs/latest/kubelet-wrapper.html" target="_blank" class="normal-link">Kubernetes wrapper</a>, only <span class="code-light-snippet">kubectl</span> needs to be installed.
 					</p>
+					<br>-->
 
-					<br>
 					<p class="narrow-paragraph">
 						To install <a href="https://github.com/kubernetes/kubernetes/releases" target="_blank" class="normal-link">Kubernetes binaries</a>
 					</p>
@@ -261,23 +261,27 @@
 					</p>
 
 					<br>
-					<h5>Set up TLS Assets</h5>
+					<md-input
+						style="width: 250px;"
+						type="number"
+						[(ngModel)]="kubeAPIServer.apiserverCount"
+						placeholder="kube-apiserver size (up to 3)"
+					></md-input>
+					<span *ngIf="kubeAPIServer.apiserverCount > 3" class="error-message">This tool only supports up to 3 nodes</span>
 					<br>
-					<p class="narrow-paragraph">
-						Type in master node IPs:
-					</p>
-					<!--TODO: use md-textarea-->
-					<textarea
-						type="text"
-						style="max-width: 550px;"
-						class="form-control"
-						placeholder="Master Node IPs (line-separated)"
-						rows="5"
-						[(ngModel)]="inputMoreMasterNodeIPsTxt"
-					></textarea>
+					<div *ngFor="let flag of kubeAPIServer.flags; let i = index;">
+						<div *ngIf="kubeAPIServer.apiserverCount > i">
+							<br>
+							<md-input type="text" [(ngModel)]="flag.ipAddress" placeholder="Master Node IP address {{i+1}}"></md-input>
+							<md-input type="number" [(ngModel)]="flag.port" placeholder="port"></md-input>
+						</div>
+					</div>
 					<br>
-					<pre class="code-dark">{{cfssl.getGenCertCommand('kube-apiserver', 'kube-apiserver', '', inputMoreMasterNodeIPsTxt)}}</pre>
 
+					<br>
+					<br>
+					<h5>Set up TLS Assets</h5>
+					<pre class="code-dark">{{cfssl.getGenCertCommand('kube-apiserver', 'kube-apiserver', kubeAPIServer.getAPIServerIPs())}}</pre>
 					<br>
 					<p class="narrow-paragraph">
 						And copy these certs to master nodes:
@@ -315,10 +319,29 @@
 					<br>
 
 					<br>
+					<h5>Master Node</h5>
+					<p class="narrow-paragraph">
+						<a href="http://kubernetes.io/docs/admin/kubelet/" target="_blank" class="code-light-snippet">kubelet</a> runs on master nodes with <span class="code-light-snippet">--register-schedulable=false</span> flag. It only communicates with <span class="code-light-snippet">kube-apiserver</span> and routes cluster works to task-specific workder nodes. <a href="http://kubernetes.io/docs/admin/kube-proxy/" target="_blank" class="code-light-snippet">kube-proxy</a> is a network proxy that runs on each node, and must be configured with <span class="code-light-snippet">kube-apiserver</span>.
+					</p>
+					<br>
+					<md-input type="text" [(ngModel)]="kubeAPIServer.version" placeholder="coreos/hyperkube version"></md-input>
+					<md-input type="text" [(ngModel)]="kubeAPIServer.serviceClusterIPRange" placeholder="service cluster IP range"></md-input>
+					<br>
+					<div *ngFor="let flag of kubeAPIServer.flags; let i = index;">
+						<div *ngIf="kubeAPIServer.apiserverCount > i">
+							<pre class="code-dark">{{kubeAPIServer.getManifest(certsDir, flag)}}
+</pre>
+						<br>
+						</div>
+					</div>
+
+
+					<br>
 					<h5>TODO</h5>
 					<p class="narrow-paragraph">
 						...
 					</p>
+
 
 					<br>
 					<h5>TODO</h5>
@@ -377,20 +400,7 @@
 					<br>
 					<h5>Set up TLS Assets</h5>
 					<br>
-					<p class="narrow-paragraph">
-						Type in master node IPs:
-					</p>
-					<!--TODO: use md-textarea-->
-					<textarea
-						type="text"
-						style="max-width: 550px;"
-						class="form-control"
-						placeholder="Master Node IPs (line-separated)"
-						rows="5"
-						[(ngModel)]="inputMoreMasterNodeIPsTxt"
-					></textarea>
-					<br>
-					<pre class="code-dark">{{cfssl.getGenCertCommand('kubectl', 'kubectl', '', inputMoreMasterNodeIPsTxt)}}</pre>
+					<pre class="code-dark">{{cfssl.getGenCertCommand('kubectl', 'kubectl', kubeAPIServer.getAPIServerIPs())}}</pre>
 
 					<br>
 					<p class="narrow-paragraph">
@@ -431,7 +441,7 @@
 					<br>
 					<h5>kubelet</h5>
 					<p class="narrow-paragraph">
-						<span class="code-light-snippet">kubelet</span> runs on master nodes with <span class="code-light-snippet">--register-schedulable=false</span> flag. It only communicates with <span class="code-light-snippet">kube-apiserver</span> and routes cluster works to task-specific workder nodes.
+						<a href="http://kubernetes.io/docs/admin/kubelet/" target="_blank" class="code-light-snippet">kubelet</a> runs on master nodes with <span class="code-light-snippet">--register-schedulable=false</span> flag. It only communicates with <span class="code-light-snippet">kube-apiserver</span> and routes cluster works to task-specific workder nodes.
 					</p>
 
 					<br>

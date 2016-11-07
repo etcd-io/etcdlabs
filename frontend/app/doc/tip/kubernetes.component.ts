@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { ParentComponent } from './common/common.component';
-import { KubernetesInstall } from './common/kubernetes.component';
+import { KubernetesInstall, KubeAPIServer, KubeAPIServerFlag } from './common/kubernetes.component';
 import { CFSSL } from './common/cfssl.component';
 
 @Component({
@@ -13,16 +13,9 @@ export class KubernetesTipComponent extends ParentComponent {
     kubeInstall: KubernetesInstall;
 
     cfssl: CFSSL;
-
     certsDir: string;
 
-    inputEtcdEndpointsTxt: string;
-
-    inputEtcdRootCAFile: string;
-    inputEtcdCertFile: string;
-    inputEtcdKeyFile: string;
-
-    inputMoreMasterNodeIPsTxt: string;
+    kubeAPIServer: KubeAPIServer;
 
     constructor() {
         super();
@@ -45,21 +38,18 @@ export class KubernetesTipComponent extends ParentComponent {
             87600,
             'kube-root-ca'
         );
-
         this.certsDir = '/etc/kubernetes/ssl';
 
-        this.inputEtcdEndpointsTxt = `https://10.240.0.35:2379
-https://10.240.0.36:2379
-https://10.240.0.37:2379
-`;
-
-        this.inputEtcdRootCAFile = 'etcd-root-ca.pem';
-        this.inputEtcdCertFile = 'my-etcd-1.pem';
-        this.inputEtcdKeyFile = 'my-etcd-1-key.pem';
-
-        this.inputMoreMasterNodeIPsTxt = `10.240.0.39
-10.240.0.40
-10.240.0.41
-`;
+        this.kubeAPIServer = new KubeAPIServer(
+            'v1.4.5_coreos.0',
+            1,
+            '10.240.0.0/24',
+            '10.240.0.0/24',
+            [
+                new KubeAPIServerFlag('10.240.0.39', 8080),
+                new KubeAPIServerFlag('10.240.0.40', 8080),
+                new KubeAPIServerFlag('10.240.0.41', 8080),
+            ],
+        );
     }
 }

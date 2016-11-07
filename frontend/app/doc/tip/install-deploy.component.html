@@ -179,7 +179,7 @@
 
 					<div *ngFor="let flag of etcd.flags; let i = index;">
 						<div *ngIf="etcd.clusterSize > i">
-							<pre class="code-dark">{{cfssl.getGenCertCommand(flag.name, flag.name, flag.ipAddress, inputCFSSLMoreHostsTxt)}}</pre>
+							<pre class="code-dark">{{cfssl.getGenCertCommandTxt(flag.name, flag.name, flag.ipAddress, inputCFSSLMoreHostsTxt)}}</pre>
 						
 							<div class="osx-window">
 								<div class="window-narrow">

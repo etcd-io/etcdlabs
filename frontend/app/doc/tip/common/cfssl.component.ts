@@ -139,7 +139,6 @@ cat > ${this.getCertsDir()}/${this.rootCAPrefix}-csr.json <<EOF
   "CN": "${this.commonName}"
 }
 EOF
-
 cfssl gencert --initca=true ${this.getCertsDir()}/${this.rootCAPrefix}-csr.json | cfssljson --bare ${this.getCertsDir()}/${this.rootCAPrefix}
 
 # verify
@@ -184,19 +183,20 @@ ${this.getCertsDir()}/${this.gencertFileName}
 `;
     }
 
-    getGenCertCommand(name: string, commonName: string, host: string, moreHostsTxt: string) {
-        let hosts: string[] = ['127.0.0.1', 'localhost'];
-        if (host !== '' && host !== 'localhost') {
-            hosts.push(host);
+    getGenCertCommand(name: string, commonName: string, hosts: string[]) {
+        let hs: string[] = ['127.0.0.1', 'localhost'];
+        for (let _i = 0; _i < hosts.length; _i++) {
+            if (hosts[_i] !== '' && hosts[_i] !== 'localhost') {
+                hs.push(hosts[_i]);
+            }
         }
-        hosts = hosts.concat(getLines(moreHostsTxt));
 
         let hostTxt = `    `;
         let lineBreak = `
     `;
-        for (let _i = 0; _i < hosts.length; _i++) {
-            hostTxt += '"' + hosts[_i] + '"';
-            if (_i === hosts.length - 1) {
+        for (let _i = 0; _i < hs.length; _i++) {
+            hostTxt += '"' + hs[_i] + '"';
+            if (_i === hs.length - 1) {
                 break;
             }
             hostTxt += ',' + lineBreak;
@@ -225,7 +225,6 @@ ${hostTxt}
   ]
 }
 EOF
-
 cfssl gencert` + ' \\' + `
     --ca ${this.getCertsDir()}/${this.rootCAPrefix}.pem` + ' \\' + `
     --ca-key ${this.getCertsDir()}/${this.rootCAPrefix}-key.pem` + ' \\' + `
@@ -233,6 +232,17 @@ cfssl gencert` + ' \\' + `
     ` + `${this.getCertsDir()}/${name}-ca-csr.json | cfssljson --bare ${this.getCertsDir()}/${name}
 
 `;
+    }
+
+    getGenCertCommandTxt(name: string, commonName: string, host: string, moreHostsTxt: string) {
+        let hosts: string[] = [];
+        if (host !== '' && host !== 'localhost') {
+            hosts.push(host);
+        }
+        if (moreHostsTxt !== '') {
+            hosts = hosts.concat(getLines(moreHostsTxt));
+        }
+        return this.getGenCertCommand(name, commonName, hosts);
     }
 
     getCertsPrepareCommand(dstCertsDir: string) {

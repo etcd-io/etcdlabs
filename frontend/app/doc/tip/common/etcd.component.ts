@@ -19,6 +19,17 @@ function cleanDir(dir: string) {
     return ds;
 }
 
+function sanitizeNumber(num: number, min: number, max: number) {
+    let n = num;
+    if (n <= min) {
+        n = min;
+    }
+    if (n > max) {
+        n = max;
+    }
+    return n;
+}
+
 function getSystemdCommand(service: string) {
     return `# to start service
 sudo systemctl daemon-reload
@@ -210,7 +221,7 @@ export class Etcd {
         let txt = '';
         for (let _i = 0; _i < this.flags.length; _i++) {
             txt += this.flags[_i].getCFSSLFilesTxt();
-            if (_i + 1 === this.clusterSize) {
+            if (_i + 1 === sanitizeNumber(this.clusterSize, 1, 7)) {
                 break;
             }
             txt += lineBreak;
@@ -325,7 +336,7 @@ GOOGLE_URL=https://storage.googleapis.com/etcd
                 txt += ',';
             }
             txt += this.flags[_i].ipAddress + ':' + String(this.flags[_i].clientPort);
-            if (_i + 1 === this.clusterSize) {
+            if (_i + 1 === sanitizeNumber(this.clusterSize, 1, 7)) {
                 break;
             }
         }
@@ -342,7 +353,7 @@ GOOGLE_URL=https://storage.googleapis.com/etcd
             }
             let ep = protocol + '://' + addr;
             eps.push(ep);
-            if (_i + 1 === this.clusterSize) {
+            if (_i + 1 === sanitizeNumber(this.clusterSize, 1, 7)) {
                 break;
             }
         }
@@ -374,7 +385,7 @@ GOOGLE_URL=https://storage.googleapis.com/etcd
 
             txt += this.flags[_i].name + '=' + this.flags[_i].getPeerURL(this.secure);
 
-            if (_i + 1 === this.clusterSize) {
+            if (_i + 1 === sanitizeNumber(this.clusterSize, 1, 7)) {
                 break;
             }
         }
@@ -483,7 +494,6 @@ ExecStart=` + this.getCommand(flag, false, false) + `
 [Install]
 WantedBy=multi-user.target
 EOF
-
 sudo mv /tmp/${flag.name}.service /etc/systemd/system/${flag.name}.service
 `;
     }
@@ -563,7 +573,6 @@ ExecStart=` + txt + `
 [Install]
 WantedBy=multi-user.target
 EOF
-
 sudo mv /tmp/${flag.name}.service /etc/systemd/system/${flag.name}.service
 
 `;
@@ -581,7 +590,6 @@ Environment="ETCD_DATA_DIR=${flag.getDataDir()}"
 Environment="ETCD_SSL_DIR=${flag.getCertsDir()}"
 Environment="ETCD_OPTS=${this.getFlagTxt(flag, true, false)}"
 EOF
-
 sudo mkdir -p /etc/systemd/system/etcd-member.service.d
 sudo mv /tmp/override-${flag.name}.conf /etc/systemd/system/etcd-member.service.d/override.conf
 
