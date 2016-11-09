@@ -25,8 +25,8 @@ import (
 	"time"
 
 	"github.com/coreos/etcdlabs/cluster"
-	"github.com/coreos/etcdlabs/listener"
-	"github.com/coreos/etcdlabs/ratelimit"
+	"github.com/coreos/etcdlabs/pkg/listener"
+	"github.com/coreos/etcdlabs/pkg/ratelimit"
 )
 
 var (
