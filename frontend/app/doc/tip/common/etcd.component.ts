@@ -173,6 +173,12 @@ export class Etcd {
 
     rkt: Rkt;
 
+    operatorReplicas: number;
+    operatorClusterSize: number;
+    operatorSnapshotIntervalInSecond: number;
+    operatorMaxSnapshot: number;
+    operatorBackupVolumeSizeInMB: number;
+
     constructor(
         version: string,
         execDir: string,
@@ -201,6 +207,12 @@ export class Etcd {
         this.flags = flags;
 
         this.rkt = rkt;
+
+        this.operatorReplicas = 1;
+        this.operatorClusterSize = this.clusterSize;
+        this.operatorSnapshotIntervalInSecond = 1800;
+        this.operatorMaxSnapshot = 5;
+        this.operatorBackupVolumeSizeInMB = 512;
     }
 
     getLatestReleaseVersion() {
@@ -602,5 +614,96 @@ sudo systemd-delta --type=extended
 
     getServiceFileCoreOSCommand() {
         return getSystemdCommand('etcd-member');
+    }
+
+    getOperatorEndpoints() {
+        let txt = '';
+        for (let _i = 0; _i < this.operatorClusterSize; _i++) {
+            txt += 'http://etcd-cluster-000' + String(_i) + ':2379';
+            if (_i === this.operatorClusterSize - 1) {
+                break;
+            }
+            txt += ',';
+        }
+        return txt;
+    }
+
+    getOperatorKubectlEndpointHealthCommand() {
+        let lineBreak = ' \\' + `
+    `;
+        let cmd = `# Test with kubectl
+kubectl run --rm -i test`;
+        cmd += lineBreak + `--image quay.io/coreos/etcd`;
+        cmd += lineBreak + `--restart=Never`;
+        cmd += '--' + lineBreak + `/bin/sh -c "ETCDCTL_API=3 /usr/local/bin/etcdctl --endpoints=${this.getOperatorEndpoints()} endpoint health"`;
+        return cmd;
+    }
+
+    getOperatorCommand() {
+        return `# make sure Kubernetes API servers are available
+kubectl cluster-info
+
+
+# Deploy etcd-operator
+cat > /tmp/etcd-operator-deployment.yaml <<EOF
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: etcd-operator
+spec:
+  replicas: ${sanitizeNumber(this.operatorReplicas, 1, 3)}
+  template:
+    metadata:
+      labels:
+        name: etcd-operator
+    spec:
+      containers:
+      - name: etcd-operator
+        image: quay.io/coreos/etcd-operator
+        env:
+        - name: MY_POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+EOF
+
+kubectl create -f /tmp/etcd-operator-deployment.yaml
+kubectl get deployments
+kubectl get thirdpartyresources
+kubectl get pods
+
+
+
+# Create etcd cluster
+cat > /tmp/etcd-operator-cluster.yaml <<EOF
+apiVersion: coreos.com/v1
+kind: EtcdCluster
+metadata:
+  name: etcd-cluster
+
+spec:
+  size: ${sanitizeNumber(this.operatorClusterSize, 1, 7)}
+  version: ${this.version}
+
+  backup:
+    # interval to save snapshot of etcd, used for disaster recovery
+    snapshotIntervalInSecond: ${sanitizeNumber(this.operatorSnapshotIntervalInSecond, 10, 999999)}
+
+    # maximum number of snapshot files to retain; 0 to disable backup (not recommended)
+    maxSnapshot: ${sanitizeNumber(this.operatorMaxSnapshot, 0, 999999)}
+
+    # size of volume for persistent disk used for backup
+    volumeSizeInMB: ${sanitizeNumber(this.operatorBackupVolumeSizeInMB, 0, 9999999)}
+    storageType: PersistentVolume
+
+EOF
+kubectl create -f /tmp/etcd-operator-cluster.yaml
+kubectl get pods
+kubectl get services
+
+
+${this.getOperatorKubectlEndpointHealthCommand()}
+
+`;
     }
 }

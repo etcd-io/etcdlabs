@@ -284,6 +284,12 @@
                     <td><a href="https://github.com/coreos/cetcd" target="_blank" class="normal-link">coreos/cetcd</a></td>
                     <td>N/A</td>
                 </tr>
+                <tr>
+                    <th scope="row">Managed Service</th>
+                    <td>No</td>
+                    <td><a href="https://github.com/coreos/etcd-operator" target="_blank" class="normal-link">etcd-operator</a><sup>[4]</sup></td>
+                    <td><a href="https://www.hashicorp.com/consul.html" target="_blank" class="normal-link">Consul Enterprise</a></td>
+                </tr>
             </tbody>
         </table>
         <hr align="left" class="footer-top-line">
@@ -292,6 +298,7 @@
                 target="_blank" class="footer-link">ZooKeeper Data Model</a>.
             <br> [2] In addition to auto-purging Raft logs, etcd also supports on-disk storage compaction.
             <br> [3] etcd provides discovery service for bootstrapping etcd cluster. Please visit <a href="https://discovery.etcd.io" target="_blank" class="footer-link">discovery.etcd.io</a>.
+            <br> [4] etcd-operator is fully managed etcd cluster on Kubernetes. And it's completely open-source and free.
         </footer>
         <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/comparison#top" class="normal-link">↑ top</a></div>
         <br><br>
@@ -453,11 +460,11 @@
             <br> [4] Consul has hard-coded <span class="code-light-snippet-small">maxKVSize</span> value. Server returns <span class="code-light-snippet-small">Value for key X is too large</span> error to the exceeding client request.
             <br> [5] Zookeeper documentation recommends to limit Java heap size to avoid disk swap since Zookeeper stores data in-memory; see <a href="https://zookeeper.apache.org/doc/r3.4.9/zookeeperAdmin.html#sc_zkMulitServerSetup" target="_blank" class="footer-link">Clustered (Multi-Server) Setup</a>.
             <br> [6] etcd default space quota is 2GB, which can be configured up to 8GB. If etcd exceeds space quota, cluster becomes maintenance mode only allowing read and delete client requests. This is to prevent degrading etcd performance.
-            <br> [7] Write 2 million entries (each entry is 8-byte key, 256-byte value) with 1,000 concurrent TCP connections, while etcd uses only 100 connections.
-            <br> [8] 2 million read requests (each entry is 8-byte key, 256-byte value) with 1,000 concurrent TCP connections, while etcd uses only 100 connections. It is serializable read, where server returns data without going through consensus, so
-            possibly serving stale data.
-            <br> [9] 2 million read requests (each entry is 8-byte key, 256-byte value) with 1,000 concurrent TCP connections, while etcd uses only 100 connections. It is linearizable read, where majority of cluster has to agree on the same value before
-            it returns.
+            <br> [7] Write 2 million entries (each entry is 8-byte key, 256-byte value, and total data size is about 0.5 GB) with 1,000 concurrent TCP connections, while etcd uses only 100 connections.
+            <br> [8] 2 million read requests (each entry is 8-byte key, 256-byte value, and total data size is about 0.5 GB) with 1,000 concurrent TCP connections, while etcd uses only 100 connections. It is serializable read, where server returns data
+            without going through consensus, so possibly serving stale data.
+            <br> [9] 2 million read requests (each entry is 8-byte key, 256-byte value, and total data size is about 0.5 GB) with 1,000 concurrent TCP connections, while etcd uses only 100 connections. It is linearizable read, where majority of cluster
+            has to agree on the same value before it returns.
         </footer>
         <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/comparison#top" class="normal-link">↑ top</a></div>
         <br><br>
@@ -558,7 +565,7 @@
             <li>panic before/after Raft applies entries</li>
         </ul>
         <p class="narrow-paragraph">
-            etcd functional-tester runs 24/7. One cluster gets about 8,000 failure injections per day, <i>1 failure injection for every 10-second</i>.
+            etcd functional-tester runs 24/7; cluster gets about 8,000 failure injections per day, <i>1 failure injection for every 10-second</i>.
         </p>
         <p class="narrow-paragraph">
             Please visit <a href="http://dash.etcd.io/" target="_blank" class="normal-link">dash.etcd.io</a> for realtime testing cluster dashboards.
