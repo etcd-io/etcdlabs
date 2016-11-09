@@ -463,7 +463,8 @@
             <br> [7] Write 2 million entries (each entry is 8-byte key, 256-byte value, and total data size is about 0.5 GB) with 1,000 concurrent TCP connections, while etcd uses only 100 connections.
             <br> [8] 2 million read requests (each entry is 8-byte key, 256-byte value, and total data size is about 0.5 GB) with 1,000 concurrent TCP connections, while etcd uses only 100 connections. It is serializable read, where server returns data
             without going through consensus, so possibly serving stale data.
-            <br> [9] 2 million read requests (each entry is 8-byte key, 256-byte value, and total data size is about 0.5 GB) with 1,000 concurrent TCP connections, while etcd uses only 100 connections. It is linearizable read, where majority of cluster has to agree on the same value before it returns.
+            <br> [9] 2 million read requests (each entry is 8-byte key, 256-byte value, and total data size is about 0.5 GB) with 1,000 concurrent TCP connections, while etcd uses only 100 connections. It is linearizable read, where majority of cluster
+            has to agree on the same value before it returns.
         </footer>
         <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/comparison#top" class="normal-link">↑ top</a></div>
         <br><br>
@@ -564,7 +565,7 @@
             <li>panic before/after Raft applies entries</li>
         </ul>
         <p class="narrow-paragraph">
-            etcd functional-tester runs 24/7. One cluster gets about 8,000 failure injections per day, <i>1 failure injection for every 10-second</i>.
+            etcd functional-tester runs 24/7; cluster gets about 8,000 failure injections per day, <i>1 failure injection for every 10-second</i>.
         </p>
         <p class="narrow-paragraph">
             Please visit <a href="http://dash.etcd.io/" target="_blank" class="normal-link">dash.etcd.io</a> for realtime testing cluster dashboards.
