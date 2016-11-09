@@ -633,30 +633,47 @@
 						Application container gives much portability to initial development phase. But operating and scaling container requires much more work. <a href="http://kubernetes.io/" target="_blank" class="normal-link">Kubernetes</a> manages such complex container environments. <a href="https://github.com/coreos/etcd-operator" target="_blank" class="normal-link">etcd-operator</a> deploy and manage etcd on Kubernetes.
 					</p>
 					<br>
+
+					<md-input
+						type="text"
+						[(ngModel)]="etcd.version"
+						placeholder="etcd version"
+						style="width: 220px;"
+					></md-input>
 					<md-input
 						type="number"
 						[(ngModel)]="etcd.operatorReplicas"
 						placeholder="Number of operator replicas"
-						style="width: 350px;"
+						style="width: 220px;"
 					></md-input>
+					<md-input
+						type="number"
+						[(ngModel)]="etcd.operatorClusterSize"
+						placeholder="Cluster size (up to 7)"
+						style="width: 220px;"
+					></md-input>
+					<span *ngIf="etcd.operatorClusterSize > 7" class="error-message">Recommended maximum cluster size is 7</span>
+					<span *ngIf="etcd.operatorClusterSize < 1" class="error-message">Minimum cluster size is 1</span>
+					<span *ngIf="etcd.operatorClusterSize % 2 == 0" class="error-message">Cluster size should an odd number</span>
 					<br>
+
 					<md-input
 						type="number"
 						[(ngModel)]="etcd.operatorSnapshotIntervalInSecond"
 						placeholder="Snapshot(backup) interval (seconds)"
-						style="width: 270px;"
+						style="width: 220px;"
 					></md-input>
 					<md-input
 						type="number"
 						[(ngModel)]="etcd.operatorMaxSnapshot"
 						placeholder="Back-up files to retain"
-						style="width: 270px;"
+						style="width: 220px;"
 					></md-input>
 					<md-input
 						type="number"
 						[(ngModel)]="etcd.operatorBackupVolumeSizeInMB"
 						placeholder="Back-up volume size (MB)"
-						style="width: 270px;"
+						style="width: 220px;"
 					></md-input>
 					<br>
 					<pre *ngIf="etcd.secure" class="code-dark">{{etcd.getOperatorCommand()}}
