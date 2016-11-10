@@ -14,7 +14,12 @@
 
 package main
 
-import "github.com/spf13/cobra"
+import (
+	"fmt"
+	"os"
+
+	"github.com/spf13/cobra"
+)
 
 var rootCommand = &cobra.Command{
 	Use:        "etcd-tester-reporter",
@@ -26,6 +31,29 @@ func init() {
 	cobra.EnablePrefixMatching = true
 }
 
-func main() {
+var metricsName string
+var metricsEndpoint string
 
+var dbHost string
+var dbPort int
+var dbUser string
+var dbPassword string
+
+func init() {
+	rootCommand.PersistentFlags().StringVar(&metricsName, "metrics-name", "", "metrics name")
+	rootCommand.PersistentFlags().StringVar(&metricsEndpoint, "metrics-endpoint", "", "metrics endpoint")
+
+	rootCommand.PersistentFlags().StringVar(&dbHost, "db-host", "", "database host")
+	rootCommand.PersistentFlags().IntVar(&dbPort, "db-port", 3306, "database port")
+	rootCommand.PersistentFlags().StringVar(&dbUser, "db-user", "root", "database user")
+	rootCommand.PersistentFlags().StringVar(&dbPassword, "db-password", "", "database password")
+
+	rootCommand.AddCommand(pingCommand)
+}
+
+func main() {
+	if err := rootCommand.Execute(); err != nil {
+		fmt.Fprintln(os.Stdout, err)
+		os.Exit(1)
+	}
 }

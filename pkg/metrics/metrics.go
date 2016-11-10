@@ -44,6 +44,9 @@ type TesterStatus struct {
 
 // Metrics represents etcd functional-tester metrics.
 type Metrics interface {
+	// Ping pings database and metrics endpoint.
+	Ping()
+
 	// Sync updates tester status data in backend database.
 	Sync() error
 
@@ -56,8 +59,8 @@ type defaultMetrics struct {
 	metricsEndpoint string
 
 	dbHost     string
-	dbUser     string
 	dbPort     int
+	dbUser     string
 	dbPassword string
 
 	mu            sync.Mutex
@@ -65,17 +68,62 @@ type defaultMetrics struct {
 }
 
 // New returns a new default metrics.
-func New(name, ep, dbHost string, dbUser, dbPassword string) Metrics {
+func New(name, ep, dbHost string, dbPort int, dbUser, dbPassword string) Metrics {
 	return &defaultMetrics{
 		name:            name,
 		metricsEndpoint: ep,
 
 		dbHost:     dbHost,
+		dbPort:     dbPort, // 3306 is default MySQL port
 		dbUser:     dbUser,
-		dbPort:     3306, // default MySQL port
 		dbPassword: dbPassword,
 
 		currentStatus: &TesterStatus{},
+	}
+}
+
+func (m *defaultMetrics) Ping() {
+	caseN, failedN, err := fetch(m.metricsEndpoint)
+	if err != nil {
+		plog.Warning("fetch error:", err)
+		return
+	}
+	fmt.Println("ping metrics endpoint result:")
+	fmt.Println("current case:", caseN)
+	fmt.Println("current failed case:", failedN)
+	fmt.Println()
+
+	fmt.Println("ping database result:")
+	db, err := m.mysql()
+	if err != nil {
+		plog.Warning("mysql error:", err)
+		return
+	}
+	defer db.Close()
+
+	rows, err := db.Query(`SELECT name, total_case, total_failed, current_case, current_failed, last_update FROM etcdlabs.metrics`)
+	if err != nil {
+		plog.Warning("db.Query error:", err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var name []byte
+		var totalCase []byte
+		var totalFailed []byte
+		var currentCase []byte
+		var currentFailed []byte
+		var lastUpdate []byte
+		if err := rows.Scan(&name, &totalCase, &totalFailed, &currentCase, &currentFailed, &lastUpdate); err != nil {
+			plog.Warning("rows.Scan error:", err)
+			return
+		}
+		fmt.Printf("name %q | total case %q | total failed %q | current case %q | current failed %q | last update %q \n",
+			string(name), string(totalCase), string(totalFailed), string(currentCase), string(currentFailed), string(lastUpdate))
+	}
+	if err := rows.Err(); err != nil {
+		plog.Warning("rows.Err error:", err)
+		return
 	}
 }
 
