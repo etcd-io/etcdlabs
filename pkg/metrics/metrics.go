@@ -44,6 +44,9 @@ type TesterStatus struct {
 
 // Metrics represents etcd functional-tester metrics.
 type Metrics interface {
+	// Ping pings database and metrics endpoint.
+	Ping()
+
 	// Sync updates tester status data in backend database.
 	Sync() error
 
@@ -51,25 +54,12 @@ type Metrics interface {
 	Get() TesterStatus
 }
 
-// New returns a new default metrics.
-func New(name, ep, dbHost string, dbUser, dbPassword string) Metrics {
-	return &defaultMetrics{
-		name:      name,
-		metricsEp: ep,
-
-		dbHost:     dbHost,
-		dbUser:     dbUser,
-		dbPassword: dbPassword,
-
-		currentStatus: &TesterStatus{},
-	}
-}
-
 type defaultMetrics struct {
-	name      string
-	metricsEp string
+	name            string
+	metricsEndpoint string
 
 	dbHost     string
+	dbPort     int
 	dbUser     string
 	dbPassword string
 
@@ -77,8 +67,92 @@ type defaultMetrics struct {
 	currentStatus *TesterStatus
 }
 
+// New returns a new default metrics.
+func New(name, ep, dbHost string, dbPort int, dbUser, dbPassword string) Metrics {
+	return &defaultMetrics{
+		name:            name,
+		metricsEndpoint: ep,
+
+		dbHost:     dbHost,
+		dbPort:     dbPort, // 3306 is default MySQL port
+		dbUser:     dbUser,
+		dbPassword: dbPassword,
+
+		currentStatus: &TesterStatus{},
+	}
+}
+
+func (m *defaultMetrics) Ping() {
+	caseN, failedN, err := fetch(m.metricsEndpoint)
+	if err != nil {
+		plog.Warning("fetch error:", err)
+		return
+	}
+	println()
+	fmt.Println(`
+#######################
+# ping metrics result #
+#######################
+`)
+	fmt.Println("current case:", caseN)
+	fmt.Println("current failed case:", failedN)
+	println()
+
+	fmt.Println(`
+########################
+# ping database result #
+########################
+`)
+	db, err := m.mysql()
+	if err != nil {
+		plog.Warning("mysql error:", err)
+		return
+	}
+	defer db.Close()
+
+	rows, err := db.Query(`SELECT name, total_case, total_failed, current_case, current_failed, last_update FROM etcdlabs.metrics`)
+	if err != nil {
+		plog.Warning("db.Query error:", err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var name []byte
+		var totalCase []byte
+		var totalFailed []byte
+		var currentCase []byte
+		var currentFailed []byte
+		var lastUpdate []byte
+		if err := rows.Scan(&name, &totalCase, &totalFailed, &currentCase, &currentFailed, &lastUpdate); err != nil {
+			plog.Warning("rows.Scan error:", err)
+			return
+		}
+		fmt.Printf(`-----
+name           %q
+total case     %q
+total failed   %q
+current case   %q
+current failed %q
+last update    %q
+-----
+`,
+			string(name), string(totalCase), string(totalFailed), string(currentCase), string(currentFailed), string(lastUpdate))
+		println()
+	}
+	if err := rows.Err(); err != nil {
+		plog.Warning("rows.Err error:", err)
+		return
+	}
+}
+
+func (m *defaultMetrics) Get() TesterStatus {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return *m.currentStatus
+}
+
 func (m *defaultMetrics) Sync() error {
-	plog.Printf("Sync started on %q %q", m.name, m.metricsEp)
+	plog.Printf("Sync started on %q %q", m.name, m.metricsEndpoint)
 
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -92,8 +166,8 @@ func (m *defaultMetrics) Sync() error {
 
 	// fresh; fetch data to compare against
 	if m.currentStatus.LastUpdate.IsZero() {
-		plog.Printf("Sync querying current case and failed on %q %q", m.name, m.metricsEp)
-		rows, rerr := db.Query(fmt.Sprintf(`SELECT current_case, current_failed FROM etcdlabs.metrics WHERE name = "%s"`, m.name))
+		plog.Printf("Sync querying current case and failed on %q %q", m.name, m.metricsEndpoint)
+		rows, rerr := db.Query(fmt.Sprintf(`SELECT total_case, total_failed, current_case, current_failed FROM etcdlabs.metrics WHERE name = "%s"`, m.name))
 		if rerr != nil {
 			return rerr
 		}
@@ -137,43 +211,58 @@ func (m *defaultMetrics) Sync() error {
 		}
 	}
 
-	plog.Printf("Sync fetching current case and failed on %q %q", m.name, m.metricsEp)
-	caseN, failedN, err := fetch(m.metricsEp)
+	plog.Printf("Sync fetching current case and failed on %q %q", m.name, m.metricsEndpoint)
+	caseN, failedN, err := fetch(m.metricsEndpoint)
 	if err != nil {
 		return err
 	}
 
 	toUpdate := false
-	ns := *m.currentStatus
-	if int64(caseN) > m.currentStatus.CurrentCase {
+	if int64(caseN) != m.currentStatus.CurrentCase {
 		delta := int64(caseN) - m.currentStatus.CurrentCase
-		ns.TotalCase += delta
-		ns.CurrentCase = int64(caseN)
-		ns.LastUpdate = time.Now()
-		toUpdate = true
-	}
-	if int64(failedN) > m.currentStatus.CurrentFailed {
-		delta := int64(failedN) - m.currentStatus.CurrentFailed
-		ns.TotalFailed += delta
-		ns.CurrentFailed = int64(failedN)
-		ns.LastUpdate = time.Now()
-		toUpdate = true
-	}
-	if toUpdate {
-		plog.Printf("Sync updating metrics table on %q %q", m.name, m.metricsEp)
-		if _, err := db.Query(fmt.Sprintf(`UPDATE etcdlabs.metrics SET total_case = %d, total_failed = %d, current_case = %d, current_failed = %d WHERE name = "%s"`,
-			ns.TotalCase, ns.TotalFailed, ns.CurrentCase, ns.CurrentFailed, m.name)); err != nil {
-			return err
+		if delta < 0 { // tester redeployed
+			delta = int64(caseN)
 		}
+		m.currentStatus.TotalCase += delta
+		m.currentStatus.CurrentCase = int64(caseN)
+		toUpdate = true
 	}
 
-	m.currentStatus = &ns
-	plog.Printf("Sync success on %q %q", m.name, m.metricsEp)
+	if int64(failedN) != m.currentStatus.CurrentFailed {
+		delta := int64(failedN) - m.currentStatus.CurrentFailed
+		if delta < 0 { // tester redeployed
+			delta = int64(failedN)
+		}
+		m.currentStatus.TotalFailed += delta
+		m.currentStatus.CurrentFailed = int64(failedN)
+		toUpdate = true
+	}
+
+	if toUpdate {
+		now := time.Now()
+		plog.Printf("Sync updating metrics table on %q %q", m.name, m.metricsEndpoint)
+		qry := fmt.Sprintf(`UPDATE etcdlabs.metrics
+SET total_case = %d, total_failed = %d, current_case = %d, current_failed = %d, last_update = %q
+WHERE name = %q`, m.currentStatus.TotalCase,
+			m.currentStatus.TotalFailed,
+			m.currentStatus.CurrentCase,
+			m.currentStatus.CurrentFailed,
+			now.String()[:19],
+			m.name,
+		)
+		if _, err := db.Query(qry); err != nil {
+			return fmt.Errorf("error %v when running query %q", err, qry)
+		}
+
+		m.currentStatus.LastUpdate = now
+	}
+
+	plog.Printf("Sync success on %q %q", m.name, m.metricsEndpoint)
 	return nil
 }
 
 func (m *defaultMetrics) mysql() (db *sql.DB, err error) {
-	db, err = sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:3306)/etcdlabs?timeout=2s", m.dbUser, m.dbPassword, m.dbHost))
+	db, err = sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/etcdlabs?timeout=2s", m.dbUser, m.dbPassword, m.dbHost, m.dbPort))
 	return
 }
 
@@ -184,10 +273,8 @@ func fetch(ep string) (curCase int, curFailed int, err error) {
 	if err != nil {
 		return 0, 0, err
 	}
-
 	tr.MaxIdleConns = -1
 	tr.DisableKeepAlives = true
-
 	cli := &http.Client{Transport: tr}
 
 	resp, rerr := cli.Get(ep)
@@ -220,6 +307,9 @@ func fetch(ep string) (curCase int, curFailed int, err error) {
 	}
 
 	for k, v := range mm {
+		if v == 0 {
+			continue
+		}
 		if strings.HasPrefix(k, "etcd_funcational_tester_case_total") {
 			curCase += v
 			continue
@@ -229,12 +319,6 @@ func fetch(ep string) (curCase int, curFailed int, err error) {
 		}
 	}
 	return
-}
-
-func (m *defaultMetrics) Get() TesterStatus {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	return *m.currentStatus
 }
 
 func toInclude(s string) bool {

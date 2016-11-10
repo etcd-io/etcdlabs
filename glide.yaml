@@ -1,7 +1,7 @@
 package: github.com/coreos/etcdlabs
 import:
 - package: github.com/coreos/etcd
-  version: dbb692e50fb0a1a844af64d9d17a09545a6077cd
+  version: 952eb4fadeef3f840bd7557544338c985d4ed0ef
   subpackages:
   - clientv3
   - embed
@@ -16,7 +16,7 @@ import:
 - package: github.com/dustin/go-humanize
   version: bd88f87ad3a420f7bcf05e90566fd1ceb351fa7f
 - package: google.golang.org/grpc
-  version: v1.0.2
+  version: v1.0.4
   subpackages:
   - credentials
   - grpclog
@@ -24,3 +24,7 @@ import:
   version: 711ca1cb87636abec28122ef3bc6a77269d433f3
 - package: github.com/go-sql-driver/mysql
   version: 8f6c67f0228a4a6a962008d6c3d1e694e4532e71
+- package: github.com/spf13/cobra
+  version: 6e91dded25d73176bf7f60b40dd7aa1f0bf9be8d
+- package: github.com/spf13/pflag
+  version: 5ccb023bc27df288a957c5e994cd44fd19619465

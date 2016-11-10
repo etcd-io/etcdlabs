@@ -154,14 +154,8 @@ export class InstallDeployTipComponent extends ParentComponent {
                     'etcd-root-ca'
                 ),
             ],
-            new Rkt('v1.18.0', '/', '', '', '')
+            new Rkt('v1.19.0', '/', '', '', '')
         );
         ///////////////////////////////////////////////////
-    }
-
-    getEtcdOperator() {
-        return `
-
-`;
     }
 }
