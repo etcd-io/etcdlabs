@@ -255,7 +255,6 @@ WHERE name = %q`, m.currentStatus.TotalCase,
 		}
 
 		m.currentStatus.LastUpdate = now
-		plog.Printf("Sync success on %q %q", m.name, m.metricsEndpoint)
 	}
 
 	plog.Printf("Sync success on %q %q", m.name, m.metricsEndpoint)
