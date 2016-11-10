@@ -41,7 +41,7 @@ func pingCommandFunc(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("got empty db user %q", dbUser)
 	}
 	if dbPassword == "" {
-		return fmt.Errorf("got empty db password %q", dbPassword)
+		fmt.Printf("[WARN] got empty db password %q\n", dbPassword)
 	}
 
 	mt := metrics.New(metricsName, metricsEndpoint, dbHost, dbPort, dbUser, dbPassword)
