@@ -14,3 +14,18 @@
 
 package main
 
+import "github.com/spf13/cobra"
+
+var rootCommand = &cobra.Command{
+	Use:        "etcd-tester-reporter",
+	Short:      "etcd-tester-reporter is etcd functional-tester reporter.",
+	SuggestFor: []string{"etcd-tester-reportr", "etcdtesterreporter"},
+}
+
+func init() {
+	cobra.EnablePrefixMatching = true
+}
+
+func main() {
+
+}

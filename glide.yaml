@@ -24,3 +24,5 @@ import:
   version: 711ca1cb87636abec28122ef3bc6a77269d433f3
 - package: github.com/go-sql-driver/mysql
   version: 8f6c67f0228a4a6a962008d6c3d1e694e4532e71
+- package: github.com/spf13/cobra
+  version: 6e91dded25d73176bf7f60b40dd7aa1f0bf9be8d

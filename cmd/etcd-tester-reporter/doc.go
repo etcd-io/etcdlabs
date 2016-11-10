@@ -14,7 +14,3 @@
 
 // etcd-tester-reporter collects etcd functional-testing data to database.
 package main
-
-func main() {
-
-}
