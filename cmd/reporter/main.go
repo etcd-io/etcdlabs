@@ -22,8 +22,8 @@ import (
 )
 
 var rootCommand = &cobra.Command{
-	Use:        "etcd-tester-reporter",
-	Short:      "etcd-tester-reporter is etcd functional-tester reporter.",
+	Use:        "reporter",
+	Short:      "reporter is etcd functional-tester reporter.",
 	SuggestFor: []string{"etcd-tester-reportr", "etcdtesterreporter"},
 }
 
