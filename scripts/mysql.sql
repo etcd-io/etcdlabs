@@ -1,6 +1,10 @@
+
+SHOW DATABASES;
+
 CREATE SCHEMA IF NOT EXISTS etcdlabs;
 
 SHOW DATABASES;
+
 
 DROP TABLE etcdlabs.metrics;
 CREATE TABLE IF NOT EXISTS etcdlabs.metrics (
