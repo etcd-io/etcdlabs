@@ -1,5 +1,5 @@
-hash: 99525fed4f8ce42044b86d448ed1d657e8e6752a4ebf93d3defadbaabcfb59b9
-updated: 2016-11-10T14:48:23.570524486-08:00
+hash: e7cd7b02149f9e3b11ec77fdddf336bba797de896cd4f8202f6d5588d13f1899
+updated: 2016-11-10T15:16:16.173725972-08:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -78,10 +78,6 @@ imports:
   version: 3ac0863d7acf3bc44daf49afef8919af12f704ef
   subpackages:
   - capnslog
-- name: github.com/cpuguy83/go-md2man
-  version: 71acacd42f85e5e82f70a55327789582a5200a90
-  subpackages:
-  - md2man
 - name: github.com/dustin/go-humanize
   version: bd88f87ad3a420f7bcf05e90566fd1ceb351fa7f
 - name: github.com/ghodss/yaml
@@ -130,14 +126,10 @@ imports:
   - model
 - name: github.com/prometheus/procfs
   version: 454a56f35412459b5e684fd5ec0f9211b94f002a
-- name: github.com/russross/blackfriday
-  version: 300106c228d52c8941d4b3de6054a6062a86dda3
-- name: github.com/shurcooL/sanitized_anchor_name
-  version: 10ef21a441db47d8b13ebcc5fd2310f636973c77
 - name: github.com/spf13/cobra
   version: 6e91dded25d73176bf7f60b40dd7aa1f0bf9be8d
 - name: github.com/spf13/pflag
-  version: 08b1a584251b5b62f458943640fc8ebd4d50aaa5
+  version: 5ccb023bc27df288a957c5e994cd44fd19619465
 - name: github.com/ugorji/go
   version: f1f1a805ed361a0e078bb537e4ea78cd37dcf065
   subpackages:
