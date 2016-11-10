@@ -8,6 +8,7 @@ import:
   - etcdserver/etcdserverpb
   - pkg/transport
   - pkg/types
+  - pkg/httputil
 - package: github.com/coreos/pkg
   version: 3ac0863d7acf3bc44daf49afef8919af12f704ef
   subpackages:
@@ -21,3 +22,5 @@ import:
   - grpclog
 - package: golang.org/x/time
   version: 711ca1cb87636abec28122ef3bc6a77269d433f3
+- package: github.com/go-sql-driver/mysql
+  version: 8f6c67f0228a4a6a962008d6c3d1e694e4532e71
