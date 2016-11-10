@@ -12,5 +12,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// etcd-tester-reporter collects etcd functional-testing data to database.
+// reporter collects etcd functional-testing data to database.
 package main
