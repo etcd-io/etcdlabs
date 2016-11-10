@@ -88,10 +88,11 @@ func (m *defaultMetrics) Ping() {
 		plog.Warning("fetch error:", err)
 		return
 	}
+	println()
 	fmt.Println("ping metrics endpoint result:")
 	fmt.Println("current case:", caseN)
 	fmt.Println("current failed case:", failedN)
-	fmt.Println()
+	println()
 
 	fmt.Println("ping database result:")
 	db, err := m.mysql()
@@ -118,8 +119,17 @@ func (m *defaultMetrics) Ping() {
 			plog.Warning("rows.Scan error:", err)
 			return
 		}
-		fmt.Printf("name %q | total case %q | total failed %q | current case %q | current failed %q | last update %q \n",
+		fmt.Printf(`-----
+name           %q
+total case     %q
+total failed   %q
+current case   %q
+current failed %q
+last update    %q
+-----
+`,
 			string(name), string(totalCase), string(totalFailed), string(currentCase), string(currentFailed), string(lastUpdate))
+		println()
 	}
 	if err := rows.Err(); err != nil {
 		plog.Warning("rows.Err error:", err)
