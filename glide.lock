@@ -1,5 +1,5 @@
-hash: 58f26920953085eb31dd45544fb8815ae90d73ce4bc45eca0a2cb204fb5037da
-updated: 2016-11-08T18:34:40.665208726-08:00
+hash: 01227eee8c3ba263273f6516e1bf7c89be4fcbf96dc26a8d6cff1a83c90fde26
+updated: 2016-11-10T01:03:25.997958326-08:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -82,6 +82,8 @@ imports:
   version: bd88f87ad3a420f7bcf05e90566fd1ceb351fa7f
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
+- name: github.com/go-sql-driver/mysql
+  version: 8f6c67f0228a4a6a962008d6c3d1e694e4532e71
 - name: github.com/gogo/protobuf
   version: e18d7aa8f8c624c915db340349aad4c49b10d173
   subpackages:
