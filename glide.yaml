@@ -16,7 +16,7 @@ import:
 - package: github.com/dustin/go-humanize
   version: bd88f87ad3a420f7bcf05e90566fd1ceb351fa7f
 - package: google.golang.org/grpc
-  version: v1.0.2
+  version: v1.0.4
   subpackages:
   - credentials
   - grpclog
