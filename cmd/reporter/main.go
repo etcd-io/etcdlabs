@@ -18,6 +18,9 @@ import (
 	"fmt"
 	"os"
 
+	"time"
+
+	"github.com/coreos/etcdlabs/pkg/metrics"
 	"github.com/spf13/cobra"
 )
 
@@ -39,6 +42,8 @@ var dbPort int
 var dbUser string
 var dbPassword string
 
+var syncInterval time.Duration
+
 func init() {
 	rootCommand.PersistentFlags().StringVar(&metricsName, "metrics-name", "", "metrics name")
 	rootCommand.PersistentFlags().StringVar(&metricsEndpoint, "metrics-endpoint", "", "metrics endpoint")
@@ -48,7 +53,10 @@ func init() {
 	rootCommand.PersistentFlags().StringVar(&dbUser, "db-user", "root", "database user")
 	rootCommand.PersistentFlags().StringVar(&dbPassword, "db-password", "", "database password")
 
+	syncCommand.PersistentFlags().DurationVarP(&syncInterval, "sync-interval", "i", time.Duration(0), "interval to run sync")
+
 	rootCommand.AddCommand(pingCommand)
+	rootCommand.AddCommand(syncCommand)
 }
 
 func main() {
@@ -56,4 +64,65 @@ func main() {
 		fmt.Fprintln(os.Stdout, err)
 		os.Exit(1)
 	}
+}
+
+var pingCommand = &cobra.Command{
+	Use:   "ping",
+	Short: "ping ping etcd functional-tester and database.",
+	RunE:  pingCommandFunc,
+}
+
+var syncCommand = &cobra.Command{
+	Use:   "sync",
+	Short: "sync syncs etcd functional-tester to the database.",
+	RunE:  syncCommandFunc,
+}
+
+func pingCommandFunc(cmd *cobra.Command, args []string) error {
+	if len(metricsEndpoint) < 3 {
+		return fmt.Errorf("got empty metrics endpoint %q", metricsEndpoint)
+	}
+	if dbHost == "" {
+		return fmt.Errorf("got empty db host %q", dbHost)
+	}
+	if dbPort == 0 {
+		return fmt.Errorf("got 0 db port")
+	}
+	if dbUser == "" {
+		return fmt.Errorf("got empty db user %q", dbUser)
+	}
+
+	mt := metrics.New(metricsName, metricsEndpoint, dbHost, dbPort, dbUser, dbPassword)
+	mt.Ping()
+	return nil
+}
+
+func syncCommandFunc(cmd *cobra.Command, args []string) error {
+	if len(metricsEndpoint) < 3 {
+		return fmt.Errorf("got empty metrics endpoint %q", metricsEndpoint)
+	}
+	if dbHost == "" {
+		return fmt.Errorf("got empty db host %q", dbHost)
+	}
+	if dbPort == 0 {
+		return fmt.Errorf("got 0 db port")
+	}
+	if dbUser == "" {
+		return fmt.Errorf("got empty db user %q", dbUser)
+	}
+
+	mt := metrics.New(metricsName, metricsEndpoint, dbHost, dbPort, dbUser, dbPassword)
+
+	for {
+		if err := mt.Sync(); err != nil {
+			return err
+		}
+		if syncInterval < time.Duration(1) {
+			fmt.Println("sync done!")
+			break
+		}
+		fmt.Println("sleeping", syncInterval)
+		time.Sleep(syncInterval)
+	}
+	return nil
 }

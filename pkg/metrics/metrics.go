@@ -89,12 +89,20 @@ func (m *defaultMetrics) Ping() {
 		return
 	}
 	println()
-	fmt.Println("ping metrics endpoint result:")
+	fmt.Println(`
+#######################
+# ping metrics result #
+#######################
+`)
 	fmt.Println("current case:", caseN)
 	fmt.Println("current failed case:", failedN)
 	println()
 
-	fmt.Println("ping database result:")
+	fmt.Println(`
+########################
+# ping database result #
+########################
+`)
 	db, err := m.mysql()
 	if err != nil {
 		plog.Warning("mysql error:", err)
