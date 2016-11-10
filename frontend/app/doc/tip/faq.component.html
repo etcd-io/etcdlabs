@@ -58,6 +58,8 @@
                 <br>
                 <a href="/doc/{{docVersion}}/faq#comparison" class="faq-list">How is etcd different than Zookeeper and Consul?</a>
                 <br>
+                <a href="/doc/{{docVersion}}/faq#store-data" class="faq-list">How does etcd store data?</a>
+                <br>
                 <a href="/doc/{{docVersion}}/faq#stm" class="faq-list">How does etcd implement transaction?</a>
                 <br>
                 <a href="/doc/{{docVersion}}/faq#revision" class="faq-list">What is revision in etcd?</a>
@@ -74,6 +76,8 @@
                 <a href="/doc/{{docVersion}}/faq#odd-cluster-size" class="faq-list">Why odd number of cluster size?</a>
                 <br>
                 <a href="/doc/{{docVersion}}/faq#max-cluster-size" class="faq-list">What is maximum cluster size?</a>
+                <br>
+                <a href="/doc/{{docVersion}}/faq#deploy-cross-region-datacenter" class="faq-list">Deploy cross-region, cross data center?</a>
                 <br>
                 <a href="/doc/{{docVersion}}/faq#best-deployment-practice" class="faq-list">Best deployment practice</a>
                 <br>
@@ -401,6 +405,15 @@
         <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/faq#top" class="normal-link">↑ top</a></div>
         <br>
 
+        <div id="store-data"></div>
+        <h2><a href="/doc/{{docVersion}}/faq#store-data" class="faq-title">How does etcd store data?</a></h2>
+        <p class="narrow-paragraph">
+            Client sends requests to any etcd server. And those proposals are forwarded to leader. Entries are committed when cluster quorum agrees and persisted on-disk via write-ahead logs (WAL); write request only returns when cluster has persisted the entry across
+            the quorum. To prevent logs growing forever, etcd periodically snapshots logs and discards the tail. See <a routerLink="/doc/{{docVersion}}/comparison" class="normal-link">etcd Data model with reliable events</a> for more details.
+        </p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/faq#top" class="normal-link">↑ top</a></div>
+        <br>
+
         <div id="stm"></div>
         <h2><a href="/doc/{{docVersion}}/faq#stm" class="faq-title">How does etcd implement transaction?</a></h2>
         <p class="narrow-paragraph">
@@ -534,6 +547,14 @@
         </footer>
         <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/faq#top" class="normal-link">↑ top</a></div>
         <br><br>
+
+        <div id="deploy-cross-region-datacenter"></div>
+        <h2><a href="/doc/{{docVersion}}/faq#deploy-cross-region-datacenter" class="faq-title">Deploy cross-region, cross data center?</a></h2>
+        <p class="narrow-paragraph">
+            See <a routerLink="/doc/{{docVersion}}/tuning-etcd" class="normal-link">Tuning etcd</a>.
+        </p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/faq#top" class="normal-link">↑ top</a></div>
+        <br>
 
         <div id="best-deployment-practice"></div>
         <h2><a href="/doc/{{docVersion}}/faq#best-deployment-practice" class="faq-title">Best deployment practice</a></h2>
