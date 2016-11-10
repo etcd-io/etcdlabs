@@ -167,7 +167,7 @@ func (m *defaultMetrics) Sync() error {
 	// fresh; fetch data to compare against
 	if m.currentStatus.LastUpdate.IsZero() {
 		plog.Printf("Sync querying current case and failed on %q %q", m.name, m.metricsEndpoint)
-		rows, rerr := db.Query(fmt.Sprintf(`SELECT current_case, current_failed FROM etcdlabs.metrics WHERE name = "%s"`, m.name))
+		rows, rerr := db.Query(fmt.Sprintf(`SELECT total_case, total_failed, current_case, current_failed FROM etcdlabs.metrics WHERE name = "%s"`, m.name))
 		if rerr != nil {
 			return rerr
 		}
