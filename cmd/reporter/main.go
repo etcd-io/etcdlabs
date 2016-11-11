@@ -38,13 +38,13 @@ func main() {
 	}
 }
 
-var metricsNames []string
-var metricsEndpoints []string
-
 var dbHost string
 var dbPort int
 var dbUser string
 var dbPassword string
+
+var metricsNames []string
+var metricsEndpoints []string
 
 var syncInterval time.Duration
 

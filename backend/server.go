@@ -76,12 +76,12 @@ var (
 	globalClientRequestLimiter ratelimit.RequestLimiter
 	globalStopRestartLimiter   ratelimit.RequestLimiter
 
-	globalMetrics []metrics.Metrics
+	globalMetrics metrics.Metrics
 )
 
 // StartServer starts a backend webserver with stoppable listener.
-func StartServer(port int, mts ...metrics.Metrics) (*Server, error) {
-	globalMetrics = append(globalMetrics, mts...)
+func StartServer(port int, mt metrics.Metrics) (*Server, error) {
+	globalMetrics = mt
 
 	stopc := make(chan struct{})
 	ln, err := listener.NewListenerStoppable("http", fmt.Sprintf("localhost:%d", port), nil, stopc)
@@ -120,7 +120,7 @@ func StartServer(port int, mts ...metrics.Metrics) (*Server, error) {
 	})
 	mux.Handle("/fetch-metrics", &ContextAdapter{
 		ctx:     rootCtx,
-		handler: withCache(ContextHandlerFunc(clientRequestHandler)),
+		handler: withCache(ContextHandlerFunc(fetchMetricsRequestHandler)),
 	})
 
 	addrURL := url.URL{Scheme: "http", Host: fmt.Sprintf("localhost:%d", port)}
@@ -142,7 +142,6 @@ func StartServer(port int, mts ...metrics.Metrics) (*Server, error) {
 			srv.rootCancel()
 			close(srv.donec)
 		}()
-
 		if err := srv.httpServer.Serve(ln); err != nil && err != listener.ErrListenerStopped {
 			plog.Panic(err)
 		}

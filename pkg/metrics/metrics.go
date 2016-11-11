@@ -53,6 +53,9 @@ type Metrics interface {
 
 	// Get returns all current tester statuses.
 	Get() []TesterStatus
+
+	// GetLastUpdate returns the last update time.
+	GetLastUpdate() time.Time
 }
 
 type defaultMetrics struct {
@@ -63,6 +66,7 @@ type defaultMetrics struct {
 
 	mu            sync.Mutex
 	currentStatus map[string]*TesterStatus
+	lastUpdate    time.Time
 }
 
 // New returns a new default metrics.
@@ -320,6 +324,8 @@ WHERE name = %q`, status.TotalCase,
 			if _, err := db.Query(qry); err != nil {
 				return err
 			}
+
+			m.lastUpdate = time.Now()
 		}
 	}
 
@@ -343,4 +349,8 @@ func (m *defaultMetrics) Get() []TesterStatus {
 
 	sort.Sort(byName(ts))
 	return ts
+}
+
+func (m *defaultMetrics) GetLastUpdate() time.Time {
+	return m.lastUpdate
 }

@@ -21,6 +21,7 @@ import (
 	"os/signal"
 
 	"github.com/coreos/etcdlabs/backend"
+	"github.com/coreos/etcdlabs/pkg/metrics"
 	"github.com/coreos/pkg/capnslog"
 	"github.com/spf13/cobra"
 )
@@ -44,6 +45,14 @@ func main() {
 
 var webPort int
 
+var dbHost string
+var dbPort int
+var dbUser string
+var dbPassword string
+
+var metricsNames []string
+var metricsEndpoints []string
+
 var rootCommand = &cobra.Command{
 	Use:        "etcdlabs",
 	Short:      "etcdlabs runs etcdlabs.",
@@ -51,7 +60,15 @@ var rootCommand = &cobra.Command{
 }
 
 func init() {
-	rootCommand.PersistentFlags().IntVar(&webPort, "web-port", 2200, "web server port")
+	webCommand.PersistentFlags().IntVar(&webPort, "web-port", 2200, "web server port")
+
+	rootCommand.PersistentFlags().StringVar(&dbHost, "db-host", "", "database host")
+	rootCommand.PersistentFlags().IntVar(&dbPort, "db-port", 3306, "database port")
+	rootCommand.PersistentFlags().StringVar(&dbUser, "db-user", "root", "database user")
+	rootCommand.PersistentFlags().StringVar(&dbPassword, "db-password", "", "database password")
+
+	webCommand.PersistentFlags().StringSliceVar(&metricsNames, "metrics-names", []string{}, "metrics names (must be same order as endpoints)")
+	webCommand.PersistentFlags().StringSliceVar(&metricsEndpoints, "metrics-endpoints", []string{}, "metrics endpoints (must be same order as names)")
 
 	rootCommand.AddCommand(webCommand)
 }
@@ -63,8 +80,26 @@ var webCommand = &cobra.Command{
 }
 
 func webCommandFunc(cmd *cobra.Command, args []string) error {
-	// TODO: get metrics
-	srv, err := backend.StartServer(webPort)
+	if len(metricsNames) == 0 {
+		return nil, fmt.Errorf("got empty metrics names %v", metricsNames)
+	}
+	if len(metricsEndpoints) == 0 {
+		return nil, fmt.Errorf("got empty metrics endpoints %v", metricsEndpoints)
+	}
+	if len(metricsNames) != len(metricsEndpoints) {
+		return nil, fmt.Errorf("got different number of names and endpoints; %v, %v", metricsNames, metricsEndpoints)
+	}
+
+	statuses := make(map[string]*metrics.TesterStatus)
+	for i := range metricsNames {
+		statuses[metricsNames[i]] = &metrics.TesterStatus{
+			Name:            metricsNames[i],
+			MetricsEndpoint: metricsEndpoints[i],
+		}
+	}
+	mt := metrics.New(dbHost, dbPort, dbUser, dbPassword, statuses)
+
+	srv, err := backend.StartServer(webPort, mt)
 	if err != nil {
 		return err
 	}
