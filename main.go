@@ -78,7 +78,7 @@ func init() {
 	rootCommand.PersistentFlags().StringSliceVar(&metricsEndpoints, "metrics-endpoints", []string{}, "metrics endpoints (must be same order as names)")
 
 	webCommand.PersistentFlags().IntVar(&webPort, "web-port", 2200, "web server port")
-	webCommand.PersistentFlags().BoolVar(&skipDatabase, "skip-database", true, "true to skip database connection (for testing)")
+	webCommand.PersistentFlags().BoolVar(&skipDatabase, "skip-database", false, "true to skip database connection (for testing)")
 
 	syncCommand.PersistentFlags().DurationVarP(&syncInterval, "sync-interval", "i", time.Duration(0), "interval to run sync")
 
