@@ -45,18 +45,20 @@ export class ComparisonTipComponent extends ParentComponent implements AfterCont
         this.metricsSuccess = resp.Success;
         this.metricsResult = resp.Result;
 
-        for (let _i = 0; _i < resp.Statuses.length; _i++) {
-            let status = resp.Statuses[_i];
-            if (status.Name === '3-node') {
-                this.status3Node = status;
-            } else if (status.Name === '3-node-failpoints') {
-                this.status3NodeFailpoints = status;
-            } else if (status.Name === '5-node') {
-                this.status5Node = status;
-            } else if (status.Name === '5-node-failpoints') {
-                this.status5NodeFailpoints = status;
+        if (resp.Success) {
+            for (let _i = 0; _i < resp.Statuses.length; _i++) {
+                let status = resp.Statuses[_i];
+                if (status.Name === '3-node') {
+                    this.status3Node = status;
+                } else if (status.Name === '3-node-failpoints') {
+                    this.status3NodeFailpoints = status;
+                } else if (status.Name === '5-node') {
+                    this.status5Node = status;
+                } else if (status.Name === '5-node-failpoints') {
+                    this.status5NodeFailpoints = status;
+                };
             };
-        }
+        };
     };
 
     clickRefresh() {
