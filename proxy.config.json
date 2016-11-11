@@ -11,7 +11,7 @@
         "target": "http://0.0.0.0:2200",
         "secure": "false"
     },
-    "/fetch-request": {
+    "/fetch-metrics": {
         "target": "http://0.0.0.0:2200",
         "secure": "false"
     }
