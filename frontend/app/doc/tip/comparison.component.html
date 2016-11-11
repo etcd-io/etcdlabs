@@ -570,14 +570,15 @@
         <p class="narrow-paragraph">
             Please visit <a href="http://dash.etcd.io/" target="_blank" class="normal-link">dash.etcd.io</a> for realtime testing cluster dashboards.
         </p>
+
         <button md-raised-button color="primary" (click)="clickRefresh();">Refresh</button>
         <button md-raised-button *ngIf="metricsLastUpdate !== ''">last Update: {{metricsLastUpdate}}</button>
-        <br>
+        <br><br>
 
-        <p *ngIf="!metricsSuccess" class="narrow-paragraph error-message">
+        <p *ngIf="!metricsSuccess" class="narrow-paragraph error-message-normal">
             {{metricsResult}}
         </p>
-        <p *ngIf="!metricsSuccess" class="narrow-paragraph error-message">
+        <p *ngIf="!metricsSuccess" class="narrow-paragraph error-message-normal">
             {{metricsErrorMessage}}
         </p>
         <br *ngIf="!metricsSuccess">
