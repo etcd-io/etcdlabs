@@ -26,6 +26,7 @@ import (
 
 	"github.com/coreos/etcdlabs/cluster"
 	"github.com/coreos/etcdlabs/pkg/listener"
+	"github.com/coreos/etcdlabs/pkg/metrics"
 	"github.com/coreos/etcdlabs/pkg/ratelimit"
 )
 
@@ -68,20 +69,19 @@ type Server struct {
 }
 
 var (
-	defaultLimitInterval       = 3 * time.Second
-	defaultStopRestartInterval = 5 * time.Second
-
-	// for websocket
-	globalWebserverPort int
+	clientRequestIntervalLimit = 3 * time.Second
+	stopRestartIntervalLimit   = 5 * time.Second
 
 	globalCluster              *cluster.Cluster
 	globalClientRequestLimiter ratelimit.RequestLimiter
 	globalStopRestartLimiter   ratelimit.RequestLimiter
+
+	globalMetrics []metrics.Metrics
 )
 
 // StartServer starts a backend webserver with stoppable listener.
-func StartServer(port int) (*Server, error) {
-	globalWebserverPort = port
+func StartServer(port int, itv time.Duration, mts ...metrics.Metrics) (*Server, error) {
+	globalMetrics = append(globalMetrics, mts...)
 
 	stopc := make(chan struct{})
 	ln, err := listener.NewListenerStoppable("http", fmt.Sprintf("localhost:%d", port), nil, stopc)
@@ -97,10 +97,13 @@ func StartServer(port int) (*Server, error) {
 	globalCluster = c
 
 	// allow only 1 request for every 2 second
-	globalClientRequestLimiter = ratelimit.NewRequestLimiter(rootCtx, defaultLimitInterval)
+	globalClientRequestLimiter = ratelimit.NewRequestLimiter(rootCtx, clientRequestIntervalLimit)
 
 	// rate-limit more strictly for every 3 second
-	globalStopRestartLimiter = ratelimit.NewRequestLimiter(rootCtx, defaultStopRestartInterval)
+	globalStopRestartLimiter = ratelimit.NewRequestLimiter(rootCtx, stopRestartIntervalLimit)
+
+	// rate-limit fetch metrics for every 30 second
+	fetchMetricsLimiter = ratelimit.NewRequestLimiter(rootCtx, fetchMetricsRequestIntervalLimit)
 
 	mux := http.NewServeMux()
 	mux.Handle("/conn", &ContextAdapter{
@@ -112,6 +115,10 @@ func StartServer(port int) (*Server, error) {
 		handler: withCache(ContextHandlerFunc(serverStatusHandler)),
 	})
 	mux.Handle("/client-request", &ContextAdapter{
+		ctx:     rootCtx,
+		handler: withCache(ContextHandlerFunc(clientRequestHandler)),
+	})
+	mux.Handle("/fetch-metrics", &ContextAdapter{
 		ctx:     rootCtx,
 		handler: withCache(ContextHandlerFunc(clientRequestHandler)),
 	})
@@ -135,6 +142,12 @@ func StartServer(port int) (*Server, error) {
 			srv.rootCancel()
 			close(srv.donec)
 		}()
+
+		iv := itv
+		if iv < MinFetchMetricsInterval {
+			iv = MinFetchMetricsInterval
+		}
+		go runFetchMetrics(iv, mts...)
 
 		if err := srv.httpServer.Serve(ln); err != nil && err != listener.ErrListenerStopped {
 			plog.Panic(err)
