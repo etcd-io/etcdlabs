@@ -49,6 +49,7 @@ export class TesterMetricsService {
     }
 
     private processHTTPResponseServerStatus(res: Response) {
+        console.log("res:", res);
         let jsonBody = res.json();
         let rs = <MetricsResponse>jsonBody;
         return rs || {};
