@@ -153,6 +153,14 @@ h2 .faq-title {
     font-style: italic;
 }
 
+.error-message-normal {
+    margin: 5px;
+    color: red;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 14px;
+    font-style: italic;
+}
+
 .code-light {
     white-space: pre-wrap;
     border-style: solid;

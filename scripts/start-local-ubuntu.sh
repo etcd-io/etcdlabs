@@ -10,7 +10,7 @@ echo "building backend ectcdlabs"
 go build -v
 
 echo "running backend etcdlabs"
-nohup ./etcdlabs >> /tmp/etcdlabs.log 2>&1 &
+nohup ./etcdlabs web --skip-database --web-port 2200 >> /tmp/etcdlabs.log 2>&1 &
 
 sleep 5s
 echo "starting frontend"

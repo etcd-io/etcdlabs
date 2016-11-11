@@ -69,6 +69,8 @@ type Server struct {
 }
 
 var (
+	globalWebserverPort int
+
 	clientRequestIntervalLimit = 3 * time.Second
 	stopRestartIntervalLimit   = 5 * time.Second
 
@@ -76,12 +78,13 @@ var (
 	globalClientRequestLimiter ratelimit.RequestLimiter
 	globalStopRestartLimiter   ratelimit.RequestLimiter
 
-	globalMetrics []metrics.Metrics
+	globalMetrics metrics.Metrics
 )
 
 // StartServer starts a backend webserver with stoppable listener.
-func StartServer(port int, itv time.Duration, mts ...metrics.Metrics) (*Server, error) {
-	globalMetrics = append(globalMetrics, mts...)
+func StartServer(port int, mt metrics.Metrics) (*Server, error) {
+	globalWebserverPort = port
+	globalMetrics = mt
 
 	stopc := make(chan struct{})
 	ln, err := listener.NewListenerStoppable("http", fmt.Sprintf("localhost:%d", port), nil, stopc)
@@ -102,7 +105,7 @@ func StartServer(port int, itv time.Duration, mts ...metrics.Metrics) (*Server, 
 	// rate-limit more strictly for every 3 second
 	globalStopRestartLimiter = ratelimit.NewRequestLimiter(rootCtx, stopRestartIntervalLimit)
 
-	// rate-limit fetch metrics for every 30 second
+	// rate-limit fetch metrics for every 10 second
 	fetchMetricsLimiter = ratelimit.NewRequestLimiter(rootCtx, fetchMetricsRequestIntervalLimit)
 
 	mux := http.NewServeMux()
@@ -120,7 +123,7 @@ func StartServer(port int, itv time.Duration, mts ...metrics.Metrics) (*Server, 
 	})
 	mux.Handle("/fetch-metrics", &ContextAdapter{
 		ctx:     rootCtx,
-		handler: withCache(ContextHandlerFunc(clientRequestHandler)),
+		handler: withCache(ContextHandlerFunc(fetchMetricsRequestHandler)),
 	})
 
 	addrURL := url.URL{Scheme: "http", Host: fmt.Sprintf("localhost:%d", port)}
@@ -142,13 +145,6 @@ func StartServer(port int, itv time.Duration, mts ...metrics.Metrics) (*Server, 
 			srv.rootCancel()
 			close(srv.donec)
 		}()
-
-		iv := itv
-		if iv < MinFetchMetricsInterval {
-			iv = MinFetchMetricsInterval
-		}
-		go runFetchMetrics(iv, mts...)
-
 		if err := srv.httpServer.Serve(ln); err != nil && err != listener.ErrListenerStopped {
 			plog.Panic(err)
 		}

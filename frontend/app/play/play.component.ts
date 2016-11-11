@@ -302,7 +302,7 @@ export class PlayComponent implements OnInit, AfterContentInit, AfterViewChecked
       this.closeConnect();
       clearInterval(this.serverStatusHandler);
     };
-  }
+  };
 
   // getServerStatus fetches server status from backend.
   // nodeStatus is true to get the status of all nodes.

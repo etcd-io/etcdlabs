@@ -707,16 +707,3 @@ ${this.getOperatorKubectlEndpointHealthCommand()}
 `;
     }
 }
-
-export class TesterMetrics {
-    name: string;
-    totalCase: number;
-    currentCase: number;
-    currentFailed: number;
-
-    constructor(
-        name: string,
-    ) {
-        this.name = name;
-    }
-}
