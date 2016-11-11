@@ -24,14 +24,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var rootCommand = &cobra.Command{
-	Use:        "reporter",
-	Short:      "reporter is etcd functional-tester reporter.",
-	SuggestFor: []string{"etcd-tester-reportr", "etcdtesterreporter"},
-}
-
 func init() {
 	cobra.EnablePrefixMatching = true
+}
+
+func main() {
+	if err := rootCommand.Execute(); err != nil {
+		fmt.Fprintln(os.Stdout, err)
+		os.Exit(1)
+	}
 }
 
 var metricsName string
@@ -43,6 +44,12 @@ var dbUser string
 var dbPassword string
 
 var syncInterval time.Duration
+
+var rootCommand = &cobra.Command{
+	Use:        "reporter",
+	Short:      "reporter is etcd functional-tester reporter.",
+	SuggestFor: []string{"etcd-tester-reportr", "etcdtesterreporter"},
+}
 
 func init() {
 	rootCommand.PersistentFlags().StringVar(&metricsName, "metrics-name", "", "metrics name")
@@ -59,23 +66,10 @@ func init() {
 	rootCommand.AddCommand(syncCommand)
 }
 
-func main() {
-	if err := rootCommand.Execute(); err != nil {
-		fmt.Fprintln(os.Stdout, err)
-		os.Exit(1)
-	}
-}
-
 var pingCommand = &cobra.Command{
 	Use:   "ping",
 	Short: "ping ping etcd functional-tester and database.",
 	RunE:  pingCommandFunc,
-}
-
-var syncCommand = &cobra.Command{
-	Use:   "sync",
-	Short: "sync syncs etcd functional-tester to the database.",
-	RunE:  syncCommandFunc,
 }
 
 func pingCommandFunc(cmd *cobra.Command, args []string) error {
@@ -95,6 +89,12 @@ func pingCommandFunc(cmd *cobra.Command, args []string) error {
 	mt := metrics.New(metricsName, metricsEndpoint, dbHost, dbPort, dbUser, dbPassword)
 	mt.Ping()
 	return nil
+}
+
+var syncCommand = &cobra.Command{
+	Use:   "sync",
+	Short: "sync syncs etcd functional-tester to the database.",
+	RunE:  syncCommandFunc,
 }
 
 func syncCommandFunc(cmd *cobra.Command, args []string) error {
