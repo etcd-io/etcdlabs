@@ -42,7 +42,7 @@ export class MetricsResponse {
 
 @Injectable()
 export class TesterMetricsService {
-    private fetchMetricsEndpoint = 'fetch-status';
+    private fetchMetricsEndpoint = 'fetch-metrics';
     metricsResponse: MetricsResponse;
 
     constructor(private http: Http) {
