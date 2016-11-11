@@ -220,10 +220,13 @@ last update    %q
 			string(row.name),
 			string(row.totalCase),
 			string(row.totalFailed),
+
 			string(row.currentCase),
 			caseN,
+
 			string(row.currentFailed),
 			failedN,
+
 			string(row.lastUpdate),
 		)
 	}

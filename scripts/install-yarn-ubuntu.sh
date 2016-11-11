@@ -8,6 +8,7 @@ yarn init
 
 yarn install
 npm rebuild node-sass
+yarn install
 
 yarn start
 COMMENT
