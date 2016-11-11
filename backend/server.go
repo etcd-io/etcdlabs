@@ -80,7 +80,7 @@ var (
 )
 
 // StartServer starts a backend webserver with stoppable listener.
-func StartServer(port int, itv time.Duration, mts ...metrics.Metrics) (*Server, error) {
+func StartServer(port int, mts ...metrics.Metrics) (*Server, error) {
 	globalMetrics = append(globalMetrics, mts...)
 
 	stopc := make(chan struct{})
@@ -102,7 +102,7 @@ func StartServer(port int, itv time.Duration, mts ...metrics.Metrics) (*Server, 
 	// rate-limit more strictly for every 3 second
 	globalStopRestartLimiter = ratelimit.NewRequestLimiter(rootCtx, stopRestartIntervalLimit)
 
-	// rate-limit fetch metrics for every 30 second
+	// rate-limit fetch metrics for every 10 second
 	fetchMetricsLimiter = ratelimit.NewRequestLimiter(rootCtx, fetchMetricsRequestIntervalLimit)
 
 	mux := http.NewServeMux()
@@ -142,12 +142,6 @@ func StartServer(port int, itv time.Duration, mts ...metrics.Metrics) (*Server, 
 			srv.rootCancel()
 			close(srv.donec)
 		}()
-
-		iv := itv
-		if iv < MinFetchMetricsInterval {
-			iv = MinFetchMetricsInterval
-		}
-		go runFetchMetrics(iv, mts...)
 
 		if err := srv.httpServer.Serve(ln); err != nil && err != listener.ErrListenerStopped {
 			plog.Panic(err)

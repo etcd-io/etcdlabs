@@ -25,7 +25,7 @@ func TestFetch(t *testing.T) {
 	ts := httptest.NewServer(newTesterHandler())
 	defer ts.Close()
 
-	curCase, curFailed, err := fetch(ts.URL+"/metrics")
+	curCase, curFailed, err := fetchTester(ts.URL + "/metrics")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -64,7 +64,7 @@ var webCommand = &cobra.Command{
 
 func webCommandFunc(cmd *cobra.Command, args []string) error {
 	// TODO: get metrics
-	srv, err := backend.StartServer(webPort, backend.MinFetchMetricsInterval)
+	srv, err := backend.StartServer(webPort)
 	if err != nil {
 		return err
 	}

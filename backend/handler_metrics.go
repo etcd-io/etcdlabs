@@ -31,7 +31,7 @@ var (
 	MinFetchMetricsInterval = time.Hour
 
 	// limit for manual fetch
-	fetchMetricsRequestIntervalLimit = 30 * time.Second
+	fetchMetricsRequestIntervalLimit = 10 * time.Second
 	fetchMetricsLimiter              ratelimit.RequestLimiter
 )
 
