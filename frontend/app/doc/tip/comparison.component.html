@@ -570,41 +570,44 @@
         <p class="narrow-paragraph">
             Please visit <a href="http://dash.etcd.io/" target="_blank" class="normal-link">dash.etcd.io</a> for realtime testing cluster dashboards.
         </p>
-        <p class="narrow-paragraph">
-            <!--TODO: update testing cluster metrics from database-->
-            Click <a href="http://dash.etcd.io/" target="_blank" class="normal-link">here</a> to refresh (last update {{testerClusterLastUpdate}})
+        <button md-raised-button color="primary" (click)="clickRefresh();">Refresh</button>
+        <span *ngIf="metricsLastUpdate !== ''">(last update {{metricsLastUpdate}})</span>
+        <br>
+        <p *ngIf="!metricsSuccess" class="narrow-paragraph">
+            {{metricsResult}}, {{metricsErrorMessage}}
         </p>
+        <br>
         <table class="table narrow-paragraph">
             <thead>
                 <tr>
                     <th>Testing Cluster</th>
                     <th><a href="http://dash.etcd.io/dashboard/db/functional-tests" target="_blank" class="normal-link">3-node</a></th>
-                    <th><a href="http://dash.etcd.io/dashboard/db/functional-tests-5-node" target="_blank" class="normal-link">5-node</a></th>
                     <th><a href="http://dash.etcd.io/dashboard/db/functional-tests-failpoints" target="_blank" class="normal-link">3-node failpoints</a></th>
+                    <th><a href="http://dash.etcd.io/dashboard/db/functional-tests-5-node" target="_blank" class="normal-link">5-node</a></th>
                     <th><a href="http://dash.etcd.io/dashboard/db/functional-tests-failpoints-5-node" target="_blank" class="normal-link">5-node failpoints</a></th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
                     <th scope="row">Total Injects</th>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>1</td>
+                    <td>{{status3Node.TotalCase}}</td>
+                    <td>{{status3NodeFailpoints.TotalCase}}</td>
+                    <td>{{status5Node.TotalCase}}</td>
+                    <td>{{status5NodeFailpoints.TotalCase}}</td>
                 </tr>
                 <tr>
                     <th scope="row">Current Injects</th>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>1</td>
+                    <td>{{status3Node.CurrentCase}}</td>
+                    <td>{{status3NodeFailpoints.CurrentCase}}</td>
+                    <td>{{status5Node.CurrentCase}}</td>
+                    <td>{{status5NodeFailpoints.CurrentCase}}</td>
                 </tr>
                 <tr>
                     <th scope="row">Current Failed Case</th>
-                    <td>0</td>
-                    <td>0</td>
-                    <td>0</td>
-                    <td>0</td>
+                    <td>{{status3Node.CurrentFailed}}</td>
+                    <td>{{status3NodeFailpoints.CurrentFailed}}</td>
+                    <td>{{status5Node.CurrentFailed}}</td>
+                    <td>{{status5NodeFailpoints.CurrentFailed}}</td>
                 </tr>
             </tbody>
         </table>

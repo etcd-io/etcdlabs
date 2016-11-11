@@ -60,7 +60,13 @@ export class ServerStatus {
   UserN: number;
   Users: string[];
   NodeStatuses: NodeStatus[];
-  constructor(active: boolean, serverUptime: string, userN: number, users: string[], nodeStatuses: NodeStatus[]) {
+  constructor(
+    active: boolean,
+    serverUptime: string,
+    userN: number,
+    users: string[],
+    nodeStatuses: NodeStatus[],
+  ) {
     this.PlaygroundActive = active;
     this.ServerUptime = serverUptime;
     this.UserN = userN;
@@ -162,35 +168,6 @@ export class BackendService {
   //     .toPromise()
   //     .then(this.processHTTPResponseClient)
   //     .catch(this.processHTTPErrorClient);
-  // }
-  ///////////////////////////////////////////////////////
-
-  ///////////////////////////////////////////////////////
-  // with Observable
-  //
-  // private processHTTPResponseClient(res: Response) {
-  //   let jsonBody = res.json();
-  //   let clientResponse = <ClientResponse>jsonBody;
-  //   console.log('clientResponse', clientResponse);
-  //   return clientResponse || {};
-  // }
-  // private processHTTPErrorClient(error: any) {
-  //   let errMsg = (error.message) ? error.message :
-  //     error.status ? `${error.status} - ${error.statusText}` : 'Server error';
-  //   console.error(errMsg);
-  //   this.clientResponseError = errMsg;
-  //   return Observable.throw(errMsg);
-  // }
-  // postClientRequest(clientRequest: ClientRequest): Observable<ClientResponse> {
-  //   let body = JSON.stringify(clientRequest);
-  //   let headers = new Headers({ 'Content-Type': 'application/json' });
-  //   let options = new RequestOptions({ headers: headers });
-  //
-  //   // this returns without waiting for POST response
-  //   let obser = this.http.post(this.clientRequestEndpoint, body, options)
-  //     .map(this.processHTTPResponseClient)
-  //     .catch(this.processHTTPErrorClient);
-  //   return obser;
   // }
   ///////////////////////////////////////////////////////
 }
