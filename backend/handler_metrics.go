@@ -59,6 +59,12 @@ func fetchMetricsRequestHandler(ctx context.Context, w http.ResponseWriter, req 
 		}
 		fetchMetricsLimiter.Advance()
 
+		if globalMetrics == nil {
+			mresp.Success = false
+			mresp.Result = "metrics is disabled"
+			return json.NewEncoder(w).Encode(mresp)
+		}
+
 		if err := globalMetrics.Sync(); err != nil {
 			mresp.Success = false
 			mresp.Result = "fetch metrics request " + err.Error()

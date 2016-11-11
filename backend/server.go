@@ -69,6 +69,8 @@ type Server struct {
 }
 
 var (
+	globalWebserverPort int
+
 	clientRequestIntervalLimit = 3 * time.Second
 	stopRestartIntervalLimit   = 5 * time.Second
 
@@ -81,6 +83,7 @@ var (
 
 // StartServer starts a backend webserver with stoppable listener.
 func StartServer(port int, mt metrics.Metrics) (*Server, error) {
+	globalWebserverPort = port
 	globalMetrics = mt
 
 	stopc := make(chan struct{})
