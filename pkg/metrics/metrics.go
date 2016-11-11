@@ -85,7 +85,7 @@ func New(name, ep, dbHost string, dbPort int, dbUser, dbPassword string) Metrics
 func (m *defaultMetrics) Ping() {
 	caseN, failedN, err := fetch(m.metricsEndpoint)
 	if err != nil {
-		plog.Warning("fetch error:", err)
+		plog.Warningf("fetch error %v on %q %q", err, m.name, m.metricsEndpoint)
 		return
 	}
 	println()
@@ -105,14 +105,14 @@ func (m *defaultMetrics) Ping() {
 `)
 	db, err := m.mysql()
 	if err != nil {
-		plog.Warning("mysql error:", err)
+		plog.Warningf("mysql error %v on %q %q", err, m.name, m.metricsEndpoint)
 		return
 	}
 	defer db.Close()
 
 	rows, err := db.Query(`SELECT name, total_case, total_failed, current_case, current_failed, last_update FROM etcdlabs.metrics`)
 	if err != nil {
-		plog.Warning("db.Query error:", err)
+		plog.Warningf("db.Query error %v on %q %q", err, m.name, m.metricsEndpoint)
 		return
 	}
 	defer rows.Close()
@@ -124,7 +124,7 @@ func (m *defaultMetrics) Ping() {
 		var currentFailed []byte
 		var lastUpdate []byte
 		if err := rows.Scan(&name, &totalCase, &totalFailed, &currentCase, &currentFailed, &lastUpdate); err != nil {
-			plog.Warning("rows.Scan error:", err)
+			plog.Warningf("rows.Scan error %v on %q %q", err, m.name, m.metricsEndpoint)
 			return
 		}
 		fmt.Printf(`-----
@@ -140,7 +140,7 @@ last update    %q
 		println()
 	}
 	if err := rows.Err(); err != nil {
-		plog.Warning("rows.Err error:", err)
+		plog.Warningf("rows.Err error %v on %q %q", err, m.name, m.metricsEndpoint)
 		return
 	}
 }
@@ -158,18 +158,22 @@ func (m *defaultMetrics) Sync() error {
 	defer m.mu.Unlock()
 
 	// compare current number
-	db, derr := m.mysql()
-	if derr != nil {
-		return derr
+	db, err := m.mysql()
+	if err != nil {
+		errmsg := fmt.Errorf("mysql error %v on %q %q", err, m.name, m.metricsEndpoint)
+		plog.Warning(errmsg)
+		return errmsg
 	}
 	defer db.Close()
 
 	// fresh; fetch data to compare against
 	if m.currentStatus.LastUpdate.IsZero() {
 		plog.Printf("Sync querying current case and failed on %q %q", m.name, m.metricsEndpoint)
-		rows, rerr := db.Query(fmt.Sprintf(`SELECT total_case, total_failed, current_case, current_failed FROM etcdlabs.metrics WHERE name = "%s"`, m.name))
-		if rerr != nil {
-			return rerr
+		rows, err := db.Query(fmt.Sprintf(`SELECT total_case, total_failed, current_case, current_failed FROM etcdlabs.metrics WHERE name = "%s"`, m.name))
+		if err != nil {
+			errmsg := fmt.Errorf("db.Query error %v on %q %q", err, m.name, m.metricsEndpoint)
+			plog.Warning(errmsg)
+			return errmsg
 		}
 		defer rows.Close()
 
@@ -179,24 +183,34 @@ func (m *defaultMetrics) Sync() error {
 			var caseV []byte
 			var failedV []byte
 			if err := rows.Scan(&totalCaseV, &totalFailedV, &caseV, &failedV); err != nil {
-				return err
+				errmsg := fmt.Errorf("rows.Scan error %v on %q %q", err, m.name, m.metricsEndpoint)
+				plog.Warning(errmsg)
+				return errmsg
 			}
 
 			totalCaseN, err := strconv.ParseInt(string(totalCaseV), 10, 32)
 			if err != nil {
-				return err
+				errmsg := fmt.Errorf("strconv.ParseInt error %v on %q %q", err, m.name, m.metricsEndpoint)
+				plog.Warning(errmsg)
+				return errmsg
 			}
 			totalFailedN, err := strconv.ParseInt(string(totalFailedV), 10, 32)
 			if err != nil {
-				return err
+				errmsg := fmt.Errorf("strconv.ParseInt error %v on %q %q", err, m.name, m.metricsEndpoint)
+				plog.Warning(errmsg)
+				return errmsg
 			}
 			caseN, err := strconv.ParseInt(string(caseV), 10, 32)
 			if err != nil {
-				return err
+				errmsg := fmt.Errorf("strconv.ParseInt error %v on %q %q", err, m.name, m.metricsEndpoint)
+				plog.Warning(errmsg)
+				return errmsg
 			}
 			failedN, err := strconv.ParseInt(string(failedV), 10, 32)
 			if err != nil {
-				return err
+				errmsg := fmt.Errorf("strconv.ParseInt error %v on %q %q", err, m.name, m.metricsEndpoint)
+				plog.Warning(errmsg)
+				return errmsg
 			}
 
 			m.currentStatus.TotalCase = totalCaseN
@@ -207,14 +221,18 @@ func (m *defaultMetrics) Sync() error {
 			break
 		}
 		if err := rows.Err(); err != nil {
-			return err
+			errmsg := fmt.Errorf("rows.Err error %v on %q %q", err, m.name, m.metricsEndpoint)
+			plog.Warning(errmsg)
+			return errmsg
 		}
 	}
 
 	plog.Printf("Sync fetching current case and failed on %q %q", m.name, m.metricsEndpoint)
 	caseN, failedN, err := fetch(m.metricsEndpoint)
 	if err != nil {
-		return err
+		errmsg := fmt.Errorf("fetch error %v on %q %q", err, m.name, m.metricsEndpoint)
+		plog.Warning(errmsg)
+		return errmsg
 	}
 
 	toUpdate := false
@@ -251,7 +269,9 @@ WHERE name = %q`, m.currentStatus.TotalCase,
 			m.name,
 		)
 		if _, err := db.Query(qry); err != nil {
-			return fmt.Errorf("error %v when running query %q", err, qry)
+			errmsg := fmt.Errorf("db.Query error %v on %q %q (%q)", err, m.name, m.metricsEndpoint, qry)
+			plog.Warning(errmsg)
+			return errmsg
 		}
 
 		m.currentStatus.LastUpdate = now

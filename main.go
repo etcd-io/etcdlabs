@@ -16,11 +16,13 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"os/signal"
 
 	"github.com/coreos/etcdlabs/backend"
 	"github.com/coreos/pkg/capnslog"
+	"github.com/spf13/cobra"
 )
 
 var plog = capnslog.NewPackageLogger("github.com/coreos/etcdlabs", "etcdlabs")
@@ -29,12 +31,42 @@ func init() {
 	capnslog.SetGlobalLogLevel(capnslog.INFO)
 }
 
-var webPort = 2200
+func init() {
+	cobra.EnablePrefixMatching = true
+}
 
 func main() {
-	srv, err := backend.StartServer(webPort)
+	if err := rootCommand.Execute(); err != nil {
+		fmt.Fprintln(os.Stdout, err)
+		os.Exit(1)
+	}
+}
+
+var webPort int
+
+var rootCommand = &cobra.Command{
+	Use:        "etcdlabs",
+	Short:      "etcdlabs runs etcdlabs.",
+	SuggestFor: []string{"etcdlab", "etcdlabss"},
+}
+
+func init() {
+	rootCommand.PersistentFlags().IntVar(&webPort, "web-port", 2200, "web server port")
+
+	rootCommand.AddCommand(webCommand)
+}
+
+var webCommand = &cobra.Command{
+	Use:   "web",
+	Short: "web runs etcdlabs backend web server.",
+	RunE:  webCommandFunc,
+}
+
+func webCommandFunc(cmd *cobra.Command, args []string) error {
+	// TODO: get metrics
+	srv, err := backend.StartServer(webPort, backend.MinFetchMetricsInterval)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer srv.Stop()
 
@@ -46,4 +78,5 @@ func main() {
 	case <-srv.StopNotify():
 		plog.Info("shutting down server with stop signal")
 	}
+	return nil
 }

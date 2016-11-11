@@ -36,7 +36,7 @@ func TestServer(t *testing.T) {
 	testBasePort++
 	testMu.Unlock()
 
-	srv, err := StartServer(port)
+	srv, err := StartServer(port, time.Duration(0))
 	if err != nil {
 		t.Fatal(err)
 	}
