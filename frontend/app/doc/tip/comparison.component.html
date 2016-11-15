@@ -84,7 +84,7 @@
                     <th scope="row">Version</th>
                     <td><a href="http://zookeeper.apache.org/doc/r3.4.9/" target="_blank" class="normal-link">r3.4.9</a></td>
                     <td><a href="https://github.com/coreos/etcd/releases/tag/v3.1.0" target="_blank" class="normal-link">v3.1.0</a></td>
-                    <td><a href="https://github.com/hashicorp/consul/releases/tag/v0.7.0" target="_blank" class="normal-link">v0.7.0</a></td>
+                    <td><a href="https://github.com/hashicorp/consul/releases/tag/v0.7.1" target="_blank" class="normal-link">v0.7.1</a></td>
                 </tr>
             </tbody>
         </table>
@@ -427,24 +427,6 @@
                     <td>Undefined</td>
                 </tr>
                 <tr>
-                    <th scope="row">Write<sup>[7]</sup></th>
-                    <td>?</td>
-                    <td>?</td>
-                    <td>?</td>
-                </tr>
-                <tr>
-                    <th scope="row">Serializable Read<sup>[8]</sup></th>
-                    <td>?</td>
-                    <td>?</td>
-                    <td>?</td>
-                </tr>
-                <tr>
-                    <th scope="row">Linearizable Read<sup>[9]</sup></th>
-                    <td>?</td>
-                    <td>?</td>
-                    <td>?</td>
-                </tr>
-                <tr>
                     <th scope="row">Failure Injection Tests</th>
                     <td>No</td>
                     <td><a href="http://dash.etcd.io" target="_blank" class="normal-link">dash.etcd.io</a></td>
@@ -460,11 +442,6 @@
             <br> [4] Consul has hard-coded <span class="code-light-snippet-small">maxKVSize</span> value. Server returns <span class="code-light-snippet-small">Value for key X is too large</span> error to the exceeding client request.
             <br> [5] Zookeeper documentation recommends to limit Java heap size to avoid disk swap since Zookeeper stores data in-memory; see <a href="https://zookeeper.apache.org/doc/r3.4.9/zookeeperAdmin.html#sc_zkMulitServerSetup" target="_blank" class="footer-link">Clustered (Multi-Server) Setup</a>.
             <br> [6] etcd default space quota is 2GB, which can be configured up to 8GB. If etcd exceeds space quota, cluster becomes maintenance mode only allowing read and delete client requests. This is to prevent degrading etcd performance.
-            <br> [7] Write 2 million entries (each entry is 8-byte key, 256-byte value, and total data size is about 0.75 GB) with 1,000 concurrent TCP connections, while etcd uses only 100 connections.
-            <br> [8] 2 million read requests (each entry is 8-byte key, 256-byte value, and total data size is about 0.75 GB) with 1,000 concurrent TCP connections, while etcd uses only 100 connections. It is serializable read, where server returns data
-            without going through consensus, so possibly serving stale data.
-            <br> [9] 2 million read requests (each entry is 8-byte key, 256-byte value, and total data size is about 0.75 GB) with 1,000 concurrent TCP connections, while etcd uses only 100 connections. It is linearizable read, where majority of cluster
-            has to agree on the same value before it returns.
         </footer>
         <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/comparison#top" class="normal-link">↑ top</a></div>
         <br><br>
@@ -473,56 +450,316 @@
         <div id="benchmark-results"></div>
         <h4>Benchmark Results</h4>
         <p class="narrow-paragraph">
-            All tests are run with Google Cloud Compute Engine virtual machines: 3 machines are used for database server, each of which has 8 vCPUs, 16GB Memory, and 150GB SSD on Ubuntu 16.10. 1 machine is used for sending client requests, which has 16 vCPUs, 30GB
-            Memory, and 150GB SSD on Ubuntu 16.10. Zookeeper is run with Java 8 (Java(TM) SE Runtime Environment TODO, Java HotSpot(TM) 64-Bit Server VM TODO, javac TODO). etcd is compiled with Go 1.7.3. Consul is compiled with Go TODO. Want to run your
-            own benchmarks? Please try <a href="https://github.com/coreos/etcd/tree/master/tools/benchmark" target="_blank" class="normal-link">etcd benchmark</a> and <a href="https://github.com/coreos/dbtester" target="_blank" class="normal-link">dbtester</a>.
+            All tests are run with Google Cloud Compute Engine virtual machines: 3 machines are used for database servers, each of which has 8 vCPUs, 16GB Memory, and 150GB SSD on Ubuntu 16.10. 1 machine is used for sending client requests, which has 16 vCPUs, 30GB
+            Memory, and 150GB SSD on Ubuntu 16.10.
         </p>
-        <br>
-        <h5>Write</h5>
-        <br>
-        <h6>Latency</h6>
-        <br>
-        <h6>Throughput</h6>
-        <br>
-        <h6>CPU</h6>
-        <br>
-        <h6>Memory</h6>
-        <br>
         <p class="narrow-paragraph">
-            TODO: graphs...
+            In linearizable read, majority of cluster has to agree on the same value before it returns. In serializable read, server returns data without going through consensus, so possibly serving stale data.
+        </p>
+        <p class="narrow-paragraph">
+            Want to run your own benchmarks? Please try <a href="https://github.com/coreos/etcd/tree/master/tools/benchmark" target="_blank" class="normal-link">etcd benchmark</a> and <a href="https://github.com/coreos/dbtester" target="_blank" class="normal-link">dbtester</a>.
         </p>
 
         <br>
-        <h5>Serializable Read</h5>
+        <table class="table narrow-paragraph">
+            <thead>
+                <tr>
+                    <th>Write</th>
+                    <th>Zookeeper</th>
+                    <th>etcd</th>
+                    <th>Consul</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">Version</th>
+                    <td><a href="http://zookeeper.apache.org/doc/r3.4.9/" target="_blank" class="normal-link">r3.4.9</a></td>
+                    <td><a href="https://github.com/coreos/etcd/releases/tag/v3.1.0" target="_blank" class="normal-link">v3.1.0</a></td>
+                    <td><a href="https://github.com/hashicorp/consul/releases/tag/v0.7.1" target="_blank" class="normal-link">v0.7.1</a></td>
+                </tr>
+                <tr>
+                    <th scope="row">Runtime</th>
+                    <td>Java 8</td>
+                    <td>Go 1.7.3</td>
+                    <td>Go 1.7.3</td>
+                </tr>
+                <tr>
+                    <th scope="row">Number of TCP connections</th>
+                    <td>1000</td>
+                    <td>100<sup>[1]</sup></td>
+                    <td>1000</td>
+                </tr>
+                <tr>
+                    <th scope="row">Number of concurrent clients</th>
+                    <td>1000</td>
+                    <td>1000</td>
+                    <td>1000</td>
+                </tr>
+                <tr>
+                    <th scope="row">Key size</th>
+                    <td>8-byte</td>
+                    <td>8-byte</td>
+                    <td>8-byte</td>
+                </tr>
+                <tr>
+                    <th scope="row">Value size</th>
+                    <td>256-byte</td>
+                    <td>256-byte</td>
+                    <td>256-byte</td>
+                </tr>
+                <tr>
+                    <th scope="row">Number of entries to write</th>
+                    <td>2 million</td>
+                    <td>2 million</td>
+                    <td>2 million</td>
+                </tr>
+                <tr>
+                    <th scope="row">Data Size<sup>[2]</sup></th>
+                    <td>1 GB</td>
+                    <td>1 GB</td>
+                    <td>1 GB</td>
+                </tr>
+                <tr>
+                    <th scope="row">Average Throughput</th>
+                    <td>1 qps</td>
+                    <td>1 qps</td>
+                    <td>1 qps</td>
+                </tr>
+                <tr>
+                    <th scope="row">Average Latency</th>
+                    <td>1 qps</td>
+                    <td>1 qps</td>
+                    <td>1 qps</td>
+                </tr>
+                <tr>
+                    <th scope="row">Peak CPU Usage</th>
+                    <td>1 qps</td>
+                    <td>1 qps</td>
+                    <td>1 qps</td>
+                </tr>
+                <tr>
+                    <th scope="row">Peak Memory Usage</th>
+                    <td>1 qps</td>
+                    <td>1 qps</td>
+                    <td>1 qps</td>
+                </tr>
+            </tbody>
+        </table>
+        <hr align="left" class="footer-top-line">
+        <footer class="narrow-footer">
+            [1] etcd uses less TCP connections with gRPC and HTTP/2.
+            <br> [2] Total size of data written to disk after writes are finished.
+        </footer>
         <br>
-        <h6>Latency</h6>
-        <br>
-        <h6>Throughput</h6>
-        <br>
-        <h6>CPU</h6>
-        <br>
-        <h6>Memory</h6>
-        <br>
-        <p class="narrow-paragraph">
+        <div>
             TODO: graphs...
-        </p>
-
-        <br>
-        <h5>Linearizable Read</h5>
-        <br>
-        <h6>Latency</h6>
-        <br>
-        <h6>Throughput</h6>
-        <br>
-        <h6>CPU</h6>
-        <br>
-        <h6>Memory</h6>
-        <br>
+        </div>
         <p class="narrow-paragraph">
-            TODO: graphs...
+            TODO: explanation...
         </p>
         <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/comparison#top" class="normal-link">↑ top</a></div>
         <br><br>
+
+
+        <table class="table narrow-paragraph">
+            <thead>
+                <tr>
+                    <th>Linearizable Read</th>
+                    <th>Zookeeper</th>
+                    <th>etcd</th>
+                    <th>Consul</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">Version</th>
+                    <td><a href="http://zookeeper.apache.org/doc/r3.4.9/" target="_blank" class="normal-link">r3.4.9</a></td>
+                    <td><a href="https://github.com/coreos/etcd/releases/tag/v3.1.0" target="_blank" class="normal-link">v3.1.0</a></td>
+                    <td><a href="https://github.com/hashicorp/consul/releases/tag/v0.7.1" target="_blank" class="normal-link">v0.7.1</a></td>
+                </tr>
+                <tr>
+                    <th scope="row">Runtime</th>
+                    <td>Java 8</td>
+                    <td>Go 1.7.3</td>
+                    <td>Go 1.7.3</td>
+                </tr>
+                <tr>
+                    <th scope="row">Number of TCP connections</th>
+                    <td>1000</td>
+                    <td>100<sup>[1]</sup></td>
+                    <td>1000</td>
+                </tr>
+                <tr>
+                    <th scope="row">Number of concurrent clients</th>
+                    <td>1000</td>
+                    <td>1000</td>
+                    <td>1000</td>
+                </tr>
+                <tr>
+                    <th scope="row">Key size</th>
+                    <td>8-byte</td>
+                    <td>8-byte</td>
+                    <td>8-byte</td>
+                </tr>
+                <tr>
+                    <th scope="row">Value size</th>
+                    <td>256-byte</td>
+                    <td>256-byte</td>
+                    <td>256-byte</td>
+                </tr>
+                <tr>
+                    <th scope="row">Number of entries to read</th>
+                    <td>2 million</td>
+                    <td>2 million</td>
+                    <td>2 million</td>
+                </tr>
+                <tr>
+                    <th scope="row">Data Size<sup>[2]</sup></th>
+                    <td>1 GB</td>
+                    <td>1 GB</td>
+                    <td>1 GB</td>
+                </tr>
+                <tr>
+                    <th scope="row">Average Throughput</th>
+                    <td>1 qps</td>
+                    <td>1 qps</td>
+                    <td>1 qps</td>
+                </tr>
+                <tr>
+                    <th scope="row">Average Latency</th>
+                    <td>1 qps</td>
+                    <td>1 qps</td>
+                    <td>1 qps</td>
+                </tr>
+                <tr>
+                    <th scope="row">Peak CPU Usage</th>
+                    <td>1 qps</td>
+                    <td>1 qps</td>
+                    <td>1 qps</td>
+                </tr>
+                <tr>
+                    <th scope="row">Peak Memory Usage</th>
+                    <td>1 qps</td>
+                    <td>1 qps</td>
+                    <td>1 qps</td>
+                </tr>
+            </tbody>
+        </table>
+        <hr align="left" class="footer-top-line">
+        <footer class="narrow-footer">
+            [1] etcd uses less TCP connections with gRPC and HTTP/2.
+            <br> [2] Total size of data when reads were requested. This is mostly from previous write tests.
+        </footer>
+        <br>
+        <div>
+            TODO: graphs...
+        </div>
+        <p class="narrow-paragraph">
+            TODO: explanation...
+        </p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/comparison#top" class="normal-link">↑ top</a></div>
+        <br><br>
+
+
+        <table class="table narrow-paragraph">
+            <thead>
+                <tr>
+                    <th>Serializable Read</th>
+                    <th>Zookeeper</th>
+                    <th>etcd</th>
+                    <th>Consul</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">Version</th>
+                    <td><a href="http://zookeeper.apache.org/doc/r3.4.9/" target="_blank" class="normal-link">r3.4.9</a></td>
+                    <td><a href="https://github.com/coreos/etcd/releases/tag/v3.1.0" target="_blank" class="normal-link">v3.1.0</a></td>
+                    <td><a href="https://github.com/hashicorp/consul/releases/tag/v0.7.1" target="_blank" class="normal-link">v0.7.1</a></td>
+                </tr>
+                <tr>
+                    <th scope="row">Runtime</th>
+                    <td>Java 8</td>
+                    <td>Go 1.7.3</td>
+                    <td>Go 1.7.3</td>
+                </tr>
+                <tr>
+                    <th scope="row">Number of TCP connections</th>
+                    <td>1000</td>
+                    <td>100<sup>[1]</sup></td>
+                    <td>1000</td>
+                </tr>
+                <tr>
+                    <th scope="row">Number of concurrent clients</th>
+                    <td>1000</td>
+                    <td>1000</td>
+                    <td>1000</td>
+                </tr>
+                <tr>
+                    <th scope="row">Key size</th>
+                    <td>8-byte</td>
+                    <td>8-byte</td>
+                    <td>8-byte</td>
+                </tr>
+                <tr>
+                    <th scope="row">Value size</th>
+                    <td>256-byte</td>
+                    <td>256-byte</td>
+                    <td>256-byte</td>
+                </tr>
+                <tr>
+                    <th scope="row">Number of entries to read</th>
+                    <td>2 million</td>
+                    <td>2 million</td>
+                    <td>2 million</td>
+                </tr>
+                <tr>
+                    <th scope="row">Data Size<sup>[2]</sup></th>
+                    <td>1 GB</td>
+                    <td>1 GB</td>
+                    <td>1 GB</td>
+                </tr>
+                <tr>
+                    <th scope="row">Average Throughput</th>
+                    <td>1 qps</td>
+                    <td>1 qps</td>
+                    <td>1 qps</td>
+                </tr>
+                <tr>
+                    <th scope="row">Average Latency</th>
+                    <td>1 qps</td>
+                    <td>1 qps</td>
+                    <td>1 qps</td>
+                </tr>
+                <tr>
+                    <th scope="row">Peak CPU Usage</th>
+                    <td>1 qps</td>
+                    <td>1 qps</td>
+                    <td>1 qps</td>
+                </tr>
+                <tr>
+                    <th scope="row">Peak Memory Usage</th>
+                    <td>1 qps</td>
+                    <td>1 qps</td>
+                    <td>1 qps</td>
+                </tr>
+            </tbody>
+        </table>
+        <hr align="left" class="footer-top-line">
+        <footer class="narrow-footer">
+            [1] etcd uses less TCP connections with gRPC and HTTP/2.
+            <br> [2] Total size of data when reads were requested. This is mostly from previous write tests.
+        </footer>
+        <br>
+        <div>
+            TODO: graphs...
+        </div>
+        <p class="narrow-paragraph">
+            TODO: explanation...
+        </p>
+        <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/comparison#top" class="normal-link">↑ top</a></div>
+        <br><br>
+
 
         <br><br>
         <div id="etcd-tests"></div>
