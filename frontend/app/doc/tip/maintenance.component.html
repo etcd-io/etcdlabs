@@ -34,7 +34,7 @@
             <li><a href="/doc/{{docVersion}}/maintenance#defragmentation" class="normal-link">Defragmentation</a></li>
             <li><a href="/doc/{{docVersion}}/maintenance#space-quota" class="normal-link">Space Quota</a></li>
             <li><a href="/doc/{{docVersion}}/maintenance#snapshot-backup" class="normal-link">Snapshot Backup</a></li>
-            <li><a href="/doc/{{docVersion}}/maintenance#dashboard" class="normal-link">Dashboard</a></li>
+            <li><a href="/doc/{{docVersion}}/maintenance#monitoring" class="normal-link">Monitoring</a></li>
         </ul>
 
 
@@ -277,15 +277,46 @@ $ ETCDCTL_API=3 etcdctl --write-out=table snapshot status backup.db
         <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/maintenance#top" class="normal-link">↑ top</a></div>
         <br>
 
-        <!--TODO: update link to etcd Grafana dashboard tempate-->
         <br>
-        <div id="dashboard"></div>
-        <h5>Dashboard</h5>
+        <div id="monitoring"></div>
+        <h5>Monitoring</h5>
         <p class="narrow-paragraph">
-            etcd provides various <a href="https://github.com/coreos/etcd/blob/master/Documentation/metrics.md" target="_blank" class="normal-link">metrics</a> using <a href="https://prometheus.io" target="_blank" class="normal-link">Prometheus</a>.
+            Each etcd server exports metrics under the <span class="code-light-snippet">/metrics</span> path on its client port.
         </p>
+
+        <br>
+        <h6>Prometheus</h6>
         <p class="narrow-paragraph">
-            <a href="http://grafana.org" target="_blank" class="normal-link">Grafana</a> can be used to set up Prometheus dashboards; see <a href="https://github.com/coreos/etcd/blob/master/Documentation/metrics.md" target="_blank" class="normal-link">template</a>            and <a href="http://dash.etcd.io/dashboard/db/test-etcd" target="_blank" class="normal-link">sample dashboard</a>.
+            Running a <a href="https://prometheus.io" target="_blank" class="normal-link">Prometheus</a> monitoring service is the easiest way to ingest and record etcd's metrics.
+        </p>
+
+        <md-input type="text" [(ngModel)]="prometheusVersion" placeholder="Prometheus version"></md-input>
+        <md-input type="text" [(ngModel)]="prometheusDir" placeholder="Prometheus dir"></md-input>
+        <md-input type="text" [(ngModel)]="prometheusName" placeholder="Prometheus name"></md-input>
+        <md-input type="number" [(ngModel)]="prometheusPort" placeholder="Prometheus port"></md-input>
+
+        <!--TODO: use md-textarea-->
+        <textarea type="text" style="max-width: 550px;" class="form-control" placeholder="etcd hosts to scrape (line-separated)" rows="7" [(ngModel)]="inputEtcdHostsTxt"></textarea>
+        <br>
+
+        <pre class="code-dark">{{getPrometheusCommand()}}
+</pre>
+
+        <br>
+        <h6>Grafana</h6>
+        <p class="narrow-paragraph">
+            <a href="http://grafana.org" target="_blank" class="normal-link">Grafana</a> has built-in Prometheus support; just add a Prometheus data source:
+        </p>
+
+        <md-input type="text" [(ngModel)]="grafanaDownloadURL" placeholder="Grafana download URL" style="width: 750px;"></md-input>
+        <br>
+        <md-input type="text" [(ngModel)]="grafanaDir" placeholder="Grafana dir"></md-input>
+
+        <pre class="code-dark">{{getGrafanaCommand()}}
+</pre>
+        <p class="narrow-paragraph">
+            Then import the default <a href="https://github.com/coreos/etcd/blob/master/Documentation/op-guide/grafana.json" target="_blank" class="normal-link">etcd dashboard template</a> and customize; see the <a href="http://dash.etcd.io/dashboard/db/test-etcd"
+                target="_blank" class="normal-link">demo</a>.
         </p>
         <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/maintenance#top" class="normal-link">↑ top</a></div>
         <br>

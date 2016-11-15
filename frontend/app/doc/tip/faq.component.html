@@ -288,8 +288,8 @@
         <div id="etcd-clock-time"></div>
         <h2><a href="/doc/{{docVersion}}/faq#etcd-clock-time" class="faq-title">Clock, time in etcd</a></h2>
         <p class="narrow-paragraph">
-            etcd does not depend on clock time to ensure the consistency of cluster states, in case clock drift or message delay happens. etcd uses Raft term and index<sup>[1]</sup> as a logical clock. And lease backend uses TODO as a logical clock. Transporation
-            layer probes clock drift and prints out warnings if any.
+            etcd does not depend on clock time to ensure the consistency of cluster states, in case clock drift or message delay happens. etcd uses Raft term and index<sup>[1]</sup> as a logical clock. And lease backend uses TODO(https://github.com/coreos/etcd/issues/6700)
+            as a logical clock. Transporation layer probes clock drift and prints out warnings with certain threshold.
         </p>
         <hr align="left" class="footer-top-line">
         <footer class="narrow-footer">
@@ -408,8 +408,8 @@
         <div id="store-data"></div>
         <h2><a href="/doc/{{docVersion}}/faq#store-data" class="faq-title">How does etcd store data?</a></h2>
         <p class="narrow-paragraph">
-            Client sends requests to any etcd server. And those proposals are forwarded to leader. Entries are committed when cluster quorum agrees and persisted on-disk via write-ahead logs (WAL); write request only returns when cluster has persisted the entry across
-            the quorum. To prevent logs growing forever, etcd periodically snapshots logs and discards the tail. See <a routerLink="/doc/{{docVersion}}/comparison" class="normal-link">etcd Data model with reliable events</a> for more details.
+            Client requests to any etcd server. And proposals of such requests are forwarded to leader. Entries are committed when cluster quorum agrees, and then persisted on-disk via write-ahead logs (WAL). Write request only returns when cluster has persisted
+            the entry across the quorum. To prevent logs growing forever, etcd periodically snapshots logs to discard the tail. See <a routerLink="/doc/{{docVersion}}/comparison" class="normal-link">etcd Data model with reliable events</a>.
         </p>
         <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/faq#top" class="normal-link">↑ top</a></div>
         <br>
