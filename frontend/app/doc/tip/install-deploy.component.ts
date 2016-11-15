@@ -68,7 +68,7 @@ export class InstallDeployTipComponent extends ParentComponent {
 
         ///////////////////////////////////////////////////
         this.etcd = new Etcd(
-            'v3.1.0-rc.0',
+            'v3.1.0-rc.1',
             '/',
             true,
             false,

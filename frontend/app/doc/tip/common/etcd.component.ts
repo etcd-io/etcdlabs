@@ -153,7 +153,7 @@ sudo chmod -R a+rw ${this.getDataDir()}
     }
 }
 
-const latestReleaseVersion = 'v3.1.0-rc.0';
+const latestReleaseVersion = 'v3.1.0-rc.1';
 const flagHelpURL = 'https://github.com/coreos/etcd/blob/master/etcdmain/help.go';
 
 export class Etcd {
