@@ -484,7 +484,7 @@
                     <td>Go 1.7.3</td>
                 </tr>
                 <tr>
-                    <th scope="row">TCP connections</th>
+                    <th scope="row">Number of TCP connections</th>
                     <td>1000</td>
                     <td>100<sup>[1]</sup></td>
                     <td>1000</td>
@@ -508,19 +508,19 @@
                     <td>256-byte</td>
                 </tr>
                 <tr>
-                    <th scope="row">Number of entries</th>
+                    <th scope="row">Number of entries to write</th>
                     <td>2 million</td>
                     <td>2 million</td>
                     <td>2 million</td>
                 </tr>
                 <tr>
-                    <th scope="row">Data Size</th>
+                    <th scope="row">Data Size<sup>[2]</sup></th>
                     <td>1 GB</td>
                     <td>1 GB</td>
                     <td>1 GB</td>
                 </tr>
                 <tr>
-                    <th scope="row">Throughput</th>
+                    <th scope="row">Average Throughput</th>
                     <td>1 qps</td>
                     <td>1 qps</td>
                     <td>1 qps</td>
@@ -532,13 +532,13 @@
                     <td>1 qps</td>
                 </tr>
                 <tr>
-                    <th scope="row">Average CPU Usage</th>
+                    <th scope="row">Peak CPU Usage</th>
                     <td>1 qps</td>
                     <td>1 qps</td>
                     <td>1 qps</td>
                 </tr>
                 <tr>
-                    <th scope="row">Average Memory Usage</th>
+                    <th scope="row">Peak Memory Usage</th>
                     <td>1 qps</td>
                     <td>1 qps</td>
                     <td>1 qps</td>
@@ -548,6 +548,7 @@
         <hr align="left" class="footer-top-line">
         <footer class="narrow-footer">
             [1] etcd uses less TCP connections with gRPC and HTTP/2.
+            <br> [2] Total size of data written to disk after writes are finished.
         </footer>
         <br>
         <div>
@@ -583,9 +584,9 @@
                     <td>Go 1.7.3</td>
                 </tr>
                 <tr>
-                    <th scope="row">TCP connections</th>
+                    <th scope="row">Number of TCP connections</th>
                     <td>1000</td>
-                    <td>100</td>
+                    <td>100<sup>[1]</sup></td>
                     <td>1000</td>
                 </tr>
                 <tr>
@@ -607,19 +608,19 @@
                     <td>256-byte</td>
                 </tr>
                 <tr>
-                    <th scope="row">Number of entries</th>
+                    <th scope="row">Number of entries to read</th>
                     <td>2 million</td>
                     <td>2 million</td>
                     <td>2 million</td>
                 </tr>
                 <tr>
-                    <th scope="row">Data Size</th>
+                    <th scope="row">Data Size<sup>[2]</sup></th>
                     <td>1 GB</td>
                     <td>1 GB</td>
                     <td>1 GB</td>
                 </tr>
                 <tr>
-                    <th scope="row">Throughput</th>
+                    <th scope="row">Average Throughput</th>
                     <td>1 qps</td>
                     <td>1 qps</td>
                     <td>1 qps</td>
@@ -631,13 +632,13 @@
                     <td>1 qps</td>
                 </tr>
                 <tr>
-                    <th scope="row">Average CPU Usage</th>
+                    <th scope="row">Peak CPU Usage</th>
                     <td>1 qps</td>
                     <td>1 qps</td>
                     <td>1 qps</td>
                 </tr>
                 <tr>
-                    <th scope="row">Average Memory Usage</th>
+                    <th scope="row">Peak Memory Usage</th>
                     <td>1 qps</td>
                     <td>1 qps</td>
                     <td>1 qps</td>
@@ -647,6 +648,7 @@
         <hr align="left" class="footer-top-line">
         <footer class="narrow-footer">
             [1] etcd uses less TCP connections with gRPC and HTTP/2.
+            <br> [2] Total size of data when reads were requested. This is mostly from previous write tests.
         </footer>
         <br>
         <div>
@@ -682,9 +684,9 @@
                     <td>Go 1.7.3</td>
                 </tr>
                 <tr>
-                    <th scope="row">TCP connections</th>
+                    <th scope="row">Number of TCP connections</th>
                     <td>1000</td>
-                    <td>100</td>
+                    <td>100<sup>[1]</sup></td>
                     <td>1000</td>
                 </tr>
                 <tr>
@@ -706,19 +708,19 @@
                     <td>256-byte</td>
                 </tr>
                 <tr>
-                    <th scope="row">Number of entries</th>
+                    <th scope="row">Number of entries to read</th>
                     <td>2 million</td>
                     <td>2 million</td>
                     <td>2 million</td>
                 </tr>
                 <tr>
-                    <th scope="row">Data Size</th>
+                    <th scope="row">Data Size<sup>[2]</sup></th>
                     <td>1 GB</td>
                     <td>1 GB</td>
                     <td>1 GB</td>
                 </tr>
                 <tr>
-                    <th scope="row">Throughput</th>
+                    <th scope="row">Average Throughput</th>
                     <td>1 qps</td>
                     <td>1 qps</td>
                     <td>1 qps</td>
@@ -730,13 +732,13 @@
                     <td>1 qps</td>
                 </tr>
                 <tr>
-                    <th scope="row">Average CPU Usage</th>
+                    <th scope="row">Peak CPU Usage</th>
                     <td>1 qps</td>
                     <td>1 qps</td>
                     <td>1 qps</td>
                 </tr>
                 <tr>
-                    <th scope="row">Average Memory Usage</th>
+                    <th scope="row">Peak Memory Usage</th>
                     <td>1 qps</td>
                     <td>1 qps</td>
                     <td>1 qps</td>
@@ -746,6 +748,7 @@
         <hr align="left" class="footer-top-line">
         <footer class="narrow-footer">
             [1] etcd uses less TCP connections with gRPC and HTTP/2.
+            <br> [2] Total size of data when reads were requested. This is mostly from previous write tests.
         </footer>
         <br>
         <div>
