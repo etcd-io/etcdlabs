@@ -153,7 +153,6 @@ sudo chmod -R a+rw ${this.getDataDir()}
     }
 }
 
-const latestReleaseVersion = 'v3.1.0-rc.1';
 const flagHelpURL = 'https://github.com/coreos/etcd/blob/master/etcdmain/help.go';
 
 export class Etcd {
@@ -213,10 +212,6 @@ export class Etcd {
         this.operatorSnapshotIntervalInSecond = 1800;
         this.operatorMaxSnapshot = 5;
         this.operatorBackupVolumeSizeInMB = 512;
-    }
-
-    getLatestReleaseVersion() {
-        return latestReleaseVersion;
     }
 
     getFlagHelpURL() {

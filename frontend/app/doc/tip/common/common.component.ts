@@ -13,12 +13,14 @@ export class SidebarItem {
 
 export class ParentComponent {
     docVersion: string;
+    latestReleaseVersion: string;
 
     getStartedItems: SidebarItem[];
     operationItems: SidebarItem[];
 
     constructor() {
         this.docVersion = 'tip';
+        this.latestReleaseVersion = 'v3.1.0-rc.1';
 
         this.getStartedItems = [
             new SidebarItem(
@@ -101,6 +103,10 @@ export class ParentComponent {
 
     getDocVersion() {
         return this.docVersion;
+    }
+
+    getLatestReleaseVersion() {
+        return this.latestReleaseVersion;
     }
 
     getAllSidebarItems() {
