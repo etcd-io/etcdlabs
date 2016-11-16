@@ -45,7 +45,7 @@ export class ComparisonTipComponent extends ParentComponent implements AfterCont
         this.metricsSuccess = resp.Success;
         this.metricsResult = resp.Result;
 
-        if (resp.Success) {
+        if (String(this.metricsResult) !== 'metrics is disabled') {
             for (let _i = 0; _i < resp.Statuses.length; _i++) {
                 let status = resp.Statuses[_i];
                 if (status.Name === '3-node') {
