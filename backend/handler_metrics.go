@@ -68,20 +68,19 @@ func fetchMetricsRequestHandler(ctx context.Context, w http.ResponseWriter, req 
 		if err := globalMetrics.Sync(); err != nil {
 			mresp.Success = false
 			mresp.Result = "fetch metrics request " + err.Error()
-			mresp.LastUpdate = humanize.Time(globalMetrics.GetLastUpdate())
-			return json.NewEncoder(w).Encode(mresp)
+		} else {
+			mresp.Success = true
+			for _, status := range globalMetrics.Get() {
+				mresp.Statuses = append(mresp.Statuses, TesterStatus{
+					Name:          status.Name,
+					TotalCase:     status.TotalCase,
+					CurrentCase:   status.CurrentCase,
+					CurrentFailed: status.CurrentFailed,
+				})
+			}
 		}
 
-		for _, status := range globalMetrics.Get() {
-			mresp.Success = true
-			mresp.Statuses = append(mresp.Statuses, TesterStatus{
-				Name:          status.Name,
-				TotalCase:     status.TotalCase,
-				CurrentCase:   status.CurrentCase,
-				CurrentFailed: status.CurrentFailed,
-			})
-			mresp.LastUpdate = humanize.Time(globalMetrics.GetLastUpdate())
-		}
+		mresp.LastUpdate = humanize.Time(globalMetrics.GetLastUpdate())
 		return json.NewEncoder(w).Encode(mresp)
 
 	default:
