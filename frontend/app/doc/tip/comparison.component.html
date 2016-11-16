@@ -579,7 +579,8 @@
             <img src="app/doc/tip/images/write-2M-keys-avg-cpu.svg" alt="write-2M-keys-avg-cpu">
         </div>
         <p class="narrow-paragraph">
-            TODO: explanation...
+            etcd is more reliable than Zookeeper and Consul. Zookeeper fails to serve a bunch of client requests when snapshot happens; logs message <span class="code-light-snippet">Too busy to snap, skipping</span>, <span class="code-light-snippet">fsync-ing the write ahead log in SyncThread:2 took 1827ms which will adversely effect operation latency. See the ZooKeeper troubleshooting guide</span>.
+            Consul has the same issue. Default etcd snapshot count is 10,000. Zookeeper's default snap count is 100,000; Zookeeper with snap count 10,000 still has the same issue.
         </p>
         <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/comparison#top" class="normal-link">↑ top</a></div>
         <br><br>
@@ -645,39 +646,39 @@
                 </tr>
                 <tr>
                     <th scope="row">Average Throughput</th>
-                    <td>98,433.2600 req/sec</td>
-                    <td>51,237.9593 req/sec</td>
-                    <td>77,340.1358 req/sec</td>
+                    <td>98,433.2600 req/sec<sup>[3]</sup></td>
+                    <td>51,309.4119 req/sec</td>
+                    <td>53,876.9702 req/sec</td>
                 </tr>
                 <tr>
                     <th scope="row">Slowest Latency</th>
                     <td>0.4265 sec</td>
-                    <td>0.1555 sec</td>
-                    <td>0.1961 sec</td>
+                    <td>0.1564 sec</td>
+                    <td>0.1493 sec</td>
                 </tr>
                 <tr>
                     <th scope="row">Fastest Latency</th>
                     <td>0.0006 sec</td>
                     <td>0.0005 sec</td>
-                    <td>0.0002 sec</td>
+                    <td>0.0004 sec</td>
                 </tr>
                 <tr>
                     <th scope="row">Average Latency</th>
                     <td>0.0093 sec</td>
                     <td>0.0194 sec</td>
-                    <td>0.0126 sec</td>
+                    <td>0.0182 sec</td>
                 </tr>
                 <tr>
                     <th scope="row">Peak CPU Usage</th>
                     <td>182.99 %</td>
-                    <td>334.17 %</td>
-                    <td>571.58 %</td>
+                    <td>343.20 %</td>
+                    <td>595.26 %</td>
                 </tr>
                 <tr>
-                    <th scope="row">Peak Memory Usage<sup>[3]</sup></th>
+                    <th scope="row">Peak Memory Usage<sup>[4]</sup></th>
                     <td>345 MB</td>
-                    <td>259 MB</td>
-                    <td>56 MB</td>
+                    <td>271 MB</td>
+                    <td>60 MB</td>
                 </tr>
             </tbody>
         </table>
@@ -685,7 +686,8 @@
         <footer class="narrow-footer">
             [1] <span class="code-light-snippet-small">java version "1.8.0_111"</span>, <span class="code-light-snippet-small">Java(TM) SE Runtime Environment (build 1.8.0_111-b14)</span>, <span class="code-light-snippet-small">Java HotSpot(TM) 64-Bit Server VM (build 25.111-b14, mixed mode)</span>.
             <br> [2] etcd uses less TCP connections with gRPC and HTTP/2.
-            <br> [3] <span class="code-light-snippet-small">VmRSS</span> value in Linux proc file is used to calculate memory usage.
+            <br> [3] Zookeeper linearizable reads are broken; see <a href="https://issues.apache.org/jira/browse/ZOOKEEPER-2136" target="_blank" class="footer-link">Sync() should get quorum acks</a>.
+            <br> [4] <span class="code-light-snippet-small">VmRSS</span> value in Linux proc file is used to calculate memory usage.
         </footer>
         <br>
         <div>
@@ -695,7 +697,7 @@
             <img src="app/doc/tip/images/read-2M-keys-linearizable-avg-cpu.svg" alt="read-2M-keys-linearizable-avg-cpu">
         </div>
         <p class="narrow-paragraph">
-            TODO: explanation...
+            Zookeeper linearizable read is broken; see <a href="https://issues.apache.org/jira/browse/ZOOKEEPER-2136" target="_blank" class="normal-link">Sync() should get quorum acks</a>.
         </p>
         <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/comparison#top" class="normal-link">↑ top</a></div>
         <br><br>
@@ -763,13 +765,13 @@
                     <th scope="row">Average Throughput</th>
                     <td>193,113.4667 req/sec</td>
                     <td>69,022.3143 req/sec</td>
-                    <td>139,610.2479 req/sec</td>
+                    <td>142,493.9889 req/sec</td>
                 </tr>
                 <tr>
                     <th scope="row">Slowest Latency</th>
                     <td>1.0100 sec</td>
                     <td>0.3077 sec</td>
-                    <td>0.1232 sec</td>
+                    <td>1.1022 sec</td>
                 </tr>
                 <tr>
                     <th scope="row">Fastest Latency</th>
@@ -781,19 +783,19 @@
                     <th scope="row">Average Latency</th>
                     <td>0.0034 sec</td>
                     <td>0.0144 sec</td>
-                    <td>0.0048 sec</td>
+                    <td>0.0049 sec</td>
                 </tr>
                 <tr>
                     <th scope="row">Peak CPU Usage</th>
                     <td>113.97 %</td>
                     <td>304.55 %</td>
-                    <td>375.62 %</td>
+                    <td>365.93 %</td>
                 </tr>
                 <tr>
                     <th scope="row">Peak Memory Usage<sup>[4]</sup></th>
                     <td>498 MB</td>
                     <td>49 MB</td>
-                    <td>30 MB</td>
+                    <td>31 MB</td>
                 </tr>
             </tbody>
         </table>
@@ -812,7 +814,7 @@
             <img src="app/doc/tip/images/read-2M-keys-serializable-avg-cpu.svg" alt="read-2M-keys-serializable-avg-cpu">
         </div>
         <p class="narrow-paragraph">
-            TODO: explanation...
+            TODO: figure out etcd serializable read regression.
         </p>
         <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/comparison#top" class="normal-link">↑ top</a></div>
         <br><br>
