@@ -51,10 +51,18 @@ func fetchMetricsRequestHandler(ctx context.Context, w http.ResponseWriter, req 
 	switch req.Method {
 	case "GET":
 		mresp := MetricsResponse{Success: true}
-		if rmsg, ok := fetchMetricsLimiter.Check(); !ok {
+		if rmsg, ok := fetchMetricsLimiter.Check(); !ok { // rate limit exceeded
 			mresp.Success = false
 			mresp.Result = "fetch metrics request " + rmsg
 			mresp.LastUpdate = humanize.Time(globalMetrics.GetLastUpdate())
+			for _, status := range globalMetrics.Get() { // serve stale status
+				mresp.Statuses = append(mresp.Statuses, TesterStatus{
+					Name:          status.Name,
+					TotalCase:     status.TotalCase,
+					CurrentCase:   status.CurrentCase,
+					CurrentFailed: status.CurrentFailed,
+				})
+			}
 			return json.NewEncoder(w).Encode(mresp)
 		}
 		fetchMetricsLimiter.Advance()
@@ -65,7 +73,7 @@ func fetchMetricsRequestHandler(ctx context.Context, w http.ResponseWriter, req 
 			return json.NewEncoder(w).Encode(mresp)
 		}
 
-		if err := globalMetrics.Sync(); err != nil {
+		if err := globalMetrics.Sync(); err != nil { // connection error
 			mresp.Success = false
 			mresp.Result = "fetch metrics request " + err.Error()
 		} else {
