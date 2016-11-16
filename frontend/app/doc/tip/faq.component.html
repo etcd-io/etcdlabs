@@ -250,7 +250,7 @@
         </p>
         <p class="narrow-paragraph">
             In etcd v3.0, quorum read throughput is around 40,000 requests per second (QPS), whereas serializable read is over 100,000 QPS (2x faster). Quorum read is slower because it needs to issue a read query command, and this command gets replicated, costs disk
-            I/O. <b>etcd v3.1+</b> implements <i>read index</i> mechanism<sup>[2]</sup>. <b>etcd quorum read is now as fast as serializable read</b>: Leader records its current committed index in <span class="code-light-snippet">readIndex</span>            field. Leader sends <span class="code-light-snippet">readIndex</span> to its followers. For followers, <span class="code-light-snippet">readIndex</span> is the largest committed index ever seen by any server because it is from leader and committed.
+            I/O. <b>etcd v3.1+</b> implements <i>read index</i> mechanism<sup>[2]</sup>. <b>etcd quorum read now does not cost any disk I/O</b>: Leader records its current committed index in <span class="code-light-snippet">readIndex</span>            field. Leader sends <span class="code-light-snippet">readIndex</span> to its followers. For followers, <span class="code-light-snippet">readIndex</span> is the largest committed index ever seen by any server because it is from leader and committed.
             Then read queries as far as <span class="code-light-snippet">readIndex</span> can be served locally without talking to other replicas, but still with linearizability. This is more efficient because it avoids synchronous disk writes and still
             preserves the linearizability.
         </p>
@@ -288,8 +288,8 @@
         <div id="etcd-clock-time"></div>
         <h2><a href="/doc/{{docVersion}}/faq#etcd-clock-time" class="faq-title">Clock, time in etcd</a></h2>
         <p class="narrow-paragraph">
-            etcd does not depend on clock time to ensure the consistency of cluster states, in case clock drift or message delay happens. etcd uses Raft term and index<sup>[1]</sup> as a logical clock. And lease backend uses monotime<sup>[2]</sup>. Transporation
-            layer probes clock drift and prints out warnings with certain threshold.
+            etcd ensures the consistency independent of clock time; clock drift or message delay happens all the time. etcd uses Raft term and index<sup>[1]</sup> as a logical clock. Lease backend uses monotime<sup>[2]</sup>. In addition, etcd transporation
+            layer monitors clock drift and gives warnings in case.
         </p>
         <hr align="left" class="footer-top-line">
         <footer class="narrow-footer">
@@ -311,8 +311,8 @@
         <div id="etcd-use-case-kubernetes"></div>
         <h2><a href="/doc/{{docVersion}}/faq#etcd-use-case-kubernetes" class="faq-title">Who uses etcd: Kubernetes</a></h2>
         <p class="narrow-paragraph">
-            <a href="http://kubernetes.io/docs/whatisk8s/" target="_blank" class="normal-link">Kubernetes</a> needs configuration storage for service discovery and cluster management. Kubernetes API server writes persistent cluster states in etcd. And
-            uses etcd watch API to get notified whenever changes happen. Consistency is the key to ensure that services correctly schedule and operatate.
+            <a href="http://kubernetes.io/docs/whatisk8s/" target="_blank" class="normal-link">Kubernetes</a> needs configuration storage for service discovery and cluster management. Kubernetes API server writes cluster states in etcd as persistent storage.
+            And watch API to monitor, roll out critical configuration changes. Consistency is the key to ensure that services correctly schedule and operatate.
         </p>
         <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/faq#top" class="normal-link">↑ top</a></div>
         <br>
