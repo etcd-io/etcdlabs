@@ -70,14 +70,14 @@ func fetchMetricsRequestHandler(ctx context.Context, w http.ResponseWriter, req 
 			mresp.Result = "fetch metrics request " + err.Error()
 		} else {
 			mresp.Success = true
-			for _, status := range globalMetrics.Get() {
-				mresp.Statuses = append(mresp.Statuses, TesterStatus{
-					Name:          status.Name,
-					TotalCase:     status.TotalCase,
-					CurrentCase:   status.CurrentCase,
-					CurrentFailed: status.CurrentFailed,
-				})
-			}
+		}
+		for _, status := range globalMetrics.Get() {
+			mresp.Statuses = append(mresp.Statuses, TesterStatus{
+				Name:          status.Name,
+				TotalCase:     status.TotalCase,
+				CurrentCase:   status.CurrentCase,
+				CurrentFailed: status.CurrentFailed,
+			})
 		}
 
 		mresp.LastUpdate = humanize.Time(globalMetrics.GetLastUpdate())
