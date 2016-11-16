@@ -20,7 +20,7 @@
         <router-outlet></router-outlet>
 
         <div id="top"></div>
-        <h4>etcd in Comparison <span class="next-to-header-title">(last update Nov 10, 2016)</span></h4>
+        <h4>etcd in Comparison <span class="next-to-header-title">(last update Nov 15, 2016)</span></h4>
         <br>
         <ul>
             <li><a href="/doc/{{docVersion}}/comparison#chubby-zookeeper-etcd-consul" class="faq-list">Chubby, Zookeeper, etcd, Consul</a></li>
@@ -341,7 +341,7 @@
         <p class="narrow-paragraph">
             A Zookeeper client is expected to have a single long-lived connection, creating a session per application instance; see <a href="https://zookeeper.apache.org/doc/trunk/zookeeperProgrammers.html#ch_zkSessions" target="_blank" class="normal-link">Zookeeper Sessions</a>.
             Zookeeper watcher is tied to this session; if the client loses the session or gets disconnected from server, it loses all the events. And Zookeeper watcher is one time trigger; if watcher receives an event, client must create another watcher
-            for future events. That is, any latency between changes happened and watcher creation can lead to missing events; see <a href="https://zookeeper.apache.org/doc/trunk/zookeeperProgrammers.html" target="_blank" class="normal-link">Things to Remember about Watches</a>            .
+            for future events. That is, any latency between changes happened and watcher creation can lead to missing events; see <a href="https://zookeeper.apache.org/doc/trunk/zookeeperProgrammers.html" target="_blank" class="normal-link">Things to Remember about Watches</a>.
         </p>
         <p class="narrow-paragraph">
             Consul watch API uses long-polling to wait for potential changes; see <a href="https://www.consul.io/docs/agent/http.html" target="_blank" class="normal-link">Blocking Queries</a>.
@@ -450,8 +450,8 @@
         <div id="benchmark-results"></div>
         <h4>Benchmark Results</h4>
         <p class="narrow-paragraph">
-            All tests are run with Google Cloud Compute Engine virtual machines: 3 machines are used for database servers, each of which has 8 vCPUs, 16GB Memory, and 150GB SSD on Ubuntu 16.10. 1 machine is used for sending client requests, which has 16 vCPUs, 30GB
-            Memory, and 150GB SSD on Ubuntu 16.10.
+            All tests are run with Google Cloud Compute Engine virtual machines: Three machines are used for database servers, each of which has 8 vCPUs, 16 GB Memory, and 150 GB SSD on Ubuntu 16.10. One machine is used for sending client requests, which has 16 vCPUs,
+            30 GB Memory, and 150 GB SSD on Ubuntu 16.10.
         </p>
         <p class="narrow-paragraph">
             In linearizable read, majority of cluster has to agree on the same value before it returns. In serializable read, server returns data without going through consensus, so possibly serving stale data.
@@ -479,14 +479,14 @@
                 </tr>
                 <tr>
                     <th scope="row">Runtime</th>
-                    <td>Java 8</td>
+                    <td>Java 8<sup>[1]</sup></td>
                     <td>Go 1.7.3</td>
                     <td>Go 1.7.3</td>
                 </tr>
                 <tr>
                     <th scope="row">Number of TCP connections</th>
                     <td>1000</td>
-                    <td>100<sup>[1]</sup></td>
+                    <td>100<sup>[2]</sup></td>
                     <td>1000</td>
                 </tr>
                 <tr>
@@ -514,41 +514,62 @@
                     <td>2 million</td>
                 </tr>
                 <tr>
-                    <th scope="row">Data Size<sup>[2]</sup></th>
+                    <th scope="row">Data Size<sup>[3]</sup></th>
+                    <td>4.7 GB</td>
                     <td>1 GB</td>
-                    <td>1 GB</td>
-                    <td>1 GB</td>
+                    <td>2.6 GB</td>
+                </tr>
+                <tr>
+                    <th scope="row">Number of errors</th>
+                    <td>1,032<sup>[4]</sup></td>
+                    <td>None</td>
+                    <td>None</td>
                 </tr>
                 <tr>
                     <th scope="row">Average Throughput</th>
-                    <td>1 qps</td>
-                    <td>1 qps</td>
-                    <td>1 qps</td>
+                    <td>34,054.4941 req/sec</td>
+                    <td>39,692.5013 req/sec</td>
+                    <td>4,245.7052 req/sec</td>
+                </tr>
+                <tr>
+                    <th scope="row">Slowest Latency</th>
+                    <td>2.5233 sec</td>
+                    <td>0.3032 sec</td>
+                    <td>10.4728 sec</td>
+                </tr>
+                <tr>
+                    <th scope="row">Fastest Latency</th>
+                    <td>0.0016 sec</td>
+                    <td>0.0058 sec</td>
+                    <td>0.0297 sec</td>
                 </tr>
                 <tr>
                     <th scope="row">Average Latency</th>
-                    <td>1 qps</td>
-                    <td>1 qps</td>
-                    <td>1 qps</td>
+                    <td>0.0268 sec</td>
+                    <td>0.0251 sec</td>
+                    <td>0.2352 sec</td>
                 </tr>
                 <tr>
                     <th scope="row">Peak CPU Usage</th>
-                    <td>1 qps</td>
-                    <td>1 qps</td>
-                    <td>1 qps</td>
+                    <td>390.64 %</td>
+                    <td>429.29 %</td>
+                    <td>349.34 %</td>
                 </tr>
                 <tr>
-                    <th scope="row">Peak Memory Usage</th>
-                    <td>1 qps</td>
-                    <td>1 qps</td>
-                    <td>1 qps</td>
+                    <th scope="row">Peak Memory Usage<sup>[5]</sup></th>
+                    <td>2.7 GB</td>
+                    <td>771 MB</td>
+                    <td>4.9 GB</td>
                 </tr>
             </tbody>
         </table>
         <hr align="left" class="footer-top-line">
         <footer class="narrow-footer">
-            [1] etcd uses less TCP connections with gRPC and HTTP/2.
-            <br> [2] Total size of data written to disk after writes are finished.
+            [1] <span class="code-light-snippet-small">java version "1.8.0_111"</span>, <span class="code-light-snippet-small">Java(TM) SE Runtime Environment (build 1.8.0_111-b14)</span>, <span class="code-light-snippet-small">Java HotSpot(TM) 64-Bit Server VM (build 25.111-b14, mixed mode)</span>.
+            <br> [2] etcd uses less TCP connections with gRPC and HTTP/2.
+            <br> [3] Total size of data written to disk after writes are finished.
+            <br> [4] 352 errors of <span class="code-light-snippet-small">zk: connection closed</span>, 680 errors of <span class="code-light-snippet-small">zk: could not connect to a server</span>.
+            <br> [5] <span class="code-light-snippet-small">VmRSS</span> value in Linux proc file is used to calculate memory usage.
         </footer>
         <br>
         <div>
@@ -579,14 +600,14 @@
                 </tr>
                 <tr>
                     <th scope="row">Runtime</th>
-                    <td>Java 8</td>
+                    <td>Java 8<sup>[1]</sup></td>
                     <td>Go 1.7.3</td>
                     <td>Go 1.7.3</td>
                 </tr>
                 <tr>
                     <th scope="row">Number of TCP connections</th>
                     <td>1000</td>
-                    <td>100<sup>[1]</sup></td>
+                    <td>100<sup>[2]</sup></td>
                     <td>1000</td>
                 </tr>
                 <tr>
@@ -614,41 +635,54 @@
                     <td>2 million</td>
                 </tr>
                 <tr>
-                    <th scope="row">Data Size<sup>[2]</sup></th>
-                    <td>1 GB</td>
-                    <td>1 GB</td>
-                    <td>1 GB</td>
+                    <th scope="row">Number of errors</th>
+                    <td>None</td>
+                    <td>None</td>
+                    <td>None</td>
                 </tr>
                 <tr>
                     <th scope="row">Average Throughput</th>
-                    <td>1 qps</td>
-                    <td>1 qps</td>
-                    <td>1 qps</td>
+                    <td>98,433.2600 req/sec</td>
+                    <td>51,237.9593 req/sec</td>
+                    <td>77,340.1358 req/sec</td>
+                </tr>
+                <tr>
+                    <th scope="row">Slowest Latency</th>
+                    <td>0.4265 sec</td>
+                    <td>0.1555 sec</td>
+                    <td>0.1961 sec</td>
+                </tr>
+                <tr>
+                    <th scope="row">Fastest Latency</th>
+                    <td>0.0006 sec</td>
+                    <td>0.0005 sec</td>
+                    <td>0.0002 sec</td>
                 </tr>
                 <tr>
                     <th scope="row">Average Latency</th>
-                    <td>1 qps</td>
-                    <td>1 qps</td>
-                    <td>1 qps</td>
+                    <td>0.0093 sec</td>
+                    <td>0.0194 sec</td>
+                    <td>0.0126 sec</td>
                 </tr>
                 <tr>
                     <th scope="row">Peak CPU Usage</th>
-                    <td>1 qps</td>
-                    <td>1 qps</td>
-                    <td>1 qps</td>
+                    <td>182.99 %</td>
+                    <td>334.17 %</td>
+                    <td>571.58 %</td>
                 </tr>
                 <tr>
-                    <th scope="row">Peak Memory Usage</th>
-                    <td>1 qps</td>
-                    <td>1 qps</td>
-                    <td>1 qps</td>
+                    <th scope="row">Peak Memory Usage<sup>[3]</sup></th>
+                    <td>345 MB</td>
+                    <td>259 MB</td>
+                    <td>56 MB</td>
                 </tr>
             </tbody>
         </table>
         <hr align="left" class="footer-top-line">
         <footer class="narrow-footer">
-            [1] etcd uses less TCP connections with gRPC and HTTP/2.
-            <br> [2] Total size of data when reads were requested. This is mostly from previous write tests.
+            [1] <span class="code-light-snippet-small">java version "1.8.0_111"</span>, <span class="code-light-snippet-small">Java(TM) SE Runtime Environment (build 1.8.0_111-b14)</span>, <span class="code-light-snippet-small">Java HotSpot(TM) 64-Bit Server VM (build 25.111-b14, mixed mode)</span>.
+            <br> [2] etcd uses less TCP connections with gRPC and HTTP/2.
+            <br> [3] <span class="code-light-snippet-small">VmRSS</span> value in Linux proc file is used to calculate memory usage.
         </footer>
         <br>
         <div>
@@ -679,14 +713,14 @@
                 </tr>
                 <tr>
                     <th scope="row">Runtime</th>
-                    <td>Java 8</td>
+                    <td>Java 8<sup>[1]</sup></td>
                     <td>Go 1.7.3</td>
                     <td>Go 1.7.3</td>
                 </tr>
                 <tr>
                     <th scope="row">Number of TCP connections</th>
                     <td>1000</td>
-                    <td>100<sup>[1]</sup></td>
+                    <td>100<sup>[2]</sup></td>
                     <td>1000</td>
                 </tr>
                 <tr>
@@ -714,41 +748,55 @@
                     <td>2 million</td>
                 </tr>
                 <tr>
-                    <th scope="row">Data Size<sup>[2]</sup></th>
-                    <td>1 GB</td>
-                    <td>1 GB</td>
-                    <td>1 GB</td>
+                    <th scope="row">Number of errors</th>
+                    <td>1<sup>[3]</sup></td>
+                    <td>None</td>
+                    <td>None</td>
                 </tr>
                 <tr>
                     <th scope="row">Average Throughput</th>
-                    <td>1 qps</td>
-                    <td>1 qps</td>
-                    <td>1 qps</td>
+                    <td>193,113.4667 req/sec</td>
+                    <td>69,022.3143 req/sec</td>
+                    <td>139,610.2479 req/sec</td>
+                </tr>
+                <tr>
+                    <th scope="row">Slowest Latency</th>
+                    <td>1.0100 sec</td>
+                    <td>0.3077 sec</td>
+                    <td>0.1232 sec</td>
+                </tr>
+                <tr>
+                    <th scope="row">Fastest Latency</th>
+                    <td>0.0001 sec</td>
+                    <td>0.0002 sec</td>
+                    <td>0.0002 sec</td>
                 </tr>
                 <tr>
                     <th scope="row">Average Latency</th>
-                    <td>1 qps</td>
-                    <td>1 qps</td>
-                    <td>1 qps</td>
+                    <td>0.0034 sec</td>
+                    <td>0.0144 sec</td>
+                    <td>0.0048 sec</td>
                 </tr>
                 <tr>
                     <th scope="row">Peak CPU Usage</th>
-                    <td>1 qps</td>
-                    <td>1 qps</td>
-                    <td>1 qps</td>
+                    <td>113.97 %</td>
+                    <td>304.55 %</td>
+                    <td>375.62 %</td>
                 </tr>
                 <tr>
-                    <th scope="row">Peak Memory Usage</th>
-                    <td>1 qps</td>
-                    <td>1 qps</td>
-                    <td>1 qps</td>
+                    <th scope="row">Peak Memory Usage<sup>[4]</sup></th>
+                    <td>498 MB</td>
+                    <td>49 MB</td>
+                    <td>30 MB</td>
                 </tr>
             </tbody>
         </table>
         <hr align="left" class="footer-top-line">
         <footer class="narrow-footer">
-            [1] etcd uses less TCP connections with gRPC and HTTP/2.
-            <br> [2] Total size of data when reads were requested. This is mostly from previous write tests.
+            [1] <span class="code-light-snippet-small">java version "1.8.0_111"</span>, <span class="code-light-snippet-small">Java(TM) SE Runtime Environment (build 1.8.0_111-b14)</span>, <span class="code-light-snippet-small">Java HotSpot(TM) 64-Bit Server VM (build 25.111-b14, mixed mode)</span>.
+            <br> [2] etcd uses less TCP connections with gRPC and HTTP/2.
+            <br> [3] 4 errors of <span class="code-light-snippet-small">zk: could not connect to a server</span>.
+            <br> [4] <span class="code-light-snippet-small">VmRSS</span> value in Linux proc file is used to calculate memory usage.
         </footer>
         <br>
         <div>
