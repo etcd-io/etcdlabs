@@ -299,6 +299,7 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
 
 ` + this.getExecDir() + divide + `etcd --version
 ` + this.getExecDir() + divide + `etcdctl --version
+
 `;
 
         return txt;
@@ -331,6 +332,7 @@ GOOGLE_URL=https://storage.googleapis.com/etcd
 
 ` + this.getExecDir() + divide + `etcd --version
 ` + this.getExecDir() + divide + `etcdctl --version
+
 `;
 
         return txt;
