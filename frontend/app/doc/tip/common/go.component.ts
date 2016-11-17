@@ -28,6 +28,8 @@ else
 fi
 
 mkdir -p $GOPATH/bin/
-go version`;
+go version
+
+`;
     }
 }

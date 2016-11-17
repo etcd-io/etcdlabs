@@ -267,8 +267,9 @@ BRANCH_NAME=${gitBranch}
         txt += `sudo cp ` + '${GOPATH}/src/${GIT_PATH}/bin/etcd* ' + this.getExecDir() + `
 
 ` + this.getExecDir() + divide + `etcd --version
-` + this.getExecDir() + divide + `etcdctl --version`;
+` + this.getExecDir() + divide + `etcdctl --version
 
+`;
         return txt;
     }
 
@@ -504,6 +505,7 @@ ExecStart=` + this.getCommand(flag, false, false) + `
 WantedBy=multi-user.target
 EOF
 sudo mv /tmp/${flag.name}.service /etc/systemd/system/${flag.name}.service
+
 `;
     }
 
@@ -604,6 +606,7 @@ sudo mv /tmp/override-${flag.name}.conf /etc/systemd/system/etcd-member.service.
 
 # to check service-file-override status
 sudo systemd-delta --type=extended
+
 `;
 
         return cmd;
