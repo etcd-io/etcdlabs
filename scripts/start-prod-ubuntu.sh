@@ -22,22 +22,17 @@ nohup ./etcdlabs --db-host ${DB_HOST} \
     --db-user ${DB_USER} \
     --metrics-names ${METRICS_NAMES} \
     --metrics-endpoints ${METRICS_ENDPOINTS} \
-    web --web-port 2200 >> $HOME/etcdlabs.log 2>&1 &
+    web --web-port 2200 > $HOME/etcdlabs-backend.log 2>&1 &
 
 sleep 3s
 echo "starting frontend"
 # TODO: doesn't work with Angular 2.2.0
 # See https://github.com/angular/angular/issues/11076
-nohup yarn start-prod > $HOME/etcdlabs-prod.log 2>&1 &
+nohup yarn start-prod > $HOME/etcdlabs-frontend.log 2>&1 &
 
-sleep 3s
-cat $HOME/etcdlabs.log
-cat $HOME/etcdlabs-yarn.log
+sleep 2s
+cat $HOME/etcdlabs-backend.log
+cat $HOME/etcdlabs-frontend.log
 
 echo ""
 echo "Ready!"
-
-<<COMMENT
-tail -f /tmp/etcdlabs.log
-tail -f /tmp/etcdlabs-yarn.log
-COMMENT
