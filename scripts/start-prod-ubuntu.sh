@@ -26,7 +26,9 @@ nohup ./etcdlabs --db-host ${DB_HOST} \
 
 sleep 5s
 echo "starting frontend"
-nohup yarn start-prod > $HOME/etcdlabs-prod.log 2>&1 &
+# TODO: doesn't work; see https://github.com/angular/angular/issues/11076
+# nohup yarn start-prod > $HOME/etcdlabs-prod.log 2>&1 &
+nohup yarn start > $HOME/etcdlabs-prod.log 2>&1 &
 
 sleep 5s
 cat $HOME/etcdlabs.log
