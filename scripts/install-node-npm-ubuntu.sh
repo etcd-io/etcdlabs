@@ -26,9 +26,3 @@ nvm install 6.9.1
 # check NodeJS version
 node -v
 npm -v
-
-<<COMMENT
-npm install
-npm rebuild node-sass
-npm install
-COMMENT
