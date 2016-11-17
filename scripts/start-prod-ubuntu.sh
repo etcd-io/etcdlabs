@@ -26,7 +26,7 @@ nohup ./etcdlabs --db-host ${DB_HOST} \
 
 sleep 5s
 echo "starting frontend"
-nohup yarn start >> $HOME/etcdlabs-yarn.log 2>&1 &
+nohup yarn start-prod > $HOME/etcdlabs-prod.log 2>&1 &
 
 sleep 5s
 cat $HOME/etcdlabs.log
@@ -39,3 +39,4 @@ echo "Ready!"
 tail -f /tmp/etcdlabs.log
 tail -f /tmp/etcdlabs-yarn.log
 COMMENT
+

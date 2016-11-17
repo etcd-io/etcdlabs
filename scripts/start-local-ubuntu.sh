@@ -14,7 +14,7 @@ nohup ./etcdlabs web --skip-database --web-port 2200 >> /tmp/etcdlabs.log 2>&1 &
 
 sleep 5s
 echo "starting frontend"
-nohup yarn start >> /tmp/etcdlabs-yarn.log 2>&1 &
+nohup yarn start > /tmp/etcdlabs-local.log 2>&1 &
 
 sleep 5s
 cat /tmp/etcdlabs.log
@@ -27,3 +27,4 @@ echo "Ready!"
 tail -f /tmp/etcdlabs.log
 tail -f /tmp/etcdlabs-yarn.log
 COMMENT
+
