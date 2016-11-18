@@ -1,0 +1,906 @@
+<div class="comparison-group">
+    <router-outlet></router-outlet>
+
+    <div id="top"></div>
+    <h4>etcd in Comparison <span class="next-to-header-title">(last update Nov 17, 2016)</span></h4>
+    <br>
+    <ul>
+        <li><a href="/comparison#chubby-zookeeper-etcd-consul" class="faq-list">Chubby, Zookeeper, etcd, Consul</a></li>
+        <li><a href="/comparison#consensus-algorithm" class="faq-list">Consensus Algorithm</a></li>
+        <li><a href="/comparison#features" class="faq-list">Features</a></li>
+        <li><a href="/comparison#performance-reliability" class="faq-list">Performance & Reliability</a></li>
+        <li><a href="/comparison#benchmark-results" class="faq-list">Benchmark Results</a></li>
+        <li><a href="/comparison#etcd-tests" class="faq-list">How etcd is tested</a></li>
+    </ul>
+    <br>
+
+    <br><br>
+    <div id="chubby-zookeeper-etcd-consul"></div>
+    <h4>Chubby, Zookeeper, etcd, Consul</h4>
+    <br>
+    <p class="narrow-paragraph">
+        In 2006, Google published Chubby<sup>[1]</sup> distributed lock service built on Paxos<sup>[2]</sup>, then followed by Zookeeper, etcd, and Consul.
+    </p>
+    <br>
+    <table class="table narrow-paragraph">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Zookeeper</th>
+                <th>etcd</th>
+                <th>Consul</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th scope="row">Code</th>
+                <td><a href="https://git-wip-us.apache.org/repos/asf?p=zookeeper.git" target="_blank" class="normal-link">apache/zookeeper</a></td>
+                <td><a href="https://github.com/coreos/etcd" target="_blank" class="normal-link">coreos/etcd</a></td>
+                <td><a href="https://github.com/hashicorp/consul" target="_blank" class="normal-link">hashicorp/consul</a></td>
+            </tr>
+            <tr>
+                <th scope="row">First Commit</th>
+                <td>Oct 28, 2007</td>
+                <td>Jun 2, 2013</td>
+                <td>Nov 3, 2013</td>
+            </tr>
+            <tr>
+                <th scope="row">License</th>
+                <td>Apache-2.0</td>
+                <td>Apache-2.0</td>
+                <td>Apache-2.0</td>
+            </tr>
+            <tr>
+                <th scope="row">Language</th>
+                <td>Java</td>
+                <td>Go</td>
+                <td>Go</td>
+            </tr>
+            <tr>
+                <th scope="row">Issues</th>
+                <td><a href="https://issues.apache.org/jira/browse/ZOOKEEPER/?selectedTab=com.atlassian.jira.jira-projects-plugin:issues-panel" target="_blank" class="normal-link">Zookeeper/JIRA</a></td>
+                <td><a href="https://github.com/coreos/etcd/issues" target="_blank" class="normal-link">etcd/issues</a></td>
+                <td><a href="https://github.com/hashicorp/consul/issues" target="_blank" class="normal-link">consul/issues</a></td>
+            </tr>
+            <tr>
+                <th scope="row">Version</th>
+                <td><a href="http://zookeeper.apache.org/doc/r3.4.9/" target="_blank" class="normal-link">r3.4.9</a></td>
+                <td><a href="https://github.com/coreos/etcd/releases/tag/v3.1.0" target="_blank" class="normal-link">v3.1.0</a></td>
+                <td><a href="https://github.com/hashicorp/consul/releases/tag/v0.7.1" target="_blank" class="normal-link">v0.7.1</a></td>
+            </tr>
+        </tbody>
+    </table>
+    <hr align="left" class="footer-top-line">
+    <footer class="narrow-footer">
+        [1] Mike Burrows: "<a href="http://static.googleusercontent.com/media/research.google.com/en//archive/chubby-osdi06.pdf" target="_blank" class="footer-link">The Chubby lock service for loosely-coupled distributed systems</a>," at 7th USENIX Symposium
+        on Operating System Design and Implementation (OSDI), chapter 2, page 3, November 2006.
+        <br> [2] Leslie Lamport: "<a href="http://research.microsoft.com/en-us/um/people/lamport/pubs/lamport-paxos.pdf" target="_blank" class="footer-link">The Part-Time Parliament</a>," ACM Transactions on Computer Systems, volume 16, number 2, pages
+        133–169, May 1998.
+    </footer>
+    <div align="right" class="narrow-paragraph"><a href="/comparison#top" class="normal-link">↑ top</a></div>
+    <br><br>
+
+
+
+    <br><br>
+    <div id="consensus-algorithm"></div>
+    <h4>Consensus Algorithm</h4>
+    <br>
+    <table class="table narrow-paragraph">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Zookeeper</th>
+                <th>etcd</th>
+                <th>Consul</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th scope="row">Consensus Protocol</th>
+                <td>Zab<sup>[1]</sup></td>
+                <td>Raft<sup>[2]</sup></td>
+                <td>Raft<sup>[2]</sup></td>
+            </tr>
+            <tr>
+                <th scope="row">Gossip Protocol</th>
+                <td>No</td>
+                <td>No</td>
+                <td>SWIM<sup>[3]</sup></td>
+            </tr>
+            <tr>
+                <th scope="row">Dynamic Reconfiguration</th>
+                <td>Yes</td>
+                <td>Yes</td>
+                <td>Yes</td>
+            </tr>
+            <tr>
+                <th scope="row">Leadership Transfer</th>
+                <td>No</td>
+                <td>Yes<sup>[4]</sup></td>
+                <td>No</td>
+            </tr>
+            <tr>
+                <th scope="row">Read-only optimization</th>
+                <td>No</td>
+                <td>Yes<sup>[5]</sup></td>
+                <td>No</td>
+            </tr>
+            <tr>
+                <th scope="row">Pre-Vote algorithm</th>
+                <td>Yes<sup>[6]</sup></td>
+                <td>Yes<sup>[7]</sup></td>
+                <td>No</td>
+            </tr>
+        </tbody>
+    </table>
+    <hr align="left" class="footer-top-line">
+    <footer class="narrow-footer">
+        [1] Flavio P. Junqueira, Benjamin C. Reed, and Marco Serafini: "<a href="https://pdfs.semanticscholar.org/b02c/6b00bd5dbdbd951fddb00b906c82fa80f0b3.pdf" target="_blank" class="footer-link">Zab: High-performance broadcast for primary-backup systems</a>,"
+        at DSN'11, IEEE/IFIP International Conference on Dependable Systems & Networks, June 2011.
+        <br> [2] Diego Ongaro: "<a href="https://ramcloud.stanford.edu/~ongaro/thesis.pdf" target="_blank" class="footer-link">Consensus: Bridging Theory and Practice</a>," Stanford University Ph.D. Dissertation, August 2014.
+        <br> [3] Abhinandan Das, Indranil Gupta, Ashish Motivala: "<a href="http://www.cs.cornell.edu/~asdas/research/dsn02-swim.pdf" target="_blank" class="footer-link">SWIM: Scalable Weakly-consistent Infection-style Process Group Membership Protocol</a>,"
+        at DSN '02: Proceedings of the 2002 International Conference on Dependable Systems and Networks, June 2002.
+        <br> [4] Diego Ongaro: "<a href="https://ramcloud.stanford.edu/~ongaro/thesis.pdf" target="_blank" class="footer-link">Consensus: Bridging Theory and Practice</a>," Stanford University Ph.D. Dissertation, chapter 3, page 28, August 2014.
+        <br> [5] Diego Ongaro: "<a href="https://ramcloud.stanford.edu/~ongaro/thesis.pdf" target="_blank" class="footer-link">Consensus: Bridging Theory and Practice</a>," Stanford University Ph.D. Dissertation, chapter 6, page 72, August 2014.
+        <br> [6] Flavio P. Junqueira, Benjamin C. Reed, and Marco Serafini: "<a href="https://pdfs.semanticscholar.org/b02c/6b00bd5dbdbd951fddb00b906c82fa80f0b3.pdf" target="_blank" class="footer-link">Zab: High-performance broadcast for primary-backup systems</a>,"
+        at DSN'11, IEEE/IFIP International Conference on Dependable Systems & Networks, page 249, June 2011.
+        <br> [7] Diego Ongaro: "<a href="https://ramcloud.stanford.edu/~ongaro/thesis.pdf" target="_blank" class="footer-link">Consensus: Bridging Theory and Practice</a>," Stanford University Ph.D. Dissertation, chapter 9, page 136, August 2014.
+    </footer>
+    <div align="right" class="narrow-paragraph"><a href="/comparison#top" class="normal-link">↑ top</a></div>
+    <br><br>
+
+
+    <br><br>
+    <div id="features"></div>
+    <h4>Features</h4>
+    <br>
+    <p class="narrow-paragraph">
+        In practice, etcd is already integrated into a large-scale distributed system, Kubernetes, and we have implemented distributed coordination primitives including distributed locks, elections, and software transactional memory, to ensure the etcd API is
+        flexible enough to support a variety of applications.
+    </p>
+    <br>
+    <table class="table narrow-paragraph">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Zookeeper</th>
+                <th>etcd</th>
+                <th>Consul</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th scope="row">Reserved Keywords</th>
+                <td>Yes<sup>[1]</sup></td>
+                <td>No</td>
+                <td>No</td>
+            </tr>
+            <tr>
+                <th scope="row">Atomic Read/Write</th>
+                <td>Yes</td>
+                <td>Yes</td>
+                <td>Yes</td>
+            </tr>
+            <tr>
+                <th scope="row">Lease</th>
+                <td><a href="http://zookeeper.apache.org/doc/r3.4.9/zookeeperProgrammers.html#Ephemeral+Nodes" target="_blank" class="normal-link">Yes</a></td>
+                <td><a href="https://github.com/coreos/etcd/tree/master/etcdctl#lease-subcommand" target="_blank" class="normal-link">Yes</a></td>
+                <td>Yes</td>
+            </tr>
+            <tr>
+                <th scope="row">Watch</th>
+                <td>Yes</td>
+                <td>Yes</td>
+                <td>Yes</td>
+            </tr>
+            <tr>
+                <th scope="row">Distributed Lock</th>
+                <td>Yes</td>
+                <td>Yes</td>
+                <td>Yes</td>
+            </tr>
+            <tr>
+                <th scope="row">SSL</th>
+                <td>TLS</td>
+                <td>TLS</td>
+                <td>TLS</td>
+            </tr>
+            <tr>
+                <th scope="row">Acess Control</th>
+                <td><a href="http://zookeeper.apache.org/doc/r3.4.9/zookeeperProgrammers.html#sc_ZooKeeperAccessControl" target="_blank" class="normal-link">ACL</a></td>
+                <td><a href="https://github.com/coreos/etcd/tree/master/etcdctl#auth-enable-or-disable" target="_blank" class="normal-link">Authentication</a></td>
+                <td><a href="https://www.consul.io/docs/internals/acl.html" target="_blank" class="normal-link">ACL</a></td>
+            </tr>
+            <tr>
+                <th scope="row">Auto-compaction</th>
+                <td><a href="http://zookeeper.apache.org/doc/r3.4.9/zookeeperAdmin.html#sc_strengthsAndLimitations" target="_blank" class="normal-link">Yes</a></td>
+                <td><a href="https://github.com/coreos/etcd/blob/master/Documentation/op-guide/maintenance.md" target="_blank" class="normal-link">Yes</a><sup>[2]</sup></td>
+                <td>Yes</td>
+            </tr>
+            <tr>
+                <th scope="row">Space Quota</th>
+                <td><a href="http://zookeeper.apache.org/doc/r3.4.9/zookeeperQuotas.html" target="_blank" class="normal-link">Yes</a></td>
+                <td><a href="https://github.com/coreos/etcd/tree/master/etcdctl#alarm-subcommand" target="_blank" class="normal-link">Yes</a></td>
+                <td>No</td>
+            </tr>
+            <tr>
+                <th scope="row">Built-in DNS</th>
+                <td>No</td>
+                <td>No<sup>[3]</sup></td>
+                <td><a href="https://www.consul.io/docs/agent/dns.html" target="_blank" class="normal-link">Yes</a></td>
+            </tr>
+            <tr>
+                <th scope="row">Monitoring</th>
+                <td><a href="http://zookeeper.apache.org/doc/r3.4.9/zookeeperAdmin.html#sc_monitoring" target="_blank" class="normal-link">mntr command</a></td>
+                <td><a href="https://github.com/coreos/etcd/blob/master/Documentation/metrics.md" target="_blank" class="normal-link">Prometheus metrics</a></td>
+                <td><a href="https://www.consul.io/docs/agent/telemetry.html" target="_blank" class="normal-link">Telemetry</a></td>
+            </tr>
+            <tr>
+                <th scope="row">Snapshot Backup</th>
+                <td>No</td>
+                <td><a href="https://github.com/coreos/etcd/blob/master/Documentation/op-guide/maintenance.md#snapshot-backup" target="_blank" class="normal-link">Yes</a></td>
+                <td>No</td>
+            </tr>
+            <tr>
+                <th scope="row">Mirror</th>
+                <td>No</td>
+                <td><a href="https://github.com/coreos/etcd/blob/master/etcdctl/doc/mirror_maker.md" target="_blank" class="normal-link">Yes</a></td>
+                <td>No</td>
+            </tr>
+            <tr>
+                <th scope="row">Proxy</th>
+                <td>No</td>
+                <td><a href="https://github.com/coreos/etcd/blob/master/Documentation/op-guide/grpc_proxy.md" target="_blank" class="normal-link">Yes</a></td>
+                <td>No</td>
+            </tr>
+            <tr>
+                <th scope="row">Zookeeper Proxy</th>
+                <td>N/A</td>
+                <td><a href="https://github.com/coreos/zetcd" target="_blank" class="normal-link">coreos/zetcd</a></td>
+                <td>No</td>
+            </tr>
+            <tr>
+                <th scope="row">Consul Proxy</th>
+                <td>No</td>
+                <td><a href="https://github.com/coreos/cetcd" target="_blank" class="normal-link">coreos/cetcd</a></td>
+                <td>N/A</td>
+            </tr>
+            <tr>
+                <th scope="row">Managed Service</th>
+                <td>No</td>
+                <td><a href="https://github.com/coreos/etcd-operator" target="_blank" class="normal-link">etcd-operator</a><sup>[4]</sup></td>
+                <td><a href="https://www.hashicorp.com/consul.html" target="_blank" class="normal-link">Consul Enterprise</a></td>
+            </tr>
+        </tbody>
+    </table>
+    <hr align="left" class="footer-top-line">
+    <footer class="narrow-footer">
+        [1] The token <span class="code-light-snippet-small">zookeeper</span> is reserved. Also <span class="code-light-snippet-small">/a/b/./c</span> is invalid in Zookeeper. There are many other limitations on key names. See <a href="https://zookeeper.apache.org/doc/zookeeperProgrammers.html"
+            target="_blank" class="footer-link">ZooKeeper Data Model</a>.
+        <br> [2] In addition to auto-purging Raft logs, etcd also supports on-disk storage compaction.
+        <br> [3] etcd provides discovery service for bootstrapping etcd cluster. Please visit <a href="https://discovery.etcd.io" target="_blank" class="footer-link">discovery.etcd.io</a>.
+        <br> [4] etcd-operator is fully managed etcd cluster on Kubernetes. And it's completely open-source and free.
+    </footer>
+    <div align="right" class="narrow-paragraph"><a href="/comparison#top" class="normal-link">↑ top</a></div>
+    <br><br>
+
+
+    <br><br>
+    <div id="performance-reliability"></div>
+    <h4>Performance & Reliability</h4>
+    <br>
+    <h5>RPCs</h5>
+    <p class="narrow-paragraph">
+        etcd base server interface uses <a href="http://www.grpc.io" target="_blank" class="normal-link">gRPC</a> instead of JSON for increased efficiency. Support for JSON endpoints is maintained through a <a href="https://github.com/coreos/etcd/blob/master/Documentation/dev-guide/api_grpc_gateway.md"
+            target="_blank" class="normal-link">gRPC gateway</a>. gRPC protocol message is defined using <a href="https://developers.google.com/protocol-buffers" target="_blank" class="normal-link">Protocol Buffer</a>, which simplifies the generation of efficient
+        RPC stub code and makes protocol extensions easier to manage. For comparison, even after optimizing etcd v2's client-side JSON parsing, etcd v3 gRPC still holds a 2x message processing performance edge over etcd v2. Likewise, gRPC is better at
+        handling connections, using HTTP/2 to multiplex multiple streams of RPCs over a single TCP connection. etcd can have several messages to be in flight at the same time, reducing network resource usage, while Consul with HTTP/1 must establish a
+        new connection for every request. HTTP/2 is binary protocol, which is more efficient than sending textual JSON data over HTTP/1 (e.g. Consul).
+    </p>
+    <br>
+    <h5>Leases</h5>
+    <p class="narrow-paragraph">
+        Keys expire in etcd v2 through a time-to-live (TTL) mechanism. For every key with a TTL, a client must periodically refresh the key to keep it from being automatically deleted when the TTL expires. Each refresh establishes a new connection and issues
+        a consensus proposal to etcd to update the key. To keep all TTL keys alive, an idling cluster must have a minimum request throughput of the number of TTL keys divided by the average TTL.
+    </p>
+    <p class="narrow-paragraph">
+        etcd v3 implements key expiry TTLs with a lightweight streaming lease keepalive model. Instead of a key having a TTL, a lease with a TTL is attached to a key. When the lease's TTL expires, it deletes all attached keys. This model reduces keep-alive traffic
+        when multiple keys are attached to the same lease. The keep-alive connection thrashing in etcd v2 is avoided by multiplexing keep-alives on a lease's single gRPC stream. Likewise, keep-alives are processed by the leader, avoiding any consensus
+        overhead when idling.
+    </p>
+    <br>
+    <h5>Watchers</h5>
+    <p class="narrow-paragraph">
+        etcd watchers also uses streams and multiplexes events over key intervals. A watch in etcd waits for changes to keys. Unlike systems such as ZooKeeper or Consul that return one event per watch request, etcd can continuously watch from the current revision.
+        In <b>etcd v2</b>, these streaming watches use <b>long polling</b> over HTTP, forcing the etcd v2 server to wastefully hold open a TCP connection per watch. When an application with thousands of clients watches thousands of keys, it can
+        quickly exhaust etcd v2 server socket and memory resources.
+    </p>
+    <p class="narrow-paragraph">
+        <b>The etcd v3 API multiplexes watches on a single connection</b>. Instead of opening a new connection, a client registers a watcher on a bidirectional gRPC stream. The stream delivers events tagged with a watcher's registered ID. Multiple watch
+        streams can even share the same TCP connection. Multiplexing and stream connection sharing reduce etcd v3's memory footprint by at least an order of magnitude.
+    </p>
+    <p class="narrow-paragraph">
+        A Zookeeper client is expected to have a single long-lived connection, creating a session per application instance; see <a href="https://zookeeper.apache.org/doc/trunk/zookeeperProgrammers.html#ch_zkSessions" target="_blank" class="normal-link">Zookeeper Sessions</a>.
+        Zookeeper watcher is tied to this session; if the client loses the session or gets disconnected from server, it loses all the events. And Zookeeper watcher is one time trigger; if watcher receives an event, client must create another watcher for
+        future events. That is, any latency between changes happened and watcher creation can lead to missing events; see <a href="https://zookeeper.apache.org/doc/trunk/zookeeperProgrammers.html" target="_blank" class="normal-link">Things to Remember about Watches</a>.
+    </p>
+    <p class="narrow-paragraph">
+        Consul watch API uses long-polling to wait for potential changes; see <a href="https://www.consul.io/docs/agent/http.html" target="_blank" class="normal-link">Blocking Queries</a>.
+    </p>
+    <br>
+    <h5>Data model with reliable events</h5>
+    <p class="narrow-paragraph">
+        Like any key-value store, etcd's data model maps keys to values. The etcd v2 model only keeps the most recent key-value mappings available; older versions are discarded. However, applications which track all key changes or scan the entire key space need
+        a reliable event stream to consistently reconstruct past key states. To avoid prematurely dropping events so that these applications can work even if briefly disconnected, etcd v2 maintains a short global sliding window of events. However, if
+        a watch begins on a revision that the window passed over, the watch may miss discarded events.
+    </p>
+    <p class="narrow-paragraph">
+        etcd v3 does away with this unpredictable window, instead retaining historical key revisions through a new multi-version concurrency control model. The retention policy for this history can be configured by cluster administrators for fine-grained storage
+        management. Usually etcd v3 discards old revisions of keys on a timer. A typical etcd v3 cluster retains superseded key data for hours. To reliably handle longer client disconnection, not just transient network disruptions, watchers simply resume
+        from the last observed historical revision. To read from the store at a particular point-in-time, key read requests may be tagged with a revision that will return the key's value at the given revision.
+    </p>
+    <p class="narrow-paragraph">
+        In addition to preserving historical data in the key value store, etcd v3 trades etcd v2's hierarchical key structure for a flat binary key space. In practice, applications tended to either fetch individual keys, or to recursively fetch all keys under
+        a directory. Usage patterns didn't justify the overhead of maintaining hierarchy information. etcd v3 instead uses key ranges that search for keys in an interval. This interval model supports both querying on prefixes and, with a convention for
+        key naming, listing keys as if from a directory.
+    </p>
+    <br>
+    <h5>Multiversion concurrency control (MVCC)</h5>
+    <p class="narrow-paragraph">
+        When multiple clients concurrently read and modify a key or a set of keys, it is important to have synchronization primitives to prevent data races from corrupting application state. For this purpose, etcd v2 offers both load-link/store-conditional and
+        compare-and-swap operations; a client specifies a previous revision index or previous value to match before updating a key. Although these operations suffice for simple semaphores and limited atomic updates, they are inadequate for describing
+        more sophisticated approaches to serializing data access, such as distributed locks and transactional memory.
+    </p>
+    <p class="narrow-paragraph">
+        etcd v3 can serialize multiple operations into a single conditional mini-transaction. Each transaction includes a conjunction of conditional guards (e.g., checks on key version, value, modified revision, and creation revision), a list of the operations
+        to apply when all conditions evaluate to true (i.e., Get, Put, Delete), and a list of operations to apply if any of the conditions evaluate to false. Transactions make distributed locks safe in etcd v3 because accesses can be conditional based
+        on whether the client still holds its lock. This means that even if a client loses its claim on a lock, whether due to clock skew or missing expiration events, etcd v3 will refuse to honor the stale request.
+    </p>
+    <p class="narrow-paragraph">
+        Zookeeper and Consul do not support querying old key-values; only <a href="https://www.consul.io/docs/commands/kv/get.html" target="_blank" class="normal-link">overwrites</a>.
+    </p>
+    <br>
+    <table class="table narrow-paragraph">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Zookeeper</th>
+                <th>etcd</th>
+                <th>Consul</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th scope="row">RPC</th>
+                <td><a href="https://issues.apache.org/jira/browse/ZOOKEEPER/component/12312385/?selectedTab=com.atlassian.jira.jira-projects-plugin:component-summary-panel" target="_blank" class="normal-link">Jute</a>, <a href="https://zookeeper.apache.org/doc/trunk/zookeeperAdmin.html#Communication+using+the+Netty+framework"
+                        target="_blank" class="normal-link">NIO, Netty</a></td>
+                <td><a href="http://www.grpc.io" target="_blank" class="normal-link">gRPC</a>, <a href="https://http2.github.io" target="_blank" class="normal-link">HTTP/2</a></td>
+                <td>JSON, HTTP/1</td>
+            </tr>
+            <tr>
+                <th scope="row">Storage</th>
+                <td>Key-value, in-memory, WAL</td>
+                <td>Key-value, <a href="https://github.com/boltdb/bolt" target="_blank" class="normal-link">Bolt</a>, <a href="https://github.com/coreos/etcd/blob/master/wal/doc.go" target="_blank" class="normal-link">WAL</a></td>
+                <td>Key-value, <a href="https://github.com/boltdb/bolt" target="_blank" class="normal-link">Bolt</a></td>
+            </tr>
+            <tr>
+                <th scope="row">MVCC<sup>[1]</sup></th>
+                <td>No</td>
+                <td>Yes</td>
+                <td>No</td>
+            </tr>
+            <tr>
+                <th scope="row">Database Snapshot</th>
+                <td>On-disk snapshot</td>
+                <td>On-disk snapshot</td>
+                <td>On-disk snapshot</td>
+            </tr>
+            <tr>
+                <th scope="row">Request Size Limit</th>
+                <td>1 MB<sup>[2]</sup></td>
+                <td>1.5 MB<sup>[3]</sup></td>
+                <td>512 KB<sup>[4]</sup></td>
+            </tr>
+            <tr>
+                <th scope="row">Storage Size Limit</th>
+                <td>Undefined<sup>[5]</sup></td>
+                <td>Default 2GB, Maximum 8GB<sup>[6]</sup></td>
+                <td>Undefined</td>
+            </tr>
+            <tr>
+                <th scope="row">Failure Injection Tests</th>
+                <td>No</td>
+                <td><a href="http://dash.etcd.io" target="_blank" class="normal-link">dash.etcd.io</a></td>
+                <td>No</td>
+            </tr>
+        </tbody>
+    </table>
+    <hr align="left" class="footer-top-line">
+    <footer class="narrow-footer">
+        [1] Bruce Momjian: "<a href="http://momjian.us/main/presentations/internals.html#mvcc" target="_blank" class="footer-link">MVCC Unmasked</a>," momjian.us, July 2014.
+        <br> [2] Zookeeper server and client have sanity checks to ensure that znodes size does not exceed 1MB, which includes all of its children; see <a href="http://zookeeper.apache.org/doc/r3.4.9/zookeeperProgrammers.html" target="_blank" class="footer-link">Data Access</a>.
+        <br> [3] etcd has hard-coded <span class="code-light-snippet-small">maxRequestBytes</span> value to avoid blocking Raft stream. Server returns <span class="code-light-snippet-small">ErrRequestTooLarge</span> error to the exceeding client request.
+        <br> [4] Consul has hard-coded <span class="code-light-snippet-small">maxKVSize</span> value. Server returns <span class="code-light-snippet-small">Value for key X is too large</span> error to the exceeding client request.
+        <br> [5] Zookeeper documentation recommends to limit Java heap size to avoid disk swap since Zookeeper stores data in-memory; see <a href="https://zookeeper.apache.org/doc/r3.4.9/zookeeperAdmin.html#sc_zkMulitServerSetup" target="_blank" class="footer-link">Clustered (Multi-Server) Setup</a>.
+        <br> [6] etcd default space quota is 2GB, which can be configured up to 8GB. If etcd exceeds space quota, cluster becomes maintenance mode only allowing read and delete client requests. This is to prevent degrading etcd performance.
+    </footer>
+    <div align="right" class="narrow-paragraph"><a href="/comparison#top" class="normal-link">↑ top</a></div>
+    <br><br>
+
+    <br><br>
+    <div id="benchmark-results"></div>
+    <h4>Benchmark Results</h4>
+    <p class="narrow-paragraph">
+        All tests are run with Google Cloud Compute Engine virtual machines: Three machines are used for database servers, each of which has 8 vCPUs, 16 GB Memory, and 150 GB SSD on Ubuntu 16.10. One machine is used for sending client requests, which has 16 vCPUs,
+        30 GB Memory, and 150 GB SSD on Ubuntu 16.10.
+    </p>
+    <p class="narrow-paragraph">
+        In linearizable read, majority of cluster has to agree on the same value before it returns. In serializable read, server returns data without going through consensus, so possibly serving stale data.
+    </p>
+    <p class="narrow-paragraph">
+        Want to run your own benchmarks? Please try <a href="https://github.com/coreos/etcd/tree/master/tools/benchmark" target="_blank" class="normal-link">etcd benchmark</a> and <a href="https://github.com/coreos/dbtester" target="_blank" class="normal-link">dbtester</a>.
+    </p>
+
+    <br>
+    <table class="table narrow-paragraph">
+        <thead>
+            <tr>
+                <th>Write</th>
+                <th>Zookeeper</th>
+                <th>etcd</th>
+                <th>Consul</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th scope="row">Version</th>
+                <td><a href="http://zookeeper.apache.org/doc/r3.4.9/" target="_blank" class="normal-link">r3.4.9</a></td>
+                <td><a href="https://github.com/coreos/etcd/releases/tag/v3.1.0" target="_blank" class="normal-link">v3.1.0</a></td>
+                <td><a href="https://github.com/hashicorp/consul/releases/tag/v0.7.1" target="_blank" class="normal-link">v0.7.1</a></td>
+            </tr>
+            <tr>
+                <th scope="row">Runtime</th>
+                <td>Java 8<sup>[1]</sup></td>
+                <td>Go 1.7.3</td>
+                <td>Go 1.7.3</td>
+            </tr>
+            <tr>
+                <th scope="row">Number of TCP connections</th>
+                <td>1000</td>
+                <td>100<sup>[2]</sup></td>
+                <td>1000</td>
+            </tr>
+            <tr>
+                <th scope="row">Number of concurrent clients</th>
+                <td>1000</td>
+                <td>1000</td>
+                <td>1000</td>
+            </tr>
+            <tr>
+                <th scope="row">Key size</th>
+                <td>8-byte</td>
+                <td>8-byte</td>
+                <td>8-byte</td>
+            </tr>
+            <tr>
+                <th scope="row">Value size</th>
+                <td>256-byte</td>
+                <td>256-byte</td>
+                <td>256-byte</td>
+            </tr>
+            <tr>
+                <th scope="row">Number of entries to write</th>
+                <td>2 million</td>
+                <td>2 million</td>
+                <td>2 million</td>
+            </tr>
+            <tr>
+                <th scope="row">Data Size<sup>[3]</sup></th>
+                <td>4.7 GB</td>
+                <td>1 GB</td>
+                <td>2.6 GB</td>
+            </tr>
+            <tr>
+                <th scope="row">Number of errors</th>
+                <td>1,032<sup>[4]</sup></td>
+                <td>None</td>
+                <td>None</td>
+            </tr>
+            <tr>
+                <th scope="row">Average Throughput</th>
+                <td>34,054.4941 req/sec</td>
+                <td>39,692.5013 req/sec</td>
+                <td>4,245.7052 req/sec</td>
+            </tr>
+            <tr>
+                <th scope="row">Slowest Latency</th>
+                <td>2.5233 sec</td>
+                <td>0.3032 sec</td>
+                <td>10.4728 sec</td>
+            </tr>
+            <tr>
+                <th scope="row">Fastest Latency</th>
+                <td>0.0016 sec</td>
+                <td>0.0058 sec</td>
+                <td>0.0297 sec</td>
+            </tr>
+            <tr>
+                <th scope="row">Average Latency</th>
+                <td>0.0268 sec</td>
+                <td>0.0251 sec</td>
+                <td>0.2352 sec</td>
+            </tr>
+            <tr>
+                <th scope="row">Peak CPU Usage</th>
+                <td>390.64 %</td>
+                <td>429.29 %</td>
+                <td>349.34 %</td>
+            </tr>
+            <tr>
+                <th scope="row">Peak Memory Usage<sup>[5]</sup></th>
+                <td>2.7 GB</td>
+                <td>771 MB</td>
+                <td>4.9 GB</td>
+            </tr>
+        </tbody>
+    </table>
+    <hr align="left" class="footer-top-line">
+    <footer class="narrow-footer">
+        [1] <span class="code-light-snippet-small">java version "1.8.0_111"</span>, <span class="code-light-snippet-small">Java(TM) SE Runtime Environment (build 1.8.0_111-b14)</span>, <span class="code-light-snippet-small">Java HotSpot(TM) 64-Bit Server VM (build 25.111-b14, mixed mode)</span>.
+        <br> [2] etcd uses less TCP connections with gRPC and HTTP/2.
+        <br> [3] Total size of data written to disk after writes are finished.
+        <br> [4] 352 errors of <span class="code-light-snippet-small">zk: connection closed</span>, 680 errors of <span class="code-light-snippet-small">zk: could not connect to a server</span>.
+        <br> [5] <span class="code-light-snippet-small">VmRSS</span> value in Linux proc file is used to calculate memory usage.
+    </footer>
+    <br>
+    <div>
+        <img class="narrow-paragraph" src="app/doc/tip/images/write-2M-keys-throughput.svg" alt="write-2M-keys-throughput">
+        <img class="narrow-paragraph" src="app/doc/tip/images/write-2M-keys-avg-latency-ms.svg" alt="write-2M-keys-avg-latency-ms">
+        <img class="narrow-paragraph" src="app/doc/tip/images/write-2M-keys-avg-memory-mb.svg" alt="write-2M-keys-avg-memory-mb">
+        <img class="narrow-paragraph" src="app/doc/tip/images/write-2M-keys-avg-cpu.svg" alt="write-2M-keys-avg-cpu">
+    </div>
+    <p class="narrow-paragraph">
+        etcd is more reliable than Zookeeper and Consul. Zookeeper fails to serve a bunch of client requests when snapshot happens; logs message <span class="code-light-snippet">Too busy to snap, skipping</span>, <span class="code-light-snippet">fsync-ing the write ahead log in SyncThread:2 took 1827ms which will adversely effect operation latency. See the ZooKeeper troubleshooting guide</span>.
+        Consul has the same issue. Default etcd snapshot count is 10,000. Zookeeper's default snap count is 100,000; Zookeeper with snap count 10,000 still has the same issue.
+    </p>
+    <div align="right" class="narrow-paragraph"><a href="/comparison#top" class="normal-link">↑ top</a></div>
+    <br><br>
+
+
+    <table class="table narrow-paragraph">
+        <thead>
+            <tr>
+                <th>Linearizable Read</th>
+                <th>Zookeeper</th>
+                <th>etcd</th>
+                <th>Consul</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th scope="row">Version</th>
+                <td><a href="http://zookeeper.apache.org/doc/r3.4.9/" target="_blank" class="normal-link">r3.4.9</a></td>
+                <td><a href="https://github.com/coreos/etcd/releases/tag/v3.1.0" target="_blank" class="normal-link">v3.1.0</a></td>
+                <td><a href="https://github.com/hashicorp/consul/releases/tag/v0.7.1" target="_blank" class="normal-link">v0.7.1</a></td>
+            </tr>
+            <tr>
+                <th scope="row">Runtime</th>
+                <td>Java 8<sup>[1]</sup></td>
+                <td>Go 1.7.3</td>
+                <td>Go 1.7.3</td>
+            </tr>
+            <tr>
+                <th scope="row">Number of TCP connections</th>
+                <td>1000</td>
+                <td>100<sup>[2]</sup></td>
+                <td>1000</td>
+            </tr>
+            <tr>
+                <th scope="row">Number of concurrent clients</th>
+                <td>1000</td>
+                <td>1000</td>
+                <td>1000</td>
+            </tr>
+            <tr>
+                <th scope="row">Key size</th>
+                <td>8-byte</td>
+                <td>8-byte</td>
+                <td>8-byte</td>
+            </tr>
+            <tr>
+                <th scope="row">Value size</th>
+                <td>256-byte</td>
+                <td>256-byte</td>
+                <td>256-byte</td>
+            </tr>
+            <tr>
+                <th scope="row">Number of entries to read</th>
+                <td>2 million</td>
+                <td>2 million</td>
+                <td>2 million</td>
+            </tr>
+            <tr>
+                <th scope="row">Number of errors</th>
+                <td>None</td>
+                <td>None</td>
+                <td>None</td>
+            </tr>
+            <tr>
+                <th scope="row">Average Throughput</th>
+                <td>98,433.2600 req/sec<sup>[3]</sup></td>
+                <td>51,309.4119 req/sec</td>
+                <td>53,876.9702 req/sec</td>
+            </tr>
+            <tr>
+                <th scope="row">Slowest Latency</th>
+                <td>0.4265 sec</td>
+                <td>0.1564 sec</td>
+                <td>0.1493 sec</td>
+            </tr>
+            <tr>
+                <th scope="row">Fastest Latency</th>
+                <td>0.0006 sec</td>
+                <td>0.0005 sec</td>
+                <td>0.0004 sec</td>
+            </tr>
+            <tr>
+                <th scope="row">Average Latency</th>
+                <td>0.0093 sec</td>
+                <td>0.0194 sec</td>
+                <td>0.0182 sec</td>
+            </tr>
+            <tr>
+                <th scope="row">Peak CPU Usage</th>
+                <td>182.99 %</td>
+                <td>343.20 %</td>
+                <td>595.26 %</td>
+            </tr>
+            <tr>
+                <th scope="row">Peak Memory Usage<sup>[4]</sup></th>
+                <td>345 MB</td>
+                <td>271 MB</td>
+                <td>60 MB</td>
+            </tr>
+        </tbody>
+    </table>
+    <hr align="left" class="footer-top-line">
+    <footer class="narrow-footer">
+        [1] <span class="code-light-snippet-small">java version "1.8.0_111"</span>, <span class="code-light-snippet-small">Java(TM) SE Runtime Environment (build 1.8.0_111-b14)</span>, <span class="code-light-snippet-small">Java HotSpot(TM) 64-Bit Server VM (build 25.111-b14, mixed mode)</span>.
+        <br> [2] etcd uses less TCP connections with gRPC and HTTP/2.
+        <br> [3] Zookeeper linearizable reads are broken; see <a href="https://issues.apache.org/jira/browse/ZOOKEEPER-2136" target="_blank" class="footer-link">Sync() should get quorum acks</a>.
+        <br> [4] <span class="code-light-snippet-small">VmRSS</span> value in Linux proc file is used to calculate memory usage.
+    </footer>
+    <br>
+    <div>
+        <img class="narrow-paragraph" src="app/doc/tip/images/read-2M-keys-linearizable-throughput.svg" alt="read-2M-keys-linearizable-throughput">
+        <img class="narrow-paragraph" src="app/doc/tip/images/read-2M-keys-linearizable-avg-latency-ms.svg" alt="read-2M-keys-linearizable-avg-latency-ms">
+        <img class="narrow-paragraph" src="app/doc/tip/images/read-2M-keys-linearizable-avg-memory-mb.svg" alt="read-2M-keys-linearizable-avg-memory-mb">
+        <img class="narrow-paragraph" src="app/doc/tip/images/read-2M-keys-linearizable-avg-cpu.svg" alt="read-2M-keys-linearizable-avg-cpu">
+    </div>
+    <p class="narrow-paragraph">
+        Zookeeper linearizable read is broken; see <a href="https://issues.apache.org/jira/browse/ZOOKEEPER-2136" target="_blank" class="normal-link">Sync() should get quorum acks</a>.
+    </p>
+    <div align="right" class="narrow-paragraph"><a href="/comparison#top" class="normal-link">↑ top</a></div>
+    <br><br>
+
+
+    <table class="table narrow-paragraph">
+        <thead>
+            <tr>
+                <th>Serializable Read</th>
+                <th>Zookeeper</th>
+                <th>etcd</th>
+                <th>Consul</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th scope="row">Version</th>
+                <td><a href="http://zookeeper.apache.org/doc/r3.4.9/" target="_blank" class="normal-link">r3.4.9</a></td>
+                <td><a href="https://github.com/coreos/etcd/releases/tag/v3.1.0" target="_blank" class="normal-link">v3.1.0</a></td>
+                <td><a href="https://github.com/hashicorp/consul/releases/tag/v0.7.1" target="_blank" class="normal-link">v0.7.1</a></td>
+            </tr>
+            <tr>
+                <th scope="row">Runtime</th>
+                <td>Java 8<sup>[1]</sup></td>
+                <td>Go 1.7.3</td>
+                <td>Go 1.7.3</td>
+            </tr>
+            <tr>
+                <th scope="row">Number of TCP connections</th>
+                <td>1000</td>
+                <td>100<sup>[2]</sup></td>
+                <td>1000</td>
+            </tr>
+            <tr>
+                <th scope="row">Number of concurrent clients</th>
+                <td>1000</td>
+                <td>1000</td>
+                <td>1000</td>
+            </tr>
+            <tr>
+                <th scope="row">Key size</th>
+                <td>8-byte</td>
+                <td>8-byte</td>
+                <td>8-byte</td>
+            </tr>
+            <tr>
+                <th scope="row">Value size</th>
+                <td>256-byte</td>
+                <td>256-byte</td>
+                <td>256-byte</td>
+            </tr>
+            <tr>
+                <th scope="row">Number of entries to read</th>
+                <td>2 million</td>
+                <td>2 million</td>
+                <td>2 million</td>
+            </tr>
+            <tr>
+                <th scope="row">Number of errors</th>
+                <td>1<sup>[3]</sup></td>
+                <td>None</td>
+                <td>None</td>
+            </tr>
+            <tr>
+                <th scope="row">Average Throughput</th>
+                <td>193,113.4667 req/sec</td>
+                <td>69,022.3143 req/sec</td>
+                <td>142,493.9889 req/sec</td>
+            </tr>
+            <tr>
+                <th scope="row">Slowest Latency</th>
+                <td>1.0100 sec</td>
+                <td>0.3077 sec</td>
+                <td>1.1022 sec</td>
+            </tr>
+            <tr>
+                <th scope="row">Fastest Latency</th>
+                <td>0.0001 sec</td>
+                <td>0.0002 sec</td>
+                <td>0.0002 sec</td>
+            </tr>
+            <tr>
+                <th scope="row">Average Latency</th>
+                <td>0.0034 sec</td>
+                <td>0.0144 sec</td>
+                <td>0.0049 sec</td>
+            </tr>
+            <tr>
+                <th scope="row">Peak CPU Usage</th>
+                <td>113.97 %</td>
+                <td>304.55 %</td>
+                <td>365.93 %</td>
+            </tr>
+            <tr>
+                <th scope="row">Peak Memory Usage<sup>[4]</sup></th>
+                <td>498 MB</td>
+                <td>49 MB</td>
+                <td>31 MB</td>
+            </tr>
+        </tbody>
+    </table>
+    <hr align="left" class="footer-top-line">
+    <footer class="narrow-footer">
+        [1] <span class="code-light-snippet-small">java version "1.8.0_111"</span>, <span class="code-light-snippet-small">Java(TM) SE Runtime Environment (build 1.8.0_111-b14)</span>, <span class="code-light-snippet-small">Java HotSpot(TM) 64-Bit Server VM (build 25.111-b14, mixed mode)</span>.
+        <br> [2] etcd uses less TCP connections with gRPC and HTTP/2.
+        <br> [3] 4 errors of <span class="code-light-snippet-small">zk: could not connect to a server</span>.
+        <br> [4] <span class="code-light-snippet-small">VmRSS</span> value in Linux proc file is used to calculate memory usage.
+    </footer>
+    <br>
+    <div>
+        <img class="narrow-paragraph" src="app/doc/tip/images/read-2M-keys-serializable-throughput.svg" alt="read-2M-keys-serializable-throughput">
+        <img class="narrow-paragraph" src="app/doc/tip/images/read-2M-keys-serializable-avg-latency-ms.svg" alt="read-2M-keys-serializable-avg-latency-ms">
+        <img class="narrow-paragraph" src="app/doc/tip/images/read-2M-keys-serializable-avg-memory-mb.svg" alt="read-2M-keys-serializable-avg-memory-mb">
+        <img class="narrow-paragraph" src="app/doc/tip/images/read-2M-keys-serializable-avg-cpu.svg" alt="read-2M-keys-serializable-avg-cpu">
+    </div>
+    <p class="narrow-paragraph">
+        TODO: figure out etcd serializable read regression.
+    </p>
+    <div align="right" class="narrow-paragraph"><a href="/comparison#top" class="normal-link">↑ top</a></div>
+    <br><br>
+
+
+    <br><br>
+    <div id="etcd-tests"></div>
+    <h4>How etcd is tested</h4>
+    <p class="narrow-paragraph">
+        Reliability and robustness of etcd is our <b>highest</b> priority. And it is ensured by various etcd testing suites: unit tests, integration tests, migration tests, end-to-end tests, benchmarks and regression tests, soak tests, stress tests, functional
+        tests, and so on.
+    </p>
+    <p class="narrow-paragraph">
+        As of today, etcd consists of 85,113 lines of Go code<sup>[1]</sup>; more than half of code base, <i>48,786 lines</i>, are for tests and testing infrastructure. Especially, raft has 8,617 lines Go code, where 5,998 lines of them are tests.
+    </p>
+    <p class="narrow-paragraph">
+        Most rigorous one is our <a href="https://github.com/coreos/etcd/tree/master/tools/functional-tester" target="_blank" class="normal-link">functional tests</a>. This verifies the correct behavior of etcd under various system and network malfunctions.
+        It is extremely helpful<sup>[2]</sup> to find critical bugs in etcd, <i>before anyone else</i>; see a list of bugs that it has found at
+        <a href="https://github.com/coreos/etcd/issues?q=is%3Aissue+label%3Acomponent%2Ffunctional-tester+is%3Aclosed" target="_blank" class="normal-link">GitHub Issues</a>.
+    </p>
+    <p class="narrow-paragraph">
+        The tester ensures that etcd operates as expected during failure and after recovery. So it continuously injects failures to etcd cluster while stressing them with heavy workloads. And then compares database hashes of each node to see if cluster keeps
+        its data consistent. Some of the failures are:
+    </p>
+    <ul>
+        <li>Kill random node</li>
+        <li>Kill leader node</li>
+        <li>Kill majority of nodes in cluster</li>
+        <li>Kill all nodes</li>
+        <li>Kill node for a long time to trigger snapshot when it comes back</li>
+        <li>Network partition</li>
+        <li>Slow network</li>
+    </ul>
+    <p class="narrow-paragraph">
+        Furthermore, it also performs crash tests, such as power loss, I/O error, partial writes, and so on. It is impractical to run these tests with real power failures. So etcd crash testing is simulated with <a href="https://github.com/coreos/gofail"
+            target="_blank" class="normal-link">gofail</a>. etcd has tons of fail points in its code base, and tester triggers Go runtime panics in etcd. Some of the failures are:
+    </p>
+    <ul>
+        <li>panic before/after database commits an entry</li>
+        <li>panic before/after Raft follower sends message</li>
+        <li>panic before/after Raft leader sends message</li>
+        <li>panic before/after Raft saves entries</li>
+        <li>panic before/after Raft saves snapshot</li>
+        <li>panic before/after Raft applies entries</li>
+    </ul>
+    <p class="narrow-paragraph">
+        etcd functional-tester runs 24/7; cluster gets about 8,000 failure injections per day, <i>1 failure injection for every 10-second</i>.
+    </p>
+    <p class="narrow-paragraph">
+        Please visit <a href="http://dash.etcd.io/" target="_blank" class="normal-link">dash.etcd.io</a> for realtime testing cluster dashboards.
+    </p>
+
+    <button md-raised-button color="primary" (click)="clickRefresh();">Refresh</button>
+    <button md-raised-button *ngIf="metricsLastUpdate !== ''">last Update: {{metricsLastUpdate}}</button>
+    <br><br>
+
+    <p *ngIf="!metricsSuccess" class="narrow-paragraph error-message-normal">
+        {{metricsResult}}
+    </p>
+    <p *ngIf="!metricsSuccess" class="narrow-paragraph error-message-normal">
+        {{metricsErrorMessage}}
+    </p>
+    <br *ngIf="!metricsSuccess">
+
+    <table class="table narrow-paragraph">
+        <thead>
+            <tr>
+                <th>Testing Cluster</th>
+                <th><a href="http://dash.etcd.io/dashboard/db/functional-tests" target="_blank" class="normal-link">3-node</a></th>
+                <th><a href="http://dash.etcd.io/dashboard/db/functional-tests-failpoints" target="_blank" class="normal-link">3-node failpoints</a></th>
+                <th><a href="http://dash.etcd.io/dashboard/db/functional-tests-5-node" target="_blank" class="normal-link">5-node</a></th>
+                <th><a href="http://dash.etcd.io/dashboard/db/functional-tests-failpoints-5-node" target="_blank" class="normal-link">5-node failpoints</a></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th scope="row">Total Injects</th>
+                <td>{{status3Node.TotalCase}}</td>
+                <td>{{status3NodeFailpoints.TotalCase}}</td>
+                <td>{{status5Node.TotalCase}}</td>
+                <td>{{status5NodeFailpoints.TotalCase}}</td>
+            </tr>
+            <tr>
+                <th scope="row">Current Injects</th>
+                <td>{{status3Node.CurrentCase}}</td>
+                <td>{{status3NodeFailpoints.CurrentCase}}</td>
+                <td>{{status5Node.CurrentCase}}</td>
+                <td>{{status5NodeFailpoints.CurrentCase}}</td>
+            </tr>
+            <tr>
+                <th scope="row">Current Failed Case</th>
+                <td>{{status3Node.CurrentFailed}}</td>
+                <td>{{status3NodeFailpoints.CurrentFailed}}</td>
+                <td>{{status5Node.CurrentFailed}}</td>
+                <td>{{status5NodeFailpoints.CurrentFailed}}</td>
+            </tr>
+        </tbody>
+    </table>
+    <hr align="left" class="footer-top-line">
+    <footer class="narrow-footer">
+        [1] Includes comments and tests. Excludes vendor, auto-generated Protocol Buffer files.
+        <br> [2] Important bugs and debugging story can be found at <a href="https://github.com/coreos/etcdlabs/tree/master/debug-etcd" target="_blank" class="footer-link">etcdlabs/debug-etcd</a>.
+    </footer>
+    <div align="right" class="narrow-paragraph"><a href="/comparison#top" class="normal-link">↑ top</a></div>
+    <br><br>
+
+</div>
