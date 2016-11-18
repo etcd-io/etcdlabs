@@ -29,7 +29,11 @@ testem.log
 .DS_Store
 
 # log file
-etcdlabs.log
+etcdlabs-backend.log
+etcdlabs-frontend.log
 
 # binary file
 etcdlabs
+etcdlabs.aci
+etcdlabs.aci.asc
+/.acbuild
