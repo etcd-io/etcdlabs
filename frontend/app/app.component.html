@@ -1,12 +1,11 @@
 <md-toolbar color="primary">
     <a routerLink="/home"><button md-button>etcd</button></a>
-    <a routerLink="/doc"><button md-button>Doc</button></a>
+    <a href="https://coreos.com/etcd/docs/latest" target="_blank"><button md-button>Doc</button></a>
+    <a routerLink="/install"><button md-button>Install</button></a>
+    <a routerLink="/tests"><button md-button>Tests</button></a>
     <a routerLink="/play"><button md-button>Play</button></a>
 
-    <!--<span class="app-toolbar-filler"></span>
-	<a href="..." target="_blank">
-		<md-icon>code</md-icon>
-	</a>-->
+    <!--TODO: faq, comparison-->
 </md-toolbar>
 
 <router-outlet></router-outlet>
