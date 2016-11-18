@@ -9,16 +9,7 @@ md-divider {
     color: lightgray;
 }
 
-md-sidenav-layout {
-    min-height: 700px;
-}
-
-.doc-sidenav {
-    padding: 10px;
-    min-width: 150px;
-}
-
-.doc-group {
+.install-group {
     padding: 30px;
 }
 
@@ -27,32 +18,13 @@ a {
     text-decoration: none !important;
 }
 
-.doc-group md-checkbox {
+.install-group md-checkbox {
     margin: 10px;
 }
 
 .no-text-decoration {
     color: black;
     text-decoration: none !important;
-}
-
-.doc-title {
-    color: black;
-    font-family: 'Open Sans', sans-serif;
-    font-size: 15px;
-}
-
-.doc-description {
-    color: darkgray;
-    font-family: 'Open Sans', sans-serif;
-    font-size: 12px;
-    font-style: italic;
-}
-
-.unknown {
-    color: #424242;
-    font-family: 'Open Sans', sans-serif;
-    font-size: 12px;
 }
 
 sup {
@@ -93,56 +65,8 @@ footer {
     font-size: 15px;
 }
 
-.faq-list-title {
-    color: midnightblue;
-    text-decoration: none !important;
-    font-family: 'Open Sans', sans-serif;
-    font-size: 20px;
-    font-style: bold;
-}
-
-.faq-list {
-    color: dodgerblue;
-    text-decoration: none !important;
-    font-family: 'Open Sans', sans-serif;
-    font-size: 15px;
-}
-
-h2 .faq-title {
-    color: dodgerblue;
-    text-decoration: none !important;
-    font-family: 'Open Sans', sans-serif;
-    font-size: 20px;
-}
-
 .narrow-paragraph {
     max-width: 1000px;
-}
-
-.narrow-footer {
-    max-width: 800px;
-}
-
-.next-to-header-title {
-    color: dimgrey;
-    text-decoration: none !important;
-    font-family: 'Open Sans', sans-serif;
-    font-size: 13px;
-}
-
-.versions-link-main {
-    color: black;
-    text-decoration: none !important;
-    font-family: 'Open Sans', sans-serif;
-    font-size: 15px;
-}
-
-.versions-link-other {
-    color: darkgray;
-    text-decoration: none !important;
-    font-family: 'Open Sans', sans-serif;
-    font-size: 12px;
-    font-style: italic;
 }
 
 .error-message {
@@ -150,14 +74,6 @@ h2 .faq-title {
     color: red;
     font-family: 'Open Sans', sans-serif;
     font-size: 12px;
-    font-style: italic;
-}
-
-.error-message-normal {
-    margin: 5px;
-    color: red;
-    font-family: 'Open Sans', sans-serif;
-    font-size: 14px;
     font-style: italic;
 }
 
@@ -533,58 +449,4 @@ section {
     .block-graphic:last-child {
         margin-right: 0
     }
-}
-
-.aspect-ratio-16-9 {
-    position: relative;
-    width: 100%;
-    height: 0;
-    padding-bottom: 56.25%
-}
-
-#video {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    left: 0;
-    top: 0
-}
-
-
-/*
-blog
-*/
-
-.article-title {
-    color: grey;
-    font-family: Sans-Serif;
-}
-
-.article-date {
-    color: #999;
-    font-family: Sans-Serif;
-    font-size: 14px;
-}
-
-.article-author {
-    color: darkgray;
-    font-family: 'Open Sans', sans-serif;
-    font-size: 13px;
-    font-style: italic;
-}
-
-.article-author-link {
-    color: darkgray;
-    font-family: 'Open Sans', sans-serif;
-    font-size: 13px;
-    font-style: italic;
-    text-decoration: none !important;
-}
-
-.article-contents p {
-    color: black;
-    font-family: 'Open Sans', sans-serif;
-    font-size: 16px;
-    font-weight: 300;
-    font-style: normal;
 }

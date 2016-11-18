@@ -1,16 +1,15 @@
 import { Component, AfterContentInit } from '@angular/core';
-import { ParentComponent } from './common/common.component';
 
 import { Http } from '@angular/http';
-import { TesterMetricsService, TesterStatus, MetricsResponse } from './common/tester-metrics.service';
+import { TesterMetricsService, TesterStatus, MetricsResponse } from './tester-metrics.service';
 
 @Component({
     selector: 'app-comparison',
     templateUrl: 'comparison.component.html',
-    styleUrls: ['common/common.component.css'],
+    styleUrls: ['common.component.css'],
     providers: [TesterMetricsService],
 })
-export class ComparisonTipComponent extends ParentComponent implements AfterContentInit {
+export class ComparisonComponent implements AfterContentInit {
     metricsLastUpdate: string;
     metricsSuccess: boolean;
     metricsResult: string;
@@ -22,8 +21,6 @@ export class ComparisonTipComponent extends ParentComponent implements AfterCont
     status5NodeFailpoints: TesterStatus;
 
     constructor(private metricsService: TesterMetricsService, private http: Http) {
-        super();
-
         this.metricsLastUpdate = '';
         this.metricsSuccess = true;
         this.metricsResult = '';

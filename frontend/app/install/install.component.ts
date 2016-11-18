@@ -6,13 +6,11 @@ import { Etcd, EtcdFlag } from './common/etcd.component';
 import { Rkt } from './common/rkt.component';
 
 @Component({
-    selector: 'app-install-deploy',
-    templateUrl: 'install-deploy.component.html',
+    selector: 'app-install',
+    templateUrl: 'install.component.html',
     styleUrls: ['common/common.component.css'],
 })
-export class InstallDeployTipComponent extends ParentComponent {
-    docVersion: string;
-
+export class InstallComponent extends ParentComponent {
     ////////////////////////////////////
     // TLS setting properties
     cfssl: CFSSL;
@@ -38,7 +36,6 @@ export class InstallDeployTipComponent extends ParentComponent {
 
     constructor() {
         super();
-        this.docVersion = super.getDocVersion();
 
         ///////////////////////////////////////////////////
         this.cfssl = new CFSSL(

@@ -1,92 +1,74 @@
-<md-sidenav-layout>
-    <md-sidenav #sidenav [opened]="true" mode="side" class="doc-sidenav">
-        <md-list dense>
-            <a routerLink="/doc/{{docVersion}}">
-                <h3 md-subheader>Getting Started ({{docVersion}})</h3>
-            </a>
-            <md-list-item *ngFor="let item of getStartedItems">
-                <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
-            </md-list-item>
+<div class="install-group">
+    <router-outlet></router-outlet>
 
-            <md-divider></md-divider>
-            <h3 md-subheader>Operation Guides</h3>
-            <md-list-item *ngFor="let item of operationItems">
-                <a routerLink="{{item.url}}" class="{{item.htmlClass}}">{{item.title}}</a>
-            </md-list-item>
-        </md-list>
-    </md-sidenav>
+    <div id="top-top"></div>
 
-    <div class="doc-group">
-        <router-outlet></router-outlet>
+    <h4>Install and deploy etcd</h4>
+    <br>
+    <p class="narrow-paragraph">
+        This is an example workflow to install and deploy etcd.
+    </p>
 
-        <div id="top-top"></div>
-
-        <h4>Install and deploy etcd</h4>
+    <md-card>
+        <md-checkbox [(ngModel)]="etcd.secure">Secure connection (HTTPS)</md-checkbox>
+        <md-checkbox [(ngModel)]="etcd.enableProfile">Enable profiler</md-checkbox>
+        <md-checkbox [(ngModel)]="etcd.debug">Debug mode</md-checkbox>
+        <p></p>
+        <md-input type="number" [(ngModel)]="etcd.autoCompactHour" placeholder="auto compaction (hour)"></md-input>
+        <md-input type="number" [(ngModel)]="etcd.clusterSize" placeholder="Cluster size (up to 7)"></md-input>
+        <span *ngIf="etcd.clusterSize > 7" class="error-message">This tool only supports up to 7 nodes</span>
+        <span *ngIf="etcd.clusterSize < 1" class="error-message">Minimum cluster size is 1</span>
+        <span *ngIf="etcd.clusterSize % 2 == 0" class="error-message">Cluster size should an odd number</span>
         <br>
-        <p class="narrow-paragraph">
-            This is an example workflow to install and deploy etcd.
-        </p>
 
-        <md-card>
-            <md-checkbox [(ngModel)]="etcd.secure">Secure connection (HTTPS)</md-checkbox>
-            <md-checkbox [(ngModel)]="etcd.enableProfile">Enable profiler</md-checkbox>
-            <md-checkbox [(ngModel)]="etcd.debug">Debug mode</md-checkbox>
-            <p></p>
-            <md-input type="number" [(ngModel)]="etcd.autoCompactHour" placeholder="auto compaction (hour)"></md-input>
-            <md-input type="number" [(ngModel)]="etcd.clusterSize" placeholder="Cluster size (up to 7)"></md-input>
-            <span *ngIf="etcd.clusterSize > 7" class="error-message">This tool only supports up to 7 nodes</span>
-            <span *ngIf="etcd.clusterSize < 1" class="error-message">Minimum cluster size is 1</span>
-            <span *ngIf="etcd.clusterSize % 2 == 0" class="error-message">Cluster size should an odd number</span>
-            <br>
+        <div *ngFor="let flag of etcd.flags; let i = index;">
+            <div *ngIf="etcd.clusterSize > i">
+                <br>
+                <md-card-subtitle class="sub-sub-title">Node {{i+1}}</md-card-subtitle>
+                <md-input type="text" [(ngModel)]="flag.name" placeholder="etcd name"></md-input>
+                <md-input type="text" [(ngModel)]="flag.dataDir" placeholder="etcd data directory"></md-input>
 
-            <div *ngFor="let flag of etcd.flags; let i = index;">
-                <div *ngIf="etcd.clusterSize > i">
-                    <br>
-                    <md-card-subtitle class="sub-sub-title">Node {{i+1}}</md-card-subtitle>
-                    <md-input type="text" [(ngModel)]="flag.name" placeholder="etcd name"></md-input>
-                    <md-input type="text" [(ngModel)]="flag.dataDir" placeholder="etcd data directory"></md-input>
+                <br>
+                <md-input type="text" [(ngModel)]="flag.ipAddress" placeholder="IP address"></md-input>
+                <md-input type="number" [(ngModel)]="flag.clientPort" placeholder="client port"></md-input>
+                <md-input type="number" [(ngModel)]="flag.peerPort" placeholder="peer port"></md-input>
 
-                    <br>
-                    <md-input type="text" [(ngModel)]="flag.ipAddress" placeholder="IP address"></md-input>
-                    <md-input type="number" [(ngModel)]="flag.clientPort" placeholder="client port"></md-input>
-                    <md-input type="number" [(ngModel)]="flag.peerPort" placeholder="peer port"></md-input>
+                <br>
+                <md-input type="text" [(ngModel)]="flag.initialClusterToken" placeholder="cluster token"></md-input>
+                <md-input type="text" [(ngModel)]="flag.initialClusterState" placeholder="cluster state"></md-input>
+                <span *ngIf="flag.initialClusterState != 'new' && flag.initialClusterState != 'existing'" class="error-message">Cluster state must be either 'new' or 'existing'</span>
 
-                    <br>
-                    <md-input type="text" [(ngModel)]="flag.initialClusterToken" placeholder="cluster token"></md-input>
-                    <md-input type="text" [(ngModel)]="flag.initialClusterState" placeholder="cluster state"></md-input>
-                    <span *ngIf="flag.initialClusterState != 'new' && flag.initialClusterState != 'existing'" class="error-message">Cluster state must be either 'new' or 'existing'</span>
-
-                    <br *ngIf="etcd.secure">
-                    <md-input *ngIf="etcd.secure" dividerColor="warn" type="text" [(ngModel)]="flag.certsDir" placeholder="etcd certs directory"></md-input>
-                    <br *ngIf="etcd.secure">
-                    <md-input *ngIf="etcd.secure" dividerColor="warn" type="text" [(ngModel)]="flag.clientRootCAFile" placeholder="client trusted root CA"></md-input>
-                    <md-input *ngIf="etcd.secure" dividerColor="warn" type="text" [(ngModel)]="flag.clientCertFile" placeholder="client cert (public)"></md-input>
-                    <md-input *ngIf="etcd.secure" dividerColor="warn" type="text" [(ngModel)]="flag.clientKeyFile" placeholder="client key (private)"></md-input>
-                    <br *ngIf="etcd.secure">
-                    <md-input *ngIf="etcd.secure" dividerColor="warn" type="text" [(ngModel)]="flag.peerRootCAFile" placeholder="peer trusted root CA"></md-input>
-                    <md-input *ngIf="etcd.secure" dividerColor="warn" type="text" [(ngModel)]="flag.peerCertFile" placeholder="peer cert (public)"></md-input>
-                    <md-input *ngIf="etcd.secure" dividerColor="warn" type="text" [(ngModel)]="flag.peerKeyFile" placeholder="peer key (private)"></md-input>
-                </div>
+                <br *ngIf="etcd.secure">
+                <md-input *ngIf="etcd.secure" dividerColor="warn" type="text" [(ngModel)]="flag.certsDir" placeholder="etcd certs directory"></md-input>
+                <br *ngIf="etcd.secure">
+                <md-input *ngIf="etcd.secure" dividerColor="warn" type="text" [(ngModel)]="flag.clientRootCAFile" placeholder="client trusted root CA"></md-input>
+                <md-input *ngIf="etcd.secure" dividerColor="warn" type="text" [(ngModel)]="flag.clientCertFile" placeholder="client cert (public)"></md-input>
+                <md-input *ngIf="etcd.secure" dividerColor="warn" type="text" [(ngModel)]="flag.clientKeyFile" placeholder="client key (private)"></md-input>
+                <br *ngIf="etcd.secure">
+                <md-input *ngIf="etcd.secure" dividerColor="warn" type="text" [(ngModel)]="flag.peerRootCAFile" placeholder="peer trusted root CA"></md-input>
+                <md-input *ngIf="etcd.secure" dividerColor="warn" type="text" [(ngModel)]="flag.peerCertFile" placeholder="peer cert (public)"></md-input>
+                <md-input *ngIf="etcd.secure" dividerColor="warn" type="text" [(ngModel)]="flag.peerKeyFile" placeholder="peer key (private)"></md-input>
             </div>
+        </div>
 
-            <br>
-            <md-card-actions>
-                <a href="{{etcd.getFlagHelpURL()}}" target="_blank"><button md-button color="warn">More flags</button></a>
-            </md-card-actions>
-        </md-card>
         <br>
-        <div align="left" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top-top" class="normal-link">↑ top</a></div>
+        <md-card-actions>
+            <a href="{{etcd.getFlagHelpURL()}}" target="_blank"><button md-button color="warn">More flags</button></a>
+        </md-card-actions>
+    </md-card>
+    <br>
+    <div align="left" class="narrow-paragraph"><a href="/install#top-top" class="normal-link">↑ top</a></div>
 
-        <br><br>
-        <div id="top"></div>
+    <br><br>
+    <div id="top"></div>
 
-        <md-tab-group>
+    <md-tab-group>
 
-            <md-tab>
-                <template md-tab-label>
+        <md-tab>
+            <template md-tab-label>
 					TLS (cfssl)
 				</template>
-                <template md-tab-content>
+            <template md-tab-content>
 					<br>
 					<h5>Why?</h5>
 					<p class="narrow-paragraph">
@@ -114,7 +96,7 @@
 							</div>
 						</div>
 					</div>
-					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top" class="normal-link">↑ top</a></div>
+					<div align="right" class="narrow-paragraph"><a href="/install#top" class="normal-link">↑ top</a></div>
 					<br>
 
 
@@ -155,7 +137,7 @@
 							</div>
 						</div>
 					</div>
-					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top" class="normal-link">↑ top</a></div>
+					<div align="right" class="narrow-paragraph"><a href="/install#top" class="normal-link">↑ top</a></div>
 					<br>
 
 
@@ -210,18 +192,18 @@
 							</div>
 						</div>
 					</div>
-					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top" class="normal-link">↑ top</a></div>
+					<div align="right" class="narrow-paragraph"><a href="/install#top" class="normal-link">↑ top</a></div>
 					<br>
 					<br>
 				</template>
-            </md-tab>
+        </md-tab>
 
 
-            <md-tab>
-                <template md-tab-label>
+        <md-tab>
+            <template md-tab-label>
 					Build
 				</template>
-                <template md-tab-content>
+            <template md-tab-content>
 					<br>
 					<h5>Why?</h5>
 					<p class="narrow-paragraph">
@@ -271,18 +253,18 @@
 							</div>
 						</div>
 					</div>
-					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top" class="normal-link">↑ top</a></div>
+					<div align="right" class="narrow-paragraph"><a href="/install#top" class="normal-link">↑ top</a></div>
 					<br>
 					<br>
 				</template>
-            </md-tab>
+        </md-tab>
 
 
-            <md-tab>
-                <template md-tab-label>
+        <md-tab>
+            <template md-tab-label>
 					Bare metal, VM
 				</template>
-                <template md-tab-content>
+            <template md-tab-content>
 					<br>
 					<h5>Why?</h5>
 					<p class="narrow-paragraph">
@@ -366,18 +348,18 @@
 							</div>
 						</div>
 					</div>
-					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top" class="normal-link">↑ top</a></div>
+					<div align="right" class="narrow-paragraph"><a href="/install#top" class="normal-link">↑ top</a></div>
 					<br>
 					<br>
 				</template>
-            </md-tab>
+        </md-tab>
 
 
-            <md-tab>
-                <template md-tab-label>
+        <md-tab>
+            <template md-tab-label>
 					systemd
 				</template>
-                <template md-tab-content>
+            <template md-tab-content>
 					<br>
 					<h5>Why?</h5>
 					<p class="narrow-paragraph">
@@ -447,18 +429,18 @@
 							</div>
 						</div>
 					</div>
-					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top" class="normal-link">↑ top</a></div>
+					<div align="right" class="narrow-paragraph"><a href="/install#top" class="normal-link">↑ top</a></div>
 					<br>
 					<br>
 				</template>
-            </md-tab>
+        </md-tab>
 
 
-            <md-tab>
-                <template md-tab-label>
+        <md-tab>
+            <template md-tab-label>
 					rkt
 				</template>
-                <template md-tab-content>
+            <template md-tab-content>
 					<br>
 					<h5>Why?</h5>
 					<p class="narrow-paragraph">
@@ -553,18 +535,18 @@
 {{etcd.getEndpointHealthCommand(etcd.flags[0])}}
 
 </pre>
-					<div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top" class="normal-link">↑ top</a></div>
+					<div align="right" class="narrow-paragraph"><a href="/install#top" class="normal-link">↑ top</a></div>
 					<br>
 					<br>
 				</template>
-            </md-tab>
+        </md-tab>
 
 
-            <md-tab>
-                <template md-tab-label>
+        <md-tab>
+            <template md-tab-label>
 					CoreOS Linux
 				</template>
-                <template md-tab-content>
+            <template md-tab-content>
 					<br>
 					<h5>Why?</h5>
 					<p class="narrow-paragraph">
@@ -616,17 +598,17 @@
 
 </pre>
 				</template>
-                <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top" class="normal-link">↑ top</a></div>
-                <br>
-                <br>
-            </md-tab>
+            <div align="right" class="narrow-paragraph"><a href="/install#top" class="normal-link">↑ top</a></div>
+            <br>
+            <br>
+        </md-tab>
 
 
-            <md-tab>
-                <template md-tab-label>
+        <md-tab>
+            <template md-tab-label>
 					etcd-operator
 				</template>
-                <template md-tab-content>
+            <template md-tab-content>
 					<br>
 					<h5>Why?</h5>
 					<p class="narrow-paragraph">
@@ -679,10 +661,9 @@
 					<pre class="code-dark">{{etcd.getOperatorCommand()}}
 </pre>
 				</template>
-                <div align="right" class="narrow-paragraph"><a href="/doc/{{docVersion}}/install-deploy#top" class="normal-link">↑ top</a></div>
-                <br>
-                <br>
-            </md-tab>
-        </md-tab-group>
-    </div>
-</md-sidenav-layout>
+            <div align="right" class="narrow-paragraph"><a href="/install#top" class="normal-link">↑ top</a></div>
+            <br>
+            <br>
+        </md-tab>
+    </md-tab-group>
+</div>
