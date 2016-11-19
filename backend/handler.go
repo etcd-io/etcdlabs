@@ -33,24 +33,44 @@ type key int
 const userKey key = 0
 
 type userData struct {
+	lastActive time.Time
 }
 
 var (
-	globalCacheLock sync.Mutex
-	globalCache     = make(map[string]userData)
+	globalUserCacheLock sync.Mutex
+	globalUserCache     = make(map[string]userData)
 )
+
+func cleanCache(donec <-chan struct{}) {
+	for {
+		select {
+		case <-donec:
+			return
+		case <-time.After(time.Hour):
+		}
+
+		globalUserCacheLock.Lock()
+		for k, v := range globalUserCache {
+			if time.Since(v.lastActive) > 30*time.Minute {
+				plog.Infof("removing inactive user %q", k)
+				delete(globalUserCache, k)
+			}
+		}
+		globalUserCacheLock.Unlock()
+	}
+}
 
 func withCache(h ContextHandler) ContextHandler {
 	return ContextHandlerFunc(func(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
-		userID := getUserID(req)
+		userID := generateUserID(req)
 		ctx = context.WithValue(ctx, userKey, &userID)
 
-		globalCacheLock.Lock()
-		if _, ok := globalCache[userID]; !ok { // if user visits first time, create user cache
+		globalUserCacheLock.Lock()
+		if _, ok := globalUserCache[userID]; !ok { // if user visits first time, create user cache
 			plog.Infof("just created user %q", userID)
-			globalCache[userID] = userData{}
+			globalUserCache[userID] = userData{lastActive: time.Now()}
 		}
-		globalCacheLock.Unlock()
+		globalUserCacheLock.Unlock()
 
 		return h.ServeHTTPContext(ctx, w, req)
 	})
@@ -76,9 +96,9 @@ func connectHandler(ctx context.Context, w http.ResponseWriter, req *http.Reques
 
 	case "DELETE": // user leaves component
 		plog.Infof("user %q just left (user deleted)", userID)
-		globalCacheLock.Lock()
-		delete(globalCache, userID)
-		globalCacheLock.Unlock()
+		globalUserCacheLock.Lock()
+		delete(globalUserCache, userID)
+		globalUserCacheLock.Unlock()
 
 		resp := Connect{WebPort: globalWebserverPort, User: userID, Deleted: true}
 		if err := json.NewEncoder(w).Encode(resp); err != nil {
@@ -117,17 +137,20 @@ func serverStatusHandler(ctx context.Context, w http.ResponseWriter, req *http.R
 	case "GET":
 		user := ctx.Value(userKey).(*string)
 		userID := *user
-		globalCacheLock.Lock()
-		_, active := globalCache[userID]
-		globalCacheLock.Unlock()
+		globalUserCacheLock.Lock()
+		_, active := globalUserCache[userID]
+		if active {
+			globalUserCache[userID] = userData{lastActive: time.Now()}
+		}
+		globalUserCacheLock.Unlock()
 
 		active = active && globalCluster != nil
 
 		resp := ServerStatus{
 			PlaygroundActive: active,
 			ServerUptime:     humanize.Time(globalCluster.Started),
-			UserN:            len(globalCache),
-			Users:            getUserIDs(globalCache),
+			UserN:            len(globalUserCache),
+			Users:            getUserIDs(globalUserCache),
 			NodeStatuses:     globalCluster.AllNodeStatus(),
 		}
 		if err := json.NewEncoder(w).Encode(resp); err != nil {

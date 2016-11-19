@@ -165,7 +165,7 @@ export class PlayComponent implements OnInit, AfterContentInit, AfterViewChecked
     this.scrollToBottom();
   }
 
-  // user leaaves the template
+  // user leaves the template
   ngOnDestroy() {
     console.log('Disconnected from cluster (user left the page)!');
     this.closeConnect();

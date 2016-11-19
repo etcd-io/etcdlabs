@@ -33,7 +33,7 @@ nohup yarn start-prod > $HOME/etcdlabs-frontend.log 2>&1 &
 sleep 2s
 cat $HOME/etcdlabs-backend.log
 
-sleep 2s
+sleep 5s
 cat $HOME/etcdlabs-frontend.log
 
 echo ""

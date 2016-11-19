@@ -37,14 +37,14 @@ func hashSha512(s string) string {
 	return base64.StdEncoding.EncodeToString(sum[:])
 }
 
-func getUserID(req *http.Request) string {
+func generateUserID(req *http.Request) string {
 	ip := getRealIP(req)
 	if ip == "" {
 		ip = strings.Split(req.RemoteAddr, ":")[0]
 	}
-	ip = strings.Replace(ip, ".", "", -1)
+	ip = strings.TrimSpace(strings.Replace(ip, ".", "", -1))
 	ua := req.UserAgent()
-	return ip + simpleUA(ua) + hashSha512(ip + ua)[:15]
+	return ip + classifyUA(ua) + hashSha512(ip + ua)[:15]
 }
 
 func maskUserID(id string) string {
@@ -75,7 +75,7 @@ func getUserIDs(m map[string]userData) []string {
 	return s
 }
 
-func simpleUA(ua string) string {
+func classifyUA(ua string) string {
 	var (
 		us  = ""
 		raw = strings.Replace(strings.ToLower(ua), " ", "", -1)
