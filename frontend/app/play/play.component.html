@@ -5,11 +5,12 @@
     <button md-raised-button>Uptime: {{serverUptime}}</button>
     <br>
     <div *ngIf="showUser">
-        <md-list>
-            <md-list-item *ngFor="let user of users;">
+        <br>
+        <ul class="list-unstyled">
+            <li *ngFor="let user of users;">
                 {{user}}
-            </md-list-item>
-        </md-list>
+            </li>
+        </ul>
     </div>
     <br>
 

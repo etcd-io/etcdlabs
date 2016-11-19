@@ -19,7 +19,7 @@ nohup yarn start > /tmp/etcdlabs-frontend.log 2>&1 &
 sleep 2s
 cat /tmp/etcdlabs-backend.log
 
-sleep 2s
+sleep 5s
 cat /tmp/etcdlabs-frontend.log
 
 echo ""
