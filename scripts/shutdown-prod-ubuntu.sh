@@ -49,6 +49,8 @@ echo ""
 echo "Done!"
 
 <<COMMENT
+kill -2 $(lsof -ti tcp:4200)
+kill -9 $(lsof -ti tcp:2389)
 kill -2 $(lsof -ti tcp:2379)
 kill -2 $(lsof -ti tcp:2380)
 kill -9 $(lsof -ti tcp:2379)
