@@ -87,8 +87,7 @@ type Cluster struct {
 	clientHostToIndex map[string]int
 	clientDialTimeout time.Duration // for client requests
 
-	stopc chan struct{} // to signal updateNodeStatus
-	donec chan struct{} // after stopping updateNodeStatus
+	stopc chan struct{} // to signal UpdateNodeStatus
 
 	rootCtx    context.Context
 	rootCancel func()
@@ -129,7 +128,6 @@ func Start(ccfg Config) (c *Cluster, err error) {
 		clientHostToIndex: make(map[string]int, ccfg.Size),
 		clientDialTimeout: dt,
 		stopc:             make(chan struct{}),
-		donec:             make(chan struct{}),
 		rootCtx:           ccfg.RootCtx,
 		rootCancel:        ccfg.RootCancel,
 	}
@@ -302,22 +300,6 @@ func Start(ccfg Config) (c *Cluster, err error) {
 	}
 	wg.Wait()
 
-	defer func() {
-		go func() {
-			for {
-				select {
-				case <-c.stopc:
-					plog.Println("exiting updateNodeStatus loop")
-					close(c.donec)
-					return
-
-				case <-time.After(time.Second):
-					c.updateNodeStatus()
-				}
-			}
-		}()
-	}()
-
 	plog.Printf("successfully started %d nodes", ccfg.Size)
 	return c, nil
 }
@@ -403,8 +385,7 @@ func (c *Cluster) Restart(i int) error {
 // Shutdown stops all nodes and deletes all data directories.
 func (c *Cluster) Shutdown() {
 	c.rootCancel()
-	close(c.stopc) // stopping updateNodeStatus
-	<-c.donec      // wait until it returns
+	close(c.stopc) // stopping UpdateNodeStatus
 
 	c.opLock.Lock()
 	defer c.opLock.Unlock()
@@ -440,7 +421,7 @@ func (c *Cluster) Shutdown() {
 	plog.Printf("successfully shutdown cluster (deleted %s)", c.rootDir)
 }
 
-func (c *Cluster) updateNodeStatus() {
+func (c *Cluster) UpdateNodeStatus() {
 	var wg sync.WaitGroup
 	wg.Add(c.size)
 	for i := 0; i < c.size; i++ {
@@ -461,7 +442,7 @@ func (c *Cluster) updateNodeStatus() {
 				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.StateTxt = fmt.Sprintf("%s has been stopped (since %s)", c.nodes[i].status.Name, humanize.Time(c.nodes[i].stoppedStartedAt))
 				c.nodes[i].statusLock.Unlock()
-				plog.Printf("%s has been stopped (skipping updateNodeStatus)", c.nodes[i].cfg.Name)
+				plog.Printf("%s has been stopped (skipping UpdateNodeStatus)", c.nodes[i].cfg.Name)
 				return
 			}
 
@@ -533,7 +514,7 @@ func (c *Cluster) updateNodeStatus() {
 				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.StateTxt = fmt.Sprintf("%s has been stopped (since %s)", c.nodes[i].status.Name, humanize.Time(c.nodes[i].stoppedStartedAt))
 				c.nodes[i].statusLock.Unlock()
-				plog.Printf("%s has been stopped (skipping updateNodeStatus)", c.nodes[i].cfg.Name)
+				plog.Printf("%s has been stopped (skipping UpdateNodeStatus)", c.nodes[i].cfg.Name)
 				return
 			}
 
