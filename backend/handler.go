@@ -430,6 +430,7 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 			}
 			globalStopRestartLimiter.Advance()
 
+			plog.Printf("'stop-node' requested on %q", globalCluster.NodeStatus(idx).Name)
 			if globalCluster.IsStopped(idx) {
 				cresp.Success = false
 				cresp.Result = fmt.Sprintf("%s is already stopped (took %v)", globalCluster.NodeStatus(idx).Name, roundDownDuration(time.Since(reqStart), minScaleToDisplay))
@@ -454,6 +455,7 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 			}
 			globalStopRestartLimiter.Advance()
 
+			plog.Printf("'restart-node' requested on %q", globalCluster.NodeStatus(idx).Name)
 			if !globalCluster.IsStopped(idx) {
 				cresp.Success = false
 				cresp.Result = fmt.Sprintf("%s is already started (took %v)", globalCluster.NodeStatus(idx).Name, roundDownDuration(time.Since(reqStart), minScaleToDisplay))
@@ -462,6 +464,7 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 			}
 
 			if rerr := globalCluster.Restart(idx); rerr != nil {
+				plog.Warning("'restart-node' error", rerr)
 				cresp.Success = false
 				cresp.Result = rerr.Error()
 			} else {

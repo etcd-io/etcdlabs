@@ -529,7 +529,6 @@ func (c *Cluster) updateNodeStatus() {
 			now = time.Now()
 			mc := pb.NewMaintenanceClient(conn)
 
-			// TODO: https://github.com/coreos/etcdlabs/issues/30
 			if c.IsStopped(i) { // double-check
 				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.StateTxt = fmt.Sprintf("%s has been stopped (since %s)", c.nodes[i].status.Name, humanize.Time(c.nodes[i].stoppedStartedAt))
