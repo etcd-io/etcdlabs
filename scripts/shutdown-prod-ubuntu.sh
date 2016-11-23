@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 set -e
 
+<<COMMENT
+kill -2 $(lsof -ti tcp:2379)
+kill -2 $(lsof -ti tcp:2380)
+kill -9 $(lsof -ti tcp:2379)
+kill -9 $(lsof -ti tcp:2380)
+COMMENT
+
 if ! [[ "$0" =~ "scripts/shutdown-prod-ubuntu.sh" ]]; then
     echo "must be run from repository root"
     exit 255

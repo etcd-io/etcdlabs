@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
+if ! [[ "$0" =~ "scripts/install-node-npm-ubuntu.sh" ]]; then
+    echo "must be run from repository root"
+    exit 255
+fi
+
 # remove NodeJS
 sudo apt-get remove -y nodejs nodejs-legacy
 sudo apt-get -y autoremove
