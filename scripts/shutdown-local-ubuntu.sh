@@ -44,3 +44,10 @@ done
 
 echo ""
 echo "Done!"
+
+<<COMMENT
+kill -2 $(lsof -ti tcp:2379)
+kill -2 $(lsof -ti tcp:2380)
+kill -9 $(lsof -ti tcp:2379)
+kill -9 $(lsof -ti tcp:2380)
+COMMENT

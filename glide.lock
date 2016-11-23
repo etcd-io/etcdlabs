@@ -1,10 +1,8 @@
-hash: 5bbc00d2486233a2aaa7aba25b4c56a5327a1eaf86fd14b4e4c735c4e46747ad
-updated: 2016-11-18T12:52:47.165767484-08:00
+hash: b8baf08b5d87674648d07e9ae80d9bf432a5ba031f197d42c69d197cd27101f3
+updated: 2016-11-23T10:28:18.563418464-08:00
 imports:
-- name: bitbucket.org/ww/goautoneg
-  version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
 - name: github.com/beorn7/perks
-  version: b965b613227fddccbfffe13eae360ed3fa822f8d
+  version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
   subpackages:
   - quantile
 - name: github.com/boltdb/bolt
@@ -12,7 +10,7 @@ imports:
 - name: github.com/cockroachdb/cmux
   version: 112f0506e7743d64a6eb8fedbcff13d9979bbf92
 - name: github.com/coreos/etcd
-  version: b7cc6984444e5d55d5b4d5dcdd914ad396b0743b
+  version: aea9c6668fdc95fecacfabdc46e9c3f9b840ac94
   subpackages:
   - alarm
   - auth
@@ -75,7 +73,7 @@ imports:
   subpackages:
   - journal
 - name: github.com/coreos/pkg
-  version: 3ac0863d7acf3bc44daf49afef8919af12f704ef
+  version: 447b7ec906e523386d9c53be15b55a8ae86ea944
   subpackages:
   - capnslog
 - name: github.com/dustin/go-humanize
@@ -83,7 +81,7 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/go-sql-driver/mysql
-  version: 8f6c67f0228a4a6a962008d6c3d1e694e4532e71
+  version: 665b83488b90b902ce0a305ef6652e599771cdf9
 - name: github.com/gogo/protobuf
   version: 8d70fb3182befc465c4a1eac8ad4d38ff49778e2
   subpackages:
@@ -108,7 +106,7 @@ imports:
 - name: github.com/jonboulle/clockwork
   version: 2eee05ed794112d45db504eb05aa693efd2b8b09
 - name: github.com/matttproud/golang_protobuf_extensions
-  version: fc2b8d3a73c4867e51861bbdd5ae3c1f0869dd6a
+  version: c12348ce28de40eed0136aa2b644d0ee0650e56c
   subpackages:
   - pbutil
 - name: github.com/prometheus/client_golang
@@ -120,14 +118,15 @@ imports:
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: ffe929a3f4c4faeaa10f2b9535c2b1be3ad15650
+  version: 0d5de9d6d8629cb8bee6d4674da4127cd8b615a3
   subpackages:
   - expfmt
+  - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
-  version: 454a56f35412459b5e684fd5ec0f9211b94f002a
+  version: abf152e5f3e97f2fafac028d2cc06c1feb87ffa5
 - name: github.com/spf13/cobra
-  version: 6e91dded25d73176bf7f60b40dd7aa1f0bf9be8d
+  version: 9495bc009a56819bdb0ddbc1a373e29c140bc674
 - name: github.com/spf13/pflag
   version: 5ccb023bc27df288a957c5e994cd44fd19619465
 - name: github.com/ugorji/go
@@ -150,7 +149,7 @@ imports:
   - internal/timeseries
   - trace
 - name: golang.org/x/sys
-  version: 9c60d1c508f5134d1ca726b4641db998f2523357
+  version: 30237cf4eefd639b184d1f2cb77a581ea0be8947
   subpackages:
   - unix
 - name: golang.org/x/time
