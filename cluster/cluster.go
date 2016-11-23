@@ -166,6 +166,10 @@ func Start(ccfg Config) (c *Cluster, err error) {
 		cfg.Dir = filepath.Join(ccfg.RootDir, cfg.Name+".etcd")
 		cfg.WalDir = filepath.Join(cfg.Dir, "wal")
 
+		// this is fresh cluster, so remove any conflicting data
+		os.RemoveAll(cfg.Dir)
+		os.RemoveAll(cfg.WalDir)
+
 		clientURL := url.URL{Scheme: clientScheme, Host: fmt.Sprintf("localhost:%d", startPort)}
 		cfg.LCUrls, cfg.ACUrls = []url.URL{clientURL}, []url.URL{clientURL}
 
@@ -314,7 +318,7 @@ func (c *Cluster) Stop(i int) {
 	c.opLock.Lock()
 	defer c.opLock.Unlock()
 
-	plog.Printf("stopping %s", c.nodes[i].cfg.Name)
+	plog.Printf("stopping %q(%s)", c.nodes[i].cfg.Name, c.nodes[i].srv.Server.ID().String())
 
 	c.nodes[i].statusLock.RLock()
 	if c.nodes[i].status.State == StoppedNodeStatus {
@@ -339,7 +343,7 @@ func (c *Cluster) Stop(i int) {
 	c.nodes[i].srv.Close()
 	<-c.nodes[i].srv.Err()
 
-	plog.Printf("stopped %s", c.nodes[i].cfg.Name)
+	plog.Printf("stopped %q(%s)", c.nodes[i].cfg.Name, c.nodes[i].srv.Server.ID().String())
 }
 
 // Restart restarts a node.
@@ -347,7 +351,7 @@ func (c *Cluster) Restart(i int) error {
 	c.opLock.Lock()
 	defer c.opLock.Unlock()
 
-	plog.Printf("restarting %s", c.nodes[i].cfg.Name)
+	plog.Printf("restarting %q(%s)", c.nodes[i].cfg.Name, c.nodes[i].srv.Server.ID().String())
 
 	c.nodes[i].statusLock.RLock()
 	if c.nodes[i].status.State != StoppedNodeStatus {
@@ -378,7 +382,7 @@ func (c *Cluster) Restart(i int) error {
 	c.nodes[i].status.StateTxt = fmt.Sprintf("%s just restarted (%s)", c.nodes[i].status.Name, humanize.Time(c.nodes[i].stoppedStartedAt))
 	c.nodes[i].statusLock.Unlock()
 
-	plog.Printf("restarted %s", c.nodes[i].cfg.Name)
+	plog.Printf("restarted %q(%s)", c.nodes[i].cfg.Name, c.nodes[i].srv.Server.ID().String())
 	return nil
 }
 
@@ -421,6 +425,7 @@ func (c *Cluster) Shutdown() {
 	plog.Printf("successfully shutdown cluster (deleted %s)", c.rootDir)
 }
 
+// UpdateNodeStatus updates node statuses.
 func (c *Cluster) UpdateNodeStatus() {
 	var wg sync.WaitGroup
 	wg.Add(c.size)
