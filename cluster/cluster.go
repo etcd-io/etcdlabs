@@ -457,6 +457,7 @@ func (c *Cluster) UpdateNodeStatus() {
 			now := time.Now()
 			cli, tlsConfig, err := c.Client(c.Endpoints(i, false)...)
 			if err != nil {
+				plog.Warning(err)
 				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.State = StoppedNodeStatus
 				c.nodes[i].status.StateTxt = fmt.Sprintf("%s was not reachable while client call (%s - %v)", c.nodes[i].status.Name, humanize.Time(now), err)
@@ -474,6 +475,7 @@ func (c *Cluster) UpdateNodeStatus() {
 			resp, err := cli.Status(ctx, c.nodes[i].cfg.LCUrls[0].Host)
 			cancel()
 			if err != nil {
+				plog.Warning(err)
 				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.State = StoppedNodeStatus
 				c.nodes[i].status.StateTxt = fmt.Sprintf("%s was not reachable while getting status (%s - %v)", c.nodes[i].status.Name, humanize.Time(now), err)
@@ -503,6 +505,7 @@ func (c *Cluster) UpdateNodeStatus() {
 			now = time.Now()
 			conn, err := grpc.Dial(c.nodes[i].cfg.LCUrls[0].Host, grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)), grpc.WithTimeout(time.Second))
 			if err != nil {
+				plog.Warning(err)
 				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.State = StoppedNodeStatus
 				c.nodes[i].status.StateTxt = fmt.Sprintf("%s was not reachable while grpc.Dial (%s - %v)", c.nodes[i].status.Name, humanize.Time(now), err)
@@ -531,6 +534,7 @@ func (c *Cluster) UpdateNodeStatus() {
 			hresp, err = mc.Hash(ctx, &pb.HashRequest{}, grpc.FailFast(false))
 			cancel()
 			if err != nil {
+				plog.Warning(err)
 				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.State = StoppedNodeStatus
 				c.nodes[i].status.StateTxt = fmt.Sprintf("%s was not reachable while getting hash (%s - %v)", c.nodes[i].status.Name, humanize.Time(now), err)
