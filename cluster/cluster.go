@@ -366,6 +366,7 @@ func (c *Cluster) Restart(i int) error {
 	// start server
 	srv, err := embed.StartEtcd(c.nodes[i].cfg)
 	if err != nil {
+		fmt.Println("start etcd error:", err)
 		return err
 	}
 	c.nodes[i].srv = srv
@@ -373,7 +374,9 @@ func (c *Cluster) Restart(i int) error {
 	nc := c.nodes[i].srv.Config()
 	c.nodes[i].cfg = &nc
 
-	<-c.nodes[i].srv.Server.ReadyNotify()
+	// this blocks when quorum is lost
+	// <-c.nodes[i].srv.Server.ReadyNotify()
+
 	c.nodes[i].stoppedStartedAt = time.Now()
 
 	c.nodes[i].statusLock.Lock()

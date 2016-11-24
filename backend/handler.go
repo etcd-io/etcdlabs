@@ -478,12 +478,12 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 				cresp.Success = false
 				cresp.Result = fmt.Sprintf("%s is already started (took %v)", globalCluster.NodeStatus(idx).Name, roundDownDuration(time.Since(reqStart), minScaleToDisplay))
 				cresp.ResultLines = []string{cresp.Result}
-				plog.Warning(cresp.Result)
+				plog.Warningf("'restart-node' %s", cresp.Result)
 				return json.NewEncoder(w).Encode(cresp)
 			}
 
 			if rerr := globalCluster.Restart(idx); rerr != nil {
-				plog.Warning("'restart-node' error", rerr)
+				plog.Warningf("'restart-node' error %v", rerr)
 				cresp.Success = false
 				cresp.Result = rerr.Error()
 			} else {
