@@ -448,6 +448,13 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 			}
 			globalStopRestartLimiter.Advance()
 
+			if globalCluster.ActiveNodeN() < 2 {
+				cresp.Success = false
+				cresp.Result = "'stop-node' request rejected (only 1-node alive!)"
+				cresp.ResultLines = []string{cresp.Result}
+				return json.NewEncoder(w).Encode(cresp)
+			}
+
 			plog.Printf("starting 'stop-node' on %q(%s)", globalCluster.NodeStatus(idx).Name, globalCluster.NodeStatus(idx).ID)
 			if globalCluster.IsStopped(idx) {
 				cresp.Success = false

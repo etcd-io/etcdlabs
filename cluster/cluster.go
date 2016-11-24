@@ -446,21 +446,13 @@ func (c *Cluster) UpdateNodeStatus() {
 				wg.Done()
 			}()
 
-			if c.IsStopped(i) {
-				c.nodes[i].statusLock.Lock()
-				c.nodes[i].status.StateTxt = fmt.Sprintf("%s has been stopped (since %s)", c.nodes[i].status.Name, humanize.Time(c.nodes[i].stoppedStartedAt))
-				c.nodes[i].statusLock.Unlock()
-				plog.Printf("%s has been stopped (skipping UpdateNodeStatus)", c.nodes[i].cfg.Name)
-				return
-			}
-
 			now := time.Now()
 			cli, tlsConfig, err := c.Client(c.Endpoints(i, false)...)
 			if err != nil {
 				plog.Warning(err)
 				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.State = StoppedNodeStatus
-				c.nodes[i].status.StateTxt = fmt.Sprintf("%s was not reachable while client call (%s - %v)", c.nodes[i].status.Name, humanize.Time(now), err)
+				c.nodes[i].status.StateTxt = fmt.Sprintf("%s is not reachable (%s - %v)", c.nodes[i].status.Name, humanize.Time(now), err)
 				c.nodes[i].status.IsLeader = false
 				c.nodes[i].status.DBSize = 0
 				c.nodes[i].status.DBSizeTxt = ""
@@ -478,7 +470,7 @@ func (c *Cluster) UpdateNodeStatus() {
 				plog.Warning(err)
 				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.State = StoppedNodeStatus
-				c.nodes[i].status.StateTxt = fmt.Sprintf("%s was not reachable while getting status (%s - %v)", c.nodes[i].status.Name, humanize.Time(now), err)
+				c.nodes[i].status.StateTxt = fmt.Sprintf("%s is not reachable (%s - %v)", c.nodes[i].status.Name, humanize.Time(now), err)
 				c.nodes[i].status.IsLeader = false
 				c.nodes[i].status.DBSize = 0
 				c.nodes[i].status.DBSizeTxt = ""
@@ -508,7 +500,7 @@ func (c *Cluster) UpdateNodeStatus() {
 				plog.Warning(err)
 				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.State = StoppedNodeStatus
-				c.nodes[i].status.StateTxt = fmt.Sprintf("%s was not reachable while grpc.Dial (%s - %v)", c.nodes[i].status.Name, humanize.Time(now), err)
+				c.nodes[i].status.StateTxt = fmt.Sprintf("%s is not reachable (%s - %v)", c.nodes[i].status.Name, humanize.Time(now), err)
 				c.nodes[i].status.IsLeader = false
 				c.nodes[i].status.DBSize = 0
 				c.nodes[i].status.DBSizeTxt = ""
@@ -520,14 +512,6 @@ func (c *Cluster) UpdateNodeStatus() {
 
 			now = time.Now()
 			mc := pb.NewMaintenanceClient(conn)
-
-			if c.IsStopped(i) { // double-check
-				c.nodes[i].statusLock.Lock()
-				c.nodes[i].status.StateTxt = fmt.Sprintf("%s has been stopped (since %s)", c.nodes[i].status.Name, humanize.Time(c.nodes[i].stoppedStartedAt))
-				c.nodes[i].statusLock.Unlock()
-				plog.Printf("%s has been stopped (skipping UpdateNodeStatus)", c.nodes[i].cfg.Name)
-				return
-			}
 
 			ctx, cancel = context.WithTimeout(c.rootCtx, time.Second)
 			var hresp *pb.HashResponse
@@ -649,6 +633,18 @@ func (c *Cluster) IsStopped(i int) (stopped bool) {
 	c.nodes[i].statusLock.Lock()
 	stopped = c.nodes[i].status.State == StoppedNodeStatus
 	c.nodes[i].statusLock.Unlock()
+	return
+}
+
+// ActiveNodeN returns the number of nodes that are running.
+func (c *Cluster) ActiveNodeN() (cnt int) {
+	for i := range c.nodes {
+		c.nodes[i].statusLock.Lock()
+		if c.nodes[i].status.State != StoppedNodeStatus {
+			cnt++
+		}
+		c.nodes[i].statusLock.Unlock()
+	}
 	return
 }
 

@@ -72,7 +72,7 @@ var (
 	globalWebserverPort int
 
 	clientRequestIntervalLimit = 3 * time.Second
-	stopRestartIntervalLimit   = 5 * time.Second
+	stopRestartIntervalLimit   = 7 * time.Second
 
 	globalCluster              *cluster.Cluster
 	globalClientRequestLimiter ratelimit.RequestLimiter
