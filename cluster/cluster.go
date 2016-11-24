@@ -636,6 +636,16 @@ func (c *Cluster) IsStopped(i int) (stopped bool) {
 	return
 }
 
+// Size returns the size of cluster.
+func (c *Cluster) Size() int {
+	return len(c.nodes)
+}
+
+// Quorum returns the size of quorum.
+func (c *Cluster) Quorum() int {
+	return len(c.nodes)/2 + 1
+}
+
 // ActiveNodeN returns the number of nodes that are running.
 func (c *Cluster) ActiveNodeN() (cnt int) {
 	for i := range c.nodes {

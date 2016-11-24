@@ -448,9 +448,9 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 			}
 			globalStopRestartLimiter.Advance()
 
-			if globalCluster.ActiveNodeN() < 2 {
+			if globalCluster.ActiveNodeN() < globalCluster.Quorum() {
 				cresp.Success = false
-				cresp.Result = "'stop-node' request rejected (only 1-node alive!)"
+				cresp.Result = "'stop-node' request rejected (already quorum lost!)"
 				cresp.ResultLines = []string{cresp.Result}
 				return json.NewEncoder(w).Encode(cresp)
 			}
