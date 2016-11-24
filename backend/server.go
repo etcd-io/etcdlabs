@@ -146,9 +146,8 @@ func StartServer(port int, mt metrics.Metrics) (*Server, error) {
 			close(srv.donec)
 		}()
 
-		go func() {
-			cleanCache(srv.stopc)
-		}()
+		go func() { updateClusterStatus(srv.stopc) }()
+		go func() { cleanCache(srv.stopc) }()
 		if err := srv.httpServer.Serve(ln); err != nil && err != listener.ErrListenerStopped {
 			plog.Panic(err)
 		}

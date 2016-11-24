@@ -87,8 +87,7 @@ type Cluster struct {
 	clientHostToIndex map[string]int
 	clientDialTimeout time.Duration // for client requests
 
-	stopc chan struct{} // to signal updateNodeStatus
-	donec chan struct{} // after stopping updateNodeStatus
+	stopc chan struct{} // to signal UpdateNodeStatus
 
 	rootCtx    context.Context
 	rootCancel func()
@@ -129,7 +128,6 @@ func Start(ccfg Config) (c *Cluster, err error) {
 		clientHostToIndex: make(map[string]int, ccfg.Size),
 		clientDialTimeout: dt,
 		stopc:             make(chan struct{}),
-		donec:             make(chan struct{}),
 		rootCtx:           ccfg.RootCtx,
 		rootCancel:        ccfg.RootCancel,
 	}
@@ -167,6 +165,10 @@ func Start(ccfg Config) (c *Cluster, err error) {
 		cfg.Name = fmt.Sprintf("node%d", i+1)
 		cfg.Dir = filepath.Join(ccfg.RootDir, cfg.Name+".etcd")
 		cfg.WalDir = filepath.Join(cfg.Dir, "wal")
+
+		// this is fresh cluster, so remove any conflicting data
+		os.RemoveAll(cfg.Dir)
+		os.RemoveAll(cfg.WalDir)
 
 		clientURL := url.URL{Scheme: clientScheme, Host: fmt.Sprintf("localhost:%d", startPort)}
 		cfg.LCUrls, cfg.ACUrls = []url.URL{clientURL}, []url.URL{clientURL}
@@ -302,22 +304,6 @@ func Start(ccfg Config) (c *Cluster, err error) {
 	}
 	wg.Wait()
 
-	defer func() {
-		go func() {
-			for {
-				select {
-				case <-c.stopc:
-					plog.Println("exiting updateNodeStatus loop")
-					close(c.donec)
-					return
-
-				case <-time.After(time.Second):
-					c.updateNodeStatus()
-				}
-			}
-		}()
-	}()
-
 	plog.Printf("successfully started %d nodes", ccfg.Size)
 	return c, nil
 }
@@ -332,7 +318,7 @@ func (c *Cluster) Stop(i int) {
 	c.opLock.Lock()
 	defer c.opLock.Unlock()
 
-	plog.Printf("stopping %s", c.nodes[i].cfg.Name)
+	plog.Printf("stopping %q(%s)", c.nodes[i].cfg.Name, c.nodes[i].srv.Server.ID().String())
 
 	c.nodes[i].statusLock.RLock()
 	if c.nodes[i].status.State == StoppedNodeStatus {
@@ -357,7 +343,7 @@ func (c *Cluster) Stop(i int) {
 	c.nodes[i].srv.Close()
 	<-c.nodes[i].srv.Err()
 
-	plog.Printf("stopped %s", c.nodes[i].cfg.Name)
+	plog.Printf("stopped %q(%s)", c.nodes[i].cfg.Name, c.nodes[i].srv.Server.ID().String())
 }
 
 // Restart restarts a node.
@@ -365,7 +351,7 @@ func (c *Cluster) Restart(i int) error {
 	c.opLock.Lock()
 	defer c.opLock.Unlock()
 
-	plog.Printf("restarting %s", c.nodes[i].cfg.Name)
+	plog.Printf("restarting %q(%s)", c.nodes[i].cfg.Name, c.nodes[i].srv.Server.ID().String())
 
 	c.nodes[i].statusLock.RLock()
 	if c.nodes[i].status.State != StoppedNodeStatus {
@@ -380,6 +366,7 @@ func (c *Cluster) Restart(i int) error {
 	// start server
 	srv, err := embed.StartEtcd(c.nodes[i].cfg)
 	if err != nil {
+		fmt.Println("start etcd error:", err)
 		return err
 	}
 	c.nodes[i].srv = srv
@@ -387,7 +374,9 @@ func (c *Cluster) Restart(i int) error {
 	nc := c.nodes[i].srv.Config()
 	c.nodes[i].cfg = &nc
 
-	<-c.nodes[i].srv.Server.ReadyNotify()
+	// this blocks when quorum is lost
+	// <-c.nodes[i].srv.Server.ReadyNotify()
+
 	c.nodes[i].stoppedStartedAt = time.Now()
 
 	c.nodes[i].statusLock.Lock()
@@ -396,15 +385,14 @@ func (c *Cluster) Restart(i int) error {
 	c.nodes[i].status.StateTxt = fmt.Sprintf("%s just restarted (%s)", c.nodes[i].status.Name, humanize.Time(c.nodes[i].stoppedStartedAt))
 	c.nodes[i].statusLock.Unlock()
 
-	plog.Printf("restarted %s", c.nodes[i].cfg.Name)
+	plog.Printf("restarted %q(%s)", c.nodes[i].cfg.Name, c.nodes[i].srv.Server.ID().String())
 	return nil
 }
 
 // Shutdown stops all nodes and deletes all data directories.
 func (c *Cluster) Shutdown() {
 	c.rootCancel()
-	close(c.stopc) // stopping updateNodeStatus
-	<-c.donec      // wait until it returns
+	close(c.stopc) // stopping UpdateNodeStatus
 
 	c.opLock.Lock()
 	defer c.opLock.Unlock()
@@ -440,7 +428,8 @@ func (c *Cluster) Shutdown() {
 	plog.Printf("successfully shutdown cluster (deleted %s)", c.rootDir)
 }
 
-func (c *Cluster) updateNodeStatus() {
+// UpdateNodeStatus updates node statuses.
+func (c *Cluster) UpdateNodeStatus() {
 	var wg sync.WaitGroup
 	wg.Add(c.size)
 	for i := 0; i < c.size; i++ {
@@ -457,20 +446,13 @@ func (c *Cluster) updateNodeStatus() {
 				wg.Done()
 			}()
 
-			if c.IsStopped(i) {
-				c.nodes[i].statusLock.Lock()
-				c.nodes[i].status.StateTxt = fmt.Sprintf("%s has been stopped (since %s)", c.nodes[i].status.Name, humanize.Time(c.nodes[i].stoppedStartedAt))
-				c.nodes[i].statusLock.Unlock()
-				plog.Printf("%s has been stopped (skipping updateNodeStatus)", c.nodes[i].cfg.Name)
-				return
-			}
-
 			now := time.Now()
 			cli, tlsConfig, err := c.Client(c.Endpoints(i, false)...)
 			if err != nil {
+				plog.Warning(err)
 				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.State = StoppedNodeStatus
-				c.nodes[i].status.StateTxt = fmt.Sprintf("%s was not reachable while client call (%s - %v)", c.nodes[i].status.Name, humanize.Time(now), err)
+				c.nodes[i].status.StateTxt = fmt.Sprintf("%s is not reachable (%s - %v)", c.nodes[i].status.Name, humanize.Time(now), err)
 				c.nodes[i].status.IsLeader = false
 				c.nodes[i].status.DBSize = 0
 				c.nodes[i].status.DBSizeTxt = ""
@@ -485,9 +467,10 @@ func (c *Cluster) updateNodeStatus() {
 			resp, err := cli.Status(ctx, c.nodes[i].cfg.LCUrls[0].Host)
 			cancel()
 			if err != nil {
+				plog.Warning(err)
 				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.State = StoppedNodeStatus
-				c.nodes[i].status.StateTxt = fmt.Sprintf("%s was not reachable while getting status (%s - %v)", c.nodes[i].status.Name, humanize.Time(now), err)
+				c.nodes[i].status.StateTxt = fmt.Sprintf("%s is not reachable (%s - %v)", c.nodes[i].status.Name, humanize.Time(now), err)
 				c.nodes[i].status.IsLeader = false
 				c.nodes[i].status.DBSize = 0
 				c.nodes[i].status.DBSizeTxt = ""
@@ -514,9 +497,10 @@ func (c *Cluster) updateNodeStatus() {
 			now = time.Now()
 			conn, err := grpc.Dial(c.nodes[i].cfg.LCUrls[0].Host, grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)), grpc.WithTimeout(time.Second))
 			if err != nil {
+				plog.Warning(err)
 				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.State = StoppedNodeStatus
-				c.nodes[i].status.StateTxt = fmt.Sprintf("%s was not reachable while grpc.Dial (%s - %v)", c.nodes[i].status.Name, humanize.Time(now), err)
+				c.nodes[i].status.StateTxt = fmt.Sprintf("%s is not reachable (%s - %v)", c.nodes[i].status.Name, humanize.Time(now), err)
 				c.nodes[i].status.IsLeader = false
 				c.nodes[i].status.DBSize = 0
 				c.nodes[i].status.DBSizeTxt = ""
@@ -529,20 +513,12 @@ func (c *Cluster) updateNodeStatus() {
 			now = time.Now()
 			mc := pb.NewMaintenanceClient(conn)
 
-			// TODO: https://github.com/coreos/etcdlabs/issues/30
-			if c.IsStopped(i) { // double-check
-				c.nodes[i].statusLock.Lock()
-				c.nodes[i].status.StateTxt = fmt.Sprintf("%s has been stopped (since %s)", c.nodes[i].status.Name, humanize.Time(c.nodes[i].stoppedStartedAt))
-				c.nodes[i].statusLock.Unlock()
-				plog.Printf("%s has been stopped (skipping updateNodeStatus)", c.nodes[i].cfg.Name)
-				return
-			}
-
 			ctx, cancel = context.WithTimeout(c.rootCtx, time.Second)
 			var hresp *pb.HashResponse
 			hresp, err = mc.Hash(ctx, &pb.HashRequest{}, grpc.FailFast(false))
 			cancel()
 			if err != nil {
+				plog.Warning(err)
 				c.nodes[i].statusLock.Lock()
 				c.nodes[i].status.State = StoppedNodeStatus
 				c.nodes[i].status.StateTxt = fmt.Sprintf("%s was not reachable while getting hash (%s - %v)", c.nodes[i].status.Name, humanize.Time(now), err)
@@ -657,6 +633,28 @@ func (c *Cluster) IsStopped(i int) (stopped bool) {
 	c.nodes[i].statusLock.Lock()
 	stopped = c.nodes[i].status.State == StoppedNodeStatus
 	c.nodes[i].statusLock.Unlock()
+	return
+}
+
+// Size returns the size of cluster.
+func (c *Cluster) Size() int {
+	return len(c.nodes)
+}
+
+// Quorum returns the size of quorum.
+func (c *Cluster) Quorum() int {
+	return len(c.nodes)/2 + 1
+}
+
+// ActiveNodeN returns the number of nodes that are running.
+func (c *Cluster) ActiveNodeN() (cnt int) {
+	for i := range c.nodes {
+		c.nodes[i].statusLock.Lock()
+		if c.nodes[i].status.State != StoppedNodeStatus {
+			cnt++
+		}
+		c.nodes[i].statusLock.Unlock()
+	}
 	return
 }
 

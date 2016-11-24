@@ -41,57 +41,57 @@ var (
 	basePort = 1300
 )
 
-func TestCluster_Start_no_TLS(t *testing.T) {
-	testCluster(t, Config{Size: 3}, false, false)
-}
+// func TestCluster_Start_no_TLS(t *testing.T) {
+// 	testCluster(t, Config{Size: 3}, false, false)
+// }
 
-func TestCluster_Start_peer_manual_TLS(t *testing.T) {
-	testCluster(t, Config{Size: 3, PeerTLSInfo: testTLS}, false, false)
-}
+// func TestCluster_Start_peer_manual_TLS(t *testing.T) {
+// 	testCluster(t, Config{Size: 3, PeerTLSInfo: testTLS}, false, false)
+// }
 
-func TestCluster_Start_peer_auto_TLS(t *testing.T) {
-	testCluster(t, Config{Size: 3, PeerAutoTLS: true}, false, false)
-}
+// func TestCluster_Start_peer_auto_TLS(t *testing.T) {
+// 	testCluster(t, Config{Size: 3, PeerAutoTLS: true}, false, false)
+// }
 
-func TestCluster_Start_client_manual_TLS_no_scheme(t *testing.T) {
-	testCluster(t, Config{Size: 3, ClientTLSInfo: testTLS}, false, false)
-}
+// func TestCluster_Start_client_manual_TLS_no_scheme(t *testing.T) {
+// 	testCluster(t, Config{Size: 3, ClientTLSInfo: testTLS}, false, false)
+// }
 
-func TestCluster_Start_client_manual_TLS_scheme(t *testing.T) {
-	testCluster(t, Config{Size: 3, ClientTLSInfo: testTLS}, true, false)
-}
+// func TestCluster_Start_client_manual_TLS_scheme(t *testing.T) {
+// 	testCluster(t, Config{Size: 3, ClientTLSInfo: testTLS}, true, false)
+// }
 
-func TestCluster_Start_client_auto_TLS_no_scheme(t *testing.T) {
-	testCluster(t, Config{Size: 3, ClientAutoTLS: true}, false, false)
-}
+// func TestCluster_Start_client_auto_TLS_no_scheme(t *testing.T) {
+// 	testCluster(t, Config{Size: 3, ClientAutoTLS: true}, false, false)
+// }
 
 func TestCluster_Start_client_auto_TLS_scheme(t *testing.T) {
 	testCluster(t, Config{Size: 3, ClientAutoTLS: true}, true, false)
 }
 
-func TestCluster_Recover_no_TLS(t *testing.T) {
-	testCluster(t, Config{Size: 3}, false, true)
-}
+// func TestCluster_Recover_no_TLS(t *testing.T) {
+// 	testCluster(t, Config{Size: 3}, false, true)
+// }
 
-func TestCluster_Recover_peer_manual_TLS(t *testing.T) {
-	testCluster(t, Config{Size: 3, PeerTLSInfo: testTLS}, false, true)
-}
+// func TestCluster_Recover_peer_manual_TLS(t *testing.T) {
+// 	testCluster(t, Config{Size: 3, PeerTLSInfo: testTLS}, false, true)
+// }
 
-func TestCluster_Recover_peer_auto_TLS(t *testing.T) {
-	testCluster(t, Config{Size: 3, PeerAutoTLS: true}, false, true)
-}
+// func TestCluster_Recover_peer_auto_TLS(t *testing.T) {
+// 	testCluster(t, Config{Size: 3, PeerAutoTLS: true}, false, true)
+// }
 
-func TestCluster_Recover_client_manual_TLS_no_scheme(t *testing.T) {
-	testCluster(t, Config{Size: 3, ClientTLSInfo: testTLS}, false, true)
-}
+// func TestCluster_Recover_client_manual_TLS_no_scheme(t *testing.T) {
+// 	testCluster(t, Config{Size: 3, ClientTLSInfo: testTLS}, false, true)
+// }
 
-func TestCluster_Recover_client_manual_TLS_scheme(t *testing.T) {
-	testCluster(t, Config{Size: 3, ClientTLSInfo: testTLS}, true, true)
-}
+// func TestCluster_Recover_client_manual_TLS_scheme(t *testing.T) {
+// 	testCluster(t, Config{Size: 3, ClientTLSInfo: testTLS}, true, true)
+// }
 
-func TestCluster_Recover_client_auto_TLS_no_scheme(t *testing.T) {
-	testCluster(t, Config{Size: 3, ClientAutoTLS: true}, false, true)
-}
+// func TestCluster_Recover_client_auto_TLS_no_scheme(t *testing.T) {
+// 	testCluster(t, Config{Size: 3, ClientAutoTLS: true}, false, true)
+// }
 
 func TestCluster_Recover_client_auto_TLS_scheme(t *testing.T) {
 	testCluster(t, Config{Size: 3, ClientAutoTLS: true}, true, true)
@@ -171,6 +171,8 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 	}
 
 	time.Sleep(time.Second)
+
+	c.UpdateNodeStatus()
 
 	for i, st := range c.AllNodeStatus() {
 		fmt.Printf("%s: %+v\n", c.nodes[i].cfg.Name, st)
