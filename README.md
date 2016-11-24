@@ -5,6 +5,8 @@
 - [etcd website](http://104.199.121.254)
 - [Debug etcd](./debug-etcd)
 
+See [etcd-play][old-etcd-play] for old code.
+
 #### Technology Used
 
 - Frontend
@@ -14,6 +16,7 @@
 - Backend
     - [Go](https://golang.org/)
 
+
+[old-etcd-play]: https://github.com/coreos/etcd-play
 [cistat]: https://travis-ci.org/coreos/etcdlabs
 [etcdlabs-godoc]: https://godoc.org/github.com/coreos/etcdlabs
-
