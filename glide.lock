@@ -1,5 +1,5 @@
-hash: f275742c61cd2ef763e954ea61ad5f36b62f139ae3fdf9db1e070b0aecfc3c41
-updated: 2016-11-23T13:37:26.673128945-08:00
+hash: 0558b7da49e791122ddcb1a66374cd9ef22004c907347ff85f8d17caaf8f3e80
+updated: 2016-11-30T12:15:06.335820441-08:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -10,7 +10,7 @@ imports:
 - name: github.com/cockroachdb/cmux
   version: 112f0506e7743d64a6eb8fedbcff13d9979bbf92
 - name: github.com/coreos/etcd
-  version: c31b1ab8d18ff7990a43bd258ca54f80c5a3c952
+  version: 7079bf9a757448531c37a0b119279c20abf15798
   subpackages:
   - alarm
   - auth
@@ -46,6 +46,7 @@ imports:
   - pkg/idutil
   - pkg/ioutil
   - pkg/logutil
+  - pkg/monotime
   - pkg/netutil
   - pkg/pathutil
   - pkg/pbutil
@@ -149,7 +150,7 @@ imports:
   - internal/timeseries
   - trace
 - name: golang.org/x/sys
-  version: 30237cf4eefd639b184d1f2cb77a581ea0be8947
+  version: d5645953809d8b4752afb2c3224b1f1ad73dfa70
   subpackages:
   - unix
 - name: golang.org/x/time

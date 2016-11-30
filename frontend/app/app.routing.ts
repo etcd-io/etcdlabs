@@ -7,8 +7,8 @@ import { PlayComponent } from './play/play.component';
 import { NotFoundComponent } from './not-found.component';
 
 // TODO
-// import { ComparisonComponent } from './comparison/comparison.component';
-// import { FAQComponent } from './faq/faq.component';
+import { ComparisonComponent } from './comparison/comparison.component';
+import { FAQComponent } from './faq/faq.component';
 
 const appRoutes: Routes = [
     { path: '', redirectTo: '/play', pathMatch: 'full' },
@@ -17,8 +17,9 @@ const appRoutes: Routes = [
     { path: 'tests', component: TestsComponent },
     { path: 'play', component: PlayComponent },
 
-    // { path: 'comparison', component: ComparisonComponent },
-    // { path: 'faq', component: FAQComponent },
+    // TODO
+    { path: 'comparison', component: ComparisonComponent },
+    { path: 'faq', component: FAQComponent },
 
     { path: '**', component: NotFoundComponent },
 ];
@@ -31,8 +32,8 @@ export const routedComponents = [
     PlayComponent,
     TestsComponent,
 
-    // ComparisonComponent,
-    // FAQComponent,
+    ComparisonComponent,
+    FAQComponent,
 
     NotFoundComponent,
 ];
