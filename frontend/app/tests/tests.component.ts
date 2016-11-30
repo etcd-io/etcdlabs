@@ -15,8 +15,6 @@ export class TestsComponent implements AfterContentInit {
     metricsResult: string;
     metricsErrorMessage: string;
 
-    status3Node: TesterStatus;
-    status3NodeFailpoints: TesterStatus;
     status5Node: TesterStatus;
     status5NodeFailpoints: TesterStatus;
 
@@ -26,8 +24,6 @@ export class TestsComponent implements AfterContentInit {
         this.metricsResult = '';
         this.metricsErrorMessage = '';
 
-        this.status3Node = new TesterStatus('3-node', 0, 0, 0);
-        this.status3NodeFailpoints = new TesterStatus('3-node failpoints', 0, 0, 0);
         this.status5Node = new TesterStatus('5-node', 0, 0, 0);
         this.status5NodeFailpoints = new TesterStatus('5-node failpoints', 0, 0, 0);
     }
@@ -45,11 +41,7 @@ export class TestsComponent implements AfterContentInit {
         if (String(this.metricsResult) !== 'metrics is disabled') {
             for (let _i = 0; _i < resp.Statuses.length; _i++) {
                 let status = resp.Statuses[_i];
-                if (status.Name === '3-node') {
-                    this.status3Node = status;
-                } else if (status.Name === '3-node-failpoints') {
-                    this.status3NodeFailpoints = status;
-                } else if (status.Name === '5-node') {
+                if (status.Name === '5-node') {
                     this.status5Node = status;
                 } else if (status.Name === '5-node-failpoints') {
                     this.status5NodeFailpoints = status;
