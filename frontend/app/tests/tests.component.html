@@ -64,31 +64,23 @@
         <thead>
             <tr>
                 <th>Testing Cluster</th>
-                <th><a href="http://dash.etcd.io/dashboard/db/functional-tests" target="_blank" class="normal-link">3-node</a></th>
-                <th><a href="http://dash.etcd.io/dashboard/db/functional-tests-failpoints" target="_blank" class="normal-link">3-node failpoints</a></th>
-                <th><a href="http://dash.etcd.io/dashboard/db/functional-tests-5-node" target="_blank" class="normal-link">5-node</a></th>
-                <th><a href="http://dash.etcd.io/dashboard/db/functional-tests-failpoints-5-node" target="_blank" class="normal-link">5-node failpoints</a></th>
+                <th><a href="http://dash.etcd.io/dashboard/db/functional-tests" target="_blank" class="normal-link">5-node</a></th>
+                <th><a href="http://dash.etcd.io/dashboard/db/functional-tests-failpoints" target="_blank" class="normal-link">5-node failpoints</a></th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <th scope="row">Total Injects</th>
-                <td>{{status3Node.TotalCase}}</td>
-                <td>{{status3NodeFailpoints.TotalCase}}</td>
                 <td>{{status5Node.TotalCase}}</td>
                 <td>{{status5NodeFailpoints.TotalCase}}</td>
             </tr>
             <tr>
                 <th scope="row">Current Injects</th>
-                <td>{{status3Node.CurrentCase}}</td>
-                <td>{{status3NodeFailpoints.CurrentCase}}</td>
                 <td>{{status5Node.CurrentCase}}</td>
                 <td>{{status5NodeFailpoints.CurrentCase}}</td>
             </tr>
             <tr>
                 <th scope="row">Current Failed Case</th>
-                <td>{{status3Node.CurrentFailed}}</td>
-                <td>{{status3NodeFailpoints.CurrentFailed}}</td>
                 <td>{{status5Node.CurrentFailed}}</td>
                 <td>{{status5NodeFailpoints.CurrentFailed}}</td>
             </tr>
