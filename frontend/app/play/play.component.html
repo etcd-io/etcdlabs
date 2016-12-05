@@ -1,26 +1,25 @@
 <div class="play-group">
-    <button (click)="clickConnect()" md-raised-button color="primary" *ngIf="!connected">Connect</button>
-    <button (click)="clickDisconnect()" md-raised-button color="warn" *ngIf="connected">Disconnect</button>
-    <button md-raised-button (click)="clickShowUser()">{{userN}} user(s) online</button>
-    <button md-raised-button>Uptime: {{serverUptime}}</button>
-    <br>
-    <div *ngIf="showUser">
-        <br>
-        <ul class="list-unstyled">
-            <li *ngFor="let user of users;">
-                {{user}}
-            </li>
-        </ul>
-    </div>
-    <br>
-
-    <div class="inner">
-        <div class="block block-copy half">
-            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="border: 0px solid black" width="500" height="400">
+	<button (click)="clickConnect()" md-raised-button color="primary" *ngIf="!connected">Connect</button>
+	<button (click)="clickDisconnect()" md-raised-button color="warn" *ngIf="connected">Disconnect</button>
+	<button md-raised-button (click)="clickShowUser()">{{userN}} user(s) online</button>
+	<button md-raised-button>Uptime: {{serverUptime}}</button>
+	<br>
+	<div *ngIf="showUser">
+		<br>
+		<ul class="list-unstyled">
+			<li *ngFor="let user of users;">
+				{{user}}
+			</li>
+		</ul>
+	</div>
+	<br>
+	<div class="inner">
+		<div class="block block-copy half">
+			<svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="border: 0px solid black" width="500" height="400">
 				<circle id="ring" cx="230" cy="210" r="110" style="fill: #F5F5F5"></circle>
 				<g id="servers">
 					<g class="circle-before-start" [class.circle-Stopped]="nodeStatuses[0].State == 'Stopped'" [class.circle-Follower]="nodeStatuses[0].State == 'Follower'"
-						[class.circle-Leader]="nodeStatuses[0].State == 'Leader'" tabindex="0">
+									[class.circle-Leader]="nodeStatuses[0].State == 'Leader'" tabindex="0">
 						<text x="213" y="50" font-size="13">node1</text>
 						<text x="210" y="67" font-size="11">(Hash: {{ nodeStatuses[0].Hash }})</text>
 						<a (click)="selectTab(3)">
@@ -28,7 +27,7 @@
 						</a>
 					</g>
 					<g class="circle-before-start" [class.circle-Stopped]="nodeStatuses[1].State == 'Stopped'" [class.circle-Follower]="nodeStatuses[1].State == 'Follower'"
-						[class.circle-Leader]="nodeStatuses[1].State == 'Leader'" tabindex="0">
+									[class.circle-Leader]="nodeStatuses[1].State == 'Leader'" tabindex="0">
 						<text x="355" y="160" font-size="13">node2</text>
 						<text x="360" y="177" font-size="11">(Hash: {{ nodeStatuses[1].Hash }})</text>
 						<a (click)="selectTab(4)">
@@ -36,7 +35,7 @@
 						</a>
 					</g>
 					<g class="circle-before-start" [class.circle-Stopped]="nodeStatuses[2].State == 'Stopped'" [class.circle-Follower]="nodeStatuses[2].State == 'Follower'"
-						[class.circle-Leader]="nodeStatuses[2].State == 'Leader'" tabindex="0">
+									[class.circle-Leader]="nodeStatuses[2].State == 'Leader'" tabindex="0">
 						<text x="320" y="320" font-size="13">node3</text>
 						<text x="302" y="337" font-size="11">(Hash: {{ nodeStatuses[2].Hash }})</text>
 						<a (click)="selectTab(5)">
@@ -44,7 +43,7 @@
 						</a>
 					</g>
 					<g class="circle-before-start" [class.circle-Stopped]="nodeStatuses[3].State == 'Stopped'" [class.circle-Follower]="nodeStatuses[3].State == 'Follower'"
-						[class.circle-Leader]="nodeStatuses[3].State == 'Leader'" tabindex="0">
+									[class.circle-Leader]="nodeStatuses[3].State == 'Leader'" tabindex="0">
 						<text x="80" y="320" font-size="13">node4</text>
 						<text x="80" y="337" font-size="11">(Hash: {{ nodeStatuses[3].Hash }})</text>
 						<a (click)="selectTab(6)">
@@ -52,7 +51,7 @@
 						</a>
 					</g>
 					<g class="circle-before-start" [class.circle-Stopped]="nodeStatuses[4].State == 'Stopped'" [class.circle-Follower]="nodeStatuses[4].State == 'Follower'"
-						[class.circle-Leader]="nodeStatuses[4].State == 'Leader'" tabindex="0">
+									[class.circle-Leader]="nodeStatuses[4].State == 'Leader'" tabindex="0">
 						<text x="42" y="173" font-size="13">node5</text>
 						<text x="47" y="150" font-size="11">(Hash: {{ nodeStatuses[4].Hash }})</text>
 						<a (click)="selectTab(7)">
@@ -61,14 +60,13 @@
 					</g>
 				</g>
 			</svg>
-        </div>
-
-        <div class="block block-copy half">
-            <md-card class="client-card">
-                <md-tab-group [(selectedIndex)]="selectedTab">
-                    <md-tab>
-                        <template md-tab-label><b>Write</b></template>
-                        <template md-tab-content>
+		</div>
+		<div class="block block-copy half">
+			<md-card class="client-card">
+				<md-tab-group [(selectedIndex)]="selectedTab">
+					<md-tab>
+						<template md-tab-label><b>Write</b></template>
+						<template md-tab-content>
 							<br>
 							<div align="center">
 								<span class="select-node-checkbox">Endpoints: </span>
@@ -83,7 +81,6 @@
 								<!--<input #inputKey type="text" style="min-width: 250px;" class="form-control" placeholder="Type your key..." />-->
 								<!--<input type="text" style="min-width: 250px;" class="form-control" placeholder="Type your key..." [(ngModel)]="inputKey" />-->
 								<input type="text" style="min-width: 250px;" class="form-control" placeholder="Type your key..." [(ngModel)]="inputKey" />
-
 								<!--processWrite(inputKey.value, inputValue.value); inputKey.value=''; inputValue.value='';-->
 								<span class="input-group-btn">
 								<button md-button color="primary" (click)="processClientRequest('write');">Submit</button>
@@ -98,11 +95,10 @@
 								{{writeResult}} <span *ngIf='clientResponseError'>(error: {{clientResponseError}})</span>
 							</p>
 						</template>
-                    </md-tab>
-
-                    <md-tab>
-                        <template md-tab-label><b>Delete</b></template>
-                        <template md-tab-content>
+					</md-tab>
+					<md-tab>
+						<template md-tab-label><b>Delete</b></template>
+						<template md-tab-content>
 							<br>
 							<div align="center">
 								<span class="select-node-checkbox">Endpoints: </span>
@@ -124,11 +120,10 @@
 								{{deleteResult}} <span *ngIf='clientResponseError'>(error: {{clientResponseError}})</span>
 							</p>
 						</template>
-                    </md-tab>
-
-                    <md-tab>
-                        <template md-tab-label><b>Read</b></template>
-                        <template md-tab-content>
+					</md-tab>
+					<md-tab>
+						<template md-tab-label><b>Read</b></template>
+						<template md-tab-content>
 							<br>
 							<div align="center">
 								<span class="select-node-checkbox">Endpoints: </span>
@@ -150,11 +145,10 @@
 								{{readResult}} <span *ngIf='clientResponseError'>(error: {{clientResponseError}})</span>
 							</p>
 						</template>
-                    </md-tab>
-
-                    <md-tab *ngFor="let nodeStatus of nodeStatuses;">
-                        <template md-tab-label>{{nodeStatus.Name}}</template>
-                        <template md-tab-content>
+					</md-tab>
+					<md-tab *ngFor="let nodeStatus of nodeStatuses;">
+						<template md-tab-label>{{nodeStatus.Name}}</template>
+						<template md-tab-content>
 							<br>
 							<div align="center">
 								<!--md-tooltip="Click to kill {{nodeStatus.Name}}" -->
@@ -177,21 +171,19 @@
 								{{nodeStatus.StateTxt}} <span *ngIf='serverStatusErrorMessage'>(error: {{serverStatusErrorMessage}})</span>
 							</p>
 						</template>
-                    </md-tab>
-                </md-tab-group>
-            </md-card>
-
-        </div>
-    </div>
-
-    <div class="inner">
-        <div #logContainer class="log-box">
-            <div *ngFor="let logLine of this.logOutputLines; trackBy:trackByLineIndex">
-                <span *ngIf="logLine.logLevel == 'OK'" class="log-output-prefix-OK">{{ logLine.prefix }}</span>
-                <span *ngIf="logLine.logLevel == 'INFO'" class="log-output-prefix-INFO">{{ logLine.prefix }}</span>
-                <span *ngIf="logLine.logLevel == 'WARN'" class="log-output-prefix-WARN">{{ logLine.prefix }}</span>
-                <span class="log-output">{{ logLine.text }}</span>
-            </div>
-        </div>
-    </div>
+					</md-tab>
+				</md-tab-group>
+			</md-card>
+		</div>
+	</div>
+	<div class="inner">
+		<div #logContainer class="log-box">
+			<div *ngFor="let logLine of this.logOutputLines; trackBy:trackByLineIndex">
+				<span *ngIf="logLine.logLevel == 'OK'" class="log-output-prefix-OK">{{ logLine.prefix }}</span>
+				<span *ngIf="logLine.logLevel == 'INFO'" class="log-output-prefix-INFO">{{ logLine.prefix }}</span>
+				<span *ngIf="logLine.logLevel == 'WARN'" class="log-output-prefix-WARN">{{ logLine.prefix }}</span>
+				<span class="log-output">{{ logLine.text }}</span>
+			</div>
+		</div>
+	</div>
 </div>

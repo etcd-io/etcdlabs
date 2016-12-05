@@ -443,7 +443,9 @@
     <div id="incremental-snapshot"></div>
     <h2><a href="/faq#incremental-snapshot" class="faq-list">How does etcd snapshot?</a></h2>
     <p class="narrow-paragraph">
-        The incremental snapshots are part of the internal implementation for etcd. For v3, it's a batched transaction from applying the raft log; there's no way to access it (or really make sense of it) at the client level. The Snapshot RPC is for backing up the complete v3 boltdb database; it's used by the etcdctl snapshot commands.
+        The incremental snapshots are part of the internal implementation for etcd. For v3, it's a batched transaction from applying
+        the raft log; there's no way to access it (or really make sense of it) at the client level. The Snapshot RPC is for
+        backing up the complete v3 boltdb database; it's used by the etcdctl snapshot commands.
     </p>
     <div align="right" class="narrow-paragraph"><a href="/faq#top" class="normal-link">↑ top</a></div>
     <br>
