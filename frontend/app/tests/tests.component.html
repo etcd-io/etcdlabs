@@ -1,24 +1,30 @@
 <div class="tests-group">
     <router-outlet></router-outlet>
-
     <div id="top"></div>
     <h4>How etcd is tested <span class="next-to-header-title">(last update Nov 17, 2016)</span></h4>
     <br>
     <p class="narrow-paragraph">
-        Reliability and robustness of etcd is our <b>highest</b> priority. And it is ensured by various etcd testing suites: unit tests, integration tests, migration tests, end-to-end tests, benchmarks and regression tests, soak tests, stress tests, functional
-        tests, and so on.
+        Reliability and robustness of etcd is our <b>highest</b> priority. And it is ensured by various etcd testing suites:
+        unit tests, integration tests, migration tests, end-to-end tests, benchmarks and regression tests, soak tests, stress
+        tests, functional tests, and so on.
     </p>
     <p class="narrow-paragraph">
-        As of today, etcd consists of 85,113 lines of Go code<sup>[1]</sup>; more than half of code base, <i>48,786 lines</i>, are for tests and testing infrastructure. Especially, raft has 8,617 lines Go code, where 5,998 lines of them are tests.
+        As of today, etcd consists of 85,113 lines of Go code<sup>[1]</sup>; more than half of code base, <i>48,786 lines</i>,
+        are for tests and testing infrastructure. Especially, raft has 8,617 lines Go code, where 5,998 lines of them are
+        tests.
     </p>
     <p class="narrow-paragraph">
-        Most rigorous one is our <a href="https://github.com/coreos/etcd/tree/master/tools/functional-tester" target="_blank" class="normal-link">functional tests</a>. This verifies the correct behavior of etcd under various system and network malfunctions.
-        It is extremely helpful<sup>[2]</sup> to find critical bugs in etcd, <i>before anyone else</i>; see a list of bugs that it has found at
-        <a href="https://github.com/coreos/etcd/issues?q=is%3Aissue+label%3Acomponent%2Ffunctional-tester+is%3Aclosed" target="_blank" class="normal-link">GitHub Issues</a>.
+        Most rigorous one is our <a href="https://github.com/coreos/etcd/tree/master/tools/functional-tester" target="_blank"
+            class="normal-link">functional tests</a>. This verifies the correct behavior of etcd under various system and network
+        malfunctions. It is extremely helpful<sup>[2]</sup> to find critical bugs in etcd, <i>before anyone else</i>; see
+        a list of bugs that it has found at
+        <a href="https://github.com/coreos/etcd/issues?q=is%3Aissue+label%3Acomponent%2Ffunctional-tester+is%3Aclosed" target="_blank"
+            class="normal-link">GitHub Issues</a>.
     </p>
     <p class="narrow-paragraph">
-        The tester ensures that etcd operates as expected during failure and after recovery. So it continuously injects failures to etcd cluster while stressing them with heavy workloads. And then compares database hashes of each node to see if cluster keeps
-        its data consistent. Some of the failures are:
+        The tester ensures that etcd operates as expected during failure and after recovery. So it continuously injects failures
+        to etcd cluster while stressing them with heavy workloads. And then compares database hashes of each node to see
+        if cluster keeps its data consistent. Some of the failures are:
     </p>
     <ul>
         <li>Kill random node</li>
@@ -30,8 +36,10 @@
         <li>Slow network</li>
     </ul>
     <p class="narrow-paragraph">
-        Furthermore, it also performs crash tests, such as power loss, I/O error, partial writes, and so on. It is impractical to run these tests with real power failures. So etcd crash testing is simulated with <a href="https://github.com/coreos/gofail"
-            target="_blank" class="normal-link">gofail</a>. etcd has tons of fail points in its code base, and tester triggers Go runtime panics in etcd. Some of the failures are:
+        Furthermore, it also performs crash tests, such as power loss, I/O error, partial writes, and so on. It is impractical to
+        run these tests with real power failures. So etcd crash testing is simulated with <a href="https://github.com/coreos/gofail"
+            target="_blank" class="normal-link">gofail</a>. etcd has tons of fail points in its code base, and tester triggers
+        Go runtime panics in etcd. Some of the failures are:
     </p>
     <ul>
         <li>panic before/after database commits an entry</li>
@@ -45,13 +53,12 @@
         etcd functional-tester runs 24/7; cluster gets about 8,000 failure injections per day, <i>1 failure injection for every 10-second</i>.
     </p>
     <p class="narrow-paragraph">
-        Please visit <a href="http://dash.etcd.io/" target="_blank" class="normal-link">dash.etcd.io</a> for realtime testing cluster dashboards.
+        Please visit <a href="http://dash.etcd.io/" target="_blank" class="normal-link">dash.etcd.io</a> for realtime testing
+        cluster dashboards.
     </p>
-
     <button md-raised-button color="primary" (click)="clickRefresh();">Refresh</button>
     <button md-raised-button *ngIf="metricsLastUpdate !== ''">last Update: {{metricsLastUpdate}}</button>
     <br><br>
-
     <p *ngIf="!metricsSuccess" class="narrow-paragraph error-message-normal">
         {{metricsResult}}
     </p>
@@ -59,7 +66,6 @@
         {{metricsErrorMessage}}
     </p>
     <br *ngIf="!metricsSuccess">
-
     <table class="table narrow-paragraph">
         <thead>
             <tr>
@@ -89,9 +95,9 @@
     <hr align="left" class="footer-top-line">
     <footer class="narrow-footer">
         [1] Includes comments and tests. Excludes vendor, auto-generated Protocol Buffer files.
-        <br> [2] Important bugs and debugging story can be found at <a href="https://github.com/coreos/etcdlabs/tree/master/debug-etcd" target="_blank" class="footer-link">etcdlabs/debug-etcd</a>.
+        <br> [2] Important bugs and debugging story can be found at <a href="https://github.com/coreos/etcdlabs/tree/master/debug-etcd"
+            target="_blank" class="footer-link">etcdlabs/debug-etcd</a>.
     </footer>
     <div align="right" class="narrow-paragraph"><a href="/tests#top" class="normal-link">↑ top</a></div>
     <br><br>
-
 </div>
