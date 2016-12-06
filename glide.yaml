@@ -14,7 +14,7 @@ import:
   subpackages:
   - capnslog
 - package: github.com/dustin/go-humanize
-  version: bd88f87ad3a420f7bcf05e90566fd1ceb351fa7f
+  version: ef638b6c2e62b857442c6443dace9366a48c0ee2
 - package: google.golang.org/grpc
   version: v1.0.4
   subpackages:
