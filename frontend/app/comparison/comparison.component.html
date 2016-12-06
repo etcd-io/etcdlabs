@@ -519,7 +519,7 @@
                 <th scope="row">Runtime</th>
                 <td>Java 8<sup>[1]</sup></td>
                 <td>Go 1.7.4</td>
-                <td>Go 1.7.4</td>
+                <td>Go 1.7.3</td>
             </tr>
             <tr>
                 <th scope="row">Number of TCP connections</th>
@@ -553,51 +553,51 @@
             </tr>
             <tr>
                 <th scope="row">Data Size<sup>[3]</sup></th>
-                <td>4.7 GB</td>
+                <td>3.7 GB</td>
                 <td>1 GB</td>
                 <td>2.6 GB</td>
             </tr>
             <tr>
                 <th scope="row">Number of errors</th>
-                <td>1,032<sup>[4]</sup></td>
+                <td>485<sup>[4]</sup></td>
                 <td>None</td>
                 <td>None</td>
             </tr>
             <tr>
                 <th scope="row">Average Throughput</th>
-                <td>34,054.4941 req/sec</td>
-                <td>39,692.5013 req/sec</td>
-                <td>4,245.7052 req/sec</td>
+                <td>38,654.2277 req/sec</td>
+                <td>40,236.4270 req/sec</td>
+                <td>3,614.6392 req/sec</td>
             </tr>
             <tr>
                 <th scope="row">Slowest Latency</th>
-                <td>2.5233 sec</td>
-                <td>0.3032 sec</td>
-                <td>10.4728 sec</td>
+                <td>2.5783 sec</td>
+                <td>0.3674 sec</td>
+                <td>8.5489 sec</td>
             </tr>
             <tr>
                 <th scope="row">Fastest Latency</th>
                 <td>0.0016 sec</td>
-                <td>0.0058 sec</td>
-                <td>0.0297 sec</td>
+                <td>0.0051 sec</td>
+                <td>0.0152 sec</td>
             </tr>
             <tr>
                 <th scope="row">Average Latency</th>
-                <td>0.0268 sec</td>
-                <td>0.0251 sec</td>
-                <td>0.2352 sec</td>
+                <td>0.0255 sec</td>
+                <td>0.0247 sec</td>
+                <td>0.2764 sec</td>
             </tr>
             <tr>
                 <th scope="row">Peak CPU Usage</th>
-                <td>390.64 %</td>
-                <td>429.29 %</td>
-                <td>349.34 %</td>
+                <td>414.67 %</td>
+                <td>429.07 %</td>
+                <td>284.80 %</td>
             </tr>
             <tr>
                 <th scope="row">Peak Memory Usage<sup>[5]</sup></th>
-                <td>2.7 GB</td>
-                <td>771 MB</td>
-                <td>4.9 GB</td>
+                <td>2.5 GB</td>
+                <td>773 MB</td>
+                <td>4.7 GB</td>
             </tr>
         </tbody>
     </table>
@@ -607,7 +607,7 @@
         <span class="code-light-snippet-small">Java HotSpot(TM) 64-Bit Server VM (build 25.111-b14, mixed mode)</span>.
         <br> [2] etcd uses less TCP connections with gRPC and HTTP/2.
         <br> [3] Total size of data written to disk after writes are finished.
-        <br> [4] 352 errors of <span class="code-light-snippet-small">zk: connection closed</span>, 680 errors of <span class="code-light-snippet-small">zk: could not connect to a server</span>.
+        <br> [4] 13 errors of <span class="code-light-snippet-small">zk: connection closed</span>, 472 errors of <span class="code-light-snippet-small">zk: could not connect to a server</span>.
         <br> [5] <span class="code-light-snippet-small">VmRSS</span> value in Linux proc file is used to calculate memory
         usage.
     </footer>
@@ -647,7 +647,7 @@
                 <th scope="row">Runtime</th>
                 <td>Java 8<sup>[1]</sup></td>
                 <td>Go 1.7.4</td>
-                <td>Go 1.7.4</td>
+                <td>Go 1.7.3</td>
             </tr>
             <tr>
                 <th scope="row">Number of TCP connections</th>
@@ -687,38 +687,38 @@
             </tr>
             <tr>
                 <th scope="row">Average Throughput</th>
-                <td>98,433.2600 req/sec<sup>[3]</sup></td>
-                <td>51,309.4119 req/sec</td>
-                <td>53,876.9702 req/sec</td>
+                <td>102,286.4940 req/sec<sup>[3]</sup></td>
+                <td>51,422.6678 req/sec</td>
+                <td>54,593.7401 req/sec</td>
             </tr>
             <tr>
                 <th scope="row">Slowest Latency</th>
-                <td>0.4265 sec</td>
-                <td>0.1564 sec</td>
-                <td>0.1493 sec</td>
+                <td>0.2117 sec</td>
+                <td>0.1946 sec</td>
+                <td>1.0981 sec</td>
             </tr>
             <tr>
                 <th scope="row">Fastest Latency</th>
-                <td>0.0006 sec</td>
+                <td>0.0004 sec</td>
                 <td>0.0005 sec</td>
                 <td>0.0004 sec</td>
             </tr>
             <tr>
                 <th scope="row">Average Latency</th>
-                <td>0.0093 sec</td>
+                <td>0.0091 sec</td>
                 <td>0.0194 sec</td>
-                <td>0.0182 sec</td>
+                <td>0.0180 sec</td>
             </tr>
             <tr>
                 <th scope="row">Peak CPU Usage</th>
-                <td>182.99 %</td>
-                <td>343.20 %</td>
-                <td>595.26 %</td>
+                <td>222.91 %</td>
+                <td>339.97 %</td>
+                <td>591.64 %</td>
             </tr>
             <tr>
                 <th scope="row">Peak Memory Usage<sup>[4]</sup></th>
-                <td>345 MB</td>
-                <td>271 MB</td>
+                <td>351 MB</td>
+                <td>279 MB</td>
                 <td>60 MB</td>
             </tr>
         </tbody>
