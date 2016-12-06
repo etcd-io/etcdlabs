@@ -286,11 +286,11 @@
 {{cfssl.getCertsPrepareCommand(flag.certsDir)}}
 
 {{etcd.getCommand(flag, false, false)}}
-						</pre>
+</pre>
 						<pre *ngIf="!etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}}
 
 {{etcd.getCommand(flag, false, false)}}
-						</pre>
+</pre>
 						<br>
 					</div>
 				</div>
@@ -358,13 +358,13 @@
 {{etcd.getServiceFile(flag)}}
 
 {{flag.getSystemdCommand()}}
-						</pre>
+</pre>
 						<pre *ngIf="!etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}}
 							
 {{etcd.getServiceFile(flag)}}
 
 {{flag.getSystemdCommand()}}
-						</pre>
+</pre>
 						<br>
 					</div>
 				</div>
@@ -444,13 +444,13 @@
 {{etcd.getServiceFileRkt(flag)}}
 
 {{flag.getSystemdCommand()}}
-						</pre>
+</pre>
 						<pre *ngIf="!etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}}
 
 {{etcd.getServiceFileRkt(flag)}}
 
 {{flag.getSystemdCommand()}}
-						</pre>
+</pre>
 						<br>
 					</div>
 				</div>
@@ -461,11 +461,11 @@
 {{cfssl.getCertsPrepareCommand(etcd.flags[0].certsDir)}}
 
 {{etcd.getEndpointHealthCommand(etcd.flags[0])}}
-				</pre>
+</pre>
 				<pre *ngIf="!etcd.secure" class="code-dark">{{etcd.getInstallCommandLinux()}}
 
 {{etcd.getEndpointHealthCommand(etcd.flags[0])}}
-				</pre>
+</pre>
 				<div align="right" class="narrow-paragraph"><a href="/install#top" class="normal-link">↑ top</a></div>
 				<br>
 				<br>
@@ -498,13 +498,13 @@
 {{etcd.getServiceFileCoreOS(flag)}}
 
 {{etcd.getServiceFileCoreOSCommand()}}
-						</pre>
+</pre>
 						<pre *ngIf="!etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}}
 
 {{etcd.getServiceFileCoreOS(flag)}}
 
 {{etcd.getServiceFileCoreOSCommand()}}
-						</pre>
+</pre>
 						<br>
 					</div>
 				</div>
@@ -515,11 +515,11 @@
 {{cfssl.getCertsPrepareCommand(etcd.flags[0].certsDir)}}
 
 {{etcd.getEndpointHealthCommand(etcd.flags[0])}}
-				</pre>
+</pre>
 				<pre *ngIf="!etcd.secure" class="code-dark">{{etcd.getInstallCommandLinux()}}
 
 {{etcd.getEndpointHealthCommand(etcd.flags[0])}}
-				</pre>
+</pre>
 			</template>
 			<div align="right" class="narrow-paragraph"><a href="/install#top" class="normal-link">↑ top</a></div>
 			<br>
@@ -551,7 +551,7 @@
 				<md-input type="number" [(ngModel)]="etcd.operatorBackupVolumeSizeInMB" placeholder="Back-up volume size (MB)" style="width: 220px;"></md-input>
 				<br>
 				<pre class="code-dark">{{etcd.getOperatorCommand()}}
-				</pre>
+</pre>
 			</template>
 			<div align="right" class="narrow-paragraph"><a href="/install#top" class="normal-link">↑ top</a></div>
 			<br>
