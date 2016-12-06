@@ -118,7 +118,7 @@
     <h2><a href="/faq#etcd-not-to-use" class="faq-title">When not to use etcd</a></h2>
     <p class="narrow-paragraph">
         etcd can only handle small chunks data: configuration file, JSON, YAML, etc. etcd limits the size of request in 1.5MB; see
-        <a href="https://github.com/coreos/etcd/blob/master/etcdserver/v3_server.go#L34-L38" target="_blank" class="code-light-snippet-red">maxRequestBytes</a>.
+        <a href="https://github.com/coreos/etcd/blob/master/etcdserver/v3_server.go#L40-L44" target="_blank" class="code-light-snippet-red">maxRequestBytes</a>.
         And default storage size limit is 2GB, configurable up to 8GB; see <a href="https://github.com/coreos/etcd/blob/master/mvcc/backend/backend.go#L46-L53"
             target="_blank" class="code-light-snippet-red">DefaultQuotaBytes</a> and <a href="https://github.com/coreos/etcd/blob/master/etcdmain/help.go"
             target="_blank" class="code-light-snippet-red">--quota-backend-bytes</a>. These are the tradeoffs that etcd makes
@@ -578,7 +578,7 @@
     <div id="max-cluster-size"></div>
     <h2><a href="/faq#max-cluster-size" class="faq-title">What is maximum cluster size?</a></h2>
     <p class="narrow-paragraph">
-        Theorectially, there is no hard limit. However, we recommend no more than 7 nodes. Google Chubby lock service<sup>[1]</sup>,
+        Theoretically, there is no hard limit. However, we recommend no more than 7 nodes. Google Chubby lock service<sup>[1]</sup>,
         which is predecessor of etcd, typically runs 5 nodes in each cell. A 7-member cluster can provide enough fault tolerance
         in most cases. While larger cluster provides better fault tolerance the write performance reduces since data needs
         to be replicated to more machines.
