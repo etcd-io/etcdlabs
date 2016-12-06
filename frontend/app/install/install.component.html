@@ -281,10 +281,15 @@
 				</p>
 				<div *ngFor="let flag of etcd.flags; let i = index;">
 					<div *ngIf="etcd.clusterSize > i">
-						<pre *ngIf="etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}} {{cfssl.getCertsPrepareCommand(flag.certsDir)}} {{etcd.getCommand(flag, false,
-							false)}}
+						<pre *ngIf="etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}}
+
+{{cfssl.getCertsPrepareCommand(flag.certsDir)}}
+
+{{etcd.getCommand(flag, false, false)}}
 						</pre>
-						<pre *ngIf="!etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}} {{etcd.getCommand(flag, false, false)}}
+						<pre *ngIf="!etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}}
+
+{{etcd.getCommand(flag, false, false)}}
 						</pre>
 						<br>
 					</div>
@@ -346,9 +351,19 @@
 				</p>
 				<div *ngFor="let flag of etcd.flags; let i = index;">
 					<div *ngIf="etcd.clusterSize > i">
-						<pre *ngIf="etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}} {{cfssl.getCertsPrepareCommand(flag.certsDir)}} {{etcd.getServiceFile(flag)}} {{flag.getSystemdCommand()}}
+						<pre *ngIf="etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}}
+
+{{cfssl.getCertsPrepareCommand(flag.certsDir)}}
+
+{{etcd.getServiceFile(flag)}}
+
+{{flag.getSystemdCommand()}}
 						</pre>
-						<pre *ngIf="!etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}} {{etcd.getServiceFile(flag)}} {{flag.getSystemdCommand()}}
+						<pre *ngIf="!etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}}
+							
+{{etcd.getServiceFile(flag)}}
+
+{{flag.getSystemdCommand()}}
 						</pre>
 						<br>
 					</div>
@@ -422,19 +437,34 @@
 				<br>
 				<div *ngFor="let flag of etcd.flags; let i = index;">
 					<div *ngIf="etcd.clusterSize > i">
-						<pre *ngIf="etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}} {{cfssl.getCertsPrepareCommand(flag.certsDir)}} {{etcd.getServiceFileRkt(flag)}}
-							{{flag.getSystemdCommand()}}
+						<pre *ngIf="etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}}
+
+{{cfssl.getCertsPrepareCommand(flag.certsDir)}}
+
+{{etcd.getServiceFileRkt(flag)}}
+
+{{flag.getSystemdCommand()}}
 						</pre>
-						<pre *ngIf="!etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}} {{etcd.getServiceFileRkt(flag)}} {{flag.getSystemdCommand()}}
+						<pre *ngIf="!etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}}
+
+{{etcd.getServiceFileRkt(flag)}}
+
+{{flag.getSystemdCommand()}}
 						</pre>
 						<br>
 					</div>
 				</div>
 				<br> Check status:
 				<br>
-				<pre *ngIf="etcd.secure" class="code-dark">{{etcd.getInstallCommandLinux()}} {{cfssl.getCertsPrepareCommand(etcd.flags[0].certsDir)}} {{etcd.getEndpointHealthCommand(etcd.flags[0])}}
+				<pre *ngIf="etcd.secure" class="code-dark">{{etcd.getInstallCommandLinux()}}
+
+{{cfssl.getCertsPrepareCommand(etcd.flags[0].certsDir)}}
+
+{{etcd.getEndpointHealthCommand(etcd.flags[0])}}
 				</pre>
-				<pre *ngIf="!etcd.secure" class="code-dark">{{etcd.getInstallCommandLinux()}} {{etcd.getEndpointHealthCommand(etcd.flags[0])}}
+				<pre *ngIf="!etcd.secure" class="code-dark">{{etcd.getInstallCommandLinux()}}
+
+{{etcd.getEndpointHealthCommand(etcd.flags[0])}}
 				</pre>
 				<div align="right" class="narrow-paragraph"><a href="/install#top" class="normal-link">↑ top</a></div>
 				<br>
@@ -443,7 +473,7 @@
 		</md-tab>
 		<md-tab>
 			<template md-tab-label>
-				CoreOS Linux
+				CoreOS Container Linux
 			</template>
 			<template md-tab-content>
 				<br>
@@ -457,25 +487,40 @@
 				<md-input type="text" [(ngModel)]="etcd.version" placeholder="etcd version"></md-input>
 				<br>
 				<br>
-				<h5>Run with CoreOS</h5>
+				<h5>Run with CoreOS Container Linux</h5>
 				<p *ngIf="etcd.flags[0].ipAddress == 'localhost'">
 					Seems like etcd is configured to run in localhost. Please make sure ports and data directory do not conflict!
 				</p>
 				<div *ngFor="let flag of etcd.flags; let i = index;">
 					<div *ngIf="etcd.clusterSize > i">
-						<pre *ngIf="etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}} {{cfssl.getCertsPrepareCommand(flag.certsDir)}} {{etcd.getServiceFileCoreOS(flag)}}
-							{{etcd.getServiceFileCoreOSCommand()}}
+						<pre *ngIf="etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}}
+
+{{cfssl.getCertsPrepareCommand(flag.certsDir)}}
+
+{{etcd.getServiceFileCoreOS(flag)}}
+
+{{etcd.getServiceFileCoreOSCommand()}}
 						</pre>
-						<pre *ngIf="!etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}} {{etcd.getServiceFileCoreOS(flag)}} {{etcd.getServiceFileCoreOSCommand()}}
+						<pre *ngIf="!etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}}
+
+{{etcd.getServiceFileCoreOS(flag)}}
+
+{{etcd.getServiceFileCoreOSCommand()}}
 						</pre>
 						<br>
 					</div>
 				</div>
 				<br> Check status:
 				<br>
-				<pre *ngIf="etcd.secure" class="code-dark">{{etcd.getInstallCommandLinux()}} {{cfssl.getCertsPrepareCommand(etcd.flags[0].certsDir)}} {{etcd.getEndpointHealthCommand(etcd.flags[0])}}
+				<pre *ngIf="etcd.secure" class="code-dark">{{etcd.getInstallCommandLinux()}}
+
+{{cfssl.getCertsPrepareCommand(etcd.flags[0].certsDir)}}
+
+{{etcd.getEndpointHealthCommand(etcd.flags[0])}}
 				</pre>
-				<pre *ngIf="!etcd.secure" class="code-dark">{{etcd.getInstallCommandLinux()}} {{etcd.getEndpointHealthCommand(etcd.flags[0])}}
+				<pre *ngIf="!etcd.secure" class="code-dark">{{etcd.getInstallCommandLinux()}}
+
+{{etcd.getEndpointHealthCommand(etcd.flags[0])}}
 				</pre>
 			</template>
 			<div align="right" class="narrow-paragraph"><a href="/install#top" class="normal-link">↑ top</a></div>
