@@ -132,8 +132,7 @@
 				</p>
 				<br>
 				<!--TODO: use md-textarea-->
-				<textarea type="text" style="max-width: 550px;" class="form-control" placeholder="More hosts to sign (line-separated)" rows="7"
-								[(ngModel)]="inputCFSSLMoreHostsTxt"></textarea>
+				<textarea type="text" style="max-width: 550px;" class="form-control" placeholder="More hosts to sign (line-separated)" rows="7" [(ngModel)]="inputCFSSLMoreHostsTxt"></textarea>
 				<br>
 				<div *ngFor="let flag of etcd.flags; let i = index;">
 					<div *ngIf="etcd.clusterSize > i">
