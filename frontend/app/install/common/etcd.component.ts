@@ -520,7 +520,7 @@ sudo mv /tmp/${flag.name}.service /etc/systemd/system/${flag.name}.service
         }
 
         // optional '/var/lib/rkt' is the default
-        rktFlags.push('--dir=/var/lib/rkt');
+        // rktFlags.push('--dir=/var/lib/rkt');
 
         let rktRunFlags: string[] = [];
         rktRunFlags.push('run');
