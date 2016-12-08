@@ -4,15 +4,15 @@ import { Observable } from 'rxjs';
 
 export class TesterStatus {
     Name: string;
-    TotalCase: number;
-    CurrentCase: number;
-    CurrentFailed: number;
+    TotalCase: string;
+    CurrentCase: string;
+    CurrentFailed: string;
 
     constructor(
         name: string,
-        totalCase: number,
-        currentCase: number,
-        currentFailed: number,
+        totalCase: string,
+        currentCase: string,
+        currentFailed: string,
     ) {
         this.Name = name;
         this.TotalCase = totalCase;
