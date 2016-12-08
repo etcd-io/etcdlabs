@@ -1,5 +1,5 @@
-hash: a7ce0e2395678dbaaa10daed212ee72a649b445b8f4f2535e5e55a2bc44333ec
-updated: 2016-12-06T10:33:02.745738617-08:00
+hash: 20b1a1d55c9f1ae12de69de3c23ba0097d09dd925efb22181f381571d461c051
+updated: 2016-12-08T11:50:36.214982925-08:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -10,7 +10,7 @@ imports:
 - name: github.com/cockroachdb/cmux
   version: 112f0506e7743d64a6eb8fedbcff13d9979bbf92
 - name: github.com/coreos/etcd
-  version: 994e0d218201a68fa5c3908421c40a79e04a0051
+  version: b713113094826715b431bab47ba2b8e1991cc056
   subpackages:
   - alarm
   - auth
@@ -125,13 +125,13 @@ imports:
   - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
-  version: abf152e5f3e97f2fafac028d2cc06c1feb87ffa5
+  version: fcdb11ccb4389efb1b210b7ffb623ab71c5fdd60
 - name: github.com/spf13/cobra
   version: 9495bc009a56819bdb0ddbc1a373e29c140bc674
 - name: github.com/spf13/pflag
   version: 5ccb023bc27df288a957c5e994cd44fd19619465
 - name: github.com/ugorji/go
-  version: f1f1a805ed361a0e078bb537e4ea78cd37dcf065
+  version: 9c7f9b7a2bc3a520f7c7b30b34b7f85f47fe27b6
   subpackages:
   - codec
 - name: github.com/xiang90/probing
