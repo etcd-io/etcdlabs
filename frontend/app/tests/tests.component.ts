@@ -24,8 +24,8 @@ export class TestsComponent implements AfterContentInit {
         this.metricsResult = '';
         this.metricsErrorMessage = '';
 
-        this.status5Node = new TesterStatus('5-node', 0, 0, 0);
-        this.status5NodeFailpoints = new TesterStatus('5-node failpoints', 0, 0, 0);
+        this.status5Node = new TesterStatus('5-node', '0', '0', '0');
+        this.status5NodeFailpoints = new TesterStatus('5-node failpoints', '0', '0', '0');
     }
 
     ngAfterContentInit() {

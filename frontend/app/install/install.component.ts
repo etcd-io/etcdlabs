@@ -77,7 +77,7 @@ export class InstallComponent extends ParentComponent {
                     'my-etcd-1',
                     '/var/lib/etcd',
                     '/etc/ssl/certs',
-                    '10.240.0.35',
+                    '10.240.0.1',
                     2379,
                     2380,
                     'my-etcd-token',
@@ -88,7 +88,7 @@ export class InstallComponent extends ParentComponent {
                     'my-etcd-2',
                     '/var/lib/etcd',
                     '/etc/ssl/certs',
-                    '10.240.0.36',
+                    '10.240.0.2',
                     2379,
                     2380,
                     'my-etcd-token',
@@ -99,7 +99,7 @@ export class InstallComponent extends ParentComponent {
                     'my-etcd-3',
                     '/var/lib/etcd',
                     '/etc/ssl/certs',
-                    '10.240.0.37',
+                    '10.240.0.3',
                     2379,
                     2380,
                     'my-etcd-token',
@@ -110,7 +110,7 @@ export class InstallComponent extends ParentComponent {
                     'my-etcd-4',
                     '/var/lib/etcd',
                     '/etc/ssl/certs',
-                    '10.240.0.38',
+                    '10.240.0.4',
                     2379,
                     2380,
                     'my-etcd-token',
@@ -121,7 +121,7 @@ export class InstallComponent extends ParentComponent {
                     'my-etcd-5',
                     '/var/lib/etcd',
                     '/etc/ssl/certs',
-                    '10.240.0.39',
+                    '10.240.0.5',
                     2379,
                     2380,
                     'my-etcd-token',
@@ -132,7 +132,7 @@ export class InstallComponent extends ParentComponent {
                     'my-etcd-6',
                     '/var/lib/etcd',
                     '/etc/ssl/certs',
-                    '10.240.0.40',
+                    '10.240.0.6',
                     2379,
                     2380,
                     'my-etcd-token',
@@ -143,7 +143,7 @@ export class InstallComponent extends ParentComponent {
                     'my-etcd-7',
                     '/var/lib/etcd',
                     '/etc/ssl/certs',
-                    '10.240.0.41',
+                    '10.240.0.7',
                     2379,
                     2380,
                     'my-etcd-token',
@@ -151,7 +151,7 @@ export class InstallComponent extends ParentComponent {
                     'etcd-root-ca'
                 ),
             ],
-            new Rkt('v1.20.0', '/', '', '', '')
+            new Rkt('v1.21.0', '/', '', '', '')
         );
         ///////////////////////////////////////////////////
     }
