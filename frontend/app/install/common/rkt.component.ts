@@ -21,24 +21,12 @@ export class Rkt {
     version: string;
     execDir: string;
 
-    fetchURLPrefixToTrust: string;
-    publicKeyToTrust: string;
-    customACI: string;
-
     constructor(
         version: string,
         execDir: string,
-
-        fetchURLPrefixToTrust: string,
-        publicKeyToTrust: string,
-        customACI: string,
     ) {
         this.version = version;
         this.execDir = execDir;
-
-        this.fetchURLPrefixToTrust = fetchURLPrefixToTrust;
-        this.publicKeyToTrust = publicKeyToTrust;
-        this.customACI = customACI;
     }
 
     getExecDir() {
@@ -47,18 +35,6 @@ export class Rkt {
 
     stripVersion() {
         return this.version.substring(1)
-    }
-
-    getTrustCommandLinux() {
-        let divide = getDivider(this.execDir);
-        let lineBreak = ' \\' + `
-    `;
-
-        let exec = 'sudo' + ' ' + this.getExecDir() + divide + 'rkt' + ' ' + 'trust' + lineBreak;
-        exec += '--prefix' + ' ' + this.fetchURLPrefixToTrust + lineBreak;
-        exec += `'` + this.publicKeyToTrust + `'`;
-
-        return exec;
     }
 
     getInstallCommandLinux() {

@@ -514,10 +514,7 @@ sudo mv /tmp/${flag.name}.service /etc/systemd/system/${flag.name}.service
         let execRkt = this.rkt.getExecDir() + divideRkt + 'rkt';
 
         let rktFlags: string[] = [];
-
-        if (this.rkt.customACI === '') {
-            rktFlags.push('--trust-keys-from-https');
-        }
+        rktFlags.push('--trust-keys-from-https');
 
         // optional '/var/lib/rkt' is the default
         // rktFlags.push('--dir=/var/lib/rkt');
@@ -526,35 +523,17 @@ sudo mv /tmp/${flag.name}.service /etc/systemd/system/${flag.name}.service
         rktRunFlags.push('run');
         rktRunFlags.push('--stage1-name' + ' ' + 'coreos.com/rkt/stage1-fly:' + this.rkt.stripVersion());
         rktRunFlags.push('--net=host');
-        rktRunFlags.push('--volume' + ' ' + 'data-dir,kind=host,source=' + flag.getDataDir());
+        rktRunFlags.push('--volume' + ' ' + 'etcd-data-dir,kind=host,source=' + flag.getDataDir());
+        rktRunFlags.push('--mount' + ' ' + 'volume=etcd-data-dir,target=' + flag.getDataDir());
         if (this.secure) {
             rktRunFlags.push('--volume' + ' ' + 'etcd-ssl-certs-dir,kind=host,source=' + flag.getCertsDir());
             rktRunFlags.push('--mount' + ' ' + 'volume=etcd-ssl-certs-dir,target=' + flag.getCertsDir());
         }
 
-        // need 'rkt trust' command
-        if (this.rkt.customACI !== '') {
-            if (this.rkt.fetchURLPrefixToTrust == '' || this.rkt.publicKeyToTrust == '') {
-                rktRunFlags.push('--insecure-options' + ' ' + 'image');
-            }
-            rktRunFlags.push(this.rkt.customACI + ' ' + '--');
-        } else {
-            rktRunFlags.push('coreos.com/etcd:' + this.version + ' ' + '--');
-        }
+        // OCI (ACI is deprecated)
+        rktRunFlags.push('quay.io/coreos/etcd:' + this.version + ' ' + '--');
 
         let cmd = '';
-
-        // need 'rkt trust' command
-        if (this.rkt.fetchURLPrefixToTrust !== '' && this.rkt.publicKeyToTrust !== '' && this.rkt.customACI !== '') {
-            /*
-            coreos.com/etcd
-            https://pgp.mit.edu/pks/lookup?op=get&search=0x1DDD39C7EB70C24C&options=mr
-            https://storage.googleapis.com/etcd/tip/etcd-20161105-ecd4803.aci
-            */
-            cmd += this.rkt.getTrustCommandLinux() + `
-
-`;
-        }
 
         let txt = execRkt;
         let lineBreak = ' \\' + `
@@ -565,7 +544,7 @@ sudo mv /tmp/${flag.name}.service /etc/systemd/system/${flag.name}.service
         for (let _i = 0; _i < rktRunFlags.length; _i++) {
             txt += lineBreak + rktRunFlags[_i];
         }
-        txt += lineBreak + this.getFlagTxt(flag, true, false);
+        txt += lineBreak + this.getFlagTxt(flag, false, false); // do not skip --data-dir flag for OCI
 
         cmd += `# to write service file for etcd with rkt
 cat > /tmp/${flag.name}.service <<EOF
