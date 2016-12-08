@@ -33,9 +33,9 @@ var (
 // TesterStatus wraps metrics.TesterStatus.
 type TesterStatus struct {
 	Name          string
-	TotalCase     int64
-	CurrentCase   int64
-	CurrentFailed int64
+	TotalCase     string
+	CurrentCase   string
+	CurrentFailed string
 }
 
 // MetricsResponse translates client's GET response in frontend-friendly format.
@@ -58,9 +58,9 @@ func fetchMetricsRequestHandler(ctx context.Context, w http.ResponseWriter, req 
 			for _, status := range globalMetrics.Get() { // serve stale status
 				mresp.Statuses = append(mresp.Statuses, TesterStatus{
 					Name:          status.Name,
-					TotalCase:     status.TotalCase,
-					CurrentCase:   status.CurrentCase,
-					CurrentFailed: status.CurrentFailed,
+					TotalCase:     humanize.Comma(status.TotalCase),
+					CurrentCase:   humanize.Comma(status.CurrentCase),
+					CurrentFailed: humanize.Comma(status.CurrentFailed),
 				})
 			}
 			return json.NewEncoder(w).Encode(mresp)
@@ -82,9 +82,9 @@ func fetchMetricsRequestHandler(ctx context.Context, w http.ResponseWriter, req 
 		for _, status := range globalMetrics.Get() {
 			mresp.Statuses = append(mresp.Statuses, TesterStatus{
 				Name:          status.Name,
-				TotalCase:     status.TotalCase,
-				CurrentCase:   status.CurrentCase,
-				CurrentFailed: status.CurrentFailed,
+				TotalCase:     humanize.Comma(status.TotalCase),
+				CurrentCase:   humanize.Comma(status.CurrentCase),
+				CurrentFailed: humanize.Comma(status.CurrentFailed),
 			})
 		}
 
