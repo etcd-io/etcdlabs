@@ -151,7 +151,7 @@ export class InstallComponent extends ParentComponent {
                     'etcd-root-ca'
                 ),
             ],
-            new Rkt('v1.21.0', '/', '', '', '')
+            new Rkt('v1.21.0', '/')
         );
         ///////////////////////////////////////////////////
     }

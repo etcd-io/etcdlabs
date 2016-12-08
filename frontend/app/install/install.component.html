@@ -425,15 +425,6 @@
 				<br>
 				<md-input type="text" [(ngModel)]="etcd.version" placeholder="etcd version"></md-input>
 				<br>
-				<md-input dividerColor="warn" type="text" [(ngModel)]="etcd.rkt.fetchURLPrefixToTrust" placeholder="Fetch URL to trust (optional 'rkt trust')"
-								style="width: 750px;"></md-input>
-				<br>
-				<md-input dividerColor="warn" type="text" [(ngModel)]="etcd.rkt.publicKeyToTrust" placeholder="Public key to trust (optional 'rkt trust')"
-								style="width: 750px;"></md-input>
-				<br>
-				<md-input dividerColor="warn" type="text" [(ngModel)]="etcd.rkt.customACI" placeholder="Custom etcd ACI image (optional 'rkt trust')"
-								style="width: 750px;"></md-input>
-				<br>
 				<div *ngFor="let flag of etcd.flags; let i = index;">
 					<div *ngIf="etcd.clusterSize > i">
 						<pre *ngIf="etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}}
