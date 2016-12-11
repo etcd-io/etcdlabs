@@ -1,5 +1,5 @@
-hash: 20b1a1d55c9f1ae12de69de3c23ba0097d09dd925efb22181f381571d461c051
-updated: 2016-12-08T11:50:36.214982925-08:00
+hash: 7c8411dd7894964609f96a65781558496c2c4d4835cf3c160ee5629ec3eb0ae5
+updated: 2016-12-10T21:46:32.525243681-08:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -10,7 +10,7 @@ imports:
 - name: github.com/cockroachdb/cmux
   version: 112f0506e7743d64a6eb8fedbcff13d9979bbf92
 - name: github.com/coreos/etcd
-  version: b713113094826715b431bab47ba2b8e1991cc056
+  version: 20dca1eb80b035df0d1e93ef6577fb49624144df
   subpackages:
   - alarm
   - auth
@@ -84,7 +84,7 @@ imports:
 - name: github.com/go-sql-driver/mysql
   version: 665b83488b90b902ce0a305ef6652e599771cdf9
 - name: github.com/gogo/protobuf
-  version: 8d70fb3182befc465c4a1eac8ad4d38ff49778e2
+  version: 909568be09de550ed094403c2bf8a261b5bb730a
   subpackages:
   - proto
 - name: github.com/golang/protobuf
@@ -111,7 +111,7 @@ imports:
   subpackages:
   - pbutil
 - name: github.com/prometheus/client_golang
-  version: e51041b3fa41cece0dca035740ba6411905be473
+  version: c5b7fccd204277076155f10851dad72b76a49317
   subpackages:
   - prometheus
 - name: github.com/prometheus/client_model

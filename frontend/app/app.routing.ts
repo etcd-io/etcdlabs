@@ -4,7 +4,6 @@ import { HomeComponent } from './home/home.component';
 import { InstallComponent } from './install/install.component';
 import { TestsComponent } from './tests/tests.component';
 import { PlayComponent } from './play/play.component';
-import { ComparisonComponent } from './comparison/comparison.component';
 import { NotFoundComponent } from './not-found.component';
 
 const appRoutes: Routes = [
@@ -13,7 +12,6 @@ const appRoutes: Routes = [
     { path: 'install', component: InstallComponent },
     { path: 'tests', component: TestsComponent },
     { path: 'play', component: PlayComponent },
-    { path: 'comparison', component: ComparisonComponent },
     { path: '**', component: NotFoundComponent },
 ];
 
@@ -24,6 +22,5 @@ export const routedComponents = [
     InstallComponent,
     PlayComponent,
     TestsComponent,
-    ComparisonComponent,
     NotFoundComponent,
 ];
