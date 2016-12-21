@@ -8,7 +8,7 @@
     </p>
     <p class="narrow-paragraph">
         <a href="https://github.com/coreos/etcd/tree/master/tools/functional-tester" target="_blank"
-            class="normal-link">functional-tester</a>verifies the correct behavior of etcd under various system and network malfunctions. It sets up an etcd cluster under high pressure loads and continuously injects failures into the cluster. Then it expects the etcd cluster to recover within a short amount of time. This has been extremely helpful<sup>[1]</sup> to find critical bugs, <i>before anyone else</i>; see a list of bugs that it has found at <a href="https://github.com/coreos/etcd/issues?q=is%3Aissue+label%3Acomponent%2Ffunctional-tester+is%3Aclosed" target="_blank" class="normal-link">GitHub Issues</a>.
+            class="normal-link">functional-tester</a> verifies the correct behavior of etcd under various system and network malfunctions. It sets up an etcd cluster under high pressure loads and continuously injects failures into the cluster. Then it expects the etcd cluster to recover within a short amount of time. This has been extremely helpful<sup>[1]</sup> to find critical bugs, <i>before anyone else</i>; see a list of bugs that it has found at <a href="https://github.com/coreos/etcd/issues?q=is%3Aissue+label%3Acomponent%2Ffunctional-tester+is%3Aclosed" target="_blank" class="normal-link">GitHub Issues</a>.
     </p>
     <p class="narrow-paragraph">
         The tester ensures that etcd operates as expected during failure and after recovery. So it continuously injects failures to etcd cluster while stressing them with heavy workloads. And then compares database hashes of each node to see if cluster keeps its data consistent. Some of the failures are:
