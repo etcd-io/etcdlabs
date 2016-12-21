@@ -463,19 +463,22 @@
 		</md-tab>
 		<md-tab>
 			<template md-tab-label>
-				Container Linux by CoreOS
+				container linux by CoreOS
 			</template>
 			<template md-tab-content>
 				<br>
 				<h5>Why?</h5>
 				<p class="narrow-paragraph">
-					<a href="https://coreos.com/why" target="_blank" class="normal-link">Container Linux</a> by CoreOS is a lightweight Linux operating system for automated security updates and scalable cluster deployment. System and security patches are regularly pushed to Container Linux machines without requiring intervention by administrators.
+					<a href="https://coreos.com/why" target="_blank" class="normal-link">container linux</a> by CoreOS is a lightweight Linux operating system for automated security updates and scalable cluster deployment. System and security patches are regularly pushed to container linux machines without requiring intervention by administrators.
 				</p>
 				<br>
 				<md-input type="text" [(ngModel)]="etcd.version" placeholder="etcd version"></md-input>
 				<br>
 				<br>
-				<h5>Run with Container Linux</h5>
+				<h5>Run with container linux</h5>
+				<p class="narrow-paragraph">
+					This only works in alpha channel for now.
+				</p>
 				<p *ngIf="etcd.flags[0].ipAddress == 'localhost'">
 					Seems like etcd is configured to run in localhost. Please make sure ports and data directory do not conflict!
 				</p>
