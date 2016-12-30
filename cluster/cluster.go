@@ -495,7 +495,13 @@ func (c *Cluster) UpdateNodeStatus() {
 			}
 
 			now = time.Now()
-			conn, err := grpc.Dial(c.nodes[i].cfg.LCUrls[0].Host, grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)), grpc.WithTimeout(time.Second))
+			var dopts = []grpc.DialOption{grpc.WithTimeout(time.Second)}
+			if tlsConfig != nil {
+				dopts = append(dopts, grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)))
+			} else {
+				dopts = append(dopts, grpc.WithInsecure())
+			}
+			conn, err := grpc.Dial(c.nodes[i].cfg.LCUrls[0].Host, dopts...)
 			if err != nil {
 				plog.Warning(err)
 				c.nodes[i].statusLock.Lock()
