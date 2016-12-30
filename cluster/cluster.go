@@ -32,6 +32,7 @@ import (
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/embed"
 	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
+	"github.com/coreos/etcd/pkg/netutil"
 	"github.com/coreos/etcd/pkg/transport"
 	"github.com/coreos/etcd/pkg/types"
 
@@ -158,6 +159,11 @@ func Start(ccfg Config) (c *Cluster, err error) {
 		peerScheme = "http"
 	}
 
+	dhost, err := netutil.GetDefaultHost()
+	if err != nil {
+		return nil, err
+	}
+
 	startPort := ccfg.RootPort
 	for i := 0; i < ccfg.Size; i++ {
 		cfg := embed.NewConfig()
@@ -171,7 +177,9 @@ func Start(ccfg Config) (c *Cluster, err error) {
 		os.RemoveAll(cfg.WalDir)
 
 		clientURL := url.URL{Scheme: clientScheme, Host: fmt.Sprintf("localhost:%d", startPort)}
-		cfg.LCUrls, cfg.ACUrls = []url.URL{clientURL}, []url.URL{clientURL}
+		aCURL := url.URL{Scheme: clientScheme, Host: fmt.Sprintf("%s:%d", dhost, startPort)}
+		cfg.LCUrls, cfg.ACUrls = []url.URL{clientURL}, []url.URL{clientURL, aCURL}
+		plog.Infof("%q setting up advertise-client-urls with %v", cfg.Name, cfg.ACUrls)
 
 		c.clientHostToIndex[clientURL.Host] = i
 
