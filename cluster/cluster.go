@@ -179,7 +179,7 @@ func Start(ccfg Config) (c *Cluster, err error) {
 		clientURL := url.URL{Scheme: clientScheme, Host: fmt.Sprintf("localhost:%d", startPort)}
 		aCURL := url.URL{Scheme: clientScheme, Host: fmt.Sprintf("%s:%d", dhost, startPort)}
 		cfg.LCUrls, cfg.ACUrls = []url.URL{clientURL}, []url.URL{clientURL, aCURL}
-		plog.Infof("%q setting up advertise-client-urls with %v", cfg.Name, cfg.ACUrls)
+		plog.Infof("%q advertises client with %s, %s", cfg.Name, clientURL.String(), aCURL.String())
 
 		c.clientHostToIndex[clientURL.Host] = i
 
