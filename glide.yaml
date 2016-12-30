@@ -9,6 +9,7 @@ import:
   - pkg/transport
   - pkg/types
   - pkg/httputil
+  - pkg/netutil
 - package: github.com/coreos/pkg
   version: 447b7ec906e523386d9c53be15b55a8ae86ea944
   subpackages:
