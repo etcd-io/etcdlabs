@@ -176,6 +176,9 @@ func Start(ccfg Config) (c *Cluster, err error) {
 		os.RemoveAll(cfg.Dir)
 		os.RemoveAll(cfg.WalDir)
 
+		// advertise localhost to not expose default host
+		// set default host in listen URLs for other machines to access
+		// within the same network (Prometheus dashboard for test-etcd)
 		clientURL := url.URL{Scheme: clientScheme, Host: fmt.Sprintf("localhost:%d", startPort)}
 		aCURL := url.URL{Scheme: clientScheme, Host: fmt.Sprintf("%s:%d", dhost, startPort)}
 		cfg.LCUrls, cfg.ACUrls = []url.URL{clientURL, aCURL}, []url.URL{clientURL}
