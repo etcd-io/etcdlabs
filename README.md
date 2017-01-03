@@ -16,7 +16,6 @@ See [etcd-play][old-etcd-play] for old code.
 - Backend
     - [Go](https://golang.org/)
 
-
 [old-etcd-play]: https://github.com/coreos/etcd-play
 [cistat]: https://travis-ci.org/coreos/etcdlabs
 [etcdlabs-godoc]: https://godoc.org/github.com/coreos/etcdlabs
