@@ -49,7 +49,7 @@ type MetricsResponse struct {
 // fetchMetricsRequestHandler handles fetch metrics requests.
 func fetchMetricsRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
 	switch req.Method {
-	case "GET":
+	case http.MethodGet:
 		mresp := MetricsResponse{Success: true}
 		if rmsg, ok := fetchMetricsLimiter.Check(); !ok { // rate limit exceeded
 			mresp.Success = false
