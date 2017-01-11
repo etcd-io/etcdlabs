@@ -106,13 +106,13 @@ func connectHandler(ctx context.Context, w http.ResponseWriter, req *http.Reques
 	userID := *user
 
 	switch req.Method {
-	case "GET":
+	case http.MethodGet:
 		resp := Connect{WebPort: globalWebserverPort, User: userID, Deleted: false}
 		if err := json.NewEncoder(w).Encode(resp); err != nil {
 			return err
 		}
 
-	case "DELETE": // user leaves component
+	case http.MethodDelete: // user leaves component
 		plog.Infof("user %q just left (user deleted)", userID)
 		globalUserCacheLock.Lock()
 		delete(globalUserCache, userID)
@@ -152,7 +152,7 @@ type ServerStatus struct {
 
 func serverStatusHandler(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
 	switch req.Method {
-	case "GET":
+	case http.MethodGet:
 		user := ctx.Value(userKey).(*string)
 		userID := *user
 		globalUserCacheLock.Lock()
@@ -214,8 +214,11 @@ var (
 // clientRequestHandler handles writes, reads, deletes, kill, restart operations.
 func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
 	switch req.Method {
-	case "POST":
+	case http.MethodPost:
 		cresp := ClientResponse{Success: true}
+		defer func() {
+			plog.Info(cresp.Result)
+		}()
 		if rmsg, ok := globalClientRequestLimiter.Check(); !ok {
 			cresp.Success = false
 			cresp.Result = "client request " + rmsg
