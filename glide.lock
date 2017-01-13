@@ -1,5 +1,5 @@
-hash: d66b6b01a29413f9c370f8b75e5ebb3e8a78c8d5a8d93e529cbb951861925273
-updated: 2017-01-11T09:36:59.476523833-08:00
+hash: fdda0a614e7cc902da09f05cfeaf487643a808f48ea29c89736bca49650bfbf7
+updated: 2017-01-13T11:36:36.113187261-08:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -10,7 +10,7 @@ imports:
 - name: github.com/cockroachdb/cmux
   version: 112f0506e7743d64a6eb8fedbcff13d9979bbf92
 - name: github.com/coreos/etcd
-  version: 925d1d74cec8c3b169c52fd4b2dc234a35934fce
+  version: bb797c1ee96b6a0bbac2e0ccbf2b0a46978d6b18
   subpackages:
   - alarm
   - auth
