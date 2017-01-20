@@ -1,5 +1,5 @@
-hash: fdda0a614e7cc902da09f05cfeaf487643a808f48ea29c89736bca49650bfbf7
-updated: 2017-01-13T11:36:36.113187261-08:00
+hash: a3d2b920949fbc188510dbb387551a07831778a4c760c80072f2c5d5e7fc1c3a
+updated: 2017-01-20T13:36:07.013951365-08:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -10,7 +10,7 @@ imports:
 - name: github.com/cockroachdb/cmux
   version: 112f0506e7743d64a6eb8fedbcff13d9979bbf92
 - name: github.com/coreos/etcd
-  version: bb797c1ee96b6a0bbac2e0ccbf2b0a46978d6b18
+  version: 3196d08c7a75ad34c75859529a7ff609527fe2a5
   subpackages:
   - alarm
   - auth
@@ -70,7 +70,7 @@ imports:
   subpackages:
   - semver
 - name: github.com/coreos/go-systemd
-  version: bfdc81d0d7e0fb19447b08571f63b774495251ce
+  version: 48702e0da86bd25e76cfef347e2adeb434a0d0a6
   subpackages:
   - journal
 - name: github.com/coreos/pkg
@@ -142,12 +142,14 @@ imports:
   - bcrypt
   - blowfish
 - name: golang.org/x/net
-  version: 6acef71eb69611914f7a30939ea9f6e194c78172
+  version: f2499483f923065a842d38eb4c7f1927e6fc6e6d
   subpackages:
   - context
   - http2
   - http2/hpack
+  - idna
   - internal/timeseries
+  - lex/httplex
   - trace
 - name: golang.org/x/sys
   version: d75a52659825e75fff6158388dddc6a5b04f9ba5
