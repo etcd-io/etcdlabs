@@ -64,13 +64,14 @@ func cleanCache(stopc <-chan struct{}) {
 		select {
 		case <-stopc:
 			return
-		case <-time.After(time.Hour):
+		case <-time.After(5 * time.Minute):
 		}
 
 		globalUserCacheLock.Lock()
 		for k, v := range globalUserCache {
-			if time.Since(v.lastActive) > 30*time.Minute {
-				plog.Infof("removing inactive user %q", k)
+			since := time.Since(v.lastActive)
+			if since > 15*time.Minute {
+				plog.Infof("removing inactive user %q (last active %v)", k, since)
 				delete(globalUserCache, k)
 			}
 		}
