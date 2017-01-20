@@ -58,7 +58,7 @@ export class InstallComponent extends ParentComponent {
         ///////////////////////////////////////////////////
 
         ///////////////////////////////////////////////////
-        this.go = new Go('1.8beta1');
+        this.go = new Go('1.8');
         this.inputGitUser = 'coreos';
         this.inputGitBranch = 'master';
         ///////////////////////////////////////////////////
@@ -151,7 +151,7 @@ export class InstallComponent extends ParentComponent {
                     'etcd-root-ca'
                 ),
             ],
-            new Rkt('v1.21.0', '/')
+            new Rkt('v1.23.0', '/')
         );
         ///////////////////////////////////////////////////
     }
