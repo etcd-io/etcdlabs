@@ -3,7 +3,7 @@ language: go
 sudo: false
 
 go:
-- tip
+- 1.8rc3
 
 script:
 - ./scripts/tests.sh
