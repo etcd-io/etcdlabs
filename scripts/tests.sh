@@ -6,8 +6,8 @@ if ! [[ "$0" =~ "scripts/tests.sh" ]]; then
     exit 255
 fi
 
-echo "running tslint..."
-yarn lint
+# echo "running tslint..."
+# yarn lint
 
 IGNORE_PKGS="(vendor)"
 TESTS=`find . -name \*_test.go | while read a; do dirname $a; done | sort | uniq | egrep -v "$IGNORE_PKGS"`
