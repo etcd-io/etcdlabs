@@ -18,7 +18,6 @@ import (
 	"crypto/sha512"
 	"encoding/base64"
 	"net/http"
-	"sort"
 	"strings"
 )
 
@@ -61,18 +60,6 @@ func maskUserID(id string) string {
 		bs = bs[:23] + "..."
 	}
 	return bs
-}
-
-func getUserIDs(m map[string]userData) []string {
-	s := make([]string, 0, len(m))
-	for id := range m {
-		s = append(s, maskUserID(id))
-		if len(s) > 20 {
-			break
-		}
-	}
-	sort.Strings(s)
-	return s
 }
 
 func classifyUA(ua string) string {
