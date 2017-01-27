@@ -14,8 +14,7 @@ TESTS=`find . -name \*_test.go | while read a; do dirname $a; done | sort | uniq
 
 # TODO: run with multi-CPU (not right now because of port conflict)
 echo "Running tests..."
-go test -v -cpu 1 $TESTS;
-go test -v -cpu 1 -race $TESTS;
+go test -v $TESTS;
 
 echo "Checking gofmt..."
 fmtRes=$(gofmt -l -s $TESTS 2>&1 >/dev/null)

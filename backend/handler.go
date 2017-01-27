@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"sort"
 	"sync"
 	"time"
 
@@ -37,7 +38,7 @@ type userData struct {
 }
 
 var (
-	globalUserCacheLock sync.Mutex
+	globalUserCacheLock sync.RWMutex
 	globalUserCache     = make(map[string]userData)
 )
 
@@ -151,6 +152,27 @@ type ServerStatus struct {
 	NodeStatuses []cluster.NodeStatus
 }
 
+func getUserIDs() []string {
+	globalUserCacheLock.RLock()
+	s := make([]string, 0, len(globalUserCache))
+	for id := range globalUserCache {
+		s = append(s, maskUserID(id))
+		if len(s) > 20 {
+			break
+		}
+	}
+	globalUserCacheLock.RUnlock()
+
+	sort.Strings(s)
+	return s
+}
+func getUserIDsN() (n int) {
+	globalUserCacheLock.RLock()
+	n = len(globalUserCache)
+	globalUserCacheLock.RUnlock()
+	return
+}
+
 func serverStatusHandler(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
 	switch req.Method {
 	case http.MethodGet:
@@ -168,8 +190,8 @@ func serverStatusHandler(ctx context.Context, w http.ResponseWriter, req *http.R
 		resp := ServerStatus{
 			PlaygroundActive: active,
 			ServerUptime:     humanize.Time(globalCluster.Started),
-			UserN:            len(globalUserCache),
-			Users:            getUserIDs(globalUserCache),
+			UserN:            getUserIDsN(),
+			Users:            getUserIDs(),
 			NodeStatuses:     globalCluster.AllNodeStatus(),
 		}
 		if err := json.NewEncoder(w).Encode(resp); err != nil {

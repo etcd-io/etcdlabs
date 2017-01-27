@@ -65,9 +65,9 @@ var (
 // 	testCluster(t, Config{Size: 3, ClientAutoTLS: true}, false, false)
 // }
 
-func TestCluster_Start_client_auto_TLS_scheme(t *testing.T) {
-	testCluster(t, Config{Size: 3, ClientAutoTLS: true}, true, false)
-}
+// func TestCluster_Start_client_auto_TLS_scheme(t *testing.T) {
+// 	testCluster(t, Config{Size: 3, ClientAutoTLS: true}, true, false)
+// }
 
 // func TestCluster_Recover_no_TLS(t *testing.T) {
 // 	testCluster(t, Config{Size: 3}, false, true)
