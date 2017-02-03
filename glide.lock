@@ -1,5 +1,5 @@
-hash: a3d2b920949fbc188510dbb387551a07831778a4c760c80072f2c5d5e7fc1c3a
-updated: 2017-01-20T13:36:07.013951365-08:00
+hash: dc2ca8e42afa009ea5ef0fb62483f41821b2ee7dbfe8e825d274fb2022281842
+updated: 2017-02-03T00:06:35.584312303-08:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -10,7 +10,7 @@ imports:
 - name: github.com/cockroachdb/cmux
   version: 112f0506e7743d64a6eb8fedbcff13d9979bbf92
 - name: github.com/coreos/etcd
-  version: 3196d08c7a75ad34c75859529a7ff609527fe2a5
+  version: d159353d51afd6689db010b0da886c58b100b6d0
   subpackages:
   - alarm
   - auth
@@ -40,6 +40,7 @@ imports:
   - pkg/adt
   - pkg/contention
   - pkg/cors
+  - pkg/cpuutil
   - pkg/crc
   - pkg/fileutil
   - pkg/httputil
@@ -125,7 +126,7 @@ imports:
   - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
-  version: fcdb11ccb4389efb1b210b7ffb623ab71c5fdd60
+  version: 1878d9fbb537119d24b21ca07effd591627cd160
 - name: github.com/spf13/cobra
   version: 9495bc009a56819bdb0ddbc1a373e29c140bc674
 - name: github.com/spf13/pflag
@@ -152,7 +153,7 @@ imports:
   - lex/httplex
   - trace
 - name: golang.org/x/sys
-  version: d75a52659825e75fff6158388dddc6a5b04f9ba5
+  version: 7a6e5648d140666db5d920909e082ca00a87ba2c
   subpackages:
   - unix
 - name: golang.org/x/time
