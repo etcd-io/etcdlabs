@@ -389,36 +389,16 @@
 		</md-tab>
 		<md-tab>
 			<template md-tab-label>
-				rkt
+				Docker
 			</template>
 			<template md-tab-content>
 				<br>
 				<h5>Why?</h5>
 				<p class="narrow-paragraph">
-					Application container gives much portability to initial development phase. Here's how to run etcd with <a href="https://github.com/coreos/rkt"
-									target="_blank" class="normal-link">rkt</a>.
+					Application container gives much portability to initial development phase. Here's how to run etcd with <a href="https://github.com/docker/docker" target="_blank" class="normal-link">Docker</a>.
 				</p>
 				<br>
-				<md-input type="text" [(ngModel)]="etcd.rkt.version" placeholder="rkt version"></md-input>
-				<md-input type="text" [(ngModel)]="etcd.rkt.execDir" placeholder="rkt exec dir"></md-input>
-				<br>
-				<br>
-				<h5>Install on Linux</h5>
-				<div class="osx-window">
-					<div class="window-long">
-						<div class="titlebar">
-							<div class="buttons">
-								<div class="closebtn"><span><strong></strong></span></div>
-								<div class="minimize"><span><strong></strong></span></div>
-								<div class="zoom"><span><strong></strong></span></div>
-							</div><span class="title-bar-text">terminal</span></div>
-						<div class="content">
-							<pre class="osx-terminal-contents">{{etcd.rkt.getInstallCommandLinux()}}</pre>
-						</div>
-					</div>
-				</div>
-				<br>
-				<h5>Run with rkt</h5>
+				<h5>Run with Docker</h5>
 				<p *ngIf="etcd.flags[0].ipAddress == 'localhost'">
 					Seems like etcd is configured to run in localhost. Please make sure ports and data directory do not conflict!
 				</p>
