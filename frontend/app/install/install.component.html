@@ -284,11 +284,11 @@
 
 {{cfssl.getCertsPrepareCommand(flag.certsDir)}}
 
-{{etcd.getCommand(flag, false, false)}}
+{{etcd.getCommand(flag, false, false, false)}}
 </pre>
 						<pre *ngIf="!etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}}
 
-{{etcd.getCommand(flag, false, false)}}
+{{etcd.getCommand(flag, false, false, false)}}
 </pre>
 						<br>
 					</div>
@@ -411,13 +411,13 @@
 
 {{cfssl.getCertsPrepareCommand(flag.certsDir)}}
 
-{{etcd.getServiceFileRkt(flag)}}
+{{etcd.getServiceFileDocker(flag)}}
 
 {{flag.getSystemdCommand()}}
 </pre>
 						<pre *ngIf="!etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}}
 
-{{etcd.getServiceFileRkt(flag)}}
+{{etcd.getServiceFileDocker(flag)}}
 
 {{flag.getSystemdCommand()}}
 </pre>

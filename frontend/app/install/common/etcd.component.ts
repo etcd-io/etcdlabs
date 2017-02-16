@@ -408,12 +408,21 @@ GOOGLE_URL=https://storage.googleapis.com/etcd
         return txt;
     }
 
-    getFlagTxt(flag: EtcdFlag, skipDataDir: boolean, oneLine: boolean) {
+    getFlagTxt(flag: EtcdFlag, skipDataDir: boolean, oneLine: boolean, docker: boolean) {
         let flags: string[] = [];
         flags.push('--name' + ' ' + flag.name);
 
+        let dataDir = flag.getDataDir();
+        if (docker) {
+            dataDir = '/etcd-data';
+        }
         if (!skipDataDir) {
-            flags.push('--data-dir' + ' ' + flag.getDataDir());
+            flags.push('--data-dir' + ' ' + dataDir);
+        }
+
+        let certsDir = flag.getCertsDir();
+        if (docker) {
+            certsDir = '/etcd-ssl-certs-dir';
         }
 
         flags.push('--listen-client-urls' + ' ' + flag.getListenClientURLs(this.secure));
@@ -426,14 +435,14 @@ GOOGLE_URL=https://storage.googleapis.com/etcd
 
         if (this.secure) {
             flags.push('--client-cert-auth');
-            flags.push('--trusted-ca-file' + ' ' + flag.getCertsDir() + '/' + flag.clientRootCAFile);
-            flags.push('--cert-file' + ' ' + flag.getCertsDir() + '/' + flag.clientCertFile);
-            flags.push('--key-file' + ' ' + flag.getCertsDir() + '/' + flag.clientKeyFile);
+            flags.push('--trusted-ca-file' + ' ' + certsDir + '/' + flag.clientRootCAFile);
+            flags.push('--cert-file' + ' ' + certsDir + '/' + flag.clientCertFile);
+            flags.push('--key-file' + ' ' + certsDir + '/' + flag.clientKeyFile);
 
             flags.push('--peer-client-cert-auth');
-            flags.push('--peer-trusted-ca-file' + ' ' + flag.getCertsDir() + '/' + flag.peerRootCAFile);
-            flags.push('--peer-cert-file' + ' ' + flag.getCertsDir() + '/' + flag.peerCertFile);
-            flags.push('--peer-key-file' + ' ' + flag.getCertsDir() + '/' + flag.peerKeyFile);
+            flags.push('--peer-trusted-ca-file' + ' ' + certsDir + '/' + flag.peerRootCAFile);
+            flags.push('--peer-cert-file' + ' ' + certsDir + '/' + flag.peerCertFile);
+            flags.push('--peer-key-file' + ' ' + certsDir + '/' + flag.peerKeyFile);
         }
 
         if (this.enableProfile) {
@@ -463,10 +472,10 @@ GOOGLE_URL=https://storage.googleapis.com/etcd
         return txt;
     }
 
-    getCommand(flag: EtcdFlag, skipDataDir: boolean, oneLine: boolean) {
+    getCommand(flag: EtcdFlag, skipDataDir: boolean, oneLine: boolean, docker: boolean) {
         let divide = getDivider(this.getExecDir());
         let exec = this.getExecDir() + divide + 'etcd';
-        return exec + ' ' + this.getFlagTxt(flag, skipDataDir, oneLine);
+        return exec + ' ' + this.getFlagTxt(flag, skipDataDir, oneLine, docker);
     }
 
     getEndpointHealthCommand(flag: EtcdFlag) {
@@ -502,7 +511,7 @@ RestartSec=5s
 LimitNOFILE=40000
 TimeoutStartSec=0
 
-ExecStart=` + this.getCommand(flag, false, false) + `
+ExecStart=` + this.getCommand(flag, false, false, false) + `
 
 [Install]
 WantedBy=multi-user.target
@@ -512,10 +521,10 @@ sudo mv /tmp/${flag.name}.service /etc/systemd/system/${flag.name}.service
 `;
     }
 
-    getServiceFileRkt(flag: EtcdFlag) {
+    getServiceFileDocker(flag: EtcdFlag) {
         let dockerExec = '/usr/bin';
         let divideRkt = getDivider(dockerExec);
-        let execRkt = dockerExec + divideRkt + 'docker';
+        let execDocker = dockerExec + divideRkt + 'docker';
 
         let dockerRunFlags: string[] = [];
         dockerRunFlags.push('run');
@@ -523,21 +532,20 @@ sudo mv /tmp/${flag.name}.service /etc/systemd/system/${flag.name}.service
         dockerRunFlags.push('--name' + ' ' + 'etcd-' + this.version);
         dockerRunFlags.push('--volume' + '=' + flag.getDataDir() + ':' + '/etcd-data');
         if (this.secure) {
-            dockerRunFlags.push('--volume' + ' ' + 'etcd-ssl-certs-dir,kind=host,source=' + flag.getCertsDir());
+            dockerRunFlags.push('--volume' + '=' + flag.getCertsDir() + ':' + '/etcd-ssl-certs-dir');
         }
+        dockerRunFlags.push('quay.io/coreos/etcd:' + this.version);
+        dockerRunFlags.push('/usr/local/bin/etcd');
 
-        dockerRunFlags.push('quay.io/coreos/etcd:' + this.version + ' ' + '--');
-
-        let cmd = '';
-
-        let txt = execRkt;
+        let txt = execDocker;
         let lineBreak = ' \\' + `
     `;
         for (let _i = 0; _i < dockerRunFlags.length; _i++) {
             txt += lineBreak + dockerRunFlags[_i];
         }
-        txt += lineBreak + this.getFlagTxt(flag, false, false); // do not skip --data-dir flag for OCI
+        txt += lineBreak + this.getFlagTxt(flag, false, false, true); // do not skip --data-dir flag for OCI
 
+        let cmd = '';
         cmd += `# to write service file for etcd with Docker
 cat > /tmp/${flag.name}.service <<EOF
 [Unit]
@@ -564,30 +572,5 @@ sudo mv /tmp/${flag.name}.service /etc/systemd/system/${flag.name}.service
 `;
 
         return cmd;
-    }
-
-    // https://github.com/coreos/coreos-overlay/tree/master/app-admin/etcd-wrapper/files
-    getServiceFileCoreOS(flag: EtcdFlag) {
-        let cmd = `# to update etcd-member service file
-cat > /tmp/override-${flag.name}.conf <<EOF
-[Service]
-Environment="ETCD_IMAGE_TAG=${this.version}"
-Environment="ETCD_DATA_DIR=${flag.getDataDir()}"
-Environment="ETCD_SSL_DIR=${flag.getCertsDir()}"
-Environment="ETCD_OPTS=${this.getFlagTxt(flag, true, false)}"
-EOF
-sudo mkdir -p /etc/systemd/system/etcd-member.service.d
-sudo mv /tmp/override-${flag.name}.conf /etc/systemd/system/etcd-member.service.d/override.conf
-
-# to check service-file-override status
-sudo systemd-delta --type=extended
-
-`;
-
-        return cmd;
-    }
-
-    getServiceFileCoreOSCommand() {
-        return getSystemdCommand('etcd-member');
     }
 }
