@@ -513,47 +513,36 @@ sudo mv /tmp/${flag.name}.service /etc/systemd/system/${flag.name}.service
     }
 
     getServiceFileRkt(flag: EtcdFlag) {
-        let divideRkt = getDivider(this.rkt.getExecDir());
-        let execRkt = this.rkt.getExecDir() + divideRkt + 'rkt';
+        let dockerExec = '/usr/bin';
+        let divideRkt = getDivider(dockerExec);
+        let execRkt = dockerExec + divideRkt + 'docker';
 
-        let rktFlags: string[] = [];
-        rktFlags.push('--trust-keys-from-https');
-
-        // optional '/var/lib/rkt' is the default
-        // rktFlags.push('--dir=/var/lib/rkt');
-
-        let rktRunFlags: string[] = [];
-        rktRunFlags.push('run');
-        rktRunFlags.push('--stage1-name' + ' ' + 'coreos.com/rkt/stage1-fly:' + this.rkt.stripVersion());
-        rktRunFlags.push('--net=host');
-        rktRunFlags.push('--volume' + ' ' + 'etcd-data-dir,kind=host,source=' + flag.getDataDir());
-        rktRunFlags.push('--mount' + ' ' + 'volume=etcd-data-dir,target=' + flag.getDataDir());
+        let dockerRunFlags: string[] = [];
+        dockerRunFlags.push('run');
+        dockerRunFlags.push('--net=host');
+        dockerRunFlags.push('--name' + ' ' + 'etcd-' + this.version);
+        dockerRunFlags.push('--volume' + '=' + flag.getDataDir() + ':' + '/etcd-data');
         if (this.secure) {
-            rktRunFlags.push('--volume' + ' ' + 'etcd-ssl-certs-dir,kind=host,source=' + flag.getCertsDir());
-            rktRunFlags.push('--mount' + ' ' + 'volume=etcd-ssl-certs-dir,target=' + flag.getCertsDir());
+            dockerRunFlags.push('--volume' + ' ' + 'etcd-ssl-certs-dir,kind=host,source=' + flag.getCertsDir());
         }
 
-        // OCI (ACI is deprecated)
-        rktRunFlags.push('quay.io/coreos/etcd:' + this.version + ' ' + '--');
+        dockerRunFlags.push('quay.io/coreos/etcd:' + this.version + ' ' + '--');
 
         let cmd = '';
 
         let txt = execRkt;
         let lineBreak = ' \\' + `
     `;
-        for (let _i = 0; _i < rktFlags.length; _i++) {
-            txt += lineBreak + rktFlags[_i];
-        }
-        for (let _i = 0; _i < rktRunFlags.length; _i++) {
-            txt += lineBreak + rktRunFlags[_i];
+        for (let _i = 0; _i < dockerRunFlags.length; _i++) {
+            txt += lineBreak + dockerRunFlags[_i];
         }
         txt += lineBreak + this.getFlagTxt(flag, false, false); // do not skip --data-dir flag for OCI
 
-        cmd += `# to write service file for etcd with rkt
+        cmd += `# to write service file for etcd with Docker
 cat > /tmp/${flag.name}.service <<EOF
 [Unit]
-Description=etcd with rkt
-Documentation=https://github.com/coreos/rkt
+Description=etcd with Docker
+Documentation=https://github.com/coreos/etcd
 
 [Service]
 Restart=always
@@ -562,6 +551,10 @@ TimeoutStartSec=0
 LimitNOFILE=40000
 
 ExecStart=` + txt + `
+
+ExecStop=...
+
+` + `
 
 [Install]
 WantedBy=multi-user.target
