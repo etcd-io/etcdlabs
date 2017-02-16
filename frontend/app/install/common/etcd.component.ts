@@ -132,7 +132,22 @@ sudo chmod -R a+rw ${this.getDataDir()}
         return txt;
     }
 
-    getClientURL(secure: boolean) {
+    getListenClientURLs(secure: boolean) {
+        let protocol = 'http';
+        if (secure) {
+            protocol = 'https';
+        }
+        let s = '';
+        if (this.ipAddress === 'localhost' || this.ipAddress === '0.0.0.0') {
+            return protocol + '://' + this.ipAddress + ':' + String(this.clientPort);
+        } else {
+            s += protocol + '://' + '0.0.0.0' + ':' + String(this.clientPort);
+            s += ',';
+        }
+        return s + protocol + '://' + this.ipAddress + ':' + String(this.clientPort);
+    }
+
+    getAdvertiseClientURLs(secure: boolean) {
         let protocol = 'http';
         if (secure) {
             protocol = 'https';
@@ -401,8 +416,8 @@ GOOGLE_URL=https://storage.googleapis.com/etcd
             flags.push('--data-dir' + ' ' + flag.getDataDir());
         }
 
-        flags.push('--listen-client-urls' + ' ' + flag.getClientURL(this.secure));
-        flags.push('--advertise-client-urls' + ' ' + flag.getClientURL(this.secure));
+        flags.push('--listen-client-urls' + ' ' + flag.getListenClientURLs(this.secure));
+        flags.push('--advertise-client-urls' + ' ' + flag.getAdvertiseClientURLs(this.secure));
         flags.push('--listen-peer-urls' + ' ' + flag.getPeerURL(this.secure));
         flags.push('--initial-advertise-peer-urls' + ' ' + flag.getPeerURL(this.secure));
         flags.push('--initial-cluster' + ' ' + this.getInitialClusterTxt());
