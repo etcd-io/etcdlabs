@@ -510,6 +510,7 @@ GOOGLE_URL=https://storage.googleapis.com/etcd
             cmd += 'export ETCDCTL_API=3';
             cmd += ' && ';
             cmd += '/usr/local/bin/etcdctl';
+            cmd += ' ' + '--endpoints' + ' ' + this.getClientEndpointsTxt();
             cmd += ' ';
             if (this.secure) {
                 let cs = '/etcd-ssl-certs-dir';
