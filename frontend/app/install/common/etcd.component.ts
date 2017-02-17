@@ -1,5 +1,3 @@
-import { Rkt } from './rkt.component';
-
 function getDivider(execDir: string) {
     let divider = '/';
     if (execDir === undefined || execDir === '/') {
@@ -187,8 +185,6 @@ export class Etcd {
     // per-node configuration
     flags: EtcdFlag[];
 
-    rkt: Rkt;
-
     constructor(
         version: string,
         execDir: string,
@@ -201,8 +197,6 @@ export class Etcd {
         clusterSize: number,
 
         flags: EtcdFlag[],
-
-        rkt: Rkt,
     ) {
         this.version = version;
         this.execDir = execDir;
@@ -215,8 +209,6 @@ export class Etcd {
         this.clusterSize = clusterSize;
 
         this.flags = flags;
-
-        this.rkt = rkt;
     }
 
     getFlagHelpURL() {
