@@ -132,7 +132,7 @@ sudo chmod -R a+rw ${this.getDataDir()}
         return txt;
     }
 
-    getListenClientURLs(secure: boolean) {
+    getListenClientURLs(secure: boolean, docker: boolean) {
         let protocol = 'http';
         if (secure) {
             protocol = 'https';
@@ -141,8 +141,10 @@ sudo chmod -R a+rw ${this.getDataDir()}
         if (this.ipAddress === 'localhost' || this.ipAddress === '0.0.0.0') {
             return protocol + '://' + this.ipAddress + ':' + String(this.clientPort);
         } else {
-            s += protocol + '://' + '0.0.0.0' + ':' + String(this.clientPort);
-            s += ',';
+            if (!docker) {
+                s += protocol + '://' + '0.0.0.0' + ':' + String(this.clientPort);
+                s += ',';
+            }
         }
         return s + protocol + '://' + this.ipAddress + ':' + String(this.clientPort);
     }
@@ -425,7 +427,7 @@ GOOGLE_URL=https://storage.googleapis.com/etcd
             certsDir = '/etcd-ssl-certs-dir';
         }
 
-        flags.push('--listen-client-urls' + ' ' + flag.getListenClientURLs(this.secure));
+        flags.push('--listen-client-urls' + ' ' + flag.getListenClientURLs(this.secure, docker));
         flags.push('--advertise-client-urls' + ' ' + flag.getAdvertiseClientURLs(this.secure));
         flags.push('--listen-peer-urls' + ' ' + flag.getPeerURL(this.secure));
         flags.push('--initial-advertise-peer-urls' + ' ' + flag.getPeerURL(this.secure));
