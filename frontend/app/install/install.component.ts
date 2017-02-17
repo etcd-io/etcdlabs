@@ -3,7 +3,6 @@ import { ParentComponent } from './common/common.component';
 import { CFSSL } from './common/cfssl.component';
 import { Go } from './common/go.component';
 import { Etcd, EtcdFlag } from './common/etcd.component';
-import { Rkt } from './common/rkt.component';
 
 @Component({
     selector: 'app-install',
@@ -27,11 +26,6 @@ export class InstallComponent extends ParentComponent {
     ////////////////////////////////////
     // etcd setting properties
     etcd: Etcd;
-    ////////////////////////////////////
-
-    ////////////////////////////////////
-    // rkt setting properties
-    rkt: Rkt;
     ////////////////////////////////////
 
     constructor() {
@@ -150,8 +144,7 @@ export class InstallComponent extends ParentComponent {
                     'new',
                     'etcd-root-ca'
                 ),
-            ],
-            new Rkt('v1.23.0', '/')
+            ]
         );
         ///////////////////////////////////////////////////
     }

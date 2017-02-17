@@ -1,5 +1,3 @@
-import { Rkt } from './rkt.component';
-
 function getDivider(execDir: string) {
     let divider = '/';
     if (execDir === undefined || execDir === '/') {
@@ -132,7 +130,24 @@ sudo chmod -R a+rw ${this.getDataDir()}
         return txt;
     }
 
-    getClientURL(secure: boolean) {
+    getListenClientURLs(secure: boolean, docker: boolean) {
+        let protocol = 'http';
+        if (secure) {
+            protocol = 'https';
+        }
+        let s = '';
+        if (this.ipAddress === 'localhost' || this.ipAddress === '0.0.0.0') {
+            return protocol + '://' + this.ipAddress + ':' + String(this.clientPort);
+        } else {
+            if (!docker) {
+                s += protocol + '://' + '0.0.0.0' + ':' + String(this.clientPort);
+                s += ',';
+            }
+        }
+        return s + protocol + '://' + this.ipAddress + ':' + String(this.clientPort);
+    }
+
+    getAdvertiseClientURLs(secure: boolean) {
         let protocol = 'http';
         if (secure) {
             protocol = 'https';
@@ -170,14 +185,6 @@ export class Etcd {
     // per-node configuration
     flags: EtcdFlag[];
 
-    rkt: Rkt;
-
-    operatorReplicas: number;
-    operatorClusterSize: number;
-    operatorSnapshotIntervalInSecond: number;
-    operatorMaxSnapshot: number;
-    operatorBackupVolumeSizeInMB: number;
-
     constructor(
         version: string,
         execDir: string,
@@ -190,8 +197,6 @@ export class Etcd {
         clusterSize: number,
 
         flags: EtcdFlag[],
-
-        rkt: Rkt,
     ) {
         this.version = version;
         this.execDir = execDir;
@@ -204,14 +209,6 @@ export class Etcd {
         this.clusterSize = clusterSize;
 
         this.flags = flags;
-
-        this.rkt = rkt;
-
-        this.operatorReplicas = 1;
-        this.operatorClusterSize = this.clusterSize;
-        this.operatorSnapshotIntervalInSecond = 1800;
-        this.operatorMaxSnapshot = 5;
-        this.operatorBackupVolumeSizeInMB = 512;
     }
 
     getFlagHelpURL() {
@@ -405,16 +402,25 @@ GOOGLE_URL=https://storage.googleapis.com/etcd
         return txt;
     }
 
-    getFlagTxt(flag: EtcdFlag, skipDataDir: boolean, oneLine: boolean) {
+    getFlagTxt(flag: EtcdFlag, skipDataDir: boolean, oneLine: boolean, docker: boolean) {
         let flags: string[] = [];
         flags.push('--name' + ' ' + flag.name);
 
+        let dataDir = flag.getDataDir();
+        if (docker) {
+            dataDir = '/etcd-data';
+        }
         if (!skipDataDir) {
-            flags.push('--data-dir' + ' ' + flag.getDataDir());
+            flags.push('--data-dir' + ' ' + dataDir);
         }
 
-        flags.push('--listen-client-urls' + ' ' + flag.getClientURL(this.secure));
-        flags.push('--advertise-client-urls' + ' ' + flag.getClientURL(this.secure));
+        let certsDir = flag.getCertsDir();
+        if (docker) {
+            certsDir = '/etcd-ssl-certs-dir';
+        }
+
+        flags.push('--listen-client-urls' + ' ' + flag.getListenClientURLs(this.secure, docker));
+        flags.push('--advertise-client-urls' + ' ' + flag.getAdvertiseClientURLs(this.secure));
         flags.push('--listen-peer-urls' + ' ' + flag.getPeerURL(this.secure));
         flags.push('--initial-advertise-peer-urls' + ' ' + flag.getPeerURL(this.secure));
         flags.push('--initial-cluster' + ' ' + this.getInitialClusterTxt());
@@ -423,14 +429,14 @@ GOOGLE_URL=https://storage.googleapis.com/etcd
 
         if (this.secure) {
             flags.push('--client-cert-auth');
-            flags.push('--trusted-ca-file' + ' ' + flag.getCertsDir() + '/' + flag.clientRootCAFile);
-            flags.push('--cert-file' + ' ' + flag.getCertsDir() + '/' + flag.clientCertFile);
-            flags.push('--key-file' + ' ' + flag.getCertsDir() + '/' + flag.clientKeyFile);
+            flags.push('--trusted-ca-file' + ' ' + certsDir + '/' + flag.clientRootCAFile);
+            flags.push('--cert-file' + ' ' + certsDir + '/' + flag.clientCertFile);
+            flags.push('--key-file' + ' ' + certsDir + '/' + flag.clientKeyFile);
 
             flags.push('--peer-client-cert-auth');
-            flags.push('--peer-trusted-ca-file' + ' ' + flag.getCertsDir() + '/' + flag.peerRootCAFile);
-            flags.push('--peer-cert-file' + ' ' + flag.getCertsDir() + '/' + flag.peerCertFile);
-            flags.push('--peer-key-file' + ' ' + flag.getCertsDir() + '/' + flag.peerKeyFile);
+            flags.push('--peer-trusted-ca-file' + ' ' + certsDir + '/' + flag.peerRootCAFile);
+            flags.push('--peer-cert-file' + ' ' + certsDir + '/' + flag.peerCertFile);
+            flags.push('--peer-key-file' + ' ' + certsDir + '/' + flag.peerKeyFile);
         }
 
         if (this.enableProfile) {
@@ -460,26 +466,57 @@ GOOGLE_URL=https://storage.googleapis.com/etcd
         return txt;
     }
 
-    getCommand(flag: EtcdFlag, skipDataDir: boolean, oneLine: boolean) {
+    getCommand(flag: EtcdFlag, skipDataDir: boolean, oneLine: boolean, docker: boolean) {
         let divide = getDivider(this.getExecDir());
         let exec = this.getExecDir() + divide + 'etcd';
-        return exec + ' ' + this.getFlagTxt(flag, skipDataDir, oneLine);
+        return exec + ' ' + this.getFlagTxt(flag, skipDataDir, oneLine, docker);
     }
 
-    getEndpointHealthCommand(flag: EtcdFlag) {
+    getEndpointHealthCommand(flag: EtcdFlag, docker: boolean) {
         let divide = getDivider(this.getExecDir());
         let exec = this.getExecDir() + divide + 'etcdctl';
 
-        let cmd = 'ETCDCTL_API=3 ' + exec + ' \\' + `
-    ` + '--endpoints' + ' ' + this.getClientEndpointsTxt() + ' \\' + `
+        let lineBreak = `
     `;
+        let cmd = 'ETCDCTL_API=3 ' + exec + ' \\' + lineBreak + '--endpoints' + ' ' + this.getClientEndpointsTxt() + ' \\' + lineBreak;
         if (this.secure) {
-            cmd += '--cacert' + ' ' + flag.getCertsDir() + '/' + flag.clientRootCAFile + ' \\' + `
-    ` + '--cert' + ' ' + flag.getCertsDir() + '/' + flag.clientCertFile + ' \\' + `
-    ` + '--key' + ' ' + flag.getCertsDir() + '/' + flag.clientKeyFile + ' \\' + `
-    `;
+            cmd += '--cacert' + ' ' + flag.getCertsDir() + '/' + flag.clientRootCAFile
+            + ' \\' + lineBreak + '--cert' + ' ' + flag.getCertsDir() + '/' + flag.clientCertFile
+            + ' \\' + lineBreak + '--key' + ' ' + flag.getCertsDir() + '/' + flag.clientKeyFile
+            + ' \\' + lineBreak;
         }
         cmd += 'endpoint health';
+
+        if (docker) {
+            // sudo docker exec etcd-v3.1.0 /bin/sh -c "export ETCDCTL_API=3 && /usr/local/bin/etcdctl endpoint health"
+            cmd += `
+
+
+# to use 'docker' command to check the status
+`;
+            cmd += '/usr/bin/docker' + ' \\' + lineBreak;
+            cmd += 'exec' + ' \\' + lineBreak;
+            cmd += 'etcd-' + this.version + ' \\' + lineBreak;
+            cmd += '/bin/sh' + ' ' + '-c' + ' ';
+            cmd += '"';
+            cmd += 'export ETCDCTL_API=3';
+            cmd += ' && ';
+            cmd += '/usr/local/bin/etcdctl';
+            cmd += ' ' + '--endpoints' + ' ' + this.getClientEndpointsTxt();
+            cmd += ' ';
+            if (this.secure) {
+                let cs = '/etcd-ssl-certs-dir';
+                cmd += '--cacert' + ' ' + cs + '/' + flag.clientRootCAFile;
+                cmd += ' ' + '--cert' + ' ' + cs + '/' + flag.clientCertFile;
+                cmd += ' ' + '--key' + ' ' + cs + '/' + flag.clientKeyFile;
+                cmd += ' ';
+            }
+            cmd += 'endpoint health';
+            cmd += '"' + `
+
+`;
+        }
+
         return cmd;
     }
 
@@ -499,7 +536,7 @@ RestartSec=5s
 LimitNOFILE=40000
 TimeoutStartSec=0
 
-ExecStart=` + this.getCommand(flag, false, false) + `
+ExecStart=` + this.getCommand(flag, false, false, false) + `
 
 [Install]
 WantedBy=multi-user.target
@@ -509,48 +546,41 @@ sudo mv /tmp/${flag.name}.service /etc/systemd/system/${flag.name}.service
 `;
     }
 
-    getServiceFileRkt(flag: EtcdFlag) {
-        let divideRkt = getDivider(this.rkt.getExecDir());
-        let execRkt = this.rkt.getExecDir() + divideRkt + 'rkt';
+    getServiceFileDocker(flag: EtcdFlag) {
+        let dockerExec = '/usr/bin';
+        let divideDocker = getDivider(dockerExec);
+        let execDocker = dockerExec + divideDocker + 'docker';
+        let dockerContainerName = 'etcd-' + this.version;
 
-        let rktFlags: string[] = [];
-        rktFlags.push('--trust-keys-from-https');
-
-        // optional '/var/lib/rkt' is the default
-        // rktFlags.push('--dir=/var/lib/rkt');
-
-        let rktRunFlags: string[] = [];
-        rktRunFlags.push('run');
-        rktRunFlags.push('--stage1-name' + ' ' + 'coreos.com/rkt/stage1-fly:' + this.rkt.stripVersion());
-        rktRunFlags.push('--net=host');
-        rktRunFlags.push('--volume' + ' ' + 'etcd-data-dir,kind=host,source=' + flag.getDataDir());
-        rktRunFlags.push('--mount' + ' ' + 'volume=etcd-data-dir,target=' + flag.getDataDir());
+        let dockerRunFlags: string[] = [];
+        dockerRunFlags.push('run');
+        dockerRunFlags.push('--net=host');
+        dockerRunFlags.push('--name' + ' ' + dockerContainerName);
+        dockerRunFlags.push('--volume' + '=' + flag.getDataDir() + ':' + '/etcd-data');
         if (this.secure) {
-            rktRunFlags.push('--volume' + ' ' + 'etcd-ssl-certs-dir,kind=host,source=' + flag.getCertsDir());
-            rktRunFlags.push('--mount' + ' ' + 'volume=etcd-ssl-certs-dir,target=' + flag.getCertsDir());
+            dockerRunFlags.push('--volume' + '=' + flag.getCertsDir() + ':' + '/etcd-ssl-certs-dir');
         }
+        dockerRunFlags.push('quay.io/coreos/etcd:' + this.version);
+        dockerRunFlags.push('/usr/local/bin/etcd');
 
-        // OCI (ACI is deprecated)
-        rktRunFlags.push('quay.io/coreos/etcd:' + this.version + ' ' + '--');
-
-        let cmd = '';
-
-        let txt = execRkt;
+        let execStart = execDocker;
         let lineBreak = ' \\' + `
     `;
-        for (let _i = 0; _i < rktFlags.length; _i++) {
-            txt += lineBreak + rktFlags[_i];
+        for (let _i = 0; _i < dockerRunFlags.length; _i++) {
+            execStart += lineBreak + dockerRunFlags[_i];
         }
-        for (let _i = 0; _i < rktRunFlags.length; _i++) {
-            txt += lineBreak + rktRunFlags[_i];
-        }
-        txt += lineBreak + this.getFlagTxt(flag, false, false); // do not skip --data-dir flag for OCI
+        execStart += lineBreak + this.getFlagTxt(flag, false, false, true); // do not skip --data-dir flag for OCI
 
-        cmd += `# to write service file for etcd with rkt
+        // docker stop sends 'SIGTERM'
+        // docker kill sends 'SIGKILL'
+        let execStop = execDocker + ' ' + 'stop' + ' ' + dockerContainerName;
+
+        let cmd = '';
+        cmd += `# to write service file for etcd with Docker
 cat > /tmp/${flag.name}.service <<EOF
 [Unit]
-Description=etcd with rkt
-Documentation=https://github.com/coreos/rkt
+Description=etcd with Docker
+Documentation=https://github.com/coreos/etcd
 
 [Service]
 Restart=always
@@ -558,8 +588,10 @@ RestartSec=5s
 TimeoutStartSec=0
 LimitNOFILE=40000
 
-ExecStart=` + txt + `
+ExecStart=` + execStart + `
 
+ExecStop=` + execStop + `
+` + `
 [Install]
 WantedBy=multi-user.target
 EOF
@@ -568,121 +600,5 @@ sudo mv /tmp/${flag.name}.service /etc/systemd/system/${flag.name}.service
 `;
 
         return cmd;
-    }
-
-    // https://github.com/coreos/coreos-overlay/tree/master/app-admin/etcd-wrapper/files
-    getServiceFileCoreOS(flag: EtcdFlag) {
-        let cmd = `# to update etcd-member service file
-cat > /tmp/override-${flag.name}.conf <<EOF
-[Service]
-Environment="ETCD_IMAGE_TAG=${this.version}"
-Environment="ETCD_DATA_DIR=${flag.getDataDir()}"
-Environment="ETCD_SSL_DIR=${flag.getCertsDir()}"
-Environment="ETCD_OPTS=${this.getFlagTxt(flag, true, false)}"
-EOF
-sudo mkdir -p /etc/systemd/system/etcd-member.service.d
-sudo mv /tmp/override-${flag.name}.conf /etc/systemd/system/etcd-member.service.d/override.conf
-
-# to check service-file-override status
-sudo systemd-delta --type=extended
-
-`;
-
-        return cmd;
-    }
-
-    getServiceFileCoreOSCommand() {
-        return getSystemdCommand('etcd-member');
-    }
-
-    getOperatorEndpoints() {
-        let txt = '';
-        for (let _i = 0; _i < this.operatorClusterSize; _i++) {
-            txt += 'http://etcd-cluster-000' + String(_i) + ':2379';
-            if (_i === this.operatorClusterSize - 1) {
-                break;
-            }
-            txt += ',';
-        }
-        return txt;
-    }
-
-    getOperatorKubectlEndpointHealthCommand() {
-        let lineBreak = ' \\' + `
-    `;
-        let cmd = `# Test with kubectl
-kubectl run --rm -i test`;
-        cmd += lineBreak + `--image quay.io/coreos/etcd`;
-        cmd += lineBreak + `--restart=Never`;
-        cmd += '--' + lineBreak + `/bin/sh -c "ETCDCTL_API=3 /usr/local/bin/etcdctl --endpoints=${this.getOperatorEndpoints()} endpoint health"`;
-        return cmd;
-    }
-
-    getOperatorCommand() {
-        return `# make sure Kubernetes API servers are available
-kubectl cluster-info
-
-
-# Deploy etcd-operator
-cat > /tmp/etcd-operator-deployment.yaml <<EOF
-apiVersion: extensions/v1beta1
-kind: Deployment
-metadata:
-  name: etcd-operator
-spec:
-  replicas: ${sanitizeNumber(this.operatorReplicas, 1, 3)}
-  template:
-    metadata:
-      labels:
-        name: etcd-operator
-    spec:
-      containers:
-      - name: etcd-operator
-        image: quay.io/coreos/etcd-operator
-        env:
-        - name: MY_POD_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-EOF
-
-kubectl create -f /tmp/etcd-operator-deployment.yaml
-kubectl get deployments
-kubectl get thirdpartyresources
-kubectl get pods
-
-
-
-# Create etcd cluster
-cat > /tmp/etcd-operator-cluster.yaml <<EOF
-apiVersion: coreos.com/v1
-kind: EtcdCluster
-metadata:
-  name: etcd-cluster
-
-spec:
-  size: ${sanitizeNumber(this.operatorClusterSize, 1, 7)}
-  version: ${this.version}
-
-  backup:
-    # interval to save snapshot of etcd, used for disaster recovery
-    snapshotIntervalInSecond: ${sanitizeNumber(this.operatorSnapshotIntervalInSecond, 10, 999999)}
-
-    # maximum number of snapshot files to retain; 0 to disable backup (not recommended)
-    maxSnapshot: ${sanitizeNumber(this.operatorMaxSnapshot, 0, 999999)}
-
-    # size of volume for persistent disk used for backup
-    volumeSizeInMB: ${sanitizeNumber(this.operatorBackupVolumeSizeInMB, 0, 9999999)}
-    storageType: PersistentVolume
-
-EOF
-kubectl create -f /tmp/etcd-operator-cluster.yaml
-kubectl get pods
-kubectl get services
-
-
-${this.getOperatorKubectlEndpointHealthCommand()}
-
-`;
     }
 }

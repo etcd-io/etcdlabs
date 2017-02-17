@@ -284,11 +284,11 @@
 
 {{cfssl.getCertsPrepareCommand(flag.certsDir)}}
 
-{{etcd.getCommand(flag, false, false)}}
+{{etcd.getCommand(flag, false, false, false)}}
 </pre>
 						<pre *ngIf="!etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}}
 
-{{etcd.getCommand(flag, false, false)}}
+{{etcd.getCommand(flag, false, false, false)}}
 </pre>
 						<br>
 					</div>
@@ -304,7 +304,7 @@
 								<div class="zoom"><span><strong></strong></span></div>
 							</div><span class="title-bar-text">terminal</span></div>
 						<div class="content">
-							<pre class="osx-terminal-contents">{{etcd.getEndpointHealthCommand(etcd.flags[0])}}</pre>
+							<pre class="osx-terminal-contents">{{etcd.getEndpointHealthCommand(etcd.flags[0], false)}}</pre>
 						</div>
 					</div>
 				</div>
@@ -378,7 +378,7 @@
 								<div class="zoom"><span><strong></strong></span></div>
 							</div><span class="title-bar-text">terminal</span></div>
 						<div class="content">
-							<pre class="osx-terminal-contents">{{etcd.getEndpointHealthCommand(etcd.flags[0])}}</pre>
+							<pre class="osx-terminal-contents">{{etcd.getEndpointHealthCommand(etcd.flags[0], false)}}</pre>
 						</div>
 					</div>
 				</div>
@@ -389,36 +389,19 @@
 		</md-tab>
 		<md-tab>
 			<template md-tab-label>
-				rkt
+				Docker
 			</template>
 			<template md-tab-content>
 				<br>
 				<h5>Why?</h5>
 				<p class="narrow-paragraph">
-					Application container gives much portability to initial development phase. Here's how to run etcd with <a href="https://github.com/coreos/rkt"
-									target="_blank" class="normal-link">rkt</a>.
+					Application container gives much portability to initial development phase. Here's how to run etcd with <a href="https://github.com/docker/docker" target="_blank" class="normal-link">Docker</a>.
+				</p>
+				<p class="narrow-paragraph">
+					You can run this in <a href="https://coreos.com/why" target="_blank" class="normal-link">Container Linux by CoreOS</a>.
 				</p>
 				<br>
-				<md-input type="text" [(ngModel)]="etcd.rkt.version" placeholder="rkt version"></md-input>
-				<md-input type="text" [(ngModel)]="etcd.rkt.execDir" placeholder="rkt exec dir"></md-input>
-				<br>
-				<br>
-				<h5>Install on Linux</h5>
-				<div class="osx-window">
-					<div class="window-long">
-						<div class="titlebar">
-							<div class="buttons">
-								<div class="closebtn"><span><strong></strong></span></div>
-								<div class="minimize"><span><strong></strong></span></div>
-								<div class="zoom"><span><strong></strong></span></div>
-							</div><span class="title-bar-text">terminal</span></div>
-						<div class="content">
-							<pre class="osx-terminal-contents">{{etcd.rkt.getInstallCommandLinux()}}</pre>
-						</div>
-					</div>
-				</div>
-				<br>
-				<h5>Run with rkt</h5>
+				<h5>Run with Docker</h5>
 				<p *ngIf="etcd.flags[0].ipAddress == 'localhost'">
 					Seems like etcd is configured to run in localhost. Please make sure ports and data directory do not conflict!
 				</p>
@@ -431,13 +414,13 @@
 
 {{cfssl.getCertsPrepareCommand(flag.certsDir)}}
 
-{{etcd.getServiceFileRkt(flag)}}
+{{etcd.getServiceFileDocker(flag)}}
 
 {{flag.getSystemdCommand()}}
 </pre>
 						<pre *ngIf="!etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}}
 
-{{etcd.getServiceFileRkt(flag)}}
+{{etcd.getServiceFileDocker(flag)}}
 
 {{flag.getSystemdCommand()}}
 </pre>
@@ -450,105 +433,16 @@
 
 {{cfssl.getCertsPrepareCommand(etcd.flags[0].certsDir)}}
 
-{{etcd.getEndpointHealthCommand(etcd.flags[0])}}
+{{etcd.getEndpointHealthCommand(etcd.flags[0], true)}}
 </pre>
 				<pre *ngIf="!etcd.secure" class="code-dark">{{etcd.getInstallCommandLinux()}}
 
-{{etcd.getEndpointHealthCommand(etcd.flags[0])}}
+{{etcd.getEndpointHealthCommand(etcd.flags[0], true)}}
 </pre>
 				<div align="right" class="narrow-paragraph"><a href="/install#top" class="normal-link">↑ top</a></div>
 				<br>
 				<br>
 			</template>
-		</md-tab>
-		<md-tab>
-			<template md-tab-label>
-				Container Linux by CoreOS
-			</template>
-			<template md-tab-content>
-				<br>
-				<h5>Why?</h5>
-				<p class="narrow-paragraph">
-					<a href="https://coreos.com/why" target="_blank" class="normal-link">Container Linux</a> by CoreOS is a lightweight Linux operating system for automated security updates and scalable cluster deployment. System and security patches are regularly pushed to Container Linux machines without requiring intervention by administrators.
-				</p>
-				<br>
-				<md-input type="text" [(ngModel)]="etcd.version" placeholder="etcd version"></md-input>
-				<br>
-				<br>
-				<h5>Run with Container Linux</h5>
-				<p class="narrow-paragraph">
-					Experimental! This only works in alpha and beta channel for now.
-				</p>
-				<p *ngIf="etcd.flags[0].ipAddress == 'localhost'">
-					Seems like etcd is configured to run in localhost. Please make sure ports and data directory do not conflict!
-				</p>
-				<div *ngFor="let flag of etcd.flags; let i = index;">
-					<div *ngIf="etcd.clusterSize > i">
-						<pre *ngIf="etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}}
-
-{{cfssl.getCertsPrepareCommand(flag.certsDir)}}
-
-{{etcd.getServiceFileCoreOS(flag)}}
-
-{{etcd.getServiceFileCoreOSCommand()}}
-</pre>
-						<pre *ngIf="!etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}}
-
-{{etcd.getServiceFileCoreOS(flag)}}
-
-{{etcd.getServiceFileCoreOSCommand()}}
-</pre>
-						<br>
-					</div>
-				</div>
-				<br> Check status:
-				<br>
-				<pre *ngIf="etcd.secure" class="code-dark">{{etcd.getInstallCommandLinux()}}
-
-{{cfssl.getCertsPrepareCommand(etcd.flags[0].certsDir)}}
-
-{{etcd.getEndpointHealthCommand(etcd.flags[0])}}
-</pre>
-				<pre *ngIf="!etcd.secure" class="code-dark">{{etcd.getInstallCommandLinux()}}
-
-{{etcd.getEndpointHealthCommand(etcd.flags[0])}}
-</pre>
-			</template>
-			<div align="right" class="narrow-paragraph"><a href="/install#top" class="normal-link">↑ top</a></div>
-			<br>
-			<br>
-		</md-tab>
-		<md-tab>
-			<template md-tab-label>
-				etcd-operator
-			</template>
-			<template md-tab-content>
-				<br>
-				<h5>Why?</h5>
-				<p class="narrow-paragraph">
-					Application container gives much portability to initial development phase. But operating and scaling container requires much
-					more work. <a href="http://kubernetes.io/" target="_blank" class="normal-link">Kubernetes</a> manages such complex
-					container environments. <a href="https://github.com/coreos/etcd-operator" target="_blank" class="normal-link">etcd-operator</a>					deploys and manages etcd on Kubernetes; create, destroy, resize, recover, backup, rolling upgrade, and so on.
-				</p>
-				<br>
-				<md-input type="text" [(ngModel)]="etcd.version" placeholder="etcd version" style="width: 220px;"></md-input>
-				<md-input type="number" [(ngModel)]="etcd.operatorReplicas" placeholder="Number of operator replicas" style="width: 220px;"></md-input>
-				<md-input type="number" [(ngModel)]="etcd.operatorClusterSize" placeholder="Cluster size (up to 7)" style="width: 220px;"></md-input>
-				<span *ngIf="etcd.operatorClusterSize > 7" class="error-message">Recommended maximum cluster size is 7</span>
-				<span *ngIf="etcd.operatorClusterSize < 1" class="error-message">Minimum cluster size is 1</span>
-				<span *ngIf="etcd.operatorClusterSize % 2 == 0" class="error-message">Cluster size should an odd number</span>
-				<br>
-				<md-input type="number" [(ngModel)]="etcd.operatorSnapshotIntervalInSecond" placeholder="Snapshot(backup) interval (seconds)"
-								style="width: 220px;"></md-input>
-				<md-input type="number" [(ngModel)]="etcd.operatorMaxSnapshot" placeholder="Back-up files to retain" style="width: 220px;"></md-input>
-				<md-input type="number" [(ngModel)]="etcd.operatorBackupVolumeSizeInMB" placeholder="Back-up volume size (MB)" style="width: 220px;"></md-input>
-				<br>
-				<pre class="code-dark">{{etcd.getOperatorCommand()}}
-</pre>
-			</template>
-			<div align="right" class="narrow-paragraph"><a href="/install#top" class="normal-link">↑ top</a></div>
-			<br>
-			<br>
 		</md-tab>
 	</md-tab-group>
 </div>
