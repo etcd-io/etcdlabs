@@ -478,20 +478,50 @@ GOOGLE_URL=https://storage.googleapis.com/etcd
         return exec + ' ' + this.getFlagTxt(flag, skipDataDir, oneLine, docker);
     }
 
-    getEndpointHealthCommand(flag: EtcdFlag) {
+    getEndpointHealthCommand(flag: EtcdFlag, docker: boolean) {
         let divide = getDivider(this.getExecDir());
         let exec = this.getExecDir() + divide + 'etcdctl';
 
-        let cmd = 'ETCDCTL_API=3 ' + exec + ' \\' + `
-    ` + '--endpoints' + ' ' + this.getClientEndpointsTxt() + ' \\' + `
+        let lineBreak = `
     `;
+        let cmd = 'ETCDCTL_API=3 ' + exec + ' \\' + lineBreak + '--endpoints' + ' ' + this.getClientEndpointsTxt() + ' \\' + lineBreak;
         if (this.secure) {
-            cmd += '--cacert' + ' ' + flag.getCertsDir() + '/' + flag.clientRootCAFile + ' \\' + `
-    ` + '--cert' + ' ' + flag.getCertsDir() + '/' + flag.clientCertFile + ' \\' + `
-    ` + '--key' + ' ' + flag.getCertsDir() + '/' + flag.clientKeyFile + ' \\' + `
-    `;
+            cmd += '--cacert' + ' ' + flag.getCertsDir() + '/' + flag.clientRootCAFile
+            + ' \\' + lineBreak + '--cert' + ' ' + flag.getCertsDir() + '/' + flag.clientCertFile
+            + ' \\' + lineBreak + '--key' + ' ' + flag.getCertsDir() + '/' + flag.clientKeyFile
+            + ' \\' + lineBreak;
         }
         cmd += 'endpoint health';
+
+        if (docker) {
+            // sudo docker exec etcd-v3.1.0 /bin/sh -c "export ETCDCTL_API=3 && /usr/local/bin/etcdctl endpoint health"
+            cmd += `
+
+
+# to use 'docker' command to check the status
+`;
+            cmd += '/usr/bin/docker' + ' \\' + lineBreak;
+            cmd += 'exec' + ' \\' + lineBreak;
+            cmd += 'etcd-' + this.version + ' \\' + lineBreak;
+            cmd += '/bin/sh' + ' ' + '-c' + ' ';
+            cmd += '"';
+            cmd += 'export ETCDCTL_API=3';
+            cmd += ' && ';
+            cmd += '/usr/local/bin/etcdctl';
+            cmd += ' ';
+            if (this.secure) {
+                let cs = '/etcd-ssl-certs-dir';
+                cmd += '--cacert' + ' ' + cs + '/' + flag.clientRootCAFile;
+                cmd += ' ' + '--cert' + ' ' + cs + '/' + flag.clientCertFile;
+                cmd += ' ' + '--key' + ' ' + cs + '/' + flag.clientKeyFile;
+                cmd += ' ';
+            }
+            cmd += 'endpoint health';
+            cmd += '"' + `
+
+`;
+        }
+
         return cmd;
     }
 
@@ -523,13 +553,14 @@ sudo mv /tmp/${flag.name}.service /etc/systemd/system/${flag.name}.service
 
     getServiceFileDocker(flag: EtcdFlag) {
         let dockerExec = '/usr/bin';
-        let divideRkt = getDivider(dockerExec);
-        let execDocker = dockerExec + divideRkt + 'docker';
+        let divideDocker = getDivider(dockerExec);
+        let execDocker = dockerExec + divideDocker + 'docker';
+        let dockerContainerName = 'etcd-' + this.version;
 
         let dockerRunFlags: string[] = [];
         dockerRunFlags.push('run');
         dockerRunFlags.push('--net=host');
-        dockerRunFlags.push('--name' + ' ' + 'etcd-' + this.version);
+        dockerRunFlags.push('--name' + ' ' + dockerContainerName);
         dockerRunFlags.push('--volume' + '=' + flag.getDataDir() + ':' + '/etcd-data');
         if (this.secure) {
             dockerRunFlags.push('--volume' + '=' + flag.getCertsDir() + ':' + '/etcd-ssl-certs-dir');
@@ -537,13 +568,17 @@ sudo mv /tmp/${flag.name}.service /etc/systemd/system/${flag.name}.service
         dockerRunFlags.push('quay.io/coreos/etcd:' + this.version);
         dockerRunFlags.push('/usr/local/bin/etcd');
 
-        let txt = execDocker;
+        let execStart = execDocker;
         let lineBreak = ' \\' + `
     `;
         for (let _i = 0; _i < dockerRunFlags.length; _i++) {
-            txt += lineBreak + dockerRunFlags[_i];
+            execStart += lineBreak + dockerRunFlags[_i];
         }
-        txt += lineBreak + this.getFlagTxt(flag, false, false, true); // do not skip --data-dir flag for OCI
+        execStart += lineBreak + this.getFlagTxt(flag, false, false, true); // do not skip --data-dir flag for OCI
+
+        // docker stop sends 'SIGTERM'
+        // docker kill sends 'SIGKILL'
+        let execStop = execDocker + ' ' + 'stop' + ' ' + dockerContainerName;
 
         let cmd = '';
         cmd += `# to write service file for etcd with Docker
@@ -558,12 +593,10 @@ RestartSec=5s
 TimeoutStartSec=0
 LimitNOFILE=40000
 
-ExecStart=` + txt + `
+ExecStart=` + execStart + `
 
-ExecStop=...
-
+ExecStop=` + execStop + `
 ` + `
-
 [Install]
 WantedBy=multi-user.target
 EOF
