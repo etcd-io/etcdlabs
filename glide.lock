@@ -1,5 +1,5 @@
-hash: 457cb42ad51e137ff9bf12bf55587e911302a3dfea3d70bdfb0f068100391548
-updated: 2017-02-15T11:23:55.493691522-08:00
+hash: e97e37b8d148607ef33d16455ad38e0fc580092c9ecc513be53b90d63b87ce6b
+updated: 2017-02-16T17:05:17.403969776-08:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -10,7 +10,7 @@ imports:
 - name: github.com/cockroachdb/cmux
   version: 112f0506e7743d64a6eb8fedbcff13d9979bbf92
 - name: github.com/coreos/etcd
-  version: 2510a1488c51eb503c396c7e4e44ee910e4857a6
+  version: a5cf7fdc87304f079769055792e0e9137c72952b
   subpackages:
   - alarm
   - auth
@@ -116,7 +116,7 @@ imports:
   subpackages:
   - prometheus
 - name: github.com/prometheus/client_model
-  version: fa8ad6fec33561be4280a8f0514318c79d7f6cb6
+  version: 6f3806018612930941127f2a7c6c453ba2c527d2
   subpackages:
   - go
 - name: github.com/prometheus/common
@@ -126,7 +126,7 @@ imports:
   - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
-  version: a59ae619c824360be3641ceb5a456ff13dd58be6
+  version: a1dba9ce8baed984a2495b658c82687f8157b98f
   subpackages:
   - xfs
 - name: github.com/spf13/cobra
@@ -155,7 +155,7 @@ imports:
   - lex/httplex
   - trace
 - name: golang.org/x/sys
-  version: e24f485414aeafb646f6fca458b0bf869c0880a1
+  version: 075e574b89e4c2d22f2286a7e2b919519c6f3547
   subpackages:
   - unix
 - name: golang.org/x/time
