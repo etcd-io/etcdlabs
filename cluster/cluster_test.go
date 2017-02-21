@@ -15,11 +15,11 @@
 package cluster
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"reflect"
 	"sync"
 	"testing"
 	"time"
@@ -99,6 +99,11 @@ func TestCluster_Recover_client_auto_TLS_scheme(t *testing.T) {
 	testCluster(t, Config{Size: 3, ClientAutoTLS: true}, true, true)
 }
 
+type keyValue struct {
+	key string
+	val string
+}
+
 func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 	dir, err := ioutil.TempDir(os.TempDir(), "cluster-test")
 	if err != nil {
@@ -130,19 +135,33 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 		c.Shutdown()
 	}()
 
-	cli, _, err := c.Client(c.AllEndpoints(scheme)...)
-	if err != nil {
-		t.Fatal(err)
+	ks := []keyValue{
+		{key: "foo1", val: "bar1"},
+		{key: "foo2", val: "bar2"},
+		{key: "foo3", val: "bar3"},
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	_, err = cli.Put(ctx, "foo", "bar")
-	cancel()
-	if err != nil {
-		cli.Close()
-		t.Fatal(err)
+	func() {
+		cli, _, err := c.Client(c.AllEndpoints(scheme)...)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer cli.Close()
+
+		for i, kv := range ks {
+			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+			_, err = cli.Put(ctx, kv.key, kv.val)
+			cancel()
+			if err != nil {
+				t.Fatalf("%d: PUT failed %v", i, err)
+			}
+			time.Sleep(time.Second)
+		}
+	}()
+	c.UpdateNodeStatus()
+	hashes1 := make([]int, len(c.nodes))
+	for i := range c.nodes {
+		hashes1[i] = c.nodes[i].status.Hash
 	}
-	cli.Close()
-	time.Sleep(time.Second)
 
 	if stopRecover {
 		c.Stop(0)
@@ -153,34 +172,52 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 		}
 		time.Sleep(time.Second)
 	}
-
-	cli, _, err = c.Client(c.AllEndpoints(scheme)...)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer cli.Close()
-
-	ctx, cancel = context.WithTimeout(context.Background(), 3*time.Second)
-	var resp *clientv3.GetResponse
-	resp, err = cli.Get(ctx, "foo")
-	cancel()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !bytes.Equal(resp.Kvs[0].Key, []byte("foo")) {
-		t.Fatalf("key expected 'foo', got %q", resp.Kvs[0].Key)
-	}
-	if !bytes.Equal(resp.Kvs[0].Value, []byte("bar")) {
-		t.Fatalf("value expected 'bar', got %q", resp.Kvs[0].Key)
-	}
-
-	time.Sleep(time.Second)
-
 	c.UpdateNodeStatus()
+	hashes2 := make([]int, len(c.nodes))
+	for i := range c.nodes {
+		hashes2[i] = c.nodes[i].status.Hash
+	}
+
+	if !reflect.DeepEqual(hashes1, hashes2) {
+		t.Fatalf("hashes1 %v != hashes2 %v", hashes1, hashes2)
+	}
+
+	func() {
+		cli, _, err := c.Client(c.AllEndpoints(scheme)...)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer cli.Close()
+
+		for i, kv := range ks {
+			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+			var resp *clientv3.GetResponse
+			resp, err = cli.Get(ctx, kv.key)
+			cancel()
+			if err != nil {
+				t.Fatalf("%d: GET failed %v", i, err)
+			}
+			if string(resp.Kvs[0].Key) != kv.key {
+				t.Fatalf("#%d: key expected %q, got %q", i, kv.key, string(resp.Kvs[0].Key))
+			}
+			if string(resp.Kvs[0].Value) != kv.val {
+				t.Fatalf("#%d: value expected %q, got %q", i, kv.val, string(resp.Kvs[0].Value))
+			}
+			time.Sleep(time.Second)
+		}
+	}()
+	c.UpdateNodeStatus()
+	hashes3 := make([]int, len(c.nodes))
+	for i := range c.nodes {
+		hashes3[i] = c.nodes[i].status.Hash
+	}
+
+	if !reflect.DeepEqual(hashes1, hashes3) {
+		t.Fatalf("hashes1 %v != hashes3 %v", hashes1, hashes3)
+	}
 
 	for i, st := range c.AllNodeStatus() {
 		fmt.Printf("%s: %+v\n", c.nodes[i].cfg.Name, st)
 	}
-
 	fmt.Println("DONE!")
 }
