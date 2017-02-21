@@ -1,5 +1,5 @@
-hash: 4ad39ab673578abb616520c79f0134939f54007ef2215cc08d1f7d4902383cb0
-updated: 2017-02-18T14:13:27.195330016-08:00
+hash: d68147e6e77407c75193b5082dea7eba7d7aec3b75e64e5a8430faec192f57de
+updated: 2017-02-22T09:44:08.18961654-08:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -10,7 +10,7 @@ imports:
 - name: github.com/cockroachdb/cmux
   version: 112f0506e7743d64a6eb8fedbcff13d9979bbf92
 - name: github.com/coreos/etcd
-  version: 2533c2a50c4b6114ad6fd4c0000175fac3b6ee06
+  version: c0c4c7cb76bcf8dc3bf89c09cc0bb77575364452
   subpackages:
   - alarm
   - auth
@@ -120,7 +120,7 @@ imports:
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: dd2f054febf4a6c00f2343686efb775948a8bff4
+  version: 49fee292b27bfff7f354ee0f64e1bc4850462edf
   subpackages:
   - expfmt
   - internal/bitbucket.org/ww/goautoneg
