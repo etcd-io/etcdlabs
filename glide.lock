@@ -1,5 +1,5 @@
-hash: d68147e6e77407c75193b5082dea7eba7d7aec3b75e64e5a8430faec192f57de
-updated: 2017-02-22T09:44:08.18961654-08:00
+hash: 703f95ed084f21a06713bdcc909b4a479b2d7ecfcb077ee1e978e7d13ddcbd4e
+updated: 2017-02-22T10:00:42.747893075-08:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -10,7 +10,7 @@ imports:
 - name: github.com/cockroachdb/cmux
   version: 112f0506e7743d64a6eb8fedbcff13d9979bbf92
 - name: github.com/coreos/etcd
-  version: c0c4c7cb76bcf8dc3bf89c09cc0bb77575364452
+  version: df3bb333cabd9be4b8b1095b65b042cddf66f849
   subpackages:
   - alarm
   - auth
@@ -79,7 +79,7 @@ imports:
   subpackages:
   - capnslog
 - name: github.com/dustin/go-humanize
-  version: ef638b6c2e62b857442c6443dace9366a48c0ee2
+  version: 7a41df006ff9af79a29f0ffa9c5f21fbe6314a2d
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/go-sql-driver/mysql
