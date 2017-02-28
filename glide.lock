@@ -1,5 +1,5 @@
-hash: 703f95ed084f21a06713bdcc909b4a479b2d7ecfcb077ee1e978e7d13ddcbd4e
-updated: 2017-02-22T10:00:42.747893075-08:00
+hash: b797d1abdb6b2628e162c21903f29c38465a03c225222c53f54b107aba561394
+updated: 2017-02-28T09:24:16.826861975-08:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -10,7 +10,7 @@ imports:
 - name: github.com/cockroachdb/cmux
   version: 112f0506e7743d64a6eb8fedbcff13d9979bbf92
 - name: github.com/coreos/etcd
-  version: df3bb333cabd9be4b8b1095b65b042cddf66f849
+  version: 1a9cd7bf361144685045778173f0ed045d7afee4
   subpackages:
   - alarm
   - auth
@@ -71,7 +71,7 @@ imports:
   subpackages:
   - semver
 - name: github.com/coreos/go-systemd
-  version: 48702e0da86bd25e76cfef347e2adeb434a0d0a6
+  version: e97b35f834b17eaa82afe3d44715c34736bfa12b
   subpackages:
   - journal
 - name: github.com/coreos/pkg
@@ -155,7 +155,7 @@ imports:
   - lex/httplex
   - trace
 - name: golang.org/x/sys
-  version: 075e574b89e4c2d22f2286a7e2b919519c6f3547
+  version: e4594059fe4cde2daf423055a596c2cd1e6c9adf
   subpackages:
   - unix
 - name: golang.org/x/time
