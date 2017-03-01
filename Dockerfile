@@ -9,6 +9,7 @@ RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selectio
 
 RUN apt-get -y update
 
+# TODO: remove nginx?
 RUN apt-get -y install \
     apt-utils \
     gcc \
@@ -20,7 +21,8 @@ RUN apt-get -y install \
     apt-transport-https \
     python \
     libssl-dev \
-    mysql-client
+    mysql-client \
+    nginx
 
 RUN apt-get -y update
 RUN apt-get -y upgrade
