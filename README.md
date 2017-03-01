@@ -19,3 +19,25 @@ See [etcd-play][old-etcd-play] for old code.
 [old-etcd-play]: https://github.com/coreos/etcd-play
 [cistat]: https://travis-ci.org/coreos/etcdlabs
 [etcdlabs-godoc]: https://godoc.org/github.com/coreos/etcdlabs
+
+
+#### Deploy
+
+To run locally
+
+```
+docker rm --force etcdlabs-backend || true
+docker run --detach --net=host \
+  --ulimit nofile=262144:262144 \
+  --name etcdlabs-backend \
+  quay.io/coreos/etcdlabs:latest /go/bin/etcdlabs web \
+  --skip-database \
+  --web-port 2200
+
+echo "Starting etcdlabs-frontend"
+docker rm --force etcdlabs-frontend || true
+docker run --detach --net=host \
+  --ulimit nofile=262144:262144 \
+  --name etcdlabs-frontend \
+  quay.io/coreos/etcdlabs:latest yarn start
+```
