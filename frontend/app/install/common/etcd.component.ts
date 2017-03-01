@@ -536,11 +536,11 @@ RestartSec=5s
 LimitNOFILE=40000
 TimeoutStartSec=0
 
-ExecPre=/usr/bin/docker \
+ExecStartPre=/usr/bin/docker \
     kill \
     etcd-` + this.version + `
 
-ExecPre=/usr/bin/docker \
+ExecStartPre=/usr/bin/docker \
     rm --force \
     etcd-` + this.version + `
 
