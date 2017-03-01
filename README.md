@@ -26,7 +26,6 @@ See [etcd-play][old-etcd-play] for old code.
 To run locally
 
 ```
-docker rm --force etcdlabs-backend || true
 docker run --detach --net=host \
   --ulimit nofile=262144:262144 \
   --name etcdlabs-backend \
@@ -34,8 +33,6 @@ docker run --detach --net=host \
   --skip-database \
   --web-port 2200
 
-echo "Starting etcdlabs-frontend"
-docker rm --force etcdlabs-frontend || true
 docker run --detach --net=host \
   --ulimit nofile=262144:262144 \
   --name etcdlabs-frontend \
