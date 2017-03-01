@@ -8,6 +8,14 @@ RestartSec=5s
 TimeoutStartSec=0
 LimitNOFILE=40000
 
+ExecPre=/usr/bin/docker \
+    kill \
+    etcdlabs-frontend
+
+ExecPre=/usr/bin/docker \
+    rm --force \
+    etcdlabs-frontend
+
 ExecStart=/usr/bin/docker \
     run \
     --net=host \
