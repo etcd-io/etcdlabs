@@ -6,8 +6,13 @@ if ! [[ "$0" =~ "scripts/shutdown-docker.sh" ]]; then
     exit 255
 fi
 
-docker stop --force etcdlabs
-docker rmi --force etcdlabs
+docker rm --force etcdlabs-backend || true
+docker stop --force etcdlabs-backend || true
+docker rm --force etcdlabs-backend || true
+
+docker rm --force etcdlabs-frontend || true
+docker stop --force etcdlabs-frontend || true
+docker rm --force etcdlabs-frontend || true
 
 docker ps -a -q
 docker images
