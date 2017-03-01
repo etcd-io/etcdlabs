@@ -8,7 +8,9 @@ RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
 RUN apt-get -y update
+
 RUN apt-get -y install \
+    apt-utils \
     gcc \
     curl \
     bash \
@@ -19,8 +21,10 @@ RUN apt-get -y install \
     python \
     libssl-dev \
     mysql-client
+
 RUN apt-get -y update
 RUN apt-get -y upgrade
+RUN mysql --version
 RUN uname -a
 RUN ulimit -n
 ##########################
@@ -50,23 +54,23 @@ RUN etcdlabs --help
 
 ##########################
 # install frontend dependencies
-RUN curl https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
-  && echo "deb http://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
-  && apt-get -y update && apt-get -y install yarn \
-  && yarn --version \
-  && yarn install
-
 ENV NVM_DIR /usr/local/nvm
 RUN curl https://raw.githubusercontent.com/creationix/nvm/v0.33.0/install.sh | bash \
     && source $NVM_DIR/nvm.sh \
-    && ls /usr/local/nvm \
     && nvm ls-remote \
     && nvm install 6.10.0 \
-    && node -v \
-    && npm -v \
-    && npm install \
+    && curl https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
+    && echo "deb http://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
+    && apt-get -y update && apt-get -y install yarn \
+    && yarn install \
     && npm rebuild node-sass \
-    && npm install
+    && npm install \
+    && cp /usr/local/nvm/versions/node/v6.10.0/bin/node /usr/bin/node \
+    && cp /usr/local/nvm/versions/node/v6.10.0/bin/npm /usr/bin/npm
+
+RUN yarn --version
+RUN node --version
+RUN /usr/local/nvm/versions/node/v6.10.0/bin/npm --version
 
 RUN pwd && ls
 ##########################

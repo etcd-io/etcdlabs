@@ -7,6 +7,6 @@ if ! [[ "$0" =~ "scripts/build-docker.sh" ]]; then
 fi
 
 docker build \
-  --tag etcdlabs \
+  --tag quay.io/coreos/etcdlabs:latest \
   --file ./Dockerfile \
   .
