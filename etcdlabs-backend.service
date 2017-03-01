@@ -8,13 +8,17 @@ RestartSec=5s
 TimeoutStartSec=0
 LimitNOFILE=40000
 
-ExecPre=/usr/bin/docker \
+ExecStartPre=/usr/bin/docker \
     kill \
     etcdlabs-backend
 
-ExecPre=/usr/bin/docker \
+ExecStartPre=/usr/bin/docker \
     rm --force \
     etcdlabs-backend
+
+ExecStartPre=/usr/bin/docker \
+    pull \
+    quay.io/coreos/etcdlabs:latest
 
 ExecStart=/usr/bin/docker \
     run \
