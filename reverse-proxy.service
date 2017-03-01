@@ -1,0 +1,24 @@
+[Unit]
+Description=etcdlabs with Docker
+Documentation=https://github.com/coreos/etcdlabs
+
+[Service]
+Restart=always
+RestartSec=5s
+TimeoutStartSec=0
+LimitNOFILE=40000
+
+ExecStartPre=/usr/bin/docker pull quay.io/coreos/etcdlabs:latest
+
+ExecStart=/usr/bin/docker \
+    run \
+    --net=host \
+    --name reverse-proxy \
+    --ulimit nofile=262144:262144 \
+    quay.io/coreos/etcdlabs:latest \
+    /usr/sbin/nginx -g 'daemon off;'
+
+ExecStop=/usr/bin/docker rm --force reverse-proxy
+
+[Install]
+WantedBy=multi-user.target
