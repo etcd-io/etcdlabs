@@ -26,15 +26,15 @@ See [etcd-play][old-etcd-play] for old code.
 To run locally
 
 ```
-docker run --detach --net=host \
-  --ulimit nofile=262144:262144 \
+# backend
+docker run --net=host \
   --name etcdlabs-backend \
   quay.io/coreos/etcdlabs:latest /go/bin/etcdlabs web \
   --skip-database \
   --web-port 2200
 
-docker run --detach --net=host \
-  --ulimit nofile=262144:262144 \
+# frontend
+docker run --net=host \
   --name etcdlabs-frontend \
   quay.io/coreos/etcdlabs:latest yarn start
 ```
