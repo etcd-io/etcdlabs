@@ -1,15 +1,13 @@
 FROM ubuntu:16.10
 
 ##########################
-# Replace shell with bash so we can source files
+# bash for 'source' commands
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
-# Set debconf to run non-interactively
+# run non-interactively
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
 RUN apt-get -y update
-
-# TODO: remove nginx?
 RUN apt-get -y install \
     apt-utils \
     gcc \
@@ -26,6 +24,8 @@ RUN apt-get -y install \
 
 RUN apt-get -y update
 RUN apt-get -y upgrade
+RUN apt-get -y autoremove
+RUN apt-get -y autoclean
 RUN mysql --version
 RUN uname -a
 RUN ulimit -n
@@ -50,12 +50,12 @@ COPY . $GOPATH/src/github.com/coreos/etcdlabs
 WORKDIR $GOPATH/src/github.com/coreos/etcdlabs
 
 RUN go install -v
-RUN which etcdlabs
 RUN etcdlabs --help
 ##########################
 
 ##########################
 # install frontend dependencies
+# 'node' needs to be in $PATH for 'yarn start' command
 ENV NVM_DIR /usr/local/nvm
 RUN curl https://raw.githubusercontent.com/creationix/nvm/v0.33.0/install.sh | bash \
     && source $NVM_DIR/nvm.sh \
@@ -67,14 +67,11 @@ RUN curl https://raw.githubusercontent.com/creationix/nvm/v0.33.0/install.sh | b
     && yarn install \
     && npm rebuild node-sass \
     && npm install \
-    && cp /usr/local/nvm/versions/node/v6.10.0/bin/node /usr/bin/node \
-    && cp /usr/local/nvm/versions/node/v6.10.0/bin/npm /usr/bin/npm
+    && cp /usr/local/nvm/versions/node/v6.10.0/bin/node /usr/bin/node
 
 RUN yarn --version
 RUN node --version
 RUN /usr/local/nvm/versions/node/v6.10.0/bin/npm --version
-
-RUN pwd && ls
 ##########################
 
 ##########################
@@ -83,4 +80,8 @@ RUN mkdir -p /etc/nginx/sites-available/
 ADD nginx.conf /etc/nginx/sites-available/default
 
 EXPOSE 80
+##########################
+
+##########################
+RUN pwd && ls
 ##########################
