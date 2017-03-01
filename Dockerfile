@@ -21,7 +21,8 @@ RUN apt-get -y install \
     apt-transport-https \
     python \
     libssl-dev \
-    mysql-client
+    mysql-client \
+    nginx
 
 RUN apt-get -y update
 RUN apt-get -y upgrade
@@ -74,4 +75,13 @@ RUN node --version
 RUN /usr/local/nvm/versions/node/v6.10.0/bin/npm --version
 
 RUN pwd && ls
+##########################
+
+##########################
+# configure reverse proxy
+RUN rm -f /etc/nginx/nginx.conf
+ADD nginx.conf /etc/nginx/
+RUN echo "daemon off;" >> /etc/nginx/nginx.conf
+
+EXPOSE 80
 ##########################
