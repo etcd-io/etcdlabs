@@ -79,10 +79,6 @@ RUN pwd && ls
 
 ##########################
 # configure reverse proxy
-RUN rm -f /etc/nginx/nginx.conf
-RUN touch /etc/nginx/nginx.conf
-RUN echo "daemon off;" >> /etc/nginx/nginx.conf
-
 RUN mkdir -p /etc/nginx/sites-available/
 ADD nginx.conf /etc/nginx/sites-available/default
 
