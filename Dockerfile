@@ -21,8 +21,7 @@ RUN apt-get -y install \
     apt-transport-https \
     python \
     libssl-dev \
-    mysql-client \
-    nginx
+    mysql-client
 
 RUN apt-get -y update
 RUN apt-get -y upgrade
