@@ -499,7 +499,6 @@ func (mc *mysqlConn) readResultOK() ([]byte, error) {
 					return cipher, ErrUnknownPlugin
 				}
 			} else {
-				// https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::OldAuthSwitchRequest
 				return nil, ErrOldPassword
 			}
 

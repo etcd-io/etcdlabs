@@ -1,5 +1,5 @@
 {
-    "memo": "80e77fa479672b10c8e8a383c83e44b15bba9f7a6b0428f988cb495094da7395",
+    "memo": "d50f0afc7543ce0271af8c2d2874ed85b13d49b27057a07e9c0627d64487bb77",
     "projects": [
         {
             "name": "github.com/beorn7/perks",
@@ -110,7 +110,6 @@
         },
         {
             "name": "github.com/dustin/go-humanize",
-            "branch": "master",
             "revision": "7a41df006ff9af79a29f0ffa9c5f21fbe6314a2d",
             "packages": [
                 "."
@@ -126,8 +125,7 @@
         },
         {
             "name": "github.com/go-sql-driver/mysql",
-            "branch": "master",
-            "revision": "2e00b5cd70399450106cec6431c2e2ce3cae5034",
+            "revision": "665b83488b90b902ce0a305ef6652e599771cdf9",
             "packages": [
                 "."
             ]
@@ -244,8 +242,7 @@
         },
         {
             "name": "github.com/spf13/cobra",
-            "branch": "master",
-            "revision": "92ea23a837e66f46ac9e7d04fa826602b7b0a42d",
+            "revision": "9495bc009a56819bdb0ddbc1a373e29c140bc674",
             "packages": [
                 "."
             ]
@@ -307,8 +304,7 @@
         },
         {
             "name": "golang.org/x/time",
-            "branch": "master",
-            "revision": "f51c12702a4d776e4c1fa9b0fabab841babae631",
+            "revision": "711ca1cb87636abec28122ef3bc6a77269d433f3",
             "packages": [
                 "rate"
             ]

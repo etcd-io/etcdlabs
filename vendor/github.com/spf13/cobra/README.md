@@ -157,12 +157,7 @@ In a Cobra app, typically the main.go file is very bare. It serves, one purpose,
 ```go
 package main
 
-import (
-	"fmt"
-	"os"
-
-	"{pathToYourApp}/cmd"
-)
+import "{pathToYourApp}/cmd"
 
 func main() {
 	if err := cmd.RootCmd.Execute(); err != nil {
@@ -318,12 +313,7 @@ In a Cobra app, typically the main.go file is very bare. It serves, one purpose,
 ```go
 package main
 
-import (
-	"fmt"
-	"os"
-
-	"{pathToYourApp}/cmd"
-)
+import "{pathToYourApp}/cmd"
 
 func main() {
 	if err := cmd.RootCmd.Execute(); err != nil {
@@ -347,7 +337,6 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"fmt"
 )
 
 func init() {
