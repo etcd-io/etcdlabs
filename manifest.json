@@ -1,0 +1,25 @@
+{
+    "dependencies": {
+        "github.com/coreos/etcd": {
+            "revision": "b68416f735798bb6552c434217cc08444d068149"
+        },
+        "github.com/coreos/pkg": {
+            "revision": "447b7ec906e523386d9c53be15b55a8ae86ea944"
+        },
+        "github.com/dustin/go-humanize": {
+            "branch": "master"
+        },
+        "github.com/go-sql-driver/mysql": {
+            "branch": "master"
+        },
+        "github.com/spf13/cobra": {
+            "branch": "master"
+        },
+        "golang.org/x/time": {
+            "branch": "master"
+        },
+        "google.golang.org/grpc": {
+            "version": "v1.0.4"
+        }
+    }
+}
