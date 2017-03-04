@@ -1,7 +1,7 @@
 package: github.com/coreos/etcdlabs
 import:
 - package: github.com/coreos/etcd
-  version: 1a9cd7bf361144685045778173f0ed045d7afee4
+  version: b68416f735798bb6552c434217cc08444d068149
   subpackages:
   - clientv3
   - embed
@@ -15,7 +15,7 @@ import:
   subpackages:
   - capnslog
 - package: github.com/dustin/go-humanize
-  version: 7a41df006ff9af79a29f0ffa9c5f21fbe6314a2d
+  version: 259d2a102b871d17f30e3cd9881a642961a1e486
 - package: google.golang.org/grpc
   version: v1.0.4
   subpackages:
@@ -24,8 +24,8 @@ import:
 - package: golang.org/x/time
   version: 711ca1cb87636abec28122ef3bc6a77269d433f3
 - package: github.com/go-sql-driver/mysql
-  version: 665b83488b90b902ce0a305ef6652e599771cdf9
+  version: 2e00b5cd70399450106cec6431c2e2ce3cae5034
 - package: github.com/spf13/cobra
-  version: 9495bc009a56819bdb0ddbc1a373e29c140bc674
+  version: fcd0c5a1df88f5d6784cb4feead962c3f3d0b66c
 - package: github.com/spf13/pflag
-  version: 5ccb023bc27df288a957c5e994cd44fd19619465
+  version: 9ff6c6923cfffbcd502984b8e0c80539a94968b7
