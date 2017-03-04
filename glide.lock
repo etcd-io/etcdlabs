@@ -1,5 +1,5 @@
-hash: b797d1abdb6b2628e162c21903f29c38465a03c225222c53f54b107aba561394
-updated: 2017-02-28T09:24:16.826861975-08:00
+hash: 628ae64437af16e13c327f0ea1a425492c7e83183f3dc8b81b3495a5d6d818b6
+updated: 2017-03-03T21:15:19.772608759-08:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -10,7 +10,7 @@ imports:
 - name: github.com/cockroachdb/cmux
   version: 112f0506e7743d64a6eb8fedbcff13d9979bbf92
 - name: github.com/coreos/etcd
-  version: 1a9cd7bf361144685045778173f0ed045d7afee4
+  version: b68416f735798bb6552c434217cc08444d068149
   subpackages:
   - alarm
   - auth
@@ -79,11 +79,11 @@ imports:
   subpackages:
   - capnslog
 - name: github.com/dustin/go-humanize
-  version: 7a41df006ff9af79a29f0ffa9c5f21fbe6314a2d
+  version: 259d2a102b871d17f30e3cd9881a642961a1e486
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/go-sql-driver/mysql
-  version: 665b83488b90b902ce0a305ef6652e599771cdf9
+  version: 2e00b5cd70399450106cec6431c2e2ce3cae5034
 - name: github.com/gogo/protobuf
   version: 909568be09de550ed094403c2bf8a261b5bb730a
   subpackages:
@@ -130,9 +130,9 @@ imports:
   subpackages:
   - xfs
 - name: github.com/spf13/cobra
-  version: 9495bc009a56819bdb0ddbc1a373e29c140bc674
+  version: fcd0c5a1df88f5d6784cb4feead962c3f3d0b66c
 - name: github.com/spf13/pflag
-  version: 5ccb023bc27df288a957c5e994cd44fd19619465
+  version: 9ff6c6923cfffbcd502984b8e0c80539a94968b7
 - name: github.com/ugorji/go
   version: ded73eae5db7e7a0ef6f55aace87a2873c5d2b74
   subpackages:
@@ -155,7 +155,7 @@ imports:
   - lex/httplex
   - trace
 - name: golang.org/x/sys
-  version: e4594059fe4cde2daf423055a596c2cd1e6c9adf
+  version: e48874b42435b4347fc52bdee0424a52abc974d7
   subpackages:
   - unix
 - name: golang.org/x/time
