@@ -19,25 +19,20 @@ fi
 # 2. make sure glide.yaml and glide.lock are updated
 
 GLIDE_ROOT="$GOPATH/src/github.com/Masterminds/glide"
-GLIDE_SHA=21ff6d397ccca910873d8eaabab6a941c364cc70
 go get -d -u github.com/Masterminds/glide
 pushd "${GLIDE_ROOT}"
-	# git reset --hard HEAD
-	git reset --hard ${GLIDE_SHA}
-	go install
+	git reset --hard HEAD
+	go install -v
 popd
 
 GLIDE_VC_ROOT="$GOPATH/src/github.com/sgotti/glide-vc"
-GLIDE_VC_SHA=d96375d23c85287e80296cdf48f9d21c227fa40a
 go get -d -u github.com/sgotti/glide-vc
 pushd "${GLIDE_VC_ROOT}"
-	# git reset --hard HEAD
-	git reset --hard ${GLIDE_VC_SHA}
-	go install
+	git reset --hard HEAD
+	go install -v
 popd
 
 rm -rf ./vendor
-
 
 if [ -n "$1" ]; then
 	echo "glide get on $(echo $1)"
@@ -48,3 +43,4 @@ else
 fi;
 
 glide vc --no-tests --only-code
+
