@@ -31,6 +31,7 @@ function getLines(txt: string) {
 }
 
 export class CFSSL {
+    arch: string;
     version: string;
     execDir: string;
     srcCertsDir: string;
@@ -51,6 +52,7 @@ export class CFSSL {
     commonName: string;
 
     constructor(
+        arch: string,
         version: string,
         execDir: string,
         srcCertsDir: string,
@@ -70,6 +72,7 @@ export class CFSSL {
 
         commonName: string,
     ) {
+        this.arch = arch;
         this.version = version;
         this.execDir = execDir;
         this.srcCertsDir = srcCertsDir;
@@ -103,11 +106,11 @@ export class CFSSL {
 
         return `rm -f /tmp/cfssl* && rm -rf /tmp/certs && mkdir -p /tmp/certs
 
-curl -L https://pkg.cfssl.org/${this.version}/cfssl_linux-amd64 -o /tmp/cfssl
+curl -L https://pkg.cfssl.org/${this.version}/cfssl_${this.arch} -o /tmp/cfssl
 chmod +x /tmp/cfssl
 sudo mv /tmp/cfssl ` + this.getExecDir() + `/cfssl
 
-curl -L https://pkg.cfssl.org/${this.version}/cfssljson_linux-amd64 -o /tmp/cfssljson
+curl -L https://pkg.cfssl.org/${this.version}/cfssljson_${this.arch} -o /tmp/cfssljson
 chmod +x /tmp/cfssljson
 sudo mv /tmp/cfssljson ` + this.getExecDir() + `/cfssljson
 
