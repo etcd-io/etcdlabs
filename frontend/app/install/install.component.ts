@@ -33,6 +33,7 @@ export class InstallComponent extends ParentComponent {
 
         ///////////////////////////////////////////////////
         this.cfssl = new CFSSL(
+            'linux-amd64',
             'R1.2',
             '/usr/local/bin',
             '$HOME/certs',
