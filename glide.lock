@@ -1,5 +1,5 @@
-hash: a9704651d446737542de21b9016420c7ec916b5b3006025f279cbbe06f429f40
-updated: 2017-03-07T09:07:37.493087303-08:00
+hash: e7ffea34e92265fe03b762abefb98c235a8c903341d61720e1b01ecdf443b94c
+updated: 2017-03-07T11:46:55.712800302-08:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -156,6 +156,10 @@ imports:
   - internal/timeseries
   - lex/httplex
   - trace
+- name: golang.org/x/sync
+  version: 86ddc858aa39d0f6cccccd733e482ddc52b852e9
+  subpackages:
+  - errgroup
 - name: golang.org/x/sys
   version: e48874b42435b4347fc52bdee0424a52abc974d7
   subpackages:
