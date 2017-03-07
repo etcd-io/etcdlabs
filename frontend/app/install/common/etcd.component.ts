@@ -575,6 +575,9 @@ sudo mv /tmp/${flag.name}.service /etc/systemd/system/${flag.name}.service
         // docker kill sends 'SIGKILL'
         let execStop = execDocker + ' ' + 'stop' + ' ' + dockerContainerName;
 
+        // ExecStartPre=/usr/bin/docker` + lineBreak + 'kill' + lineBreak + 'etcd-' + this.version + `
+        // ExecStartPre=/usr/bin/docker` + lineBreak + 'rm --force' + lineBreak + 'etcd-' + this.version + `
+
         let cmd = '';
         cmd += `# to write service file for etcd with Docker
 cat > /tmp/${flag.name}.service <<EOF
@@ -588,10 +591,6 @@ RestartSec=5s
 TimeoutStartSec=0
 LimitNOFILE=40000
 
-ExecStartPre=/usr/bin/docker` + lineBreak + 'kill' + lineBreak + 'etcd-' + this.version + `
-
-ExecStartPre=/usr/bin/docker` + lineBreak + 'rm --force' + lineBreak + 'etcd-' + this.version + `
-
 ExecStart=` + execStart + `
 
 ExecStop=` + execStop + `
@@ -600,7 +599,6 @@ ExecStop=` + execStop + `
 WantedBy=multi-user.target
 EOF
 sudo mv /tmp/${flag.name}.service /etc/systemd/system/${flag.name}.service
-
 `;
 
         return cmd;
