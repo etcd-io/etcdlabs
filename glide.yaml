@@ -21,6 +21,10 @@ import:
   subpackages:
   - credentials
   - grpclog
+- package: golang.org/x/sync
+  version: 86ddc858aa39d0f6cccccd733e482ddc52b852e9
+  subpackages:
+  - errgroup
 - package: golang.org/x/time
   version: 711ca1cb87636abec28122ef3bc6a77269d433f3
 - package: github.com/go-sql-driver/mysql
