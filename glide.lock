@@ -1,5 +1,5 @@
-hash: 0d753c3d17b8449c6627481a94690099be122b66c15c579e5006592bf68ed3f3
-updated: 2017-03-06T09:15:23.773527592-08:00
+hash: a9704651d446737542de21b9016420c7ec916b5b3006025f279cbbe06f429f40
+updated: 2017-03-07T09:07:37.493087303-08:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -10,7 +10,7 @@ imports:
 - name: github.com/cockroachdb/cmux
   version: 112f0506e7743d64a6eb8fedbcff13d9979bbf92
 - name: github.com/coreos/etcd
-  version: 4e2fe050f568bfa53dda7f3b3734cf71eb4d1a94
+  version: 3eb2fdbd9934bd2cee6928d2185ceac87b848a4c
   subpackages:
   - alarm
   - auth
@@ -71,13 +71,15 @@ imports:
   subpackages:
   - semver
 - name: github.com/coreos/go-systemd
-  version: e97b35f834b17eaa82afe3d44715c34736bfa12b
+  version: 48702e0da86bd25e76cfef347e2adeb434a0d0a6
   subpackages:
   - journal
 - name: github.com/coreos/pkg
   version: 447b7ec906e523386d9c53be15b55a8ae86ea944
   subpackages:
   - capnslog
+- name: github.com/dgrijalva/jwt-go
+  version: d2709f9f1f31ebcda9651b03077758c1f3a0018c
 - name: github.com/dustin/go-humanize
   version: 259d2a102b871d17f30e3cd9881a642961a1e486
 - name: github.com/ghodss/yaml
