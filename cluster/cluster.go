@@ -33,6 +33,7 @@ import (
 	"github.com/coreos/etcd/pkg/transport"
 	"github.com/coreos/etcd/pkg/types"
 	humanize "github.com/dustin/go-humanize"
+	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -223,40 +224,32 @@ func Start(ccfg Config) (c *Cluster, err error) {
 		c.nodes[i].cfg = &nc
 	}
 
-	errc := make(chan error)
+	var g errgroup.Group
 	for i := 0; i < c.size; i++ {
-		go func(i int) {
+		idx := i
+
+		g.Go(func() error {
 			var rerr error
 			select {
-			case <-c.nodes[i].srv.Server.ReadyNotify():
-			case rerr = <-c.nodes[i].srv.Err():
+			case <-c.nodes[idx].srv.Server.ReadyNotify():
+			case rerr = <-c.nodes[idx].srv.Err():
 			}
-			errc <- rerr
 			if rerr != nil {
-				plog.Warning("embed.Etcd failed to start", rerr, "at", c.nodes[i].cfg.Name, c.nodes[i].cfg.LCUrls[0].String())
-				return
+				plog.Warning("embed.Etcd failed to start", rerr, "at", c.nodes[idx].cfg.Name, c.nodes[idx].cfg.LCUrls[0].String())
+				return rerr
 			}
 
-			c.nodes[i].stoppedStartedAt = time.Now()
-			c.nodes[i].status.State = FollowerNodeStatus
-			c.nodes[i].status.StateTxt = fmt.Sprintf("%s just started (%s)", c.nodes[i].status.Name, humanize.Time(c.nodes[i].stoppedStartedAt))
-			c.nodes[i].status.IsLeader = false
+			c.nodes[idx].stoppedStartedAt = time.Now()
+			c.nodes[idx].status.State = FollowerNodeStatus
+			c.nodes[idx].status.StateTxt = fmt.Sprintf("%s just started (%s)", c.nodes[idx].status.Name, humanize.Time(c.nodes[idx].stoppedStartedAt))
+			c.nodes[idx].status.IsLeader = false
 
-			plog.Printf("started %s (client %s, peer %s)", c.nodes[i].cfg.Name, c.nodes[i].cfg.LCUrls[0].String(), c.nodes[i].cfg.LPUrls[0].String())
-		}(i)
+			plog.Printf("started %s (client %s, peer %s)", c.nodes[idx].cfg.Name, c.nodes[idx].cfg.LCUrls[0].String(), c.nodes[idx].cfg.LPUrls[0].String())
+			return nil
+		})
 	}
-	cnt := 0
-	for rerr := range errc {
-		if rerr != nil {
-			err = rerr
-			return
-		}
-
-		cnt++
-		if cnt == c.size {
-			close(errc)
-			break
-		}
+	if gerr := g.Wait(); gerr != nil {
+		return nil, gerr
 	}
 
 	time.Sleep(time.Second)
