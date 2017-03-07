@@ -536,14 +536,6 @@ RestartSec=5s
 LimitNOFILE=40000
 TimeoutStartSec=0
 
-ExecStartPre=/usr/bin/docker \
-    kill \
-    etcd-` + this.version + `
-
-ExecStartPre=/usr/bin/docker \
-    rm --force \
-    etcd-` + this.version + `
-
 ExecStart=` + this.getCommand(flag, false, false, false) + `
 
 [Install]
@@ -595,6 +587,10 @@ Restart=always
 RestartSec=5s
 TimeoutStartSec=0
 LimitNOFILE=40000
+
+ExecStartPre=/usr/bin/docker` + lineBreak + 'kill' + lineBreak + 'etcd-' + this.version + `
+
+ExecStartPre=/usr/bin/docker` + lineBreak + 'rm --force' + lineBreak + 'etcd-' + this.version + `
 
 ExecStart=` + execStart + `
 
