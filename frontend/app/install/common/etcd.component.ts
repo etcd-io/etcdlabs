@@ -31,6 +31,7 @@ function sanitizeNumber(num: number, min: number, max: number) {
 function getSystemdCommand(service: string) {
     return `# to start service
 sudo systemctl daemon-reload
+sudo systemctl cat ${service}.service
 sudo systemctl enable ${service}.service
 sudo systemctl start ${service}.service
 
