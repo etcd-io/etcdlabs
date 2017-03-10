@@ -1,6 +1,6 @@
 # etcdlabs
 
-[![Build Status](https://img.shields.io/travis/coreos/etcdlabs.svg?style=flat-square)][cistat] [![Godoc](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)][etcdlabs-godoc]
+[![Build Status](https://img.shields.io/travis/coreos/etcdlabs.svg?style=flat-square)][cistat] [![Godoc](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)][etcdlabs-godoc] [![Docker Repository on Quay](https://quay.io/repository/coreos/etcdlabs/status "Docker Repository on Quay")](https://quay.io/repository/coreos/etcdlabs)
 
 - [etcd website](http://play.etcd.io)
 - [Debug etcd](./debug-etcd)
