@@ -317,17 +317,18 @@ GOOGLE_URL=https://storage.googleapis.com/etcd
 `;
 
         txt += 'rm -f /tmp/etcd-${ETCD_VER}-darwin-amd64.zip' + `
-` + 'rm -rf /tmp/test-etcd-${ETCD_VER}' + `
+` + 'rm -rf /tmp/test-etcd' + `
 
 ` + 'curl -L ${DOWNLOAD_URL}/${ETCD_VER}/etcd-${ETCD_VER}-darwin-amd64.zip -o /tmp/etcd-${ETCD_VER}-darwin-amd64.zip' + `
-` + 'unzip /tmp/etcd-${ETCD_VER}-darwin-amd64.zip -d /tmp && mv /tmp/etcd-${ETCD_VER}-darwin-amd64/* /tmp/test-etcd' + `
+` + 'unzip /tmp/etcd-${ETCD_VER}-darwin-amd64.zip -d /tmp && mkdir -p /tmp/test-etcd'`
+` + 'mv /tmp/etcd-${ETCD_VER}-darwin-amd64/* /tmp/test-etcd' + `
 
 `;
         if (this.getExecDir() === '/') {
-            txt += '# sudo cp /tmp/test-etcd-${ETCD_VER}/etcd* /usr/local/bin' + `
+            txt += '# sudo cp /tmp/test-etcd/etcd* /usr/local/bin' + `
 `;
         }
-        txt += 'sudo cp /tmp/test-etcd-${ETCD_VER}/etcd* ' + this.getExecDir() + `
+        txt += 'sudo cp /tmp/test-etcd/etcd* ' + this.getExecDir() + `
 
 ` + this.getExecDir() + divide + `etcd --version
 ` + this.getExecDir() + divide + `etcdctl --version
