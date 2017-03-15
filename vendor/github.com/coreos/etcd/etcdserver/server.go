@@ -599,6 +599,7 @@ func (s *EtcdServer) ReportSnapshot(id uint64, status raft.SnapshotStatus) {
 type etcdProgress struct {
 	confState raftpb.ConfState
 	snapi     uint64
+	appliedt  uint64
 	appliedi  uint64
 }
 
@@ -608,6 +609,7 @@ type etcdProgress struct {
 type raftReadyHandler struct {
 	updateLeadership     func()
 	updateCommittedIndex func(uint64)
+	waitForApply         func()
 }
 
 func (s *EtcdServer) run() {
@@ -615,6 +617,9 @@ func (s *EtcdServer) run() {
 	if err != nil {
 		plog.Panicf("get snapshot from raft storage error: %v", err)
 	}
+
+	// asynchronously accept apply packets, dispatch progress in-order
+	sched := schedule.NewFIFOScheduler()
 
 	var (
 		smu   sync.RWMutex
@@ -663,14 +668,16 @@ func (s *EtcdServer) run() {
 				s.setCommittedIndex(ci)
 			}
 		},
+		waitForApply: func() {
+			sched.WaitFinish(0)
+		},
 	}
 	s.r.start(rh)
 
-	// asynchronously accept apply packets, dispatch progress in-order
-	sched := schedule.NewFIFOScheduler()
 	ep := etcdProgress{
 		confState: sn.Metadata.ConfState,
 		snapi:     sn.Metadata.Index,
+		appliedt:  sn.Metadata.Term,
 		appliedi:  sn.Metadata.Index,
 	}
 
@@ -772,7 +779,7 @@ func (s *EtcdServer) applyAll(ep *etcdProgress, apply *apply) {
 	select {
 	// snapshot requested via send()
 	case m := <-s.r.msgSnapC:
-		merged := s.createMergedSnapshotMessage(m, ep.appliedi, ep.confState)
+		merged := s.createMergedSnapshotMessage(m, ep.appliedt, ep.appliedi, ep.confState)
 		s.sendMergedSnap(merged)
 	default:
 	}
@@ -874,6 +881,7 @@ func (s *EtcdServer) applySnapshot(ep *etcdProgress, apply *apply) {
 	}
 	plog.Info("finished adding peers from new cluster configuration into network...")
 
+	ep.appliedt = apply.snapshot.Metadata.Term
 	ep.appliedi = apply.snapshot.Metadata.Index
 	ep.snapi = ep.appliedi
 	ep.confState = apply.snapshot.Metadata.ConfState
@@ -895,7 +903,7 @@ func (s *EtcdServer) applyEntries(ep *etcdProgress, apply *apply) {
 		return
 	}
 	var shouldstop bool
-	if ep.appliedi, shouldstop = s.apply(ents, &ep.confState); shouldstop {
+	if ep.appliedt, ep.appliedi, shouldstop = s.apply(ents, &ep.confState); shouldstop {
 		go s.stopWithDelay(10*100*time.Millisecond, fmt.Errorf("the member has been permanently removed from the cluster"))
 	}
 }
@@ -1249,9 +1257,7 @@ func (s *EtcdServer) sendMergedSnap(merged snap.Message) {
 // apply takes entries received from Raft (after it has been committed) and
 // applies them to the current state of the EtcdServer.
 // The given entries should not be empty.
-func (s *EtcdServer) apply(es []raftpb.Entry, confState *raftpb.ConfState) (uint64, bool) {
-	var applied uint64
-	var shouldstop bool
+func (s *EtcdServer) apply(es []raftpb.Entry, confState *raftpb.ConfState) (appliedt uint64, appliedi uint64, shouldStop bool) {
 	for i := range es {
 		e := es[i]
 		switch e.Type {
@@ -1261,16 +1267,17 @@ func (s *EtcdServer) apply(es []raftpb.Entry, confState *raftpb.ConfState) (uint
 			var cc raftpb.ConfChange
 			pbutil.MustUnmarshal(&cc, e.Data)
 			removedSelf, err := s.applyConfChange(cc, confState)
-			shouldstop = shouldstop || removedSelf
+			shouldStop = shouldStop || removedSelf
 			s.w.Trigger(cc.ID, err)
 		default:
 			plog.Panicf("entry type should be either EntryNormal or EntryConfChange")
 		}
 		atomic.StoreUint64(&s.r.index, e.Index)
 		atomic.StoreUint64(&s.r.term, e.Term)
-		applied = e.Index
+		appliedt = e.Term
+		appliedi = e.Index
 	}
-	return applied, shouldstop
+	return appliedt, appliedi, shouldStop
 }
 
 // applyEntryNormal apples an EntryNormal type raftpb request to the EtcdServer
