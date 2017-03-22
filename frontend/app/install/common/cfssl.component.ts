@@ -250,11 +250,8 @@ cfssl gencert` + ' \\' + `
 
     getCertsPrepareCommand(dstCertsDir: string) {
         return `# after transferring certs to remote machines
-sudo mkdir -p ${cleanDir(dstCertsDir)}
-sudo chown -R root:$(whoami) ${cleanDir(dstCertsDir)}
-sudo chmod -R a+rw ${cleanDir(dstCertsDir)}
-sudo chmod a+rw ${this.getCertsDir()}/*
-sudo cp ${this.getCertsDir()}/* ${cleanDir(dstCertsDir)}
+mkdir -p ${cleanDir(dstCertsDir)}
+cp ${this.getCertsDir()}/* ${cleanDir(dstCertsDir)}
 `;
     }
 
