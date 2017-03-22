@@ -113,10 +113,9 @@ export class EtcdFlag {
     }
 
     getDataDirPrepareCommand() {
-        return `# sudo rm -rf ${this.getDataDir()}
-sudo mkdir -p ${this.getDataDir()}
-sudo chown -R root:$(whoami) ${this.getDataDir()}
-sudo chmod -R a+rw ${this.getDataDir()}
+        return `# make sure etcd process has write access to this directory
+# remove this directory if the cluster is new; keep if restarting etcd
+# sudo rm -rf ${this.getDataDir()}
 `;
     }
 
