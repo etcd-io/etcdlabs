@@ -316,10 +316,10 @@ GOOGLE_URL=https://storage.googleapis.com/etcd
 `;
 
         txt += 'rm -f /tmp/etcd-${ETCD_VER}-darwin-amd64.zip' + `
-` + 'rm -rf /tmp/test-etcd' + `
+` + 'rm -rf /tmp/test-etcd && mkdir -p /tmp/test-etcd' + `
 
 ` + 'curl -L ${DOWNLOAD_URL}/${ETCD_VER}/etcd-${ETCD_VER}-darwin-amd64.zip -o /tmp/etcd-${ETCD_VER}-darwin-amd64.zip' + `
-` + 'unzip /tmp/etcd-${ETCD_VER}-darwin-amd64.zip -d /tmp && mkdir -p /tmp/test-etcd' + `
+` + 'unzip /tmp/etcd-${ETCD_VER}-darwin-amd64.zip -d /tmp' + `
 ` + 'mv /tmp/etcd-${ETCD_VER}-darwin-amd64/* /tmp/test-etcd' + `
 
 `;
