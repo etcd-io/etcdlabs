@@ -275,9 +275,9 @@ BRANCH_NAME=${gitBranch}
 
         let txt = `ETCD_VER=${this.version}
 
+# choose either URL
 GOOGLE_URL=https://storage.googleapis.com/etcd
 GITHUB_URL=https://github.com/coreos/etcd/releases/download
-
 ` + 'DOWNLOAD_URL=${GOOGLE_URL}' + `
 
 `;
@@ -308,9 +308,9 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
 
         let txt = `ETCD_VER=${this.version}
 
-GITHUB_URL=https://github.com/coreos/etcd/releases/download
+# choose either URL
 GOOGLE_URL=https://storage.googleapis.com/etcd
-
+GITHUB_URL=https://github.com/coreos/etcd/releases/download
 ` + 'DOWNLOAD_URL=${GOOGLE_URL}' + `
 
 `;
