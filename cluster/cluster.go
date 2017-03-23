@@ -233,6 +233,8 @@ func Start(ccfg Config) (c *Cluster, err error) {
 			select {
 			case <-c.nodes[idx].srv.Server.ReadyNotify():
 			case rerr = <-c.nodes[idx].srv.Err():
+			case <-c.nodes[idx].srv.Server.StopNotify():
+				rerr = fmt.Errorf("received from etcdserver.Server.StopNotify")
 			}
 			if rerr != nil {
 				plog.Warning("embed.Etcd failed to start", rerr, "at", c.nodes[idx].cfg.Name, c.nodes[idx].cfg.LCUrls[0].String())
@@ -343,7 +345,10 @@ func (c *Cluster) Stop(i int) {
 
 	c.nodes[i].srv.Server.HardStop()
 	c.nodes[i].srv.Close()
-	<-c.nodes[i].srv.Err()
+	select {
+	case <-c.nodes[i].srv.Err():
+	case <-c.nodes[i].srv.Server.StopNotify():
+	}
 
 	plog.Printf("stopped %q(%s)", c.nodes[i].cfg.Name, c.nodes[i].srv.Server.ID().String())
 }
@@ -368,7 +373,6 @@ func (c *Cluster) Restart(i int) error {
 	// start server
 	srv, err := embed.StartEtcd(c.nodes[i].cfg)
 	if err != nil {
-		fmt.Println("start etcd error:", err)
 		return err
 	}
 	c.nodes[i].srv = srv
@@ -421,7 +425,10 @@ func (c *Cluster) Shutdown() {
 
 			c.nodes[i].srv.Server.HardStop()
 			c.nodes[i].srv.Close()
-			<-c.nodes[i].srv.Err()
+			select {
+			case <-c.nodes[i].srv.Err():
+			case <-c.nodes[i].srv.Server.StopNotify():
+			}
 		}(i)
 	}
 	wg.Wait()
