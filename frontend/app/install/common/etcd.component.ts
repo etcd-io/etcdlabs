@@ -555,6 +555,7 @@ sudo mv /tmp/${flag.name}.service /etc/systemd/system/${flag.name}.service
 
         let dockerRunFlags: string[] = [];
         dockerRunFlags.push('run');
+        dockerRunFlags.push('--rm');
         dockerRunFlags.push('--net=host');
         dockerRunFlags.push('--name' + ' ' + dockerContainerName);
         dockerRunFlags.push('--volume' + '=' + flag.getDataDir() + ':' + '/etcd-data');
