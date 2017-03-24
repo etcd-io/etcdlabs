@@ -428,6 +428,10 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
         flags.push('--initial-cluster-token' + ' ' + flag.initialClusterToken);
         flags.push('--initial-cluster-state' + ' ' + flag.initialClusterState);
 
+        if (this.autoCompactHour > 0) {
+            flags.push('--auto-compaction-retention' + ' ' + String(this.autoCompactHour));
+        }
+
         if (this.secure) {
             flags.push('--client-cert-auth');
             flags.push('--trusted-ca-file' + ' ' + certsDir + '/' + flag.clientRootCAFile);
@@ -446,10 +450,6 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
 
         if (this.debug) {
             flags.push('--debug');
-        }
-
-        if (this.autoCompactHour > 0) {
-            flags.push('--auto-compaction-retention' + ' ' + String(this.autoCompactHour));
         }
 
         let txt = '';
