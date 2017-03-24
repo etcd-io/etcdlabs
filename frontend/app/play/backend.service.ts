@@ -14,8 +14,8 @@ export class Connect {
   }
 }
 
-// NodeStatus defines etcd node status.
-export class NodeStatus {
+// MemberStatus defines etcd node status.
+export class MemberStatus {
   Name: string;
   ID: string;
   Endpoint: string;
@@ -59,19 +59,19 @@ export class ServerStatus {
   ServerUptime: string;
   UserN: number;
   Users: string[];
-  NodeStatuses: NodeStatus[];
+  MemberStatuses: MemberStatus[];
   constructor(
     active: boolean,
     serverUptime: string,
     userN: number,
     users: string[],
-    nodeStatuses: NodeStatus[],
+    memberStatuses: MemberStatus[],
   ) {
     this.PlaygroundActive = active;
     this.ServerUptime = serverUptime;
     this.UserN = userN;
     this.Users = users;
-    this.NodeStatuses = nodeStatuses;
+    this.MemberStatuses = memberStatuses;
   }
 }
 
@@ -90,14 +90,14 @@ export class BackendService {
   constructor(private http: Http) {
     this.connect = new Connect(2200, '', false);
 
-    let nodeStatuses = [
-      new NodeStatus('node1', 'None', 'None', false, 'Stopped', 'node1 has not started...', 0, '0 B', 0),
-      new NodeStatus('node2', 'None', 'None', false, 'Stopped', 'node2 has not started...', 0, '0 B', 0),
-      new NodeStatus('node3', 'None', 'None', false, 'Stopped', 'node3 has not started...', 0, '0 B', 0),
-      new NodeStatus('node4', 'None', 'None', false, 'Stopped', 'node4 has not started...', 0, '0 B', 0),
-      new NodeStatus('node5', 'None', 'None', false, 'Stopped', 'node5 has not started...', 0, '0 B', 0),
+    let memberStatuses = [
+      new MemberStatus('node1', 'None', 'None', false, 'Stopped', 'node1 has not started...', 0, '0 B', 0),
+      new MemberStatus('node2', 'None', 'None', false, 'Stopped', 'node2 has not started...', 0, '0 B', 0),
+      new MemberStatus('node3', 'None', 'None', false, 'Stopped', 'node3 has not started...', 0, '0 B', 0),
+      new MemberStatus('node4', 'None', 'None', false, 'Stopped', 'node4 has not started...', 0, '0 B', 0),
+      new MemberStatus('node5', 'None', 'None', false, 'Stopped', 'node5 has not started...', 0, '0 B', 0),
     ];
-    this.serverStatus = new ServerStatus(false, '0s', 0, [], nodeStatuses);
+    this.serverStatus = new ServerStatus(false, '0s', 0, [], memberStatuses);
   }
 
   ///////////////////////////////////////////////////////

@@ -1,7 +1,7 @@
 import { Component, OnInit, AfterContentInit, AfterViewChecked, ElementRef, ViewChild, OnDestroy } from '@angular/core';
 import { Http, Response, Headers, RequestOptions } from '@angular/http';
 import { Observable } from 'rxjs';
-import { BackendService, ServerStatus, NodeStatus, Connect } from './backend.service';
+import { BackendService, ServerStatus, MemberStatus, Connect } from './backend.service';
 
 export class KeyValue {
   Key: string;
@@ -109,7 +109,7 @@ export class PlayComponent implements OnInit, AfterContentInit, AfterViewChecked
   serverUptime: string;
   userN: number;
   users: string[];
-  nodeStatuses: NodeStatus[];
+  memberStatuses: MemberStatus[];
 
   connect: Connect;
   connectErrorMessage: string;
@@ -144,7 +144,7 @@ export class PlayComponent implements OnInit, AfterContentInit, AfterViewChecked
     this.serverUptime = backendService.serverStatus.ServerUptime;
     this.userN = backendService.serverStatus.UserN;
     this.users = backendService.serverStatus.Users;
-    this.nodeStatuses = backendService.serverStatus.NodeStatuses;
+    this.memberStatuses = backendService.serverStatus.MemberStatuses;
 
     this.inputKey = '';
     this.inputValue = '';
@@ -197,7 +197,7 @@ export class PlayComponent implements OnInit, AfterContentInit, AfterViewChecked
     let idxs = this.getSelectedNodeIndexes();
     let eps = [];
     for (let _i = 0; _i < idxs.length; _i++) {
-      eps.push(this.nodeStatuses[idxs[_i]].Endpoint);
+      eps.push(this.memberStatuses[idxs[_i]].Endpoint);
     }
     return eps;
   }
@@ -298,7 +298,7 @@ export class PlayComponent implements OnInit, AfterContentInit, AfterViewChecked
     this.serverUptime = resp.ServerUptime;
     this.userN = resp.UserN;
     this.users = resp.Users;
-    this.nodeStatuses = resp.NodeStatuses;
+    this.memberStatuses = resp.MemberStatuses;
 
     if (!this.playgroundActive) {
       this.closeConnect();
@@ -307,7 +307,7 @@ export class PlayComponent implements OnInit, AfterContentInit, AfterViewChecked
   };
 
   // getServerStatus fetches server status from backend.
-  // nodeStatus is true to get the status of all nodes.
+  // memberStatus is true to get the status of all nodes.
   getServerStatus() {
     let serverStatusResult: ServerStatus;
     this.backendService.fetchServerStatus().subscribe(
@@ -396,11 +396,11 @@ export class PlayComponent implements OnInit, AfterContentInit, AfterViewChecked
 
     let nodeIndex = this.selectedTab - 3;
     if (act === 'stop-node' || act === 'restart-node') {
-      eps = [this.nodeStatuses[nodeIndex].Endpoint];
+      eps = [this.memberStatuses[nodeIndex].Endpoint];
       prefix = false;
       key = '';
       val = '';
-      this.sendLogLine('OK', 'requested "' + act + '" ' + this.nodeStatuses[nodeIndex].Name);
+      this.sendLogLine('OK', 'requested "' + act + '" ' + this.memberStatuses[nodeIndex].Name);
     } else {
       this.sendLogLine('OK', 'requested "' + act + '" (' + this.getSelectedNodeEndpointsTxt() + ')');
     }
