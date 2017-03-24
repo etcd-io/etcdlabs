@@ -1,17 +1,3 @@
-// Copyright 2016 CoreOS, Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package cluster
 
 import (
@@ -20,26 +6,27 @@ import (
 	"io/ioutil"
 	"os"
 	"reflect"
-	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/pkg/transport"
-	"github.com/coreos/pkg/capnslog"
 )
 
 var testTLS = transport.TLSInfo{
+	TrustedCAFile:  "../test-certs/trusted-ca.pem",
 	CertFile:       "../test-certs/test-cert.pem",
 	KeyFile:        "../test-certs/test-cert-key.pem",
-	TrustedCAFile:  "../test-certs/trusted-ca.pem",
 	ClientCertAuth: true,
 }
 
-var (
-	bmu      sync.Mutex
-	basePort = 1300
-)
+type keyValue struct {
+	key string
+	val string
+}
+
+var basePort uint32 = 1300
 
 /*
 func TestCluster_Start_no_TLS(t *testing.T) {
@@ -107,18 +94,13 @@ func TestCluster_Recover_peer_client_manual_TLS_scheme(t *testing.T) {
 	testCluster(t, Config{Size: 3, PeerTLSInfo: testTLS, ClientTLSInfo: testTLS}, true, true)
 }
 
-type keyValue struct {
-	key string
-	val string
-}
-
 func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 	dir, err := ioutil.TempDir(os.TempDir(), "cluster-test")
 	if err != nil {
 		t.Fatal(err)
 	}
 	cfg.RootDir = dir
-	cfg.RootPort = basePort
+	cfg.RootPort = int(atomic.LoadUint32(&basePort))
 
 	if cfg.RootCtx == nil || cfg.RootCancel == nil {
 		rootCtx, rootCancel := context.WithCancel(context.Background())
@@ -127,19 +109,21 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 		cfg.RootCancel = rootCancel
 	}
 
-	bmu.Lock()
-	basePort += 10
-	bmu.Unlock()
+	atomic.AddUint32(&basePort, 10)
 
+	println()
+	println()
+	println()
+	fmt.Println("starting cluster")
 	c, err := Start(cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer func() {
-		// silence logs when shutting down cluster
-		capnslog.SetGlobalLogLevel(capnslog.CRITICAL)
-		defer capnslog.SetGlobalLogLevel(testLogLevel)
-
+		println()
+		println()
+		println()
+		fmt.Println("shutting down the cluster")
 		c.Shutdown()
 	}()
 
@@ -149,6 +133,10 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 		{key: "foo3", val: "bar3"},
 	}
 	func() {
+		println()
+		println()
+		println()
+		fmt.Println("making write requests")
 		cli, _, err := c.Client(c.AllEndpoints(scheme)...)
 		if err != nil {
 			t.Fatal(err)
@@ -165,32 +153,62 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 			time.Sleep(time.Second)
 		}
 	}()
-	c.UpdateNodeStatus()
-	hashes1 := make([]int, len(c.nodes))
-	for i := range c.nodes {
-		hashes1[i] = c.nodes[i].status.Hash
+
+	println()
+	println()
+	println()
+	fmt.Println("calling UpdateMemberStatus")
+	c.UpdateMemberStatus()
+	hashes1 := make([]int, len(c.Members))
+	for i := range c.Members {
+		hashes1[i] = c.Members[i].status.Hash
 	}
 
 	if stopRecover {
-		c.Stop(0)
+		println()
+		println()
+		println()
+		fmt.Println("stopping leader")
+		leadidx := c.LeadIdx
+		c.Stop(leadidx)
 		time.Sleep(time.Second)
 
-		if err = c.Restart(0); err != nil {
+		if err := c.WaitForLeader(); err != nil {
+			t.Fatal(err)
+		}
+
+		println()
+		println()
+		println()
+		fmt.Println("recovering old leader")
+		if err = c.Restart(leadidx); err != nil {
 			t.Fatal(err)
 		}
 		time.Sleep(time.Second)
-	}
-	c.UpdateNodeStatus()
-	hashes2 := make([]int, len(c.nodes))
-	for i := range c.nodes {
-		hashes2[i] = c.nodes[i].status.Hash
+
+		if err := c.WaitForLeader(); err != nil {
+			t.Fatal(err)
+		}
 	}
 
+	println()
+	println()
+	println()
+	fmt.Println("calling UpdateMemberStatus")
+	c.UpdateMemberStatus()
+	hashes2 := make([]int, len(c.Members))
+	for i := range c.Members {
+		hashes2[i] = c.Members[i].status.Hash
+	}
 	if !reflect.DeepEqual(hashes1, hashes2) {
 		t.Fatalf("hashes1 %v != hashes2 %v", hashes1, hashes2)
 	}
 
 	func() {
+		println()
+		println()
+		println()
+		fmt.Println("making read requests")
 		cli, _, err := c.Client(c.AllEndpoints(scheme)...)
 		if err != nil {
 			t.Fatal(err)
@@ -214,18 +232,58 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 			time.Sleep(time.Second)
 		}
 	}()
-	c.UpdateNodeStatus()
-	hashes3 := make([]int, len(c.nodes))
-	for i := range c.nodes {
-		hashes3[i] = c.nodes[i].status.Hash
-	}
 
+	println()
+	println()
+	println()
+	fmt.Println("calling UpdateMemberStatus")
+	c.UpdateMemberStatus()
+	hashes3 := make([]int, len(c.Members))
+	for i := range c.Members {
+		hashes3[i] = c.Members[i].status.Hash
+	}
 	if !reflect.DeepEqual(hashes1, hashes3) {
 		t.Fatalf("hashes1 %v != hashes3 %v", hashes1, hashes3)
 	}
 
-	for i, st := range c.AllNodeStatus() {
-		fmt.Printf("%s: %+v\n", c.nodes[i].cfg.Name, st)
+	func() {
+		println()
+		println()
+		println()
+		fmt.Println("adding a new member")
+		if err := c.Add(); err != nil {
+			t.Fatal(err)
+		}
+		if err := c.WaitForLeader(); err != nil {
+			t.Fatal(err)
+		}
+	}()
+
+	println()
+	println()
+	println()
+	for i, st := range c.AllMemberStatus() {
+		fmt.Printf("Member Status: %q, %+v\n", c.Members[i].cfg.Name, st)
 	}
-	fmt.Println("DONE!")
+
+	func() {
+		println()
+		println()
+		println()
+		fmt.Println("removing the member")
+		leadidx := c.LeadIdx
+		if err := c.Remove(leadidx); err != nil {
+			t.Fatal(err)
+		}
+		if err := c.WaitForLeader(); err != nil {
+			t.Fatal(err)
+		}
+	}()
+
+	println()
+	println()
+	println()
+	for i, st := range c.AllMemberStatus() {
+		fmt.Printf("Member Status: %q, %+v\n", c.Members[i].cfg.Name, st)
+	}
 }
