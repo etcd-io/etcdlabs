@@ -264,7 +264,7 @@ BRANCH_NAME=${gitBranch}
         txt += `sudo cp ` + '${GOPATH}/src/${GIT_PATH}/bin/etcd* ' + this.getExecDir() + `
 
 ` + this.getExecDir() + divide + `etcd --version
-` + this.getExecDir() + divide + `etcdctl --version
+` + 'ETCDCTL_API=3' + ' ' + this.getExecDir() + divide + `etcdctl version
 
 `;
         return txt;
@@ -296,7 +296,7 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
         txt += 'sudo cp /tmp/test-etcd/etcd* ' + this.getExecDir() + `
 
 ` + this.getExecDir() + divide + `etcd --version
-` + this.getExecDir() + divide + `etcdctl --version
+` + 'ETCDCTL_API=3' + ' ' + this.getExecDir() + divide + `etcdctl version
 
 `;
 
@@ -330,7 +330,7 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
         txt += 'sudo cp /tmp/test-etcd/etcd* ' + this.getExecDir() + `
 
 ` + this.getExecDir() + divide + `etcd --version
-` + this.getExecDir() + divide + `etcdctl --version
+` + 'ETCDCTL_API=3' + ' ' + this.getExecDir() + divide + `etcdctl version
 
 `;
 
