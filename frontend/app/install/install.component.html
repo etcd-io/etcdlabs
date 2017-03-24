@@ -281,9 +281,9 @@
 				</p>
 				<div *ngFor="let flag of etcd.flags; let i = index;">
 					<div *ngIf="etcd.clusterSize > i">
-						<pre *ngIf="etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}}
+						<pre *ngIf="etcd.secure" class="code-dark">{{cfssl.getCertsPrepareCommand(flag.certsDir)}}
 
-{{cfssl.getCertsPrepareCommand(flag.certsDir)}}
+{{flag.getDataDirPrepareCommand()}}
 
 {{etcd.getCommand(flag, false, false, false)}}
 </pre>
@@ -351,9 +351,9 @@
 				</p>
 				<div *ngFor="let flag of etcd.flags; let i = index;">
 					<div *ngIf="etcd.clusterSize > i">
-						<pre *ngIf="etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}}
+						<pre *ngIf="etcd.secure" class="code-dark">{{cfssl.getCertsPrepareCommand(flag.certsDir)}}
 
-{{cfssl.getCertsPrepareCommand(flag.certsDir)}}
+{{flag.getDataDirPrepareCommand()}}
 
 {{etcd.getServiceFile(flag)}}
 
@@ -411,9 +411,9 @@
 				<br>
 				<div *ngFor="let flag of etcd.flags; let i = index;">
 					<div *ngIf="etcd.clusterSize > i">
-						<pre *ngIf="etcd.secure" class="code-dark">{{flag.getDataDirPrepareCommand()}}
+						<pre *ngIf="etcd.secure" class="code-dark">{{cfssl.getCertsPrepareCommand(flag.certsDir)}}
 
-{{cfssl.getCertsPrepareCommand(flag.certsDir)}}
+{{flag.getDataDirPrepareCommand()}}
 
 {{etcd.getServiceFileDocker(flag)}}
 
@@ -430,9 +430,9 @@
 				</div>
 				<br> Check status:
 				<br>
-				<pre *ngIf="etcd.secure" class="code-dark">{{etcd.getInstallCommandLinux()}}
+				<pre *ngIf="etcd.secure" class="code-dark">{{cfssl.getCertsPrepareCommand(etcd.flags[0].certsDir)}}
 
-{{cfssl.getCertsPrepareCommand(etcd.flags[0].certsDir)}}
+{{etcd.getInstallCommandLinux()}}
 
 {{etcd.getEndpointHealthCommand(etcd.flags[0], true)}}
 </pre>
