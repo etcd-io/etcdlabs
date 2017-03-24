@@ -57,11 +57,11 @@ func TestServer(t *testing.T) {
 		if err := json.NewDecoder(resp.Body).Decode(&sresp); err != nil {
 			t.Fatal(err)
 		}
-		if len(sresp.NodeStatuses) != 5 {
-			t.Fatalf("len(sresp.NodeStatuses) expected 5, got %d", len(sresp.NodeStatuses))
+		if len(sresp.MemberStatuses) != 5 {
+			t.Fatalf("len(sresp.MemberStatuses) expected 5, got %d", len(sresp.MemberStatuses))
 		}
-		hash := sresp.NodeStatuses[0].Hash
-		for i, s := range sresp.NodeStatuses {
+		hash := sresp.MemberStatuses[0].Hash
+		for i, s := range sresp.MemberStatuses {
 			if hash != s.Hash {
 				t.Fatalf("%d: hash expected %d, got different hash %d", i, hash, s.Hash)
 			}
