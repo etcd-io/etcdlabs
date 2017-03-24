@@ -56,7 +56,7 @@ func updateClusterStatus(stopc <-chan struct{}) {
 			plog.Info("no user online")
 			continue
 		}
-		globalCluster.UpdateNodeStatus()
+		globalCluster.UpdateMemberStatus()
 	}
 }
 
@@ -148,8 +148,8 @@ type ServerStatus struct {
 	// Maximum 20 users are returned.
 	Users []string
 
-	// NodeStatuses contains all node statuses.
-	NodeStatuses []cluster.NodeStatus
+	// MemberStatuses contains all node statuses.
+	MemberStatuses []cluster.MemberStatus
 }
 
 func getUserIDs() []string {
@@ -192,7 +192,7 @@ func serverStatusHandler(ctx context.Context, w http.ResponseWriter, req *http.R
 			ServerUptime:     humanize.Time(globalCluster.Started),
 			UserN:            getUserIDsN(),
 			Users:            getUserIDs(),
-			NodeStatuses:     globalCluster.AllNodeStatus(),
+			MemberStatuses:   globalCluster.AllMemberStatus(),
 		}
 		if err := json.NewEncoder(w).Encode(resp); err != nil {
 			return err
@@ -481,17 +481,17 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 				return json.NewEncoder(w).Encode(cresp)
 			}
 
-			plog.Printf("starting 'stop-node' on %q(%s)", globalCluster.NodeStatus(idx).Name, globalCluster.NodeStatus(idx).ID)
+			plog.Printf("starting 'stop-node' on %q(%s)", globalCluster.MemberStatus(idx).Name, globalCluster.MemberStatus(idx).ID)
 			if globalCluster.IsStopped(idx) {
 				cresp.Success = false
-				cresp.Result = fmt.Sprintf("%s is already stopped (took %v)", globalCluster.NodeStatus(idx).Name, roundDownDuration(time.Since(reqStart), minScaleToDisplay))
+				cresp.Result = fmt.Sprintf("%s is already stopped (took %v)", globalCluster.MemberStatus(idx).Name, roundDownDuration(time.Since(reqStart), minScaleToDisplay))
 				cresp.ResultLines = []string{cresp.Result}
 				return json.NewEncoder(w).Encode(cresp)
 			}
 			globalCluster.Stop(idx)
-			plog.Printf("finished 'stop-node' on %q(%s)", globalCluster.NodeStatus(idx).Name, globalCluster.NodeStatus(idx).ID)
+			plog.Printf("finished 'stop-node' on %q(%s)", globalCluster.MemberStatus(idx).Name, globalCluster.MemberStatus(idx).ID)
 
-			cresp.Result = fmt.Sprintf("stopped %s (took %v)", globalCluster.NodeStatus(idx).Name, roundDownDuration(time.Since(reqStart), minScaleToDisplay))
+			cresp.Result = fmt.Sprintf("stopped %s (took %v)", globalCluster.MemberStatus(idx).Name, roundDownDuration(time.Since(reqStart), minScaleToDisplay))
 			cresp.ResultLines = []string{cresp.Result}
 			if err := json.NewEncoder(w).Encode(cresp); err != nil {
 				return err
@@ -506,10 +506,10 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 			}
 			globalStopRestartLimiter.Advance()
 
-			plog.Printf("starting 'restart-node' on %q(%s)", globalCluster.NodeStatus(idx).Name, globalCluster.NodeStatus(idx).ID)
+			plog.Printf("starting 'restart-node' on %q(%s)", globalCluster.MemberStatus(idx).Name, globalCluster.MemberStatus(idx).ID)
 			if !globalCluster.IsStopped(idx) {
 				cresp.Success = false
-				cresp.Result = fmt.Sprintf("%s is already started (took %v)", globalCluster.NodeStatus(idx).Name, roundDownDuration(time.Since(reqStart), minScaleToDisplay))
+				cresp.Result = fmt.Sprintf("%s is already started (took %v)", globalCluster.MemberStatus(idx).Name, roundDownDuration(time.Since(reqStart), minScaleToDisplay))
 				cresp.ResultLines = []string{cresp.Result}
 				plog.Warningf("'restart-node' %s", cresp.Result)
 				return json.NewEncoder(w).Encode(cresp)
@@ -521,9 +521,9 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 				cresp.Result = rerr.Error()
 			} else {
 				cresp.Success = true
-				cresp.Result = fmt.Sprintf("restarted %s (took %v)", globalCluster.NodeStatus(idx).Name, roundDownDuration(time.Since(reqStart), minScaleToDisplay))
+				cresp.Result = fmt.Sprintf("restarted %s (took %v)", globalCluster.MemberStatus(idx).Name, roundDownDuration(time.Since(reqStart), minScaleToDisplay))
 			}
-			plog.Printf("finished 'restart-node' on %q(%s)", globalCluster.NodeStatus(idx).Name, globalCluster.NodeStatus(idx).ID)
+			plog.Printf("finished 'restart-node' on %q(%s)", globalCluster.MemberStatus(idx).Name, globalCluster.MemberStatus(idx).ID)
 
 			cresp.ResultLines = []string{cresp.Result}
 			if err := json.NewEncoder(w).Encode(cresp); err != nil {

@@ -35,21 +35,12 @@ var (
 
 	defragLimit = 10000
 
-	// InitialMmapSize is the initial size of the mmapped region. Setting this larger than
+	// initialMmapSize is the initial size of the mmapped region. Setting this larger than
 	// the potential max db size can prevent writer from blocking reader.
 	// This only works for linux.
-	InitialMmapSize = int64(10 * 1024 * 1024 * 1024)
+	initialMmapSize = uint64(10 * 1024 * 1024 * 1024)
 
 	plog = capnslog.NewPackageLogger("github.com/coreos/etcd", "mvcc/backend")
-)
-
-const (
-	// DefaultQuotaBytes is the number of bytes the backend Size may
-	// consume before exceeding the space quota.
-	DefaultQuotaBytes = int64(2 * 1024 * 1024 * 1024) // 2GB
-	// MaxQuotaBytes is the maximum number of bytes suggested for a backend
-	// quota. A larger quota may lead to degraded performance.
-	MaxQuotaBytes = int64(8 * 1024 * 1024 * 1024) // 8GB
 )
 
 type Backend interface {
@@ -96,18 +87,45 @@ type backend struct {
 	donec chan struct{}
 }
 
-func New(path string, d time.Duration, limit int) Backend {
-	return newBackend(path, d, limit)
+type BackendConfig struct {
+	// Path is the file path to the backend file.
+	Path string
+	// BatchInterval is the maximum time before flushing the BatchTx.
+	BatchInterval time.Duration
+	// BatchLimit is the maximum puts before flushing the BatchTx.
+	BatchLimit int
+	// MmapSize is the number of bytes to mmap for the backend.
+	MmapSize uint64
+}
+
+func DefaultBackendConfig() BackendConfig {
+	return BackendConfig{
+		BatchInterval: defaultBatchInterval,
+		BatchLimit:    defaultBatchLimit,
+		MmapSize:      initialMmapSize,
+	}
+}
+
+func New(bcfg BackendConfig) Backend {
+	return newBackend(bcfg)
 }
 
 func NewDefaultBackend(path string) Backend {
-	return newBackend(path, defaultBatchInterval, defaultBatchLimit)
+	bcfg := DefaultBackendConfig()
+	bcfg.Path = path
+	return newBackend(bcfg)
 }
 
-func newBackend(path string, d time.Duration, limit int) *backend {
-	db, err := bolt.Open(path, 0600, boltOpenOptions)
+func newBackend(bcfg BackendConfig) *backend {
+	bopts := &bolt.Options{}
+	if boltOpenOptions != nil {
+		*bopts = *boltOpenOptions
+	}
+	bopts.InitialMmapSize = int(bcfg.MmapSize)
+
+	db, err := bolt.Open(bcfg.Path, 0600, bopts)
 	if err != nil {
-		plog.Panicf("cannot open database at %s (%v)", path, err)
+		plog.Panicf("cannot open database at %s (%v)", bcfg.Path, err)
 	}
 
 	// In future, may want to make buffering optional for low-concurrency systems
@@ -115,8 +133,8 @@ func newBackend(path string, d time.Duration, limit int) *backend {
 	b := &backend{
 		db: db,
 
-		batchInterval: d,
-		batchLimit:    limit,
+		batchInterval: bcfg.BatchInterval,
+		batchLimit:    bcfg.BatchLimit,
 
 		readTx: &readTx{buf: txReadBuffer{
 			txBuffer: txBuffer{make(map[string]*bucketBuffer)}},
@@ -247,7 +265,11 @@ func (b *backend) defrag() error {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
-	b.batchTx.commit(true)
+	// block concurrent read requests while resetting tx
+	b.readTx.mu.Lock()
+	defer b.readTx.mu.Unlock()
+
+	b.batchTx.unsafeCommit(true)
 	b.batchTx.tx = nil
 
 	tmpdb, err := bolt.Open(b.db.Path()+".tmp", 0600, boltOpenOptions)
@@ -287,6 +309,10 @@ func (b *backend) defrag() error {
 	if err != nil {
 		plog.Fatalf("cannot begin tx (%s)", err)
 	}
+
+	b.readTx.buf.reset()
+	b.readTx.tx = b.unsafeBegin(false)
+	atomic.StoreInt64(&b.size, b.readTx.tx.Size())
 
 	return nil
 }
@@ -345,12 +371,17 @@ func defragdb(odb, tmpdb *bolt.DB, limit int) error {
 
 func (b *backend) begin(write bool) *bolt.Tx {
 	b.mu.RLock()
+	tx := b.unsafeBegin(write)
+	b.mu.RUnlock()
+	atomic.StoreInt64(&b.size, tx.Size())
+	return tx
+}
+
+func (b *backend) unsafeBegin(write bool) *bolt.Tx {
 	tx, err := b.db.Begin(write)
 	if err != nil {
 		plog.Fatalf("cannot begin tx (%s)", err)
 	}
-	b.mu.RUnlock()
-	atomic.StoreInt64(&b.size, tx.Size())
 	return tx
 }
 
@@ -361,7 +392,9 @@ func NewTmpBackend(batchInterval time.Duration, batchLimit int) (*backend, strin
 		plog.Fatal(err)
 	}
 	tmpPath := filepath.Join(dir, "database")
-	return newBackend(tmpPath, batchInterval, batchLimit), tmpPath
+	bcfg := DefaultBackendConfig()
+	bcfg.Path, bcfg.BatchInterval, bcfg.BatchLimit = tmpPath, batchInterval, batchLimit
+	return newBackend(bcfg), tmpPath
 }
 
 func NewDefaultTmpBackend() (*backend, string) {

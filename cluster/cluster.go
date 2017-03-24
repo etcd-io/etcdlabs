@@ -1,17 +1,3 @@
-// Copyright 2016 CoreOS, Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package cluster
 
 import (
@@ -22,58 +8,18 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"strings"
 	"sync"
 	"time"
 
+	"golang.org/x/sync/errgroup"
+
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/embed"
-	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
 	"github.com/coreos/etcd/pkg/netutil"
 	"github.com/coreos/etcd/pkg/transport"
-	"github.com/coreos/etcd/pkg/types"
-	humanize "github.com/dustin/go-humanize"
-	"golang.org/x/sync/errgroup"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 )
 
-const (
-	// StoppedNodeStatus is node status before start or after stop.
-	StoppedNodeStatus = "Stopped"
-	// FollowerNodeStatus is follower in Raft.
-	FollowerNodeStatus = "Follower"
-	// LeaderNodeStatus is leader in Raft.
-	LeaderNodeStatus = "Leader"
-)
-
-// NodeStatus defines node status information.
-// Encode without json tag to make it parsable by Typescript.
-type NodeStatus struct {
-	Name     string
-	ID       string
-	Endpoint string
-
-	IsLeader bool
-	State    string
-	StateTxt string
-
-	DBSize    uint64
-	DBSizeTxt string
-	Hash      int
-}
-
-// node contains *embed.Etcd and its state.
-type node struct {
-	srv              *embed.Etcd
-	cfg              *embed.Config
-	stoppedStartedAt time.Time
-
-	statusLock sync.RWMutex
-	status     NodeStatus
-}
-
-// Cluster contains all embedded etcd nodes in the same cluster.
+// Cluster contains all embedded etcd Members in the same cluster.
 // Configuration is meant to be auto-generated.
 type Cluster struct {
 	Started time.Time
@@ -81,16 +27,22 @@ type Cluster struct {
 	// opLock blocks Stop, Restart, Shutdown.
 	opLock sync.Mutex
 
-	rootDir           string
+	mmu               sync.RWMutex // member change
 	size              int
-	nodes             []*node
+	LeadIdx           int
+	Members           []*Member
 	clientHostToIndex map[string]int
+
 	clientDialTimeout time.Duration // for client requests
 
-	stopc chan struct{} // to signal UpdateNodeStatus
+	stopc chan struct{} // to signal UpdateMemberStatus
 
 	rootCtx    context.Context
 	rootCancel func()
+
+	basePort int
+	rootDir  string
+	ccfg     Config
 }
 
 // Config defines etcd local cluster Configuration.
@@ -99,94 +51,122 @@ type Config struct {
 	RootDir  string
 	RootPort int
 
-	ClientTLSInfo transport.TLSInfo
-	ClientAutoTLS bool
 	PeerTLSInfo   transport.TLSInfo
 	PeerAutoTLS   bool
+	ClientTLSInfo transport.TLSInfo
+	ClientAutoTLS bool
 
 	RootCtx     context.Context
 	RootCancel  func()
 	DialTimeout time.Duration // for client requests
 }
 
+// PeerScheme returns the peer scheme.
+// TODO: support unix
+func (c Config) PeerScheme() string {
+	scheme := "https"
+	if c.PeerTLSInfo.Empty() && !c.PeerAutoTLS {
+		scheme = "http"
+	}
+	return scheme
+}
+
+// ClientScheme returns the client scheme.
+// TODO: support unix
+func (c Config) ClientScheme() string {
+	scheme := "https"
+	if c.ClientTLSInfo.Empty() && !c.ClientAutoTLS {
+		scheme = "http"
+	}
+	return scheme
+}
+
 var defaultDialTimeout = time.Second
 
 // Start starts embedded etcd cluster.
-func Start(ccfg Config) (c *Cluster, err error) {
-	plog.Printf("starting %d nodes (root directory %s, root port :%d)", ccfg.Size, ccfg.RootDir, ccfg.RootPort)
+func Start(ccfg Config) (clus *Cluster, err error) {
+	if ccfg.Size > 7 {
+		return nil, fmt.Errorf("max cluster size is 7, got %d", ccfg.Size)
+	}
+
+	plog.Printf("starting %d Members (root directory %q, root port :%d)", ccfg.Size, ccfg.RootDir, ccfg.RootPort)
 
 	dt := ccfg.DialTimeout
 	if dt == time.Duration(0) {
 		dt = defaultDialTimeout
 	}
 
-	c = &Cluster{
+	clus = &Cluster{
 		Started:           time.Now(),
-		rootDir:           ccfg.RootDir,
 		size:              ccfg.Size,
-		nodes:             make([]*node, ccfg.Size),
+		Members:           make([]*Member, ccfg.Size),
 		clientHostToIndex: make(map[string]int, ccfg.Size),
 		clientDialTimeout: dt,
 		stopc:             make(chan struct{}),
 		rootCtx:           ccfg.RootCtx,
 		rootCancel:        ccfg.RootCancel,
+
+		basePort: ccfg.RootPort,
+		rootDir:  ccfg.RootDir,
+		ccfg:     ccfg,
 	}
 
 	if !existFileOrDir(ccfg.RootDir) {
+		plog.Printf("creating root directory %q", ccfg.RootDir)
 		if err = mkdirAll(ccfg.RootDir); err != nil {
 			return nil, err
 		}
 	} else {
+		plog.Printf("removing root directory %q", ccfg.RootDir)
 		os.RemoveAll(ccfg.RootDir)
 	}
 
-	// client TLS
-	if !ccfg.ClientTLSInfo.Empty() && ccfg.ClientAutoTLS {
-		return nil, fmt.Errorf("choose either auto TLS or manual client TLS")
-	}
-	clientScheme := "https"
-	if ccfg.ClientTLSInfo.Empty() && !ccfg.ClientAutoTLS {
-		clientScheme = "http"
-	}
-
-	// peer TLS
-	if !ccfg.PeerTLSInfo.Empty() && ccfg.PeerAutoTLS {
-		return nil, fmt.Errorf("choose either auto TLS or manual peer TLS")
-	}
-	peerScheme := "https"
-	if ccfg.PeerTLSInfo.Empty() && !ccfg.PeerAutoTLS {
-		peerScheme = "http"
-	}
-
+	plog.Printf("getting default host")
 	dhost, err := netutil.GetDefaultHost()
 	if err != nil {
-		return nil, err
+		plog.Warning(err)
+		plog.Warning("overwriting default host with 'localhost")
+		dhost = "localhost"
+	}
+	plog.Printf("detected default host %q", dhost)
+
+	if !ccfg.PeerTLSInfo.Empty() && ccfg.PeerAutoTLS {
+		return nil, fmt.Errorf("choose either auto peer TLS or manual peer TLS")
+	}
+	if !ccfg.ClientTLSInfo.Empty() && ccfg.ClientAutoTLS {
+		return nil, fmt.Errorf("choose either auto client TLS or manual client TLS")
 	}
 
 	startPort := ccfg.RootPort
 	for i := 0; i < ccfg.Size; i++ {
 		cfg := embed.NewConfig()
 
-		cfg.Name = fmt.Sprintf("node%d", i+1)
-		cfg.Dir = filepath.Join(ccfg.RootDir, cfg.Name+".etcd")
-		cfg.WalDir = filepath.Join(cfg.Dir, "wal")
+		cfg.ClusterState = embed.ClusterStateFlagNew
+
+		cfg.Name = fmt.Sprintf("member-%d", i+1)
+		cfg.Dir = filepath.Join(ccfg.RootDir, cfg.Name+".data-dir-etcd")
+		cfg.WalDir = filepath.Join(ccfg.RootDir, cfg.Name+".data-dir-etcd", "wal")
 
 		// this is fresh cluster, so remove any conflicting data
 		os.RemoveAll(cfg.Dir)
+		plog.Infof("removed %q", cfg.Dir)
 		os.RemoveAll(cfg.WalDir)
+		plog.Infof("removed %q", cfg.WalDir)
 
-		// advertise localhost to not expose default host
-		// set default host in listen URLs for other machines to access
-		// within the same network (Prometheus dashboard for test-etcd)
-		clientURL := url.URL{Scheme: clientScheme, Host: fmt.Sprintf("localhost:%d", startPort)}
-		aCURL := url.URL{Scheme: clientScheme, Host: fmt.Sprintf("%s:%d", dhost, startPort)}
-		cfg.LCUrls, cfg.ACUrls = []url.URL{clientURL, aCURL}, []url.URL{clientURL}
-		plog.Infof("%q client-urls with %s, %s", cfg.Name, clientURL.String(), aCURL.String())
+		curl := url.URL{Scheme: ccfg.ClientScheme(), Host: fmt.Sprintf("localhost:%d", startPort)}
+		cfg.ACUrls = []url.URL{curl}
+		cfg.LCUrls = []url.URL{curl}
+		if dhost != "localhost" {
+			// expose default host to other machines in listen address (e.g. Prometheus dashboard)
+			curl2 := url.URL{Scheme: ccfg.ClientScheme(), Host: fmt.Sprintf("%s:%d", dhost, startPort)}
+			cfg.LCUrls = append(cfg.LCUrls, curl2)
+			plog.Infof("%q is set up to listen on client url %q (default host)", cfg.Name, curl2.String())
+		}
+		plog.Infof("%q is set up to listen on client url %q", cfg.Name, curl.String())
 
-		c.clientHostToIndex[clientURL.Host] = i
-
-		peerURL := url.URL{Scheme: peerScheme, Host: fmt.Sprintf("localhost:%d", startPort+1)}
-		cfg.LPUrls, cfg.APUrls = []url.URL{peerURL}, []url.URL{peerURL}
+		purl := url.URL{Scheme: ccfg.PeerScheme(), Host: fmt.Sprintf("localhost:%d", startPort+1)}
+		cfg.APUrls = []url.URL{purl}
+		cfg.LPUrls = []url.URL{purl}
 
 		cfg.ClientAutoTLS = ccfg.ClientAutoTLS
 		cfg.ClientTLSInfo = ccfg.ClientTLSInfo
@@ -196,59 +176,31 @@ func Start(ccfg Config) (c *Cluster, err error) {
 		// auto-compaction every hour
 		cfg.AutoCompactionRetention = 1
 
-		c.nodes[i] = &node{cfg: cfg, status: NodeStatus{Name: cfg.Name, Endpoint: clientURL.String(), IsLeader: false, State: StoppedNodeStatus}}
+		clus.Members[i] = &Member{
+			clus: clus,
+			cfg:  cfg,
+			status: MemberStatus{
+				Name:     cfg.Name,
+				Endpoint: curl.String(),
+				IsLeader: false,
+				State:    StoppedMemberStatus,
+			},
+		}
+
+		clus.clientHostToIndex[curl.Host] = i
 
 		startPort += 2
 	}
+	clus.basePort = startPort
 
-	inits := make([]string, ccfg.Size)
-	for i := 0; i < ccfg.Size; i++ {
-		inits[i] = c.nodes[i].cfg.Name + "=" + c.nodes[i].cfg.APUrls[0].String()
-	}
-	ic := strings.Join(inits, ",")
-
-	for i := 0; i < ccfg.Size; i++ {
-		c.nodes[i].cfg.InitialCluster = ic
-
-		// start server
-		var srv *embed.Etcd
-		srv, err = embed.StartEtcd(c.nodes[i].cfg)
-		if err != nil {
-			return nil, err
-		}
-		c.nodes[i].srv = srv
-
-		// copy and overwrite with internal configuration
-		// in case it was configured with auto TLS
-		nc := c.nodes[i].srv.Config()
-		c.nodes[i].cfg = &nc
+	for i := 0; i < clus.size; i++ {
+		clus.Members[i].cfg.InitialCluster = clus.initialCluster()
 	}
 
 	var g errgroup.Group
-	for i := 0; i < c.size; i++ {
+	for i := 0; i < clus.size; i++ {
 		idx := i
-
-		g.Go(func() error {
-			var rerr error
-			select {
-			case <-c.nodes[idx].srv.Server.ReadyNotify():
-			case rerr = <-c.nodes[idx].srv.Err():
-			case <-c.nodes[idx].srv.Server.StopNotify():
-				rerr = fmt.Errorf("received from etcdserver.Server.StopNotify")
-			}
-			if rerr != nil {
-				plog.Warning("embed.Etcd failed to start", rerr, "at", c.nodes[idx].cfg.Name, c.nodes[idx].cfg.LCUrls[0].String())
-				return rerr
-			}
-
-			c.nodes[idx].stoppedStartedAt = time.Now()
-			c.nodes[idx].status.State = FollowerNodeStatus
-			c.nodes[idx].status.StateTxt = fmt.Sprintf("%s just started (%s)", c.nodes[idx].status.Name, humanize.Time(c.nodes[idx].stoppedStartedAt))
-			c.nodes[idx].status.IsLeader = false
-
-			plog.Printf("started %s (client %s, peer %s)", c.nodes[idx].cfg.Name, c.nodes[idx].cfg.LCUrls[0].String(), c.nodes[idx].cfg.LPUrls[0].String())
-			return nil
-		})
+		g.Go(func() error { return clus.Members[idx].Start() })
 	}
 	if gerr := g.Wait(); gerr != nil {
 		return nil, gerr
@@ -256,299 +208,260 @@ func Start(ccfg Config) (c *Cluster, err error) {
 
 	time.Sleep(time.Second)
 
-	plog.Print("checking leader")
-	var wg sync.WaitGroup
-	wg.Add(c.size)
-	for i := 0; i < c.size; i++ {
-		go func(i int) {
-			defer wg.Done()
-
-			for {
-				cli, _, err := c.Client(c.Endpoints(i, false)...)
-				if err != nil {
-					plog.Warning(err)
-
-					time.Sleep(time.Second)
-					continue
-				}
-				defer cli.Close()
-
-				ctx, cancel := context.WithTimeout(c.rootCtx, 3*time.Second)
-				resp, err := cli.Status(ctx, c.nodes[i].cfg.LCUrls[0].Host)
-				cancel()
-				if err != nil {
-					plog.Warning(err)
-
-					time.Sleep(time.Second)
-					continue
-				}
-
-				c.nodes[i].status.ID = types.ID(resp.Header.MemberId).String()
-
-				if resp.Leader == uint64(0) {
-					plog.Printf("%s %s has no leader yet", c.nodes[i].cfg.Name, types.ID(resp.Header.MemberId))
-					c.nodes[i].status.IsLeader = false
-					c.nodes[i].status.State = FollowerNodeStatus
-
-					time.Sleep(time.Second)
-					continue
-				}
-
-				plog.Printf("%s %s has leader %s", c.nodes[i].cfg.Name, types.ID(resp.Header.MemberId), types.ID(resp.Leader))
-				c.nodes[i].status.IsLeader = resp.Leader == resp.Header.MemberId
-				if c.nodes[i].status.IsLeader {
-					c.nodes[i].status.State = LeaderNodeStatus
-				} else {
-					c.nodes[i].status.State = FollowerNodeStatus
-				}
-
-				break
-			}
-		}(i)
-	}
-	wg.Wait()
-
-	plog.Printf("successfully started %d nodes", ccfg.Size)
-	return c, nil
+	return clus, clus.WaitForLeader()
 }
 
 // StopNotify returns receive-only stop channel to notify the cluster has stopped.
-func (c *Cluster) StopNotify() <-chan struct{} {
-	return c.stopc
+func (clus *Cluster) StopNotify() <-chan struct{} {
+	return clus.stopc
 }
 
 // Stop stops a node.
-func (c *Cluster) Stop(i int) {
-	c.opLock.Lock()
-	defer c.opLock.Unlock()
-
-	plog.Printf("stopping %q(%s)", c.nodes[i].cfg.Name, c.nodes[i].srv.Server.ID().String())
-
-	c.nodes[i].statusLock.RLock()
-	if c.nodes[i].status.State == StoppedNodeStatus {
-		plog.Warningf("%s is already stopped", c.nodes[i].cfg.Name)
-		c.nodes[i].statusLock.RUnlock()
-		return
-	}
-	c.nodes[i].statusLock.RUnlock()
-
-	c.nodes[i].stoppedStartedAt = time.Now()
-
-	c.nodes[i].statusLock.Lock()
-	c.nodes[i].status.IsLeader = false
-	c.nodes[i].status.State = StoppedNodeStatus
-	c.nodes[i].status.StateTxt = fmt.Sprintf("%s just stopped (%s)", c.nodes[i].status.Name, humanize.Time(c.nodes[i].stoppedStartedAt))
-	c.nodes[i].status.DBSize = 0
-	c.nodes[i].status.DBSizeTxt = ""
-	c.nodes[i].status.Hash = 0
-	c.nodes[i].statusLock.Unlock()
-
-	c.nodes[i].srv.Server.HardStop()
-	c.nodes[i].srv.Close()
-	select {
-	case <-c.nodes[i].srv.Err():
-	case <-c.nodes[i].srv.Server.StopNotify():
-	}
-
-	plog.Printf("stopped %q(%s)", c.nodes[i].cfg.Name, c.nodes[i].srv.Server.ID().String())
+func (clus *Cluster) Stop(i int) {
+	clus.opLock.Lock()
+	defer clus.opLock.Unlock()
+	clus.Members[i].Stop()
 }
 
 // Restart restarts a node.
-func (c *Cluster) Restart(i int) error {
-	c.opLock.Lock()
-	defer c.opLock.Unlock()
+func (clus *Cluster) Restart(i int) error {
+	clus.opLock.Lock()
+	defer clus.opLock.Unlock()
+	return clus.Members[i].Restart()
+}
 
-	plog.Printf("restarting %q(%s)", c.nodes[i].cfg.Name, c.nodes[i].srv.Server.ID().String())
-
-	c.nodes[i].statusLock.RLock()
-	if c.nodes[i].status.State != StoppedNodeStatus {
-		plog.Warningf("%s is already started", c.nodes[i].cfg.Name)
-		c.nodes[i].statusLock.RUnlock()
-		return nil
+// Add adds one member.
+func (clus *Cluster) Add() error {
+	plog.Printf("getting default host")
+	dhost, err := netutil.GetDefaultHost()
+	if err != nil {
+		plog.Warning(err)
+		plog.Warning("overwriting default host with 'localhost")
+		dhost = "localhost"
 	}
-	c.nodes[i].statusLock.RUnlock()
+	plog.Printf("detected default host %q", dhost)
 
-	c.nodes[i].cfg.ClusterState = "existing"
+	clus.opLock.Lock()
+	defer clus.opLock.Unlock()
 
-	// start server
-	srv, err := embed.StartEtcd(c.nodes[i].cfg)
+	clus.mmu.Lock()
+	defer clus.mmu.Unlock()
+
+	cfg := embed.NewConfig()
+
+	cfg.ClusterState = embed.ClusterStateFlagExisting
+
+	cfg.Name = fmt.Sprintf("member-%d", clus.size+1)
+	cfg.Dir = filepath.Join(clus.rootDir, cfg.Name+".data-dir-etcd")
+	cfg.WalDir = filepath.Join(clus.rootDir, cfg.Name+".data-dir-etcd", "wal")
+
+	// this is fresh cluster, so remove any conflicting data
+	os.RemoveAll(cfg.Dir)
+	plog.Infof("removed %q", cfg.Dir)
+	os.RemoveAll(cfg.WalDir)
+	plog.Infof("removed %q", cfg.WalDir)
+
+	curl := url.URL{Scheme: clus.ccfg.ClientScheme(), Host: fmt.Sprintf("localhost:%d", clus.basePort)}
+	cfg.ACUrls = []url.URL{curl}
+	cfg.LCUrls = []url.URL{curl}
+	if dhost != "localhost" {
+		// expose default host to other machines in listen address (e.g. Prometheus dashboard)
+		curl2 := url.URL{Scheme: clus.ccfg.ClientScheme(), Host: fmt.Sprintf("%s:%d", dhost, clus.basePort)}
+		cfg.LCUrls = append(cfg.LCUrls, curl2)
+		plog.Infof("%q is set up to listen on client url %q (default host)", cfg.Name, curl2.String())
+	}
+	plog.Infof("%q is set up to listen on client url %q", cfg.Name, curl.String())
+
+	purl := url.URL{Scheme: clus.ccfg.PeerScheme(), Host: fmt.Sprintf("localhost:%d", clus.basePort+1)}
+	cfg.APUrls = []url.URL{purl}
+	cfg.LPUrls = []url.URL{purl}
+
+	clus.size++
+	clus.basePort += 2
+
+	cfg.ClientAutoTLS = clus.ccfg.ClientAutoTLS
+	cfg.ClientTLSInfo = clus.ccfg.ClientTLSInfo
+	cfg.PeerAutoTLS = clus.ccfg.PeerAutoTLS
+	cfg.PeerTLSInfo = clus.ccfg.PeerTLSInfo
+
+	// auto-compaction every hour
+	cfg.AutoCompactionRetention = 1
+
+	clus.Members = append(clus.Members, &Member{
+		clus: clus,
+		cfg:  cfg,
+		status: MemberStatus{
+			Name:     cfg.Name,
+			Endpoint: curl.String(),
+			IsLeader: false,
+			State:    StoppedMemberStatus,
+		},
+	})
+	idx := len(clus.Members) - 1
+	clus.clientHostToIndex[curl.Host] = idx
+
+	for i := 0; i < clus.size; i++ {
+		clus.Members[i].cfg.InitialCluster = clus.initialCluster()
+	}
+
+	plog.Infof("adding member %q", clus.Members[idx].cfg.Name)
+	cli, _, err := clus.Members[0].Client(false, false)
 	if err != nil {
 		return err
 	}
-	c.nodes[i].srv = srv
+	ctx, cancel := context.WithTimeout(clus.rootCtx, 3*time.Second)
+	_, err = cli.MemberAdd(ctx, []string{clus.Members[idx].cfg.APUrls[0].String()})
+	cancel()
+	if err != nil {
+		return err
+	}
+	plog.Infof("added member %q", clus.Members[idx].cfg.Name)
 
-	nc := c.nodes[i].srv.Config()
-	c.nodes[i].cfg = &nc
+	plog.Infof("starting member %q", clus.Members[idx].cfg.Name)
+	if serr := clus.Members[idx].Start(); serr != nil {
+		return serr
+	}
+	plog.Infof("started member %q", clus.Members[idx].cfg.Name)
 
-	// this blocks when quorum is lost
-	// <-c.nodes[i].srv.Server.ReadyNotify()
-
-	c.nodes[i].stoppedStartedAt = time.Now()
-
-	c.nodes[i].statusLock.Lock()
-	c.nodes[i].status.IsLeader = false
-	c.nodes[i].status.State = FollowerNodeStatus
-	c.nodes[i].status.StateTxt = fmt.Sprintf("%s just restarted (%s)", c.nodes[i].status.Name, humanize.Time(c.nodes[i].stoppedStartedAt))
-	c.nodes[i].statusLock.Unlock()
-
-	plog.Printf("restarted %q(%s)", c.nodes[i].cfg.Name, c.nodes[i].srv.Server.ID().String())
 	return nil
 }
 
-// Shutdown stops all nodes and deletes all data directories.
-func (c *Cluster) Shutdown() {
-	c.rootCancel()
-	close(c.stopc) // stopping UpdateNodeStatus
+// Remove removes the member and its data.
+func (clus *Cluster) Remove(i int) error {
+	clus.opLock.Lock()
+	defer clus.opLock.Unlock()
 
-	c.opLock.Lock()
-	defer c.opLock.Unlock()
+	clus.mmu.Lock()
+	defer clus.mmu.Unlock()
 
-	plog.Println("shutting down all nodes")
+	idx := (i + 1) % clus.size
+	plog.Infof("removing member %q", clus.Members[i].cfg.Name)
+	cli, _, err := clus.Members[idx].Client(false, false)
+	if err != nil {
+		return err
+	}
+	ctx, cancel := context.WithTimeout(clus.rootCtx, 3*time.Second)
+	_, err = cli.MemberRemove(ctx, uint64(clus.Members[i].srv.Server.ID()))
+	cancel()
+	if err != nil {
+		return err
+	}
+	plog.Infof("removed member %q", clus.Members[idx].cfg.Name)
+
+	clus.size--
+	var newms []*Member
+	for j := range clus.Members {
+		if j == i {
+			continue
+		}
+		newms = append(newms, clus.Members[j])
+	}
+	clus.Members = newms
+	for j, m := range clus.Members {
+		clus.clientHostToIndex[m.cfg.LCUrls[0].Host] = j
+	}
+
+	clus.Members[i].Stop()
+
+	os.RemoveAll(clus.Members[i].cfg.Dir)
+	plog.Infof("removed %q", clus.Members[i].cfg.Dir)
+
+	os.RemoveAll(clus.Members[i].cfg.WalDir)
+	plog.Infof("removed %q", clus.Members[i].cfg.WalDir)
+
+	return nil
+}
+
+// Shutdown stops all Members and deletes all data directories.
+func (clus *Cluster) Shutdown() {
+	clus.rootCancel()
+	close(clus.stopc) // stopping UpdateMemberStatus
+
+	clus.opLock.Lock()
+	defer clus.opLock.Unlock()
+
+	plog.Println("shutting down all Members")
 	var wg sync.WaitGroup
-	wg.Add(c.size)
-	for i := 0; i < c.size; i++ {
+	wg.Add(clus.size)
+	for i := 0; i < clus.size; i++ {
 		go func(i int) {
 			defer wg.Done()
-
-			if c.nodes[i].status.State == StoppedNodeStatus {
-				plog.Warningf("%s is already stopped (skipping shutdown)", c.nodes[i].cfg.Name)
-				return
-			}
-			c.nodes[i].stoppedStartedAt = time.Now()
-
-			c.nodes[i].status.IsLeader = false
-			c.nodes[i].status.State = StoppedNodeStatus
-			c.nodes[i].status.State = fmt.Sprintf("%s just stopped (%s)", c.nodes[i].status.Name, humanize.Time(c.nodes[i].stoppedStartedAt))
-			c.nodes[i].status.DBSize = 0
-			c.nodes[i].status.DBSizeTxt = ""
-			c.nodes[i].status.Hash = 0
-
-			c.nodes[i].srv.Server.HardStop()
-			c.nodes[i].srv.Close()
-			select {
-			case <-c.nodes[i].srv.Err():
-			case <-c.nodes[i].srv.Server.StopNotify():
-			}
+			clus.Members[i].Stop()
 		}(i)
 	}
 	wg.Wait()
 
-	os.RemoveAll(c.rootDir)
-	plog.Printf("successfully shutdown cluster (deleted %s)", c.rootDir)
+	os.RemoveAll(clus.rootDir)
+	plog.Printf("successfully shutdown cluster (deleted %q)", clus.rootDir)
 }
 
-// UpdateNodeStatus updates node statuses.
-func (c *Cluster) UpdateNodeStatus() {
+// WaitForLeader waits for cluster to elect a new leader.
+func (clus *Cluster) WaitForLeader() error {
+	plog.Print("wait for leader election")
+	var g errgroup.Group
+	for i := 0; i < clus.size; i++ {
+		idx := i
+		g.Go(func() error {
+			return clus.Members[idx].WaitForLeader()
+		})
+	}
+	if gerr := g.Wait(); gerr != nil {
+		return gerr
+	}
+	plog.Print("waited for leader election")
+
+	clus.mmu.Lock()
+	defer clus.mmu.Unlock()
+
+	found := false
+	for i, m := range clus.Members {
+		if m.status.IsLeader {
+			if found {
+				return fmt.Errorf("duplicate leader? %q(%s) claims to be the leader", clus.Members[clus.LeadIdx].cfg.Name, clus.Members[clus.LeadIdx].srv.Server.ID())
+			}
+			clus.LeadIdx = i
+			plog.Infof("%q(%s) is the leader", m.cfg.Name, m.srv.Server.ID())
+			found = true
+		}
+	}
+	return nil
+}
+
+// Client creates the client.
+func (clus *Cluster) Client(eps ...string) (*clientv3.Client, *tls.Config, error) {
+	if len(eps) == 0 {
+		return nil, nil, errors.New("no endpoint is given")
+	}
+	idx, ok := clus.clientHostToIndex[getHost(eps[0])]
+	if !ok {
+		return nil, nil, fmt.Errorf("cannot find node with endpoint %s", eps[0])
+	}
+	return clus.Members[idx].Client(false, false, eps...)
+}
+
+// UpdateMemberStatus updates node statuses.
+func (clus *Cluster) UpdateMemberStatus() {
+	clus.mmu.Lock()
+	defer clus.mmu.Unlock()
+
 	var wg sync.WaitGroup
-	wg.Add(c.size)
-	for i := 0; i < c.size; i++ {
+	wg.Add(clus.size)
+	for i := 0; i < clus.size; i++ {
 		go func(i int) {
 			defer func() {
 				if err := recover(); err != nil {
 					plog.Warning("recovered from panic", err)
 					select {
-					case <-c.rootCtx.Done():
-						plog.Warning("most likely from rootCtx canceling")
+					case <-clus.rootCtx.Done():
+						plog.Warning("rootCtx is done with", clus.rootCtx.Err())
 					default:
 					}
 				}
 				wg.Done()
 			}()
-
-			now := time.Now()
-			cli, tlsConfig, err := c.Client(c.Endpoints(i, false)...)
-			if err != nil {
+			if err := clus.Members[i].FetchMemberStatus(); err != nil {
 				plog.Warning(err)
-				c.nodes[i].statusLock.Lock()
-				c.nodes[i].status.State = StoppedNodeStatus
-				c.nodes[i].status.StateTxt = fmt.Sprintf("%s is not reachable (%s - %v)", c.nodes[i].status.Name, humanize.Time(now), err)
-				c.nodes[i].status.IsLeader = false
-				c.nodes[i].status.DBSize = 0
-				c.nodes[i].status.DBSizeTxt = ""
-				c.nodes[i].status.Hash = 0
-				c.nodes[i].statusLock.Unlock()
-				return
 			}
-			defer cli.Close()
-
-			now = time.Now()
-			ctx, cancel := context.WithTimeout(c.rootCtx, time.Second)
-			resp, err := cli.Status(ctx, c.nodes[i].cfg.LCUrls[0].Host)
-			cancel()
-			if err != nil {
-				plog.Warning(err)
-				c.nodes[i].statusLock.Lock()
-				c.nodes[i].status.State = StoppedNodeStatus
-				c.nodes[i].status.StateTxt = fmt.Sprintf("%s is not reachable (%s - %v)", c.nodes[i].status.Name, humanize.Time(now), err)
-				c.nodes[i].status.IsLeader = false
-				c.nodes[i].status.DBSize = 0
-				c.nodes[i].status.DBSizeTxt = ""
-				c.nodes[i].status.Hash = 0
-				c.nodes[i].statusLock.Unlock()
-				return
-			}
-
-			isLeader, state := false, FollowerNodeStatus
-			if resp.Header.MemberId == resp.Leader {
-				isLeader, state = true, LeaderNodeStatus
-			}
-			status := NodeStatus{
-				Name:      c.nodes[i].cfg.Name,
-				ID:        types.ID(resp.Header.MemberId).String(),
-				Endpoint:  c.nodes[i].cfg.LCUrls[0].String(),
-				IsLeader:  isLeader,
-				State:     state,
-				StateTxt:  fmt.Sprintf("%s has been healthy (since %s)", c.nodes[i].status.Name, humanize.Time(c.nodes[i].stoppedStartedAt)),
-				DBSize:    uint64(resp.DbSize),
-				DBSizeTxt: humanize.Bytes(uint64(resp.DbSize)),
-			}
-
-			now = time.Now()
-			var dopts = []grpc.DialOption{grpc.WithTimeout(time.Second)}
-			if tlsConfig != nil {
-				dopts = append(dopts, grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)))
-			} else {
-				dopts = append(dopts, grpc.WithInsecure())
-			}
-			conn, err := grpc.Dial(c.nodes[i].cfg.LCUrls[0].Host, dopts...)
-			if err != nil {
-				plog.Warning(err)
-				c.nodes[i].statusLock.Lock()
-				c.nodes[i].status.State = StoppedNodeStatus
-				c.nodes[i].status.StateTxt = fmt.Sprintf("%s is not reachable (%s - %v)", c.nodes[i].status.Name, humanize.Time(now), err)
-				c.nodes[i].status.IsLeader = false
-				c.nodes[i].status.DBSize = 0
-				c.nodes[i].status.DBSizeTxt = ""
-				c.nodes[i].status.Hash = 0
-				c.nodes[i].statusLock.Unlock()
-				return
-			}
-			defer conn.Close()
-
-			now = time.Now()
-			mc := pb.NewMaintenanceClient(conn)
-
-			ctx, cancel = context.WithTimeout(c.rootCtx, time.Second)
-			var hresp *pb.HashResponse
-			hresp, err = mc.Hash(ctx, &pb.HashRequest{}, grpc.FailFast(false))
-			cancel()
-			if err != nil {
-				plog.Warning(err)
-				c.nodes[i].statusLock.Lock()
-				c.nodes[i].status.State = StoppedNodeStatus
-				c.nodes[i].status.StateTxt = fmt.Sprintf("%s was not reachable while getting hash (%s - %v)", c.nodes[i].status.Name, humanize.Time(now), err)
-				c.nodes[i].status.IsLeader = false
-				c.nodes[i].status.DBSize = 0
-				c.nodes[i].status.DBSizeTxt = ""
-				c.nodes[i].status.Hash = 0
-				c.nodes[i].statusLock.Unlock()
-				return
-			}
-			status.Hash = int(hresp.Hash)
-
-			c.nodes[i].statusLock.Lock()
-			c.nodes[i].status = status
-			c.nodes[i].statusLock.Unlock()
 		}(i)
 	}
 
@@ -560,138 +473,8 @@ func (c *Cluster) UpdateNodeStatus() {
 	}
 
 	select {
-	case <-c.stopc:
-		return
+	case <-clus.stopc:
 	case <-wf():
 	}
 	return
-}
-
-// StoppedStartedAt returns the node's last stop and (re)start action time.
-func (c *Cluster) StoppedStartedAt(i int) time.Time {
-	return c.nodes[i].stoppedStartedAt
-}
-
-// Config returns the configuration of the server.
-func (c *Cluster) Config(i int) embed.Config {
-	return *c.nodes[i].cfg
-}
-
-// AllConfigs returns all configurations.
-func (c *Cluster) AllConfigs() []embed.Config {
-	cs := make([]embed.Config, c.size)
-	for i := range c.nodes {
-		cs[i] = *c.nodes[i].cfg
-	}
-	return cs
-}
-
-// Endpoints returns the endpoints of the node.
-func (c *Cluster) Endpoints(i int, scheme bool) []string {
-	var eps []string
-	for _, ep := range c.nodes[i].cfg.LCUrls {
-		if scheme {
-			eps = append(eps, ep.String())
-		} else {
-			eps = append(eps, ep.Host)
-		}
-	}
-	return eps
-}
-
-// AllEndpoints returns all endpoints of clients.
-func (c *Cluster) AllEndpoints(scheme bool) []string {
-	eps := make([]string, c.size)
-	for i := 0; i < c.size; i++ {
-		if scheme {
-			eps[i] = c.nodes[i].cfg.LCUrls[0].String()
-		} else {
-			eps[i] = c.nodes[i].cfg.LCUrls[0].Host
-		}
-	}
-	return eps
-}
-
-// SetClientDialTimeout sets the client dial timeout.
-func (c *Cluster) SetClientDialTimeout(d time.Duration) {
-	c.clientDialTimeout = d
-}
-
-// Client creates the client.
-func (c *Cluster) Client(eps ...string) (*clientv3.Client, *tls.Config, error) {
-	if len(eps) == 0 {
-		return nil, nil, errors.New("no endpoint is given")
-	}
-	idx, ok := c.clientHostToIndex[getHost(eps[0])]
-	if !ok {
-		return nil, nil, fmt.Errorf("cannot find node with endpoint %s", eps[0])
-	}
-
-	ccfg := clientv3.Config{
-		Endpoints:   eps,
-		DialTimeout: c.clientDialTimeout,
-	}
-	if !c.nodes[idx].cfg.ClientTLSInfo.Empty() {
-		tlsConfig, err := c.nodes[idx].cfg.ClientTLSInfo.ClientConfig()
-		if err != nil {
-			return nil, nil, err
-		}
-		ccfg.TLS = tlsConfig
-	}
-
-	cli, err := clientv3.New(ccfg)
-	return cli, ccfg.TLS, err
-}
-
-// IsStopped returns true if the node has stopped.
-func (c *Cluster) IsStopped(i int) (stopped bool) {
-	c.nodes[i].statusLock.Lock()
-	stopped = c.nodes[i].status.State == StoppedNodeStatus
-	c.nodes[i].statusLock.Unlock()
-	return
-}
-
-// Size returns the size of cluster.
-func (c *Cluster) Size() int {
-	return len(c.nodes)
-}
-
-// Quorum returns the size of quorum.
-func (c *Cluster) Quorum() int {
-	return len(c.nodes)/2 + 1
-}
-
-// ActiveNodeN returns the number of nodes that are running.
-func (c *Cluster) ActiveNodeN() (cnt int) {
-	for i := range c.nodes {
-		c.nodes[i].statusLock.Lock()
-		if c.nodes[i].status.State != StoppedNodeStatus {
-			cnt++
-		}
-		c.nodes[i].statusLock.Unlock()
-	}
-	return
-}
-
-// NodeStatus returns the node status.
-func (c *Cluster) NodeStatus(i int) NodeStatus {
-	return c.nodes[i].status
-}
-
-// AllNodeStatus returns all node status.
-func (c *Cluster) AllNodeStatus() []NodeStatus {
-	st := make([]NodeStatus, c.size)
-	for i := range c.nodes {
-		st[i] = c.nodes[i].status
-	}
-	return st
-}
-
-// FindIndex returns the node index by client URL. It returns -1 if none.
-func (c *Cluster) FindIndex(ep string) int {
-	idx, ok := c.clientHostToIndex[getHost(ep)]
-	if !ok {
-		return -1
-	}
-	return idx
 }
