@@ -12,6 +12,7 @@ ExecStartPre=/usr/bin/docker pull quay.io/coreos/etcdlabs:latest
 
 ExecStart=/usr/bin/docker \
     run \
+    --rm \
     --net=host \
     --name reverse-proxy \
     --ulimit nofile=262144:262144 \
