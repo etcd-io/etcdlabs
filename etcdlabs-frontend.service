@@ -9,19 +9,12 @@ TimeoutStartSec=0
 LimitNOFILE=40000
 
 ExecStartPre=/usr/bin/docker \
-    kill \
-    etcdlabs-frontend
-
-ExecStartPre=/usr/bin/docker \
-    rm --force \
-    etcdlabs-frontend
-
-ExecStartPre=/usr/bin/docker \
     pull \
     quay.io/coreos/etcdlabs:latest
 
 ExecStart=/usr/bin/docker \
     run \
+    --rm \
     --net=host \
     --name etcdlabs-frontend \
     --ulimit nofile=262144:262144 \
