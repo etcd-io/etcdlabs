@@ -20,7 +20,7 @@
 				<g id="servers">
 					<g class="circle-before-start" [class.circle-Stopped]="memberStatuses[0].State == 'Stopped'" [class.circle-Follower]="memberStatuses[0].State == 'Follower'"
 									[class.circle-Leader]="memberStatuses[0].State == 'Leader'" tabindex="0">
-						<text x="213" y="50" font-size="13">node1</text>
+						<text x="213" y="50" font-size="13">memberStatuses[0].Name</text>
 						<text x="210" y="67" font-size="11">(Hash: {{ memberStatuses[0].Hash }})</text>
 						<a (click)="selectTab(3)">
 							<circle cx="230" cy="100" r="25"></circle>
@@ -28,7 +28,7 @@
 					</g>
 					<g class="circle-before-start" [class.circle-Stopped]="memberStatuses[1].State == 'Stopped'" [class.circle-Follower]="memberStatuses[1].State == 'Follower'"
 									[class.circle-Leader]="memberStatuses[1].State == 'Leader'" tabindex="0">
-						<text x="355" y="160" font-size="13">node2</text>
+						<text x="355" y="160" font-size="13">memberStatuses[1].Name</text>
 						<text x="360" y="177" font-size="11">(Hash: {{ memberStatuses[1].Hash }})</text>
 						<a (click)="selectTab(4)">
 							<circle cx="330" cy="180" r="25"></circle>
@@ -36,7 +36,7 @@
 					</g>
 					<g class="circle-before-start" [class.circle-Stopped]="memberStatuses[2].State == 'Stopped'" [class.circle-Follower]="memberStatuses[2].State == 'Follower'"
 									[class.circle-Leader]="memberStatuses[2].State == 'Leader'" tabindex="0">
-						<text x="320" y="320" font-size="13">node3</text>
+						<text x="320" y="320" font-size="13">memberStatuses[2].Name</text>
 						<text x="302" y="337" font-size="11">(Hash: {{ memberStatuses[2].Hash }})</text>
 						<a (click)="selectTab(5)">
 							<circle cx="295" cy="295" r="25"></circle>
@@ -44,7 +44,7 @@
 					</g>
 					<g class="circle-before-start" [class.circle-Stopped]="memberStatuses[3].State == 'Stopped'" [class.circle-Follower]="memberStatuses[3].State == 'Follower'"
 									[class.circle-Leader]="memberStatuses[3].State == 'Leader'" tabindex="0">
-						<text x="80" y="320" font-size="13">node4</text>
+						<text x="80" y="320" font-size="13">memberStatuses[3].Name</text>
 						<text x="80" y="337" font-size="11">(Hash: {{ memberStatuses[3].Hash }})</text>
 						<a (click)="selectTab(6)">
 							<circle cx="160" cy="295" r="25"></circle>
@@ -52,7 +52,7 @@
 					</g>
 					<g class="circle-before-start" [class.circle-Stopped]="memberStatuses[4].State == 'Stopped'" [class.circle-Follower]="memberStatuses[4].State == 'Follower'"
 									[class.circle-Leader]="memberStatuses[4].State == 'Leader'" tabindex="0">
-						<text x="42" y="173" font-size="13">node5</text>
+						<text x="42" y="173" font-size="13">memberStatuses[4].Name</text>
 						<text x="47" y="150" font-size="11">(Hash: {{ memberStatuses[4].Hash }})</text>
 						<a (click)="selectTab(7)">
 							<circle cx="125" cy="180" r="25"></circle>
@@ -70,11 +70,11 @@
 							<br>
 							<div align="center">
 								<span class="select-node-checkbox">Endpoints: </span>
-								<md-checkbox [(ngModel)]="selectedNodes[0]" [checked]="true"><span class="select-node-checkbox">node1</span></md-checkbox>
-								<md-checkbox [(ngModel)]="selectedNodes[1]"><span class="select-node-checkbox">node2</span></md-checkbox>
-								<md-checkbox [(ngModel)]="selectedNodes[2]"><span class="select-node-checkbox">node3</span></md-checkbox>
-								<md-checkbox [(ngModel)]="selectedNodes[3]"><span class="select-node-checkbox">node4</span></md-checkbox>
-								<md-checkbox [(ngModel)]="selectedNodes[4]"><span class="select-node-checkbox">node5</span></md-checkbox>
+								<md-checkbox [(ngModel)]="selectedNodes[0]" [checked]="true"><span class="select-node-checkbox">memberStatuses[0].Name<</span></md-checkbox>
+								<md-checkbox [(ngModel)]="selectedNodes[1]"><span class="select-node-checkbox">memberStatuses[1].Name<</span></md-checkbox>
+								<md-checkbox [(ngModel)]="selectedNodes[2]"><span class="select-node-checkbox">memberStatuses[2].Name<</span></md-checkbox>
+								<md-checkbox [(ngModel)]="selectedNodes[3]"><span class="select-node-checkbox">memberStatuses[3].Name<</span></md-checkbox>
+								<md-checkbox [(ngModel)]="selectedNodes[4]"><span class="select-node-checkbox">memberStatuses[4].Name<</span></md-checkbox>
 							</div>
 							<br>
 							<div class="input-group">
