@@ -143,7 +143,7 @@ func Start(ccfg Config) (clus *Cluster, err error) {
 
 		cfg.ClusterState = embed.ClusterStateFlagNew
 
-		cfg.Name = fmt.Sprintf("member-%d", i+1)
+		cfg.Name = fmt.Sprintf("node%d", i+1)
 		cfg.Dir = filepath.Join(ccfg.RootDir, cfg.Name+".data-dir-etcd")
 		cfg.WalDir = filepath.Join(ccfg.RootDir, cfg.Name+".data-dir-etcd", "wal")
 
@@ -251,7 +251,7 @@ func (clus *Cluster) Add() error {
 
 	cfg.ClusterState = embed.ClusterStateFlagExisting
 
-	cfg.Name = fmt.Sprintf("member-%d", clus.size+1)
+	cfg.Name = fmt.Sprintf("node%d", clus.size+1)
 	cfg.Dir = filepath.Join(clus.rootDir, cfg.Name+".data-dir-etcd")
 	cfg.WalDir = filepath.Join(clus.rootDir, cfg.Name+".data-dir-etcd", "wal")
 

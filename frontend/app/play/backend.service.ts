@@ -91,11 +91,11 @@ export class BackendService {
     this.connect = new Connect(2200, '', false);
 
     let memberStatuses = [
-      new MemberStatus('member-1', 'None', 'None', false, 'Stopped', 'member-1 has not started...', 0, '0 B', 0),
-      new MemberStatus('member-2', 'None', 'None', false, 'Stopped', 'member-2 has not started...', 0, '0 B', 0),
-      new MemberStatus('member-3', 'None', 'None', false, 'Stopped', 'member-3 has not started...', 0, '0 B', 0),
-      new MemberStatus('member-4', 'None', 'None', false, 'Stopped', 'member-4 has not started...', 0, '0 B', 0),
-      new MemberStatus('member-5', 'None', 'None', false, 'Stopped', 'member-5 has not started...', 0, '0 B', 0),
+      new MemberStatus('node1', 'None', 'None', false, 'Stopped', 'node1 has not started...', 0, '0 B', 0),
+      new MemberStatus('node2', 'None', 'None', false, 'Stopped', 'node2 has not started...', 0, '0 B', 0),
+      new MemberStatus('node3', 'None', 'None', false, 'Stopped', 'node3 has not started...', 0, '0 B', 0),
+      new MemberStatus('node4', 'None', 'None', false, 'Stopped', 'node4 has not started...', 0, '0 B', 0),
+      new MemberStatus('node5', 'None', 'None', false, 'Stopped', 'node5 has not started...', 0, '0 B', 0),
     ];
     this.serverStatus = new ServerStatus(false, '0s', 0, [], memberStatuses);
   }
