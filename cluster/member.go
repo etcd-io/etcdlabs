@@ -7,14 +7,15 @@ import (
 	"sync"
 	"time"
 
+	"github.com/coreos/etcd/clientv3"
+	"github.com/coreos/etcd/embed"
+	"github.com/coreos/etcd/etcdserver/api/v3client"
+	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
+	"github.com/coreos/etcd/pkg/types"
+
 	humanize "github.com/dustin/go-humanize"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/embed"
-	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/pkg/types"
 )
 
 const (
@@ -243,13 +244,13 @@ func (m *Member) WaitForLeader() error {
 // since it directly connects to a single embedded server.
 func (m *Member) Client(embedded, scheme bool, eps ...string) (cli *clientv3.Client, tlsCfg *tls.Config, err error) {
 	if embedded {
-		// cli = v3client.New(m.srv.Server)
-		// if !m.clus.ccfg.ClientTLSInfo.Empty() || m.clus.ccfg.ClientAutoTLS {
-		// 	if tlsCfg == nil {
-		// 		tlsCfg, err = m.cfg.ClientTLSInfo.ClientConfig()
-		// 	}
-		// }
-		// return cli, tlsCfg, err
+		cli = v3client.New(m.srv.Server)
+		if !m.clus.ccfg.ClientTLSInfo.Empty() || m.clus.ccfg.ClientAutoTLS {
+			if tlsCfg == nil {
+				tlsCfg, err = m.cfg.ClientTLSInfo.ClientConfig()
+			}
+		}
+		return cli, tlsCfg, err
 	}
 
 	ep := m.cfg.LCUrls[0].String()
@@ -276,9 +277,7 @@ func (m *Member) Client(embedded, scheme bool, eps ...string) (cli *clientv3.Cli
 
 // FetchMemberStatus fetches member status (make sure to close the client outside of this funciton).
 func (m *Member) FetchMemberStatus() error {
-	cli, tlsCfg, err := m.Client(false, false)
-	// TODO: use this after embedded client is ready
-	// cli, tlsCfg, err := m.Client(true, false)
+	cli, tlsCfg, err := m.Client(true, false)
 	if err != nil {
 		return err
 	}

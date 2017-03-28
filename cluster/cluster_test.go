@@ -267,6 +267,10 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 	}
 
 	func() {
+		time.Sleep(5 * time.Second)
+		if err := c.WaitForLeader(); err != nil {
+			t.Fatal(err)
+		}
 		println()
 		println()
 		println()
