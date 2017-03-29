@@ -135,7 +135,7 @@ func TestServer(t *testing.T) {
 	globalClientRequestLimiter.SetInterval(10 * time.Millisecond)
 
 	println()
-	time.Sleep(time.Second)
+	time.Sleep(3 * time.Second)
 	fmt.Println("expecting error from specifying no endpoints...")
 	func() {
 		req := ClientRequest{
@@ -166,7 +166,7 @@ func TestServer(t *testing.T) {
 	}()
 
 	println()
-	time.Sleep(time.Second)
+	time.Sleep(3 * time.Second)
 	fmt.Println("writing to node2...")
 	func() {
 		req := ClientRequest{
@@ -203,7 +203,7 @@ func TestServer(t *testing.T) {
 	}()
 
 	println()
-	time.Sleep(time.Second)
+	time.Sleep(3 * time.Second)
 	fmt.Println("prefix-range from node3...")
 	func() {
 		req := ClientRequest{
@@ -270,7 +270,7 @@ func TestServer(t *testing.T) {
 	}()
 
 	println()
-	time.Sleep(time.Second)
+	time.Sleep(3 * time.Second)
 	fmt.Println("get from node5...")
 	func() {
 		req := ClientRequest{
@@ -301,7 +301,7 @@ func TestServer(t *testing.T) {
 	}()
 
 	println()
-	time.Sleep(time.Second)
+	time.Sleep(3 * time.Second)
 	fmt.Println("stop node1...")
 	func() {
 		req := ClientRequest{
@@ -366,7 +366,7 @@ func TestServer(t *testing.T) {
 	}()
 
 	println()
-	time.Sleep(time.Second)
+	time.Sleep(3 * time.Second)
 	fmt.Println("expecting errors after stopping same node1...")
 	func() {
 		req := ClientRequest{

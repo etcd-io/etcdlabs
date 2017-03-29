@@ -174,7 +174,7 @@ func (m *Member) WaitForLeader() error {
 
 	possibleLead := m.clus.allMemberIDs()
 
-	cli, _, err := m.Client(false, false)
+	cli, _, err := m.Client(false)
 	if err != nil {
 		return err
 	}
@@ -242,8 +242,8 @@ func (m *Member) WaitForLeader() error {
 // If 'eps' is not empty, it overwrites clientv3.Config.Endpoints.
 // If 'embedded' is true, it ignores 'scheme' and 'eps' arguments,
 // since it directly connects to a single embedded server.
-func (m *Member) Client(embedded, scheme bool, eps ...string) (cli *clientv3.Client, tlsCfg *tls.Config, err error) {
-	if embedded {
+func (m *Member) Client(scheme bool, eps ...string) (cli *clientv3.Client, tlsCfg *tls.Config, err error) {
+	if m.clus.embeddedClient {
 		cli = v3client.New(m.srv.Server)
 		if !m.clus.ccfg.ClientTLSInfo.Empty() || m.clus.ccfg.ClientAutoTLS {
 			if tlsCfg == nil {
@@ -277,7 +277,7 @@ func (m *Member) Client(embedded, scheme bool, eps ...string) (cli *clientv3.Cli
 
 // FetchMemberStatus fetches member status (make sure to close the client outside of this funciton).
 func (m *Member) FetchMemberStatus() error {
-	cli, tlsCfg, err := m.Client(true, false)
+	cli, tlsCfg, err := m.Client(false)
 	if err != nil {
 		return err
 	}

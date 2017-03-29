@@ -22,7 +22,8 @@ import (
 // Cluster contains all embedded etcd Members in the same cluster.
 // Configuration is meant to be auto-generated.
 type Cluster struct {
-	Started time.Time
+	embeddedClient bool
+	Started        time.Time
 
 	// opLock blocks Stop, Restart, Shutdown.
 	opLock sync.Mutex
@@ -51,10 +52,11 @@ type Config struct {
 	RootDir  string
 	RootPort int
 
-	PeerTLSInfo   transport.TLSInfo
-	PeerAutoTLS   bool
-	ClientTLSInfo transport.TLSInfo
-	ClientAutoTLS bool
+	EmbeddedClient bool
+	PeerTLSInfo    transport.TLSInfo
+	PeerAutoTLS    bool
+	ClientTLSInfo  transport.TLSInfo
+	ClientAutoTLS  bool
 
 	RootCtx     context.Context
 	RootCancel  func()
@@ -97,6 +99,7 @@ func Start(ccfg Config) (clus *Cluster, err error) {
 	}
 
 	clus = &Cluster{
+		embeddedClient:    ccfg.EmbeddedClient,
 		Started:           time.Now(),
 		size:              ccfg.Size,
 		Members:           make([]*Member, ccfg.Size),
@@ -305,7 +308,7 @@ func (clus *Cluster) Add() error {
 	}
 
 	plog.Infof("adding member %q", clus.Members[idx].cfg.Name)
-	cli, _, err := clus.Members[0].Client(false, false)
+	cli, _, err := clus.Members[0].Client(false)
 	if err != nil {
 		return err
 	}
@@ -336,7 +339,7 @@ func (clus *Cluster) Remove(i int) error {
 
 	idx := (i + 1) % clus.size
 	plog.Infof("removing member %q", clus.Members[i].cfg.Name)
-	cli, _, err := clus.Members[idx].Client(false, false)
+	cli, _, err := clus.Members[idx].Client(false)
 	if err != nil {
 		return err
 	}
@@ -436,7 +439,7 @@ func (clus *Cluster) Client(eps ...string) (*clientv3.Client, *tls.Config, error
 	if !ok {
 		return nil, nil, fmt.Errorf("cannot find node with endpoint %s", eps[0])
 	}
-	return clus.Members[idx].Client(false, false, eps...)
+	return clus.Members[idx].Client(false, eps...)
 }
 
 // UpdateMemberStatus updates node statuses.

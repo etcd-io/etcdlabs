@@ -47,13 +47,15 @@ func startCluster(rootCtx context.Context, rootCancel func()) (*cluster.Cluster,
 	}
 
 	cfg := cluster.Config{
-		Size:          5,
-		RootDir:       dir,
-		RootPort:      port,
-		ClientAutoTLS: false,
-		PeerAutoTLS:   false,
-		RootCtx:       rootCtx,
-		RootCancel:    rootCancel,
+		// TODO: use embedded client after implementing clientv3.Cluster API adapter in etcd
+		EmbeddedClient: false,
+		Size:           5,
+		RootDir:        dir,
+		RootPort:       port,
+		ClientAutoTLS:  false,
+		PeerAutoTLS:    false,
+		RootCtx:        rootCtx,
+		RootCancel:     rootCancel,
 	}
 	return cluster.Start(cfg)
 }
