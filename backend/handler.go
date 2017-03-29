@@ -166,6 +166,7 @@ func getUserIDs() []string {
 	sort.Strings(s)
 	return s
 }
+
 func getUserIDsN() (n int) {
 	globalUserCacheLock.RLock()
 	n = len(globalUserCache)
