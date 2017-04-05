@@ -90,9 +90,8 @@ func TestCluster_Recover_client_auto_TLS_scheme(t *testing.T) {
 }
 */
 
-// TODO: use embedded client after implementing clientv3.Cluster API adapter in etcd
 func TestCluster_Recover_peer_client_manual_TLS_scheme(t *testing.T) {
-	testCluster(t, Config{EmbeddedClient: false, Size: 3, PeerTLSInfo: testTLS, ClientTLSInfo: testTLS}, true, true)
+	testCluster(t, Config{EmbeddedClient: true, Size: 3, PeerTLSInfo: testTLS, ClientTLSInfo: testTLS}, true, true)
 }
 
 func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
@@ -151,7 +150,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 			if err != nil {
 				t.Fatalf("%d: PUT failed %v", i, err)
 			}
-			time.Sleep(time.Second)
+			time.Sleep(5 * time.Second)
 		}
 	}()
 
@@ -172,7 +171,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 		fmt.Println("stopping leader")
 		leadidx := c.LeadIdx
 		c.Stop(leadidx)
-		time.Sleep(time.Second)
+		time.Sleep(5 * time.Second)
 
 		if err := c.WaitForLeader(); err != nil {
 			t.Fatal(err)
@@ -185,7 +184,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 		if err = c.Restart(leadidx); err != nil {
 			t.Fatal(err)
 		}
-		time.Sleep(time.Second)
+		time.Sleep(5 * time.Second)
 
 		if err := c.WaitForLeader(); err != nil {
 			t.Fatal(err)
@@ -230,7 +229,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 			if string(resp.Kvs[0].Value) != kv.val {
 				t.Fatalf("#%d: value expected %q, got %q", i, kv.val, string(resp.Kvs[0].Value))
 			}
-			time.Sleep(time.Second)
+			time.Sleep(5 * time.Second)
 		}
 	}()
 
@@ -268,7 +267,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 	}
 
 	func() {
-		time.Sleep(7 * time.Second)
+		time.Sleep(10 * time.Second)
 		if err := c.WaitForLeader(); err != nil {
 			t.Fatal(err)
 		}

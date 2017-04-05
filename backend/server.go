@@ -47,8 +47,7 @@ func startCluster(rootCtx context.Context, rootCancel func()) (*cluster.Cluster,
 	}
 
 	cfg := cluster.Config{
-		// TODO: use embedded client after implementing clientv3.Cluster API adapter in etcd
-		EmbeddedClient: false,
+		EmbeddedClient: true,
 		Size:           5,
 		RootDir:        dir,
 		RootPort:       port,
