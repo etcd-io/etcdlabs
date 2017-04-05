@@ -25,6 +25,7 @@ import (
 	"github.com/coreos/etcd/etcdserver"
 	"github.com/coreos/etcd/etcdserver/api/v2http"
 	"github.com/coreos/etcd/pkg/cors"
+	"github.com/coreos/etcd/pkg/debugutil"
 	runtimeutil "github.com/coreos/etcd/pkg/runtime"
 	"github.com/coreos/etcd/pkg/transport"
 	"github.com/coreos/etcd/pkg/types"
@@ -237,7 +238,7 @@ func startClientListeners(cfg *Config) (sctxs map[string]*serveCtx, err error) {
 	}
 
 	if cfg.EnablePprof {
-		plog.Infof("pprof is enabled under %s", pprofPrefix)
+		plog.Infof("pprof is enabled under %s", debugutil.HTTPPrefixPProf)
 	}
 
 	sctxs = make(map[string]*serveCtx)
@@ -257,19 +258,21 @@ func startClientListeners(cfg *Config) (sctxs map[string]*serveCtx, err error) {
 		}
 
 		proto := "tcp"
+		addr := u.Host
 		if u.Scheme == "unix" || u.Scheme == "unixs" {
 			proto = "unix"
+			addr = u.Host + u.Path
 		}
 
 		sctx.secure = u.Scheme == "https" || u.Scheme == "unixs"
 		sctx.insecure = !sctx.secure
-		if oldctx := sctxs[u.Host]; oldctx != nil {
+		if oldctx := sctxs[addr]; oldctx != nil {
 			oldctx.secure = oldctx.secure || sctx.secure
 			oldctx.insecure = oldctx.insecure || sctx.insecure
 			continue
 		}
 
-		if sctx.l, err = net.Listen(proto, u.Host); err != nil {
+		if sctx.l, err = net.Listen(proto, addr); err != nil {
 			return nil, err
 		}
 
@@ -303,7 +306,7 @@ func startClientListeners(cfg *Config) (sctxs map[string]*serveCtx, err error) {
 		if cfg.Debug {
 			sctx.registerTrace()
 		}
-		sctxs[u.Host] = sctx
+		sctxs[addr] = sctx
 	}
 	return sctxs, nil
 }
