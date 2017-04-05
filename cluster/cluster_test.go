@@ -150,7 +150,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 			if err != nil {
 				t.Fatalf("%d: PUT failed %v", i, err)
 			}
-			time.Sleep(time.Second)
+			time.Sleep(5 * time.Second)
 		}
 	}()
 
@@ -171,7 +171,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 		fmt.Println("stopping leader")
 		leadidx := c.LeadIdx
 		c.Stop(leadidx)
-		time.Sleep(time.Second)
+		time.Sleep(5 * time.Second)
 
 		if err := c.WaitForLeader(); err != nil {
 			t.Fatal(err)
@@ -184,7 +184,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 		if err = c.Restart(leadidx); err != nil {
 			t.Fatal(err)
 		}
-		time.Sleep(time.Second)
+		time.Sleep(5 * time.Second)
 
 		if err := c.WaitForLeader(); err != nil {
 			t.Fatal(err)
@@ -229,7 +229,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 			if string(resp.Kvs[0].Value) != kv.val {
 				t.Fatalf("#%d: value expected %q, got %q", i, kv.val, string(resp.Kvs[0].Value))
 			}
-			time.Sleep(time.Second)
+			time.Sleep(5 * time.Second)
 		}
 	}()
 
@@ -267,7 +267,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 	}
 
 	func() {
-		time.Sleep(7 * time.Second)
+		time.Sleep(10 * time.Second)
 		if err := c.WaitForLeader(); err != nil {
 			t.Fatal(err)
 		}
