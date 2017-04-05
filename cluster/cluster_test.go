@@ -90,9 +90,8 @@ func TestCluster_Recover_client_auto_TLS_scheme(t *testing.T) {
 }
 */
 
-// TODO: use embedded client after implementing clientv3.Cluster API adapter in etcd
 func TestCluster_Recover_peer_client_manual_TLS_scheme(t *testing.T) {
-	testCluster(t, Config{EmbeddedClient: false, Size: 3, PeerTLSInfo: testTLS, ClientTLSInfo: testTLS}, true, true)
+	testCluster(t, Config{EmbeddedClient: true, Size: 3, PeerTLSInfo: testTLS, ClientTLSInfo: testTLS}, true, true)
 }
 
 func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
