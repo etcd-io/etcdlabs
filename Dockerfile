@@ -33,7 +33,7 @@ RUN ulimit -n
 
 ##########################
 # install go for backend
-ENV GO_VERSION=1.8
+ENV GO_VERSION=1.8.1
 ENV DOWNLOAD_URL=https://storage.googleapis.com/golang
 RUN curl -s ${DOWNLOAD_URL}/go${GO_VERSION}.linux-amd64.tar.gz | tar -v -C /usr/local/ -xz
 
