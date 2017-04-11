@@ -1,5 +1,5 @@
-hash: b32f2e3c77aae640192db4e38e014cc103bfb97b8a1fc6b3e6cc3e79a4afae91
-updated: 2017-04-05T13:17:06.872082418-07:00
+hash: d44610cf6790ae3ce88b67fb058a32321b24d1cf328c7b342fe04692704e149f
+updated: 2017-04-11T08:31:29.663464355-07:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -10,7 +10,7 @@ imports:
 - name: github.com/cockroachdb/cmux
   version: 112f0506e7743d64a6eb8fedbcff13d9979bbf92
 - name: github.com/coreos/etcd
-  version: 408de4124b7e86d9c6e24e4b09633ecfc7f8837a
+  version: 7da79de74b42a6b6c0330c7074f10418597b1aba
   subpackages:
   - alarm
   - auth
@@ -27,6 +27,8 @@ imports:
   - etcdserver/api/v2http
   - etcdserver/api/v2http/httptypes
   - etcdserver/api/v3client
+  - etcdserver/api/v3election
+  - etcdserver/api/v3election/v3electionpb
   - etcdserver/api/v3lock
   - etcdserver/api/v3lock/v3lockpb
   - etcdserver/api/v3rpc
@@ -106,7 +108,7 @@ imports:
 - name: github.com/grpc-ecosystem/go-grpc-prometheus
   version: 6b7015e65d366bf3f19b2b2a000a831940f0f7e0
 - name: github.com/grpc-ecosystem/grpc-gateway
-  version: 84398b94e188ee336f307779b57b3aa91af7063c
+  version: 18d159699f2e83fc5bb9ef2f79465ca3f3122676
   subpackages:
   - runtime
   - runtime/internal
@@ -175,15 +177,18 @@ imports:
   subpackages:
   - rate
 - name: google.golang.org/grpc
-  version: 777daa17ff9b5daef1cfdf915088a2ada3332bf0
+  version: 8050b9cbc271307e5a716a9d782803d09b0d6f2d
   subpackages:
   - codes
   - credentials
   - grpclog
   - internal
+  - keepalive
   - metadata
   - naming
   - peer
+  - stats
+  - tap
   - transport
 - name: gopkg.in/yaml.v2
   version: 53feefa2559fb8dfa8d81baad31be332c97d6c77

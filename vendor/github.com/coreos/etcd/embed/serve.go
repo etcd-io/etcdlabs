@@ -25,6 +25,8 @@ import (
 
 	"github.com/coreos/etcd/etcdserver"
 	"github.com/coreos/etcd/etcdserver/api/v3client"
+	"github.com/coreos/etcd/etcdserver/api/v3election"
+	"github.com/coreos/etcd/etcdserver/api/v3election/v3electionpb"
 	"github.com/coreos/etcd/etcdserver/api/v3lock"
 	"github.com/coreos/etcd/etcdserver/api/v3lock/v3lockpb"
 	"github.com/coreos/etcd/etcdserver/api/v3rpc"
@@ -66,10 +68,14 @@ func (sctx *serveCtx) serve(s *etcdserver.EtcdServer, tlscfg *tls.Config, handle
 	plog.Info("ready to serve client requests")
 
 	m := cmux.New(sctx.l)
+	v3c := v3client.New(s)
+	servElection := v3election.NewElectionServer(v3c)
+	servLock := v3lock.NewLockServer(v3c)
 
 	if sctx.insecure {
 		gs := v3rpc.Server(s, nil)
-		v3lockpb.RegisterLockServer(gs, v3lock.NewLockServer(v3client.New(s)))
+		v3electionpb.RegisterElectionServer(gs, servElection)
+		v3lockpb.RegisterLockServer(gs, servLock)
 		if sctx.serviceRegister != nil {
 			sctx.serviceRegister(gs)
 		}
@@ -97,7 +103,8 @@ func (sctx *serveCtx) serve(s *etcdserver.EtcdServer, tlscfg *tls.Config, handle
 
 	if sctx.secure {
 		gs := v3rpc.Server(s, tlscfg)
-		v3lockpb.RegisterLockServer(gs, v3lock.NewLockServer(v3client.New(s)))
+		v3electionpb.RegisterElectionServer(gs, servElection)
+		v3lockpb.RegisterLockServer(gs, servLock)
 		if sctx.serviceRegister != nil {
 			sctx.serviceRegister(gs)
 		}
@@ -158,34 +165,27 @@ func servePeerHTTP(l net.Listener, handler http.Handler) error {
 	return srv.Serve(l)
 }
 
+type registerHandlerFunc func(context.Context, *gw.ServeMux, string, []grpc.DialOption) error
+
 func (sctx *serveCtx) registerGateway(opts []grpc.DialOption) (*gw.ServeMux, error) {
 	ctx := sctx.ctx
 	addr := sctx.l.Addr().String()
 	gwmux := gw.NewServeMux()
 
-	err := pb.RegisterKVHandlerFromEndpoint(ctx, gwmux, addr, opts)
-	if err != nil {
-		return nil, err
+	handlers := []registerHandlerFunc{
+		pb.RegisterKVHandlerFromEndpoint,
+		pb.RegisterWatchHandlerFromEndpoint,
+		pb.RegisterLeaseHandlerFromEndpoint,
+		pb.RegisterClusterHandlerFromEndpoint,
+		pb.RegisterMaintenanceHandlerFromEndpoint,
+		pb.RegisterAuthHandlerFromEndpoint,
+		v3lockpb.RegisterLockHandlerFromEndpoint,
+		v3electionpb.RegisterElectionHandlerFromEndpoint,
 	}
-	err = pb.RegisterWatchHandlerFromEndpoint(ctx, gwmux, addr, opts)
-	if err != nil {
-		return nil, err
-	}
-	err = pb.RegisterLeaseHandlerFromEndpoint(ctx, gwmux, addr, opts)
-	if err != nil {
-		return nil, err
-	}
-	err = pb.RegisterClusterHandlerFromEndpoint(ctx, gwmux, addr, opts)
-	if err != nil {
-		return nil, err
-	}
-	err = pb.RegisterMaintenanceHandlerFromEndpoint(ctx, gwmux, addr, opts)
-	if err != nil {
-		return nil, err
-	}
-	err = pb.RegisterAuthHandlerFromEndpoint(ctx, gwmux, addr, opts)
-	if err != nil {
-		return nil, err
+	for _, h := range handlers {
+		if err := h(ctx, gwmux, addr, opts); err != nil {
+			return nil, err
+		}
 	}
 	return gwmux, nil
 }
