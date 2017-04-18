@@ -148,6 +148,14 @@ func (e *Etcd) Config() Config {
 func (e *Etcd) Close() {
 	e.closeOnce.Do(func() { close(e.stopc) })
 
+	// (gRPC server) stops accepting new connections,
+	// RPCs, and blocks until all pending RPCs are finished
+	for _, sctx := range e.sctxs {
+		for gs := range sctx.grpcServerC {
+			gs.GracefulStop()
+		}
+	}
+
 	for _, sctx := range e.sctxs {
 		sctx.cancel()
 	}
@@ -201,7 +209,6 @@ func startPeerListeners(cfg *Config) (plns []net.Listener, err error) {
 	}()
 
 	for i, u := range cfg.LPUrls {
-		var tlscfg *tls.Config
 		if u.Scheme == "http" {
 			if !cfg.PeerTLSInfo.Empty() {
 				plog.Warningf("The scheme of peer url %s is HTTP while peer key/cert files are presented. Ignored peer key/cert files.", u.String())
@@ -210,12 +217,7 @@ func startPeerListeners(cfg *Config) (plns []net.Listener, err error) {
 				plog.Warningf("The scheme of peer url %s is HTTP while client cert auth (--peer-client-cert-auth) is enabled. Ignored client cert auth for this url.", u.String())
 			}
 		}
-		if !cfg.PeerTLSInfo.Empty() {
-			if tlscfg, err = cfg.PeerTLSInfo.ServerConfig(); err != nil {
-				return nil, err
-			}
-		}
-		if plns[i], err = rafthttp.NewListener(u, tlscfg); err != nil {
+		if plns[i], err = rafthttp.NewListener(u, &cfg.PeerTLSInfo); err != nil {
 			return nil, err
 		}
 		plog.Info("listening for peers on ", u.String())
@@ -341,8 +343,6 @@ func (e *Etcd) serve() (err error) {
 		})
 	}
 	for _, sctx := range e.sctxs {
-		// read timeout does not work with http close notify
-		// TODO: https://github.com/golang/go/issues/9524
 		go func(s *serveCtx) {
 			e.errHandler(s.serve(e.Server, ctlscfg, v2h, e.errHandler))
 		}(sctx)

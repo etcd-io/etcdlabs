@@ -1,5 +1,5 @@
-hash: d44610cf6790ae3ce88b67fb058a32321b24d1cf328c7b342fe04692704e149f
-updated: 2017-04-11T08:31:29.663464355-07:00
+hash: a22bd89facd33a6b66131b29efe904f4d3b7b72fb25ad290a2b4a94bcc0ed885
+updated: 2017-04-18T10:39:46.999053702-07:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -10,7 +10,7 @@ imports:
 - name: github.com/cockroachdb/cmux
   version: 112f0506e7743d64a6eb8fedbcff13d9979bbf92
 - name: github.com/coreos/etcd
-  version: 7da79de74b42a6b6c0330c7074f10418597b1aba
+  version: dd0d5902177b6336b8cf344e6cbf1962b5981dde
   subpackages:
   - alarm
   - auth
@@ -155,7 +155,7 @@ imports:
   - bcrypt
   - blowfish
 - name: golang.org/x/net
-  version: f2499483f923065a842d38eb4c7f1927e6fc6e6d
+  version: d1e1b351919c6738fdeb9893d5c998b161464f0c
   subpackages:
   - context
   - http2
@@ -172,6 +172,13 @@ imports:
   version: e48874b42435b4347fc52bdee0424a52abc974d7
   subpackages:
   - unix
+- name: golang.org/x/text
+  version: f4b4367115ec2de254587813edaa901bc1c723a8
+  subpackages:
+  - secure/bidirule
+  - transform
+  - unicode/bidi
+  - unicode/norm
 - name: golang.org/x/time
   version: 711ca1cb87636abec28122ef3bc6a77269d433f3
   subpackages:
