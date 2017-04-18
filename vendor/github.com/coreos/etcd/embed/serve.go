@@ -32,7 +32,6 @@ import (
 	"github.com/coreos/etcd/etcdserver/api/v3rpc"
 	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
 	"github.com/coreos/etcd/pkg/debugutil"
-	"github.com/coreos/etcd/pkg/transport"
 
 	"github.com/cockroachdb/cmux"
 	gw "github.com/grpc-ecosystem/grpc-gateway/runtime"
@@ -52,11 +51,14 @@ type serveCtx struct {
 
 	userHandlers    map[string]http.Handler
 	serviceRegister func(*grpc.Server)
+	grpcServerC     chan *grpc.Server
 }
 
 func newServeCtx() *serveCtx {
 	ctx, cancel := context.WithCancel(context.Background())
-	return &serveCtx{ctx: ctx, cancel: cancel, userHandlers: make(map[string]http.Handler)}
+	return &serveCtx{ctx: ctx, cancel: cancel, userHandlers: make(map[string]http.Handler),
+		grpcServerC: make(chan *grpc.Server, 2), // in case sctx.insecure,sctx.secure true
+	}
 }
 
 // serve accepts incoming connections on the listener l,
@@ -72,8 +74,11 @@ func (sctx *serveCtx) serve(s *etcdserver.EtcdServer, tlscfg *tls.Config, handle
 	servElection := v3election.NewElectionServer(v3c)
 	servLock := v3lock.NewLockServer(v3c)
 
+	defer close(sctx.grpcServerC)
+
 	if sctx.insecure {
 		gs := v3rpc.Server(s, nil)
+		sctx.grpcServerC <- gs
 		v3electionpb.RegisterElectionServer(gs, servElection)
 		v3lockpb.RegisterLockServer(gs, servLock)
 		if sctx.serviceRegister != nil {
@@ -103,6 +108,7 @@ func (sctx *serveCtx) serve(s *etcdserver.EtcdServer, tlscfg *tls.Config, handle
 
 	if sctx.secure {
 		gs := v3rpc.Server(s, tlscfg)
+		sctx.grpcServerC <- gs
 		v3electionpb.RegisterElectionServer(gs, servElection)
 		v3lockpb.RegisterLockServer(gs, servLock)
 		if sctx.serviceRegister != nil {
@@ -110,7 +116,7 @@ func (sctx *serveCtx) serve(s *etcdserver.EtcdServer, tlscfg *tls.Config, handle
 		}
 		handler = grpcHandlerFunc(gs, handler)
 
-		dtls := transport.ShallowCopyTLSConfig(tlscfg)
+		dtls := tlscfg.Clone()
 		// trust local server
 		dtls.InsecureSkipVerify = true
 		creds := credentials.NewTLS(dtls)
