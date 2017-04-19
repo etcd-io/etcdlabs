@@ -1,5 +1,5 @@
-hash: e8edb4fc7160939c69e189f4a3137178995d27fcd26f88d3cc27a9c8a4567023
-updated: 2017-04-19T08:31:22.702582243-07:00
+hash: 67376ad058f37e57d5e1a16d340b6a4e07bb37258cac3774e21b92876270d511
+updated: 2017-04-19T11:58:31.836849185-07:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -95,9 +95,11 @@ imports:
 - name: github.com/go-sql-driver/mysql
   version: 9dee4ca50b83acdf57a35fb9e6fb4be640afa2f3
 - name: github.com/gogo/protobuf
-  version: 909568be09de550ed094403c2bf8a261b5bb730a
+  version: 8d70fb3182befc465c4a1eac8ad4d38ff49778e2
   subpackages:
+  - gogoproto
   - proto
+  - protoc-gen-gogo/descriptor
 - name: github.com/golang/protobuf
   version: 4bd1920723d7b7c925de087aa32e2187708897f7
   subpackages:
