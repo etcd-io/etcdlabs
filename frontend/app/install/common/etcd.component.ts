@@ -293,7 +293,11 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
             txt += '# sudo cp /tmp/test-etcd/etcd* /usr/local/bin' + `
 `;
         }
-        txt += 'sudo cp /tmp/test-etcd/etcd* ' + this.getExecDir() + `
+        let copycmd = 'sudo cp /tmp/test-etcd/etcd* ' + this.getExecDir();
+        if (this.getExecDir() == '/tmp/test-etcd') {
+            copycmd = '# sudo cp /tmp/test-etcd/etcd* [YOUR_EXEC_DIR]';
+        }
+        txt += copycmd + `
 
 ` + this.getExecDir() + divide + `etcd --version
 ` + 'ETCDCTL_API=3' + ' ' + this.getExecDir() + divide + `etcdctl version
@@ -327,7 +331,11 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
             txt += '# sudo cp /tmp/test-etcd/etcd* /usr/local/bin' + `
 `;
         }
-        txt += 'sudo cp /tmp/test-etcd/etcd* ' + this.getExecDir() + `
+        let copycmd = 'sudo cp /tmp/test-etcd/etcd* ' + this.getExecDir();
+        if (this.getExecDir() == '/tmp/test-etcd') {
+            copycmd = '# sudo cp /tmp/test-etcd/etcd* [YOUR_EXEC_DIR]';
+        }
+        txt += copycmd + `
 
 ` + this.getExecDir() + divide + `etcd --version
 ` + 'ETCDCTL_API=3' + ' ' + this.getExecDir() + divide + `etcdctl version

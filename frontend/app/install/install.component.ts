@@ -53,7 +53,7 @@ export class InstallComponent extends ParentComponent {
         ///////////////////////////////////////////////////
 
         ///////////////////////////////////////////////////
-        this.go = new Go('1.8');
+        this.go = new Go('1.8.1');
         this.inputGitUser = 'coreos';
         this.inputGitBranch = 'master';
         ///////////////////////////////////////////////////
@@ -61,7 +61,7 @@ export class InstallComponent extends ParentComponent {
         ///////////////////////////////////////////////////
         this.etcd = new Etcd(
             this.getLatestReleaseVersion(),
-            '/',
+            '/tmp/test-etcd',
             true,
             false,
             false,
@@ -75,7 +75,7 @@ export class InstallComponent extends ParentComponent {
                     '10.240.0.1',
                     2379,
                     2380,
-                    'my-etcd-token',
+                    'mytoken',
                     'new',
                     'etcd-root-ca'
                 ),
@@ -86,7 +86,7 @@ export class InstallComponent extends ParentComponent {
                     '10.240.0.2',
                     2379,
                     2380,
-                    'my-etcd-token',
+                    'mytoken',
                     'new',
                     'etcd-root-ca'
                 ),
@@ -97,7 +97,7 @@ export class InstallComponent extends ParentComponent {
                     '10.240.0.3',
                     2379,
                     2380,
-                    'my-etcd-token',
+                    'mytoken',
                     'new',
                     'etcd-root-ca'
                 ),
@@ -108,7 +108,7 @@ export class InstallComponent extends ParentComponent {
                     '10.240.0.4',
                     2379,
                     2380,
-                    'my-etcd-token',
+                    'mytoken',
                     'new',
                     'etcd-root-ca'
                 ),
@@ -119,7 +119,7 @@ export class InstallComponent extends ParentComponent {
                     '10.240.0.5',
                     2379,
                     2380,
-                    'my-etcd-token',
+                    'mytoken',
                     'new',
                     'etcd-root-ca'
                 ),
@@ -130,7 +130,7 @@ export class InstallComponent extends ParentComponent {
                     '10.240.0.6',
                     2379,
                     2380,
-                    'my-etcd-token',
+                    'mytoken',
                     'new',
                     'etcd-root-ca'
                 ),
@@ -141,7 +141,7 @@ export class InstallComponent extends ParentComponent {
                     '10.240.0.7',
                     2379,
                     2380,
-                    'my-etcd-token',
+                    'mytoken',
                     'new',
                     'etcd-root-ca'
                 ),
