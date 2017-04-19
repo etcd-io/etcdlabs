@@ -153,7 +153,9 @@ func (m *Member) Stop() {
 	m.status.Hash = 0
 	m.statusLock.Unlock()
 
-	m.srv.Server.HardStop()
+	// TODO: stop without leadership transfer?
+	// m.srv.Server.HardStop()
+
 	m.srv.Close()
 	var cerr error
 	select {
