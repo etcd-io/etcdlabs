@@ -1,0 +1,25 @@
+syntax = "proto3";
+package clusterpb;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.goproto_getters_all) = false;
+
+// MemberStatus defines node status information.
+// Keep the json tag to make it parsable by Typescript.
+message MemberStatus {
+    string Name = 1;
+    string ID = 2;
+    string Endpoint = 3;
+
+    bool IsLeader = 4;
+    string State = 5;
+    string StateTxt = 6;
+
+    uint64 DBSize = 7;
+    string DBSizeTxt = 8;
+    int32 Hash = 9;
+}
