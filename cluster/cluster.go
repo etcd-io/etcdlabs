@@ -17,6 +17,7 @@ import (
 	"github.com/coreos/etcd/embed"
 	"github.com/coreos/etcd/pkg/netutil"
 	"github.com/coreos/etcd/pkg/transport"
+	"github.com/coreos/etcdlabs/clusterpb"
 )
 
 // Cluster contains all embedded etcd Members in the same cluster.
@@ -182,7 +183,7 @@ func Start(ccfg Config) (clus *Cluster, err error) {
 		clus.Members[i] = &Member{
 			clus: clus,
 			cfg:  cfg,
-			status: MemberStatus{
+			status: clusterpb.MemberStatus{
 				Name:     cfg.Name,
 				Endpoint: curl.String(),
 				IsLeader: false,
@@ -293,7 +294,7 @@ func (clus *Cluster) Add() error {
 	clus.Members = append(clus.Members, &Member{
 		clus: clus,
 		cfg:  cfg,
-		status: MemberStatus{
+		status: clusterpb.MemberStatus{
 			Name:     cfg.Name,
 			Endpoint: curl.String(),
 			IsLeader: false,

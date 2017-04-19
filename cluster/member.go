@@ -12,6 +12,7 @@ import (
 	"github.com/coreos/etcd/etcdserver/api/v3client"
 	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
 	"github.com/coreos/etcd/pkg/types"
+	"github.com/coreos/etcdlabs/clusterpb"
 
 	humanize "github.com/dustin/go-humanize"
 	"google.golang.org/grpc"
@@ -27,22 +28,6 @@ const (
 	LeaderMemberStatus = "Leader"
 )
 
-// MemberStatus defines node status information.
-// Encode without json tag to make it parsable by Typescript.
-type MemberStatus struct {
-	Name     string
-	ID       string
-	Endpoint string
-
-	IsLeader bool
-	State    string
-	StateTxt string
-
-	DBSize    uint64
-	DBSizeTxt string
-	Hash      int
-}
-
 // Member contains *embed.Etcd and its state.
 type Member struct {
 	clus *Cluster
@@ -52,7 +37,7 @@ type Member struct {
 	stoppedStartedAt time.Time
 
 	statusLock sync.RWMutex
-	status     MemberStatus
+	status     clusterpb.MemberStatus
 }
 
 // Start starts the member.
@@ -314,7 +299,7 @@ func (m *Member) FetchMemberStatus() error {
 	if resp.Header.MemberId == resp.Leader {
 		isLeader, state = true, LeaderMemberStatus
 	}
-	status := MemberStatus{
+	status := clusterpb.MemberStatus{
 		Name:      m.cfg.Name,
 		ID:        types.ID(resp.Header.MemberId).String(),
 		Endpoint:  m.cfg.LCUrls[0].String(),
@@ -364,7 +349,7 @@ func (m *Member) FetchMemberStatus() error {
 		m.statusLock.Unlock()
 		return err
 	}
-	status.Hash = int(hresp.Hash)
+	status.Hash = hresp.Hash
 
 	m.statusLock.Lock()
 	m.status = status
