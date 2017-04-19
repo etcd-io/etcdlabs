@@ -153,13 +153,23 @@ func (m *Member) Stop() {
 	m.status.Hash = 0
 	m.statusLock.Unlock()
 
+	// TODO: stop with/without leadership transfer?
 	m.srv.Server.HardStop()
+
 	m.srv.Close()
+
+	var cerr error
 	select {
-	case <-m.srv.Err():
+	case cerr = <-m.srv.Err():
 	case <-m.srv.Server.StopNotify():
+		cerr = fmt.Errorf("received from EtcdServer.StopNotify")
 	}
 
+	if cerr != nil {
+		plog.Printf("shutdown with %q", cerr.Error())
+	} else {
+		plog.Printf("shutdown with no error")
+	}
 	plog.Printf("stopped %q(%s)", m.cfg.Name, m.srv.Server.ID().String())
 }
 

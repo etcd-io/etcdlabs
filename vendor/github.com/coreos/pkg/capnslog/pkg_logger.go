@@ -81,6 +81,12 @@ func (p *PackageLogger) Panic(args ...interface{}) {
 	panic(s)
 }
 
+func (p *PackageLogger) Panicln(args ...interface{}) {
+	s := fmt.Sprintln(args...)
+	p.internalLog(calldepth, CRITICAL, s)
+	panic(s)
+}
+
 func (p *PackageLogger) Fatalf(format string, args ...interface{}) {
 	p.Logf(CRITICAL, format, args...)
 	os.Exit(1)
