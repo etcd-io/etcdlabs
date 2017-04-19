@@ -25,7 +25,7 @@ import (
 	"time"
 
 	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcdlabs/cluster"
+	"github.com/coreos/etcdlabs/clusterpb"
 	humanize "github.com/dustin/go-humanize"
 )
 
@@ -149,7 +149,7 @@ type ServerStatus struct {
 	Users []string
 
 	// MemberStatuses contains all node statuses.
-	MemberStatuses []cluster.MemberStatus
+	MemberStatuses []clusterpb.MemberStatus
 }
 
 func getUserIDs() []string {
