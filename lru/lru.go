@@ -7,7 +7,10 @@ import (
 )
 
 var (
-	ErrStopped     = fmt.Errorf("lru: stopped or not initialized")
+	// ErrStopped is returned when the cache is stopped or not initialized.
+	ErrStopped = fmt.Errorf("lru: stopped or not initialized")
+
+	// ErrKeyNotFound is returned when the key is not found.
 	ErrKeyNotFound = fmt.Errorf("lru: key not found")
 )
 

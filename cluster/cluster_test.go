@@ -159,7 +159,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 	println()
 	fmt.Println("calling UpdateMemberStatus")
 	c.UpdateMemberStatus()
-	hashes1 := make([]int, len(c.Members))
+	hashes1 := make([]uint32, len(c.Members))
 	for i := range c.Members {
 		hashes1[i] = c.Members[i].status.Hash
 	}
@@ -196,7 +196,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 	println()
 	fmt.Println("calling UpdateMemberStatus")
 	c.UpdateMemberStatus()
-	hashes2 := make([]int, len(c.Members))
+	hashes2 := make([]uint32, len(c.Members))
 	for i := range c.Members {
 		hashes2[i] = c.Members[i].status.Hash
 	}
@@ -238,7 +238,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 	println()
 	fmt.Println("calling UpdateMemberStatus")
 	c.UpdateMemberStatus()
-	hashes3 := make([]int, len(c.Members))
+	hashes3 := make([]uint32, len(c.Members))
 	for i := range c.Members {
 		hashes3[i] = c.Members[i].status.Hash
 	}

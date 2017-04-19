@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/coreos/etcd/embed"
+	"github.com/coreos/etcdlabs/clusterpb"
 )
 
 func (clus *Cluster) initialCluster() string {
@@ -133,16 +134,16 @@ func (clus *Cluster) ActiveNodeN() (cnt int) {
 }
 
 // MemberStatus returns the node status.
-func (clus *Cluster) MemberStatus(i int) MemberStatus {
+func (clus *Cluster) MemberStatus(i int) clusterpb.MemberStatus {
 	return clus.Members[i].status
 }
 
 // AllMemberStatus returns all node status.
-func (clus *Cluster) AllMemberStatus() []MemberStatus {
+func (clus *Cluster) AllMemberStatus() []clusterpb.MemberStatus {
 	clus.mmu.RLock()
 	defer clus.mmu.RUnlock()
 
-	st := make([]MemberStatus, clus.size)
+	st := make([]clusterpb.MemberStatus, clus.size)
 	for i := range clus.Members {
 		st[i] = clus.Members[i].status
 	}
