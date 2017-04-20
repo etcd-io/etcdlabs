@@ -171,6 +171,7 @@ func Start(ccfg Config) (clus *Cluster, err error) {
 		purl := url.URL{Scheme: ccfg.PeerScheme(), Host: fmt.Sprintf("localhost:%d", startPort+1)}
 		cfg.APUrls = []url.URL{purl}
 		cfg.LPUrls = []url.URL{purl}
+		plog.Infof("%q is set up to listen on peer url %q", cfg.Name, purl.String())
 
 		cfg.ClientAutoTLS = ccfg.ClientAutoTLS
 		cfg.ClientTLSInfo = ccfg.ClientTLSInfo
