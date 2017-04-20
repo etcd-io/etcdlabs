@@ -18,11 +18,3 @@ type Cache interface {
 	// Get returns the value, or 'ErrKeyNotFound'.
 	Get(key interface{}) (interface{}, error)
 }
-
-// CacheStorage defines LRU cache, backed by persistent storage.
-type CacheStorage interface {
-	Connect() error
-	Stop() error
-
-	Cache
-}
