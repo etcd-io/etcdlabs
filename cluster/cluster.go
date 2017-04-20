@@ -187,7 +187,7 @@ func Start(ccfg Config) (clus *Cluster, err error) {
 				Name:     cfg.Name,
 				Endpoint: curl.String(),
 				IsLeader: false,
-				State:    StoppedMemberStatus,
+				State:    clusterpb.StoppedMemberStatus,
 			},
 		}
 
@@ -298,7 +298,7 @@ func (clus *Cluster) Add() error {
 			Name:     cfg.Name,
 			Endpoint: curl.String(),
 			IsLeader: false,
-			State:    StoppedMemberStatus,
+			State:    clusterpb.StoppedMemberStatus,
 		},
 	})
 	idx := len(clus.Members) - 1

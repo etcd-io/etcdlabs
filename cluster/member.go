@@ -19,15 +19,6 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
-const (
-	// StoppedMemberStatus is node status before start or after stop.
-	StoppedMemberStatus = "Stopped"
-	// FollowerMemberStatus is follower in Raft.
-	FollowerMemberStatus = "Follower"
-	// LeaderMemberStatus is leader in Raft.
-	LeaderMemberStatus = "Leader"
-)
-
 // Member contains *embed.Etcd and its state.
 type Member struct {
 	clus *Cluster
@@ -67,7 +58,7 @@ func (m *Member) Start() error {
 	m.stoppedStartedAt = time.Now()
 
 	m.statusLock.Lock()
-	m.status.State = FollowerMemberStatus
+	m.status.State = clusterpb.FollowerMemberStatus
 	m.status.StateTxt = fmt.Sprintf("%s just started (%s)", m.status.Name, humanize.Time(m.stoppedStartedAt))
 	m.status.IsLeader = false
 	m.statusLock.Unlock()
@@ -81,7 +72,7 @@ func (m *Member) Restart() error {
 	plog.Printf("restarting %q(%s)", m.cfg.Name, m.srv.Server.ID().String())
 
 	m.statusLock.RLock()
-	if m.status.State != StoppedMemberStatus {
+	if m.status.State != clusterpb.StoppedMemberStatus {
 		plog.Warningf("%s is already started", m.cfg.Name)
 		m.statusLock.RUnlock()
 		return nil
@@ -107,7 +98,7 @@ func (m *Member) Restart() error {
 
 	m.statusLock.Lock()
 	m.status.IsLeader = false
-	m.status.State = FollowerMemberStatus
+	m.status.State = clusterpb.FollowerMemberStatus
 	m.status.StateTxt = fmt.Sprintf("%s just restarted (%s)", m.status.Name, humanize.Time(m.stoppedStartedAt))
 	m.statusLock.Unlock()
 
@@ -120,7 +111,7 @@ func (m *Member) Stop() {
 	plog.Printf("stopping %q(%s)", m.cfg.Name, m.srv.Server.ID().String())
 
 	m.statusLock.RLock()
-	if m.status.State == StoppedMemberStatus {
+	if m.status.State == clusterpb.StoppedMemberStatus {
 		plog.Warningf("%s is already stopped", m.cfg.Name)
 		m.statusLock.RUnlock()
 		return
@@ -131,7 +122,7 @@ func (m *Member) Stop() {
 
 	m.statusLock.Lock()
 	m.status.IsLeader = false
-	m.status.State = StoppedMemberStatus
+	m.status.State = clusterpb.StoppedMemberStatus
 	m.status.StateTxt = fmt.Sprintf("%s just stopped (%s)", m.status.Name, humanize.Time(m.stoppedStartedAt))
 	m.status.DBSize = 0
 	m.status.DBSizeTxt = ""
@@ -161,7 +152,7 @@ func (m *Member) Stop() {
 // WaitForLeader waits for the member to find a leader.
 func (m *Member) WaitForLeader() error {
 	m.statusLock.Lock()
-	stopped := m.status.State == StoppedMemberStatus
+	stopped := m.status.State == clusterpb.StoppedMemberStatus
 	m.statusLock.Unlock()
 	if stopped {
 		return nil
@@ -213,7 +204,7 @@ func (m *Member) WaitForLeader() error {
 		if resp.Leader == uint64(0) {
 			plog.Printf("%s %s has no leader yet", m.cfg.Name, types.ID(resp.Header.MemberId))
 			m.status.IsLeader = false
-			m.status.State = FollowerMemberStatus
+			m.status.State = clusterpb.FollowerMemberStatus
 			time.Sleep(time.Second)
 			continue
 		}
@@ -221,9 +212,9 @@ func (m *Member) WaitForLeader() error {
 		plog.Printf("%s %s has leader %s", m.cfg.Name, types.ID(resp.Header.MemberId), types.ID(resp.Leader))
 		m.status.IsLeader = resp.Leader == resp.Header.MemberId
 		if m.status.IsLeader {
-			m.status.State = LeaderMemberStatus
+			m.status.State = clusterpb.LeaderMemberStatus
 		} else {
-			m.status.State = FollowerMemberStatus
+			m.status.State = clusterpb.FollowerMemberStatus
 		}
 
 		if lead == resp.Leader {
@@ -285,7 +276,7 @@ func (m *Member) FetchMemberStatus() error {
 	cancel()
 	if err != nil {
 		m.statusLock.Lock()
-		m.status.State = StoppedMemberStatus
+		m.status.State = clusterpb.StoppedMemberStatus
 		m.status.StateTxt = fmt.Sprintf("%s is not reachable (%s - %v)", m.status.Name, humanize.Time(now), err)
 		m.status.IsLeader = false
 		m.status.DBSize = 0
@@ -295,9 +286,9 @@ func (m *Member) FetchMemberStatus() error {
 		return err
 	}
 
-	isLeader, state := false, FollowerMemberStatus
+	isLeader, state := false, clusterpb.FollowerMemberStatus
 	if resp.Header.MemberId == resp.Leader {
-		isLeader, state = true, LeaderMemberStatus
+		isLeader, state = true, clusterpb.LeaderMemberStatus
 	}
 	status := clusterpb.MemberStatus{
 		Name:      m.cfg.Name,
@@ -320,7 +311,7 @@ func (m *Member) FetchMemberStatus() error {
 	conn, err := grpc.Dial(m.cfg.LCUrls[0].Host, dopts...)
 	if err != nil {
 		m.statusLock.Lock()
-		m.status.State = StoppedMemberStatus
+		m.status.State = clusterpb.StoppedMemberStatus
 		m.status.StateTxt = fmt.Sprintf("%s is not reachable (%s - %v)", m.status.Name, humanize.Time(now), err)
 		m.status.IsLeader = false
 		m.status.DBSize = 0
@@ -340,7 +331,7 @@ func (m *Member) FetchMemberStatus() error {
 	cancel()
 	if err != nil {
 		m.statusLock.Lock()
-		m.status.State = StoppedMemberStatus
+		m.status.State = clusterpb.StoppedMemberStatus
 		m.status.StateTxt = fmt.Sprintf("%s was not reachable while getting hash (%s - %v)", m.status.Name, humanize.Time(now), err)
 		m.status.IsLeader = false
 		m.status.DBSize = 0
