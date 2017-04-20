@@ -37,7 +37,9 @@ import:
   subpackages:
   - errgroup
 - package: golang.org/x/time
-  version: 711ca1cb87636abec28122ef3bc6a77269d433f3
+  version: c06e80d9300e4443158a03817b8a8cb37d230320
+  subpackages:
+  - rate
 - package: github.com/go-sql-driver/mysql
   version: 9dee4ca50b83acdf57a35fb9e6fb4be640afa2f3
 - package: github.com/spf13/cobra

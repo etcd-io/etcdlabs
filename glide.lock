@@ -1,5 +1,5 @@
-hash: 2153eb68b219d3dfdae44412ba7efffe5d83aaeb81e264031349950cfb8cda6a
-updated: 2017-04-20T10:31:49.263150943-07:00
+hash: 24b234047f9d2167a9474b5bf9da51cc9df087bfcf90153f14379ef373047526
+updated: 2017-04-20T11:22:31.794935756-07:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -182,7 +182,7 @@ imports:
   - unicode/bidi
   - unicode/norm
 - name: golang.org/x/time
-  version: 711ca1cb87636abec28122ef3bc6a77269d433f3
+  version: c06e80d9300e4443158a03817b8a8cb37d230320
   subpackages:
   - rate
 - name: google.golang.org/grpc
