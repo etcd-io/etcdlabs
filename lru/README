@@ -1,17 +1,17 @@
+Implement LRU cache
 
-Implement LRU cache, for fun
+This is mainly to experiment etcd features.
 
 etcd has monotonic global revision, and versions per key.
 And impossible to only remove previous versions of a certain key.
-That is, compaction removes all versions, except the last, that
-precedes the compact revision.
+Thus, compaction removes all preceding versions, except latest.
 
-So simplest way is putting all data in a single key-value space,
+Simplest way is putting all data in a single key-value space,
 keep track of its version history, and run compaction by revision.
 But etcd has request size limit of 1.5 MB.
 
 We can use etcd namespace feature to assign global prefix or
-version IDs and do some range queries to detect cache size, etc.
+version IDs. And do some range queries to detect cache size, etc.
 Also try out some lock APIs.
 
 To make the cache store generic, it receives interface{}.
