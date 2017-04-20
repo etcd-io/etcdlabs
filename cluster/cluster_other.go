@@ -97,7 +97,7 @@ func (clus *Cluster) IsStopped(i int) (stopped bool) {
 	defer clus.mmu.RUnlock()
 
 	clus.Members[i].statusLock.Lock()
-	stopped = clus.Members[i].status.State == StoppedMemberStatus
+	stopped = clus.Members[i].status.State == clusterpb.StoppedMemberStatus
 	clus.Members[i].statusLock.Unlock()
 	return stopped
 }
@@ -125,7 +125,7 @@ func (clus *Cluster) ActiveNodeN() (cnt int) {
 
 	for i := range clus.Members {
 		clus.Members[i].statusLock.Lock()
-		if clus.Members[i].status.State != StoppedMemberStatus {
+		if clus.Members[i].status.State != clusterpb.StoppedMemberStatus {
 			cnt++
 		}
 		clus.Members[i].statusLock.Unlock()

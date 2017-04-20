@@ -1,5 +1,5 @@
-hash: 67376ad058f37e57d5e1a16d340b6a4e07bb37258cac3774e21b92876270d511
-updated: 2017-04-19T11:58:31.836849185-07:00
+hash: 2153eb68b219d3dfdae44412ba7efffe5d83aaeb81e264031349950cfb8cda6a
+updated: 2017-04-20T10:31:49.263150943-07:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -10,7 +10,7 @@ imports:
 - name: github.com/cockroachdb/cmux
   version: 112f0506e7743d64a6eb8fedbcff13d9979bbf92
 - name: github.com/coreos/etcd
-  version: 385e18bc6c43525f2fd307872e4063c421027afa
+  version: 85c9ea92bba60fb4907a6e639d207e7fc6e189d7
   subpackages:
   - alarm
   - auth
@@ -175,7 +175,7 @@ imports:
   subpackages:
   - unix
 - name: golang.org/x/text
-  version: f4b4367115ec2de254587813edaa901bc1c723a8
+  version: 19e3104b43db45fca0303f489a9536087b184802
   subpackages:
   - secure/bidirule
   - transform
@@ -200,5 +200,5 @@ imports:
   - tap
   - transport
 - name: gopkg.in/yaml.v2
-  version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
+  version: cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b
 testImports: []

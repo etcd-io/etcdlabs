@@ -171,6 +171,7 @@ func Start(ccfg Config) (clus *Cluster, err error) {
 		purl := url.URL{Scheme: ccfg.PeerScheme(), Host: fmt.Sprintf("localhost:%d", startPort+1)}
 		cfg.APUrls = []url.URL{purl}
 		cfg.LPUrls = []url.URL{purl}
+		plog.Infof("%q is set up to listen on peer url %q", cfg.Name, purl.String())
 
 		cfg.ClientAutoTLS = ccfg.ClientAutoTLS
 		cfg.ClientTLSInfo = ccfg.ClientTLSInfo
@@ -187,7 +188,7 @@ func Start(ccfg Config) (clus *Cluster, err error) {
 				Name:     cfg.Name,
 				Endpoint: curl.String(),
 				IsLeader: false,
-				State:    StoppedMemberStatus,
+				State:    clusterpb.StoppedMemberStatus,
 			},
 		}
 
@@ -298,7 +299,7 @@ func (clus *Cluster) Add() error {
 			Name:     cfg.Name,
 			Endpoint: curl.String(),
 			IsLeader: false,
-			State:    StoppedMemberStatus,
+			State:    clusterpb.StoppedMemberStatus,
 		},
 	})
 	idx := len(clus.Members) - 1

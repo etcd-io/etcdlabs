@@ -5,7 +5,7 @@ import (
 	"google.golang.org/grpc/grpclog"
 )
 
-var plog = capnslog.NewPackageLogger("github.com/gyuho/etcd-by-example", "cluster")
+var plog = capnslog.NewPackageLogger("github.com/coreos/etcdlabs", "cluster")
 
 func init() {
 	capnslog.SetGlobalLogLevel(capnslog.INFO)
