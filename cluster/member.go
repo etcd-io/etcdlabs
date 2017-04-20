@@ -131,7 +131,6 @@ func (m *Member) Stop() {
 
 	// TODO: stop with/without leadership transfer?
 	m.srv.Server.HardStop()
-
 	m.srv.Close()
 
 	var cerr error
@@ -140,9 +139,8 @@ func (m *Member) Stop() {
 	case <-m.srv.Server.StopNotify():
 		cerr = fmt.Errorf("received from EtcdServer.StopNotify")
 	}
-
 	if cerr != nil {
-		plog.Printf("shutdown with %q", cerr.Error())
+		plog.Warningf("shutdown with %q", cerr.Error())
 	} else {
 		plog.Printf("shutdown with no error")
 	}
