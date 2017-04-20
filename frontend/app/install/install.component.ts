@@ -40,7 +40,7 @@ export class InstallComponent extends ParentComponent {
             'etcd-root-ca',
             'etcd-gencert.json',
             'etcd',
-            'etcd security',
+            'etcd Security',
             'San Francisco',
             'California',
             'USA',
@@ -69,7 +69,7 @@ export class InstallComponent extends ParentComponent {
             3,
             [
                 new EtcdFlag(
-                    'my-etcd-1',
+                    's1',
                     '/var/lib/etcd',
                     '/etc/ssl/certs',
                     '10.240.0.1',
@@ -80,7 +80,7 @@ export class InstallComponent extends ParentComponent {
                     'etcd-root-ca'
                 ),
                 new EtcdFlag(
-                    'my-etcd-2',
+                    's2',
                     '/var/lib/etcd',
                     '/etc/ssl/certs',
                     '10.240.0.2',
@@ -91,7 +91,7 @@ export class InstallComponent extends ParentComponent {
                     'etcd-root-ca'
                 ),
                 new EtcdFlag(
-                    'my-etcd-3',
+                    's3',
                     '/var/lib/etcd',
                     '/etc/ssl/certs',
                     '10.240.0.3',
@@ -102,7 +102,7 @@ export class InstallComponent extends ParentComponent {
                     'etcd-root-ca'
                 ),
                 new EtcdFlag(
-                    'my-etcd-4',
+                    's4',
                     '/var/lib/etcd',
                     '/etc/ssl/certs',
                     '10.240.0.4',
@@ -113,7 +113,7 @@ export class InstallComponent extends ParentComponent {
                     'etcd-root-ca'
                 ),
                 new EtcdFlag(
-                    'my-etcd-5',
+                    's5',
                     '/var/lib/etcd',
                     '/etc/ssl/certs',
                     '10.240.0.5',
@@ -124,7 +124,7 @@ export class InstallComponent extends ParentComponent {
                     'etcd-root-ca'
                 ),
                 new EtcdFlag(
-                    'my-etcd-6',
+                    's6',
                     '/var/lib/etcd',
                     '/etc/ssl/certs',
                     '10.240.0.6',
@@ -135,7 +135,7 @@ export class InstallComponent extends ParentComponent {
                     'etcd-root-ca'
                 ),
                 new EtcdFlag(
-                    'my-etcd-7',
+                    's7',
                     '/var/lib/etcd',
                     '/etc/ssl/certs',
                     '10.240.0.7',
