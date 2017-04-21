@@ -1,5 +1,5 @@
-hash: 24b234047f9d2167a9474b5bf9da51cc9df087bfcf90153f14379ef373047526
-updated: 2017-04-20T11:22:31.794935756-07:00
+hash: 839ea34ffeaa3802d1f195d85a33676222f3057109e83e7bceebebd8f3865172
+updated: 2017-04-20T17:39:24.601269227-07:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -10,7 +10,7 @@ imports:
 - name: github.com/cockroachdb/cmux
   version: 112f0506e7743d64a6eb8fedbcff13d9979bbf92
 - name: github.com/coreos/etcd
-  version: 85c9ea92bba60fb4907a6e639d207e7fc6e189d7
+  version: 3a93928b07465dad7076f4fc4f97f38572e19940
   subpackages:
   - alarm
   - auth
@@ -18,6 +18,7 @@ imports:
   - client
   - clientv3
   - clientv3/concurrency
+  - clientv3/namespace
   - compactor
   - discovery
   - embed
@@ -29,12 +30,15 @@ imports:
   - etcdserver/api/v3client
   - etcdserver/api/v3election
   - etcdserver/api/v3election/v3electionpb
+  - etcdserver/api/v3election/v3electionpb/gw
   - etcdserver/api/v3lock
   - etcdserver/api/v3lock/v3lockpb
+  - etcdserver/api/v3lock/v3lockpb/gw
   - etcdserver/api/v3rpc
   - etcdserver/api/v3rpc/rpctypes
   - etcdserver/auth
   - etcdserver/etcdserverpb
+  - etcdserver/etcdserverpb/gw
   - etcdserver/membership
   - etcdserver/stats
   - lease

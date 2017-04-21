@@ -10,8 +10,38 @@ import (
 	"github.com/coreos/etcd/etcdserver/api/v3client"
 )
 
-func TestEtcdRevision(t *testing.T) {
-	c := New(5, 3333, 3338, "")
+func TestEtcdEmbeddedNamespace(t *testing.T) {
+	// c := NewEtcdEmbedded(5, 9999, 9990, "")
+	// if err := c.Start(); err != nil {
+	// 	t.Fatal(err)
+	// }
+	// defer func() {
+	// 	if err := c.Shutdown(); err != nil {
+	// 		t.Log(err)
+	// 	}
+	// }()
+
+	// cli := v3client.New(ec.e.Server)
+	// defer cli.Close()
+
+	// unprefixedKV := cli.KV
+
+	// cli.KV = namespace.NewKV(cli.KV, "bucket1")
+	// // cli.Watcher = namespace.NewWatcher(cli.Watcher, "my-prefix/")
+	// // cli.Lease = namespace.NewLease(cli.Lease, "my-prefix/")
+	// _, err = cli.Put(context.TODO(), "abc", "123")
+	// if err != nil {
+	// 	t.Fatal(err)
+	// }
+	// resp, gerr := cli.Get(context.TODO(), "abc")
+	// if gerr != nil {
+	// 	t.Fatal(gerr)
+	// }
+	// fmt.Printf("%+v\n", resp)
+}
+
+func TestEtcdEmbeddedRevision(t *testing.T) {
+	c := NewEtcdEmbedded(5, 3333, 3338, "")
 	if err := c.Start(); err != nil {
 		t.Fatal(err)
 	}
@@ -20,9 +50,9 @@ func TestEtcdRevision(t *testing.T) {
 			t.Log(err)
 		}
 	}()
-	ec, ok := c.(*etcdCache)
+	ec, ok := c.(*etcdEmbedded)
 	if !ok {
-		t.Fatalf("expected *etcdCache, got %v", reflect.TypeOf(c))
+		t.Fatalf("expected *etcdEmbedded, got %v", reflect.TypeOf(c))
 	}
 
 	cli := v3client.New(ec.e.Server)
@@ -104,8 +134,8 @@ func checkGet(t *testing.T, cli *clientv3.Client, copt checkOpt) {
 	}
 }
 
-func TestEtcdCache(t *testing.T) {
-	c := New(5, 7777, 7778, "")
+func TestEtcdEmbeddedCache(t *testing.T) {
+	c := NewEtcdEmbedded(5, 7777, 7778, "")
 	if err := c.Start(); err != nil {
 		t.Fatal(err)
 	}
@@ -115,17 +145,17 @@ func TestEtcdCache(t *testing.T) {
 		}
 	}()
 
-	if err := c.Put("foo", "bar"); err != nil {
+	if err := c.Put("test-bucket", "foo", "bar"); err != nil {
 		t.Fatal(err)
 	}
-	if err := c.Put("foo", "bar2"); err != nil {
+	if err := c.Put("test-bucket", "foo", "bar2"); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := c.Get("foo1"); err != ErrKeyNotFound {
+	if _, err := c.Get("test-bucket", "foo1"); err != ErrKeyNotFound {
 		t.Fatalf("expected %v, got %v", ErrKeyNotFound, err)
 	}
 
-	v, err := c.Get("foo")
+	v, err := c.Get("test-bucket", "foo")
 	if err != nil {
 		t.Fatal(err)
 	}
