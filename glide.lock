@@ -1,5 +1,5 @@
-hash: fc462d5a7a3a02a0cf2e72e8cdd83f80fa75b9db9fbc71abda0a5c06a609ab5e
-updated: 2017-04-20T17:11:55.761104326-07:00
+hash: 839ea34ffeaa3802d1f195d85a33676222f3057109e83e7bceebebd8f3865172
+updated: 2017-04-20T17:39:24.601269227-07:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -18,6 +18,7 @@ imports:
   - client
   - clientv3
   - clientv3/concurrency
+  - clientv3/namespace
   - compactor
   - discovery
   - embed

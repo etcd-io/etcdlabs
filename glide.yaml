@@ -4,6 +4,7 @@ import:
   version: 3a93928b07465dad7076f4fc4f97f38572e19940
   subpackages:
   - clientv3
+  - clientv3/namespace
   - embed
   - etcdserver/etcdserverpb
   - pkg/transport

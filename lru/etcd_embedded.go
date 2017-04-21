@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"path"
 	"path/filepath"
 	"time"
 
@@ -23,21 +24,20 @@ func init() {
 	grpclog.SetLogger(plog)
 }
 
-// EtcdCache defines LRU cache store, backed by etcd.
-type EtcdCache interface {
+// EtcdEmbedded defines LRU cache store, backed by "local" embedded etcd.
+type EtcdEmbedded interface {
 	Cache
 	Start() error
 	Stop() error
 	Shutdown() error
 }
 
-// New returns LRU cache, backed by local embedded etcd.
-// TODO: support remote etcd cluster? Should be simple.
-func New(size int, clientPort, peerPort int, dataDir string) EtcdCache {
-	return &etcdCache{cap: size, cport: clientPort, pport: peerPort, dataDir: dataDir}
+// NewEtcdEmbedded returns LRU cache, backed by local embedded etcd.
+func NewEtcdEmbedded(size int, clientPort, peerPort int, dataDir string) EtcdEmbedded {
+	return &etcdEmbedded{cap: size, cport: clientPort, pport: peerPort, dataDir: dataDir}
 }
 
-type etcdCache struct {
+type etcdEmbedded struct {
 	cap int
 
 	cport   int
@@ -55,7 +55,7 @@ type etcdCache struct {
 // TODO: pass root context to all client calls
 
 // Start starts a new etcd server.
-func (e *etcdCache) Start() error {
+func (e *etcdEmbedded) Start() error {
 	if e.dataDir == "" {
 		e.dataDir = filepath.Join(os.TempDir(), "etcd-cache")
 	}
@@ -100,7 +100,7 @@ func (e *etcdCache) Start() error {
 }
 
 // Stop stops the etcd cache server.
-func (e *etcdCache) Stop() error {
+func (e *etcdEmbedded) Stop() error {
 	e.e.Close()
 
 	var cerr error
@@ -119,7 +119,7 @@ func (e *etcdCache) Stop() error {
 }
 
 // Shutdown stops and remove all data directories.
-func (e *etcdCache) Shutdown() error {
+func (e *etcdEmbedded) Shutdown() error {
 	if err := e.Stop(); err != nil {
 		return err
 	}
@@ -128,50 +128,39 @@ func (e *etcdCache) Shutdown() error {
 }
 
 // Put writes a key to etcd.
-func (e *etcdCache) Put(key, value interface{}) error {
+func (e *etcdEmbedded) Put(namespace string, key, value interface{}) error {
 	cli := v3client.New(e.e.Server) // embedded client
 	defer cli.Close()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 
-	resp, err := cli.Put(ctx, fmt.Sprint(key), fmt.Sprint(value), clientv3.WithPrevKV())
+	// TODO: namespace
+	k := path.Join(namespace, fmt.Sprint(key))
+	_, err := cli.Put(ctx, k, fmt.Sprint(value))
 	cancel()
 	if err != nil {
 		return err
-	}
-
-	if resp.PrevKv != nil && resp.PrevKv.Version >= int64(e.cap) {
-		fmt.Println("prev:", resp.PrevKv)
 	}
 	return nil
 }
 
 // Get reads a key from etcd.
-func (e *etcdCache) Get(key interface{}) (interface{}, error) {
+func (e *etcdEmbedded) Get(namespace string, key interface{}) (interface{}, error) {
 	cli := v3client.New(e.e.Server) // embedded client
 	defer cli.Close()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 
-	// it's cache, so serving stale data is ok, for now
-	resp, err := cli.Get(ctx, fmt.Sprint(key), clientv3.WithSerializable())
+	// TODO: namespace
+	k := path.Join(namespace, fmt.Sprint(key))
+	resp, err := cli.Get(ctx, k, clientv3.WithSerializable()) // cache, so ok for stale data
 	cancel()
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Printf("%+v\n", resp)
-	for _, kv := range resp.Kvs {
-		fmt.Printf("get resp: %+v\n", kv)
-	}
-
 	if len(resp.Kvs) == 0 {
 		return nil, ErrKeyNotFound
 	}
-
 	kv := resp.Kvs[0]
-	if kv.Version >= int64(e.cap) {
-		// evict
-	}
 	return kv.Value, err
 }
