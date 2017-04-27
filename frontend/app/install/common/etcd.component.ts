@@ -113,10 +113,15 @@ export class EtcdFlag {
     }
 
     getDataDirPrepareCommand() {
-        return `# make sure etcd process has write access to this directory
+        let ds = this.getDataDir();
+        let cs = `# make sure etcd process has write access to this directory
 # remove this directory if the cluster is new; keep if restarting etcd
-# sudo rm -rf ${this.getDataDir()}
 `;
+        if (ds !== '') {
+            cs += `# sudo rm -rf ` + ds + `
+`;
+        }
+        return cs;
     }
 
     getCFSSLFilesTxt() {
@@ -419,7 +424,7 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
         if (docker) {
             dataDir = '/etcd-data';
         }
-        if (!skipDataDir) {
+        if (!skipDataDir && dataDir !== '') {
             flags.push('--data-dir' + ' ' + dataDir);
         }
 
