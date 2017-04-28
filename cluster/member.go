@@ -130,7 +130,10 @@ func (m *Member) Stop() {
 	m.statusLock.Unlock()
 
 	// TODO: stop with/without leadership transfer?
-	m.srv.Server.HardStop()
+	// m.srv.Server.HardStop()
+
+	// stops embedded server to trigger
+	// gRPC server graceful shutdown
 	m.srv.Close()
 
 	var cerr error
