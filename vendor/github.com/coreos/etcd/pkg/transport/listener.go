@@ -65,7 +65,7 @@ type TLSInfo struct {
 	// ServerName ensures the cert matches the given host in case of discovery / virtual hosting
 	ServerName string
 
-	// HandshakeFailure is optinally called when a connection fails to handshake. The
+	// HandshakeFailure is optionally called when a connection fails to handshake. The
 	// connection will be closed immediately afterwards.
 	HandshakeFailure func(*tls.Conn, error)
 
@@ -171,6 +171,14 @@ func (info TLSInfo) baseConfig() (*tls.Config, error) {
 		Certificates: []tls.Certificate{*tlsCert},
 		MinVersion:   tls.VersionTLS12,
 		ServerName:   info.ServerName,
+	}
+	// this only reloads certs when there's a client request
+	// TODO: support server-side refresh (e.g. inotify, SIGHUP), caching
+	cfg.GetCertificate = func(clientHello *tls.ClientHelloInfo) (*tls.Certificate, error) {
+		return tlsutil.NewCert(info.CertFile, info.KeyFile, info.parseFunc)
+	}
+	cfg.GetClientCertificate = func(unused *tls.CertificateRequestInfo) (*tls.Certificate, error) {
+		return tlsutil.NewCert(info.CertFile, info.KeyFile, info.parseFunc)
 	}
 	return cfg, nil
 }
