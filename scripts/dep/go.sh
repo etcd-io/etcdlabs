@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
 set -e
 
-if ! [[ "$0" =~ "scripts/update-vendor-glide.sh" ]]; then
-    echo "must be run from repository root"
-    exit 255
+if ! [[ "$0" =~ "./scripts/dep/go.sh" ]]; then
+  echo "must be run from repository root"
+  exit 255
 fi
 
 # update depedency
 # 1. edit glide.yaml with version, git SHA
-# 2. run ./script-update-vendor-glide.sh
+# 2. run scripts/dep/go.sh
 # 3. it automatically detects new git SHA, and vendors updates to cmd/vendor directory
 #
 # add depedency
-# 1. run ./script-update-vendor-glide.sh github.com/USER/PROJECT#^1.0.0
-#        OR
-#        ./script-update-vendor-glide.sh github.com/USER/PROJECT#9b772b54b3bf0be1eec083c9669766a56332559a
-#        ./script-update-vendor-glide.sh golang.org/x/time#711ca1cb87636abec28122ef3bc6a77269d433f3
+# 1. run scripts/dep/go.sh github.com/USER/PROJECT#^1.0.0
+#     OR
+#    scripts/dep/go.sh github.com/USER/PROJECT#9b772b54b3bf0be1eec083c9669766a56332559a
+#    scripts/dep/go.sh golang.org/x/time#711ca1cb87636abec28122ef3bc6a77269d433f3
 # 2. make sure glide.yaml and glide.lock are updated
 
 GLIDE_ROOT="$GOPATH/src/github.com/Masterminds/glide"
@@ -43,4 +43,3 @@ else
 fi;
 
 glide vc --no-tests --only-code
-
