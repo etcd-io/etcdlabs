@@ -10,6 +10,9 @@ import {
   MdToolbarModule,
   MdCardModule,
   MdMenuModule,
+  MdInputModule,
+  MdTabsModule,
+  MdCheckboxModule,
 } from '@angular/material';
 
 import { AppComponent } from './app.component';
@@ -29,6 +32,9 @@ import { routing, routedComponents } from './app.routing';
     MdToolbarModule,
     MdCardModule,
     MdMenuModule,
+    MdInputModule,
+    MdTabsModule,
+    MdCheckboxModule,
 
     routing,
   ],
