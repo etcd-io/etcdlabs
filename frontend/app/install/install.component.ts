@@ -53,7 +53,7 @@ export class InstallComponent extends ParentComponent {
         ///////////////////////////////////////////////////
 
         ///////////////////////////////////////////////////
-        this.go = new Go('1.8.1');
+        this.go = new Go('1.8.3');
         this.inputGitUser = 'coreos';
         this.inputGitBranch = 'master';
         ///////////////////////////////////////////////////

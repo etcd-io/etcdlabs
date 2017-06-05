@@ -19,6 +19,7 @@ import (
 	"errors"
 	"math"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/coreos/etcd/lease"
@@ -33,13 +34,6 @@ var (
 	keyBucketName  = []byte("key")
 	metaBucketName = []byte("meta")
 
-	// markedRevBytesLen is the byte length of marked revision.
-	// The first `revBytesLen` bytes represents a normal revision. The last
-	// one byte is the mark.
-	markedRevBytesLen      = revBytesLen + 1
-	markBytePosition       = markedRevBytesLen - 1
-	markTombstone     byte = 't'
-
 	consistentIndexKeyName  = []byte("consistent_index")
 	scheduledCompactKeyName = []byte("scheduledCompactRev")
 	finishedCompactKeyName  = []byte("finishedCompactRev")
@@ -52,6 +46,17 @@ var (
 	plog = capnslog.NewPackageLogger("github.com/coreos/etcd", "mvcc")
 )
 
+const (
+	// markedRevBytesLen is the byte length of marked revision.
+	// The first `revBytesLen` bytes represents a normal revision. The last
+	// one byte is the mark.
+	markedRevBytesLen      = revBytesLen + 1
+	markBytePosition       = markedRevBytesLen - 1
+	markTombstone     byte = 't'
+
+	restoreChunkKeys = 10000
+)
+
 // ConsistentIndexGetter is an interface that wraps the Get method.
 // Consistent index is the offset of an entry in a consistent replicated log.
 type ConsistentIndexGetter interface {
@@ -62,6 +67,10 @@ type ConsistentIndexGetter interface {
 type store struct {
 	ReadView
 	WriteView
+
+	// consistentIndex caches the "consistent_index" key's value. Accessed
+	// through atomics so must be 64-bit aligned.
+	consistentIndex uint64
 
 	// mu read locks for txns and write locks for non-txn store changes.
 	mu sync.RWMutex
@@ -230,6 +239,7 @@ func (s *store) Restore(b backend.Backend) error {
 	close(s.stopc)
 	s.fifoSched.Stop()
 
+	atomic.StoreUint64(&s.consistentIndex, 0)
 	s.b = b
 	s.kvindex = newTreeIndex()
 	s.currentRev = 1
@@ -247,11 +257,6 @@ func (s *store) restore() error {
 
 	keyToLease := make(map[string]lease.LeaseID)
 
-	// use an unordered map to hold the temp index data to speed up
-	// the initial key index recovery.
-	// we will convert this unordered map into the tree index later.
-	unordered := make(map[string]*keyIndex, 100000)
-
 	// restore index
 	tx := s.b.BatchTx()
 	tx.Lock()
@@ -260,54 +265,50 @@ func (s *store) restore() error {
 		s.compactMainRev = bytesToRev(finishedCompactBytes[0]).main
 		plog.Printf("restore compact to %d", s.compactMainRev)
 	}
-
-	// TODO: limit N to reduce max memory usage
-	keys, vals := tx.UnsafeRange(keyBucketName, min, max, 0)
-	for i, key := range keys {
-		var kv mvccpb.KeyValue
-		if err := kv.Unmarshal(vals[i]); err != nil {
-			plog.Fatalf("cannot unmarshal event: %v", err)
-		}
-
-		rev := bytesToRev(key[:revBytesLen])
-		s.currentRev = rev.main
-
-		// restore index
-		switch {
-		case isTombstone(key):
-			if ki, ok := unordered[string(kv.Key)]; ok {
-				ki.tombstone(rev.main, rev.sub)
-			}
-			delete(keyToLease, string(kv.Key))
-
-		default:
-			ki, ok := unordered[string(kv.Key)]
-			if ok {
-				ki.put(rev.main, rev.sub)
-			} else {
-				ki = &keyIndex{key: kv.Key}
-				ki.restore(revision{kv.CreateRevision, 0}, rev, kv.Version)
-				unordered[string(kv.Key)] = ki
-			}
-
-			if lid := lease.LeaseID(kv.Lease); lid != lease.NoLease {
-				keyToLease[string(kv.Key)] = lid
-			} else {
-				delete(keyToLease, string(kv.Key))
-			}
-		}
+	_, scheduledCompactBytes := tx.UnsafeRange(metaBucketName, scheduledCompactKeyName, nil, 0)
+	scheduledCompact := int64(0)
+	if len(scheduledCompactBytes) != 0 {
+		scheduledCompact = bytesToRev(scheduledCompactBytes[0]).main
 	}
 
-	// restore the tree index from the unordered index.
-	for _, v := range unordered {
-		s.kvindex.Insert(v)
+	// index keys concurrently as they're loaded in from tx
+	unorderedc, donec := make(chan map[string]*keyIndex), make(chan struct{})
+	go func() {
+		defer close(donec)
+		for unordered := range unorderedc {
+			// restore the tree index from the unordered index.
+			for _, v := range unordered {
+				s.kvindex.Insert(v)
+			}
+		}
+	}()
+	for {
+		keys, vals := tx.UnsafeRange(keyBucketName, min, max, restoreChunkKeys)
+		if len(keys) == 0 {
+			break
+		}
+		// unbuffered so keys don't pile up in memory
+		unorderedc <- s.restoreChunk(keys, vals, keyToLease)
+		if len(keys) < restoreChunkKeys {
+			// partial set implies final set
+			break
+		}
+		// next set begins after where this one ended
+		newMin := bytesToRev(keys[len(keys)-1][:revBytesLen])
+		newMin.sub++
+		revToBytes(newMin, min)
 	}
+	close(unorderedc)
+	<-donec
 
 	// keys in the range [compacted revision -N, compaction] might all be deleted due to compaction.
 	// the correct revision should be set to compaction revision in the case, not the largest revision
 	// we have seen.
 	if s.currentRev < s.compactMainRev {
 		s.currentRev = s.compactMainRev
+	}
+	if scheduledCompact <= s.compactMainRev {
+		scheduledCompact = 0
 	}
 
 	for key, lid := range keyToLease {
@@ -320,15 +321,6 @@ func (s *store) restore() error {
 		}
 	}
 
-	_, scheduledCompactBytes := tx.UnsafeRange(metaBucketName, scheduledCompactKeyName, nil, 0)
-	scheduledCompact := int64(0)
-	if len(scheduledCompactBytes) != 0 {
-		scheduledCompact = bytesToRev(scheduledCompactBytes[0]).main
-		if scheduledCompact <= s.compactMainRev {
-			scheduledCompact = 0
-		}
-	}
-
 	tx.Unlock()
 
 	if scheduledCompact != 0 {
@@ -337,6 +329,40 @@ func (s *store) restore() error {
 	}
 
 	return nil
+}
+
+func (s *store) restoreChunk(keys, vals [][]byte, keyToLease map[string]lease.LeaseID) map[string]*keyIndex {
+	// assume half of keys are overwrites
+	unordered := make(map[string]*keyIndex, len(keys)/2)
+	for i, key := range keys {
+		var kv mvccpb.KeyValue
+		if err := kv.Unmarshal(vals[i]); err != nil {
+			plog.Fatalf("cannot unmarshal event: %v", err)
+		}
+		rev := bytesToRev(key[:revBytesLen])
+		s.currentRev = rev.main
+		kstr := string(kv.Key)
+		if isTombstone(key) {
+			if ki, ok := unordered[kstr]; ok {
+				ki.tombstone(rev.main, rev.sub)
+			}
+			delete(keyToLease, kstr)
+			continue
+		}
+		if ki, ok := unordered[kstr]; ok {
+			ki.put(rev.main, rev.sub)
+		} else {
+			ki = &keyIndex{key: kv.Key}
+			ki.restore(revision{kv.CreateRevision, 0}, rev, kv.Version)
+			unordered[kstr] = ki
+		}
+		if lid := lease.LeaseID(kv.Lease); lid != lease.NoLease {
+			keyToLease[kstr] = lid
+		} else {
+			delete(keyToLease, kstr)
+		}
+	}
+	return unordered
 }
 
 func (s *store) Close() error {
@@ -360,14 +386,18 @@ func (s *store) saveIndex(tx backend.BatchTx) {
 		return
 	}
 	bs := s.bytesBuf8
-	binary.BigEndian.PutUint64(bs, s.ig.ConsistentIndex())
+	ci := s.ig.ConsistentIndex()
+	binary.BigEndian.PutUint64(bs, ci)
 	// put the index into the underlying backend
 	// tx has been locked in TxnBegin, so there is no need to lock it again
 	tx.UnsafePut(metaBucketName, consistentIndexKeyName, bs)
+	atomic.StoreUint64(&s.consistentIndex, ci)
 }
 
 func (s *store) ConsistentIndex() uint64 {
-	// TODO: cache index in a uint64 field?
+	if ci := atomic.LoadUint64(&s.consistentIndex); ci > 0 {
+		return ci
+	}
 	tx := s.b.BatchTx()
 	tx.Lock()
 	defer tx.Unlock()
@@ -375,7 +405,9 @@ func (s *store) ConsistentIndex() uint64 {
 	if len(vs) == 0 {
 		return 0
 	}
-	return binary.BigEndian.Uint64(vs[0])
+	v := binary.BigEndian.Uint64(vs[0])
+	atomic.StoreUint64(&s.consistentIndex, v)
+	return v
 }
 
 // appendMarkTombstone appends tombstone mark to normal revision bytes.

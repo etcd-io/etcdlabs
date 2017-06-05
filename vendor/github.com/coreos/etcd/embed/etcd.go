@@ -139,6 +139,8 @@ func StartEtcd(inCfg *Config) (e *Etcd, err error) {
 		ElectionTicks:           cfg.ElectionTicks(),
 		AutoCompactionRetention: cfg.AutoCompactionRetention,
 		QuotaBackendBytes:       cfg.QuotaBackendBytes,
+		MaxTxnOps:               cfg.MaxTxnOps,
+		MaxRequestBytes:         cfg.MaxRequestBytes,
 		StrictReconfigCheck:     cfg.StrictReconfigCheck,
 		ClientCertAuthEnabled:   cfg.ClientTLSInfo.ClientCertAuth,
 		AuthToken:               cfg.AuthToken,

@@ -1,53 +1,26 @@
-@import '~@angular2-material/core/theming/theming';
-@import '~@angular2-material/core/theming/palette';
-@import '~@angular2-material/core/core';
-@import '~@angular2-material/button/button-theme';
-@import '~@angular2-material/button-toggle/button-toggle-theme';
-@import '~@angular2-material/card/card-theme';
-@import '~@angular2-material/checkbox/checkbox-theme';
-@import '~@angular2-material/grid-list/grid-list-theme';
-@import '~@angular2-material/icon/icon-theme';
-@import '~@angular2-material/input/input-theme';
-@import '~@angular2-material/list/list-theme';
-@import '~@angular2-material/menu/menu-theme';
-@import '~@angular2-material/progress-bar/progress-bar-theme';
-@import '~@angular2-material/progress-circle/progress-circle-theme';
-@import '~@angular2-material/radio/radio-theme';
-@import '~@angular2-material/sidenav/sidenav-theme';
-@import '~@angular2-material/slide-toggle/slide-toggle-theme';
-@import '~@angular2-material/slider/slider-theme';
-@import '~@angular2-material/tabs/tabs-theme';
-@import '~@angular2-material/toolbar/toolbar-theme';
-@import '~@angular2-material/tooltip/tooltip-theme';
-// NOTE: Theming is currently experimental and not yet publically released!
-@include md-core();
-// Mixin that captures themes for all of the components we use in our app.
-@mixin app-etcd-components($theme) {
-    @include md-button-theme($theme);
-    @include md-button-toggle-theme($theme);
-    @include md-card-theme($theme);
-    @include md-checkbox-theme($theme);
-    @include md-grid-list-theme($theme);
-    @include md-icon-theme($theme);
-    @include md-input-theme($theme);
-    @include md-list-theme($theme);
-    @include md-menu-theme($theme);
-    @include md-progress-bar-theme($theme);
-    @include md-progress-circle-theme($theme);
-    @include md-radio-theme($theme);
-    @include md-sidenav-theme($theme);
-    @include md-slide-toggle-theme($theme);
-    @include md-slider-theme($theme);
-    @include md-tabs-theme($theme);
-    @include md-toolbar-theme($theme);
-    @include md-tooltip-theme($theme);
-}
+@import '~@angular/material/theming';
+// Plus imports for other components in your app.
 
-$primary: md-palette($md-blue);
-$accent: md-palette($md-amber, A200, A100, A400);
-$warn: md-palette($md-red);
-$theme: md-light-theme($primary, $accent, $warn);
-@include app-etcd-components($theme);
-// TODO: use attribute with https://github.com/angular/material2/issues/947
-$theme-checkbox-temporary: md-light-theme($primary, $primary, $primary);
-@include md-checkbox-theme($theme-checkbox-temporary);
+// Include the common styles for Angular Material. We include this here so that you only
+// have to load a single css file for Angular Material in your app.
+// Be sure that you only ever include this mixin once!
+@include mat-core();
+
+// Define the palettes for your theme using the Material Design palettes available in palette.scss
+// (imported above). For each palette, you can optionally specify a default, lighter, and darker
+// hue.
+
+// See https://github.com/angular/material2/blob/master/src/lib/core/theming/_palette.scss
+$etcd-app-primary: mat-palette($mat-light-blue);
+$etcd-app-accent:  mat-palette($mat-pink, A200, A100, A400);
+
+// The warn palette is optional (defaults to red).
+$etcd-app-warn:    mat-palette($mat-red);
+
+// Create the theme object (a Sass map containing all of the palettes).
+$etcd-app-theme: mat-light-theme($etcd-app-primary, $etcd-app-accent, $etcd-app-warn);
+
+// Include theme styles for core and each component used in your app.
+// Alternatively, you can import and @include the theme mixins for each component
+// that you are using.
+@include angular-material-theme($etcd-app-theme);

@@ -1,7 +1,7 @@
 package: github.com/coreos/etcdlabs
 import:
 - package: github.com/coreos/etcd
-  version: fd7de051a4e57178b168e8a3c9e33bb34c007398
+  version: 9c2bbc51ca6c4a3aa514bfef365db82fe6962848
   subpackages:
   - clientv3
   - clientv3/namespace
@@ -11,10 +11,7 @@ import:
   - pkg/types
   - pkg/httputil
   - pkg/netutil
-- package: github.com/coreos/pkg
-  version: 099530d80109cc4876ac866c38dded19786731d0
-  subpackages:
-  - capnslog
+  - tools/functional-tester/etcd-agent/client
 - package: github.com/dustin/go-humanize
   version: 259d2a102b871d17f30e3cd9881a642961a1e486
 - package: github.com/gogo/protobuf
@@ -41,9 +38,19 @@ import:
   version: c06e80d9300e4443158a03817b8a8cb37d230320
   subpackages:
   - rate
-- package: github.com/go-sql-driver/mysql
-  version: 9dee4ca50b83acdf57a35fb9e6fb4be640afa2f3
-- package: github.com/spf13/cobra
-  version: b6cb3958937245a12d4d7728be080a6c758f4136
-- package: github.com/spf13/pflag
-  version: 2300d0f8576fe575f71aaa5b9bbe4e1b0dc2eb51
+- package: github.com/golang/glog
+  version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
+- package: cloud.google.com/go
+  version: 0.7.0
+  subpackages:
+  - storage
+- package: golang.org/x/oauth2
+  version: f047394b6d14284165300fd82dad67edb3a4d7f6
+  subpackages:
+  - google
+- package: google.golang.org/api
+  version: d9d64fe74969b80fb4a435ae9280c9ff061a6097
+  subpackages:
+  - googleapi
+  - iterator
+  - option

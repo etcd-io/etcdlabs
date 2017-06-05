@@ -11,13 +11,14 @@ import (
 	"sync"
 	"time"
 
-	"golang.org/x/sync/errgroup"
+	"github.com/coreos/etcdlabs/cluster/clusterpb"
 
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/embed"
 	"github.com/coreos/etcd/pkg/netutil"
 	"github.com/coreos/etcd/pkg/transport"
-	"github.com/coreos/etcdlabs/clusterpb"
+	"github.com/golang/glog"
+	"golang.org/x/sync/errgroup"
 )
 
 // Cluster contains all embedded etcd Members in the same cluster.
@@ -92,7 +93,7 @@ func Start(ccfg Config) (clus *Cluster, err error) {
 		return nil, fmt.Errorf("max cluster size is 7, got %d", ccfg.Size)
 	}
 
-	plog.Printf("starting %d Members (root directory %q, root port :%d)", ccfg.Size, ccfg.RootDir, ccfg.RootPort)
+	glog.Infof("starting %d Members (root directory %q, root port :%d)", ccfg.Size, ccfg.RootDir, ccfg.RootPort)
 
 	dt := ccfg.DialTimeout
 	if dt == time.Duration(0) {
@@ -116,23 +117,23 @@ func Start(ccfg Config) (clus *Cluster, err error) {
 	}
 
 	if !existFileOrDir(ccfg.RootDir) {
-		plog.Printf("creating root directory %q", ccfg.RootDir)
+		glog.Infof("creating root directory %q", ccfg.RootDir)
 		if err = mkdirAll(ccfg.RootDir); err != nil {
 			return nil, err
 		}
 	} else {
-		plog.Printf("removing root directory %q", ccfg.RootDir)
+		glog.Infof("removing root directory %q", ccfg.RootDir)
 		os.RemoveAll(ccfg.RootDir)
 	}
 
-	plog.Printf("getting default host")
+	glog.Infof("getting default host")
 	dhost, err := netutil.GetDefaultHost()
 	if err != nil {
-		plog.Warning(err)
-		plog.Warning("overwriting default host with 'localhost")
+		glog.Warning(err)
+		glog.Warning("overwriting default host with 'localhost")
 		dhost = "localhost"
 	}
-	plog.Printf("detected default host %q", dhost)
+	glog.Infof("detected default host %q", dhost)
 
 	if !ccfg.PeerTLSInfo.Empty() && ccfg.PeerAutoTLS {
 		return nil, fmt.Errorf("choose either auto peer TLS or manual peer TLS")
@@ -153,9 +154,9 @@ func Start(ccfg Config) (clus *Cluster, err error) {
 
 		// this is fresh cluster, so remove any conflicting data
 		os.RemoveAll(cfg.Dir)
-		plog.Infof("removed %q", cfg.Dir)
+		glog.Infof("removed %q", cfg.Dir)
 		os.RemoveAll(cfg.WalDir)
-		plog.Infof("removed %q", cfg.WalDir)
+		glog.Infof("removed %q", cfg.WalDir)
 
 		curl := url.URL{Scheme: ccfg.ClientScheme(), Host: fmt.Sprintf("localhost:%d", startPort)}
 		cfg.ACUrls = []url.URL{curl}
@@ -164,14 +165,14 @@ func Start(ccfg Config) (clus *Cluster, err error) {
 			// expose default host to other machines in listen address (e.g. Prometheus dashboard)
 			curl2 := url.URL{Scheme: ccfg.ClientScheme(), Host: fmt.Sprintf("%s:%d", dhost, startPort)}
 			cfg.LCUrls = append(cfg.LCUrls, curl2)
-			plog.Infof("%q is set up to listen on client url %q (default host)", cfg.Name, curl2.String())
+			glog.Infof("%q is set up to listen on client url %q (default host)", cfg.Name, curl2.String())
 		}
-		plog.Infof("%q is set up to listen on client url %q", cfg.Name, curl.String())
+		glog.Infof("%q is set up to listen on client url %q", cfg.Name, curl.String())
 
 		purl := url.URL{Scheme: ccfg.PeerScheme(), Host: fmt.Sprintf("localhost:%d", startPort+1)}
 		cfg.APUrls = []url.URL{purl}
 		cfg.LPUrls = []url.URL{purl}
-		plog.Infof("%q is set up to listen on peer url %q", cfg.Name, purl.String())
+		glog.Infof("%q is set up to listen on peer url %q", cfg.Name, purl.String())
 
 		cfg.ClientAutoTLS = ccfg.ClientAutoTLS
 		cfg.ClientTLSInfo = ccfg.ClientTLSInfo
@@ -237,14 +238,14 @@ func (clus *Cluster) Restart(i int) error {
 
 // Add adds one member.
 func (clus *Cluster) Add() error {
-	plog.Printf("getting default host")
+	glog.Infof("getting default host")
 	dhost, err := netutil.GetDefaultHost()
 	if err != nil {
-		plog.Warning(err)
-		plog.Warning("overwriting default host with 'localhost")
+		glog.Warning(err)
+		glog.Warning("overwriting default host with 'localhost")
 		dhost = "localhost"
 	}
-	plog.Printf("detected default host %q", dhost)
+	glog.Infof("detected default host %q", dhost)
 
 	clus.opLock.Lock()
 	defer clus.opLock.Unlock()
@@ -262,9 +263,9 @@ func (clus *Cluster) Add() error {
 
 	// this is fresh cluster, so remove any conflicting data
 	os.RemoveAll(cfg.Dir)
-	plog.Infof("removed %q", cfg.Dir)
+	glog.Infof("removed %q", cfg.Dir)
 	os.RemoveAll(cfg.WalDir)
-	plog.Infof("removed %q", cfg.WalDir)
+	glog.Infof("removed %q", cfg.WalDir)
 
 	curl := url.URL{Scheme: clus.ccfg.ClientScheme(), Host: fmt.Sprintf("localhost:%d", clus.basePort)}
 	cfg.ACUrls = []url.URL{curl}
@@ -273,9 +274,9 @@ func (clus *Cluster) Add() error {
 		// expose default host to other machines in listen address (e.g. Prometheus dashboard)
 		curl2 := url.URL{Scheme: clus.ccfg.ClientScheme(), Host: fmt.Sprintf("%s:%d", dhost, clus.basePort)}
 		cfg.LCUrls = append(cfg.LCUrls, curl2)
-		plog.Infof("%q is set up to listen on client url %q (default host)", cfg.Name, curl2.String())
+		glog.Infof("%q is set up to listen on client url %q (default host)", cfg.Name, curl2.String())
 	}
-	plog.Infof("%q is set up to listen on client url %q", cfg.Name, curl.String())
+	glog.Infof("%q is set up to listen on client url %q", cfg.Name, curl.String())
 
 	purl := url.URL{Scheme: clus.ccfg.PeerScheme(), Host: fmt.Sprintf("localhost:%d", clus.basePort+1)}
 	cfg.APUrls = []url.URL{purl}
@@ -309,7 +310,7 @@ func (clus *Cluster) Add() error {
 		clus.Members[i].cfg.InitialCluster = clus.initialCluster()
 	}
 
-	plog.Infof("adding member %q", clus.Members[idx].cfg.Name)
+	glog.Infof("adding member %q", clus.Members[idx].cfg.Name)
 	cli, _, err := clus.Members[0].Client(false)
 	if err != nil {
 		return err
@@ -320,13 +321,13 @@ func (clus *Cluster) Add() error {
 	if err != nil {
 		return err
 	}
-	plog.Infof("added member %q", clus.Members[idx].cfg.Name)
+	glog.Infof("added member %q", clus.Members[idx].cfg.Name)
 
-	plog.Infof("starting member %q", clus.Members[idx].cfg.Name)
+	glog.Infof("starting member %q", clus.Members[idx].cfg.Name)
 	if serr := clus.Members[idx].Start(); serr != nil {
 		return serr
 	}
-	plog.Infof("started member %q", clus.Members[idx].cfg.Name)
+	glog.Infof("started member %q", clus.Members[idx].cfg.Name)
 
 	return nil
 }
@@ -340,7 +341,7 @@ func (clus *Cluster) Remove(i int) error {
 	defer clus.mmu.Unlock()
 
 	idx := (i + 1) % clus.size
-	plog.Infof("removing member %q", clus.Members[i].cfg.Name)
+	glog.Infof("removing member %q", clus.Members[i].cfg.Name)
 	cli, _, err := clus.Members[idx].Client(false)
 	if err != nil {
 		return err
@@ -351,7 +352,7 @@ func (clus *Cluster) Remove(i int) error {
 	if err != nil {
 		return err
 	}
-	plog.Infof("removed member %q", clus.Members[idx].cfg.Name)
+	glog.Infof("removed member %q", clus.Members[idx].cfg.Name)
 
 	clus.size--
 	var newms []*Member
@@ -369,10 +370,10 @@ func (clus *Cluster) Remove(i int) error {
 	clus.Members[i].Stop()
 
 	os.RemoveAll(clus.Members[i].cfg.Dir)
-	plog.Infof("removed %q", clus.Members[i].cfg.Dir)
+	glog.Infof("removed %q", clus.Members[i].cfg.Dir)
 
 	os.RemoveAll(clus.Members[i].cfg.WalDir)
-	plog.Infof("removed %q", clus.Members[i].cfg.WalDir)
+	glog.Infof("removed %q", clus.Members[i].cfg.WalDir)
 
 	return nil
 }
@@ -385,7 +386,7 @@ func (clus *Cluster) Shutdown() {
 	clus.opLock.Lock()
 	defer clus.opLock.Unlock()
 
-	plog.Println("shutting down all Members")
+	glog.Info("shutting down all Members")
 	var wg sync.WaitGroup
 	wg.Add(clus.size)
 	for i := 0; i < clus.size; i++ {
@@ -397,12 +398,12 @@ func (clus *Cluster) Shutdown() {
 	wg.Wait()
 
 	os.RemoveAll(clus.rootDir)
-	plog.Printf("successfully shutdown cluster (deleted %q)", clus.rootDir)
+	glog.Infof("successfully shutdown cluster (deleted %q)", clus.rootDir)
 }
 
 // WaitForLeader waits for cluster to elect a new leader.
 func (clus *Cluster) WaitForLeader() error {
-	plog.Print("wait for leader election")
+	glog.Info("wait for leader election")
 	var g errgroup.Group
 	for i := 0; i < clus.size; i++ {
 		idx := i
@@ -413,7 +414,7 @@ func (clus *Cluster) WaitForLeader() error {
 	if gerr := g.Wait(); gerr != nil {
 		return gerr
 	}
-	plog.Print("waited for leader election")
+	glog.Info("waited for leader election")
 
 	clus.mmu.Lock()
 	defer clus.mmu.Unlock()
@@ -425,7 +426,7 @@ func (clus *Cluster) WaitForLeader() error {
 				return fmt.Errorf("duplicate leader? %q(%s) claims to be the leader", clus.Members[clus.LeadIdx].cfg.Name, clus.Members[clus.LeadIdx].srv.Server.ID())
 			}
 			clus.LeadIdx = i
-			plog.Infof("%q(%s) is the leader", m.cfg.Name, m.srv.Server.ID())
+			glog.Infof("%q(%s) is the leader", m.cfg.Name, m.srv.Server.ID())
 			found = true
 		}
 	}
@@ -455,17 +456,17 @@ func (clus *Cluster) UpdateMemberStatus() {
 		go func(i int) {
 			defer func() {
 				if err := recover(); err != nil {
-					plog.Warning("recovered from panic", err)
+					glog.Warning("recovered from panic", err)
 					select {
 					case <-clus.rootCtx.Done():
-						plog.Warning("rootCtx is done with", clus.rootCtx.Err())
+						glog.Warning("rootCtx is done with", clus.rootCtx.Err())
 					default:
 					}
 				}
 				wg.Done()
 			}()
 			if err := clus.Members[i].FetchMemberStatus(); err != nil {
-				plog.Warning(err)
+				glog.Warning(err)
 			}
 		}(i)
 	}
