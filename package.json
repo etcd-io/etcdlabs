@@ -59,7 +59,7 @@
     "description": "website",
     "main": "index.js",
     "repository": {
-        "url": "git@github.com:gyuho/deephardway.git",
+        "url": "git@github.com:coreos/etcdlabs.git",
         "type": "git"
     },
     "author": "Gyu-Ho Lee <gyuhox@gmail.com>"

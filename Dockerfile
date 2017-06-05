@@ -44,7 +44,7 @@ RUN go build -o ./backend-web-server -v ./cmd/backend-web-server
 # Install Angular, NodeJS for frontend
 # 'node' needs to be in $PATH for 'yarn start' command
 ENV NVM_DIR /usr/local/nvm
-RUN pushd ${GOPATH}/src/github.com/gyuho/deephardway \
+RUN pushd ${GOPATH}/src/github.com/coreos/etcdlabs \
   && curl https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | /bin/bash \
   && echo "Running nvm scripts..." \
   && source $NVM_DIR/nvm.sh \
