@@ -3,14 +3,17 @@ package gcp
 import (
 	"io/ioutil"
 	"net/http"
-	"path"
+	"strings"
 )
 
 // GetComputeMetadata fetches the metadata from instance or project.
 // e.g. curl -L http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip -H 'Metadata-Flavor:Google'
 func GetComputeMetadata(key string) ([]byte, error) {
 	const endpoint = "http://metadata.google.internal/computeMetadata/v1/"
-	ep := path.Join(endpoint, key)
+	if strings.HasPrefix(key, "/") {
+		key = key[1:]
+	}
+	ep := endpoint + key
 
 	req, err := http.NewRequest("GET", ep, nil)
 	if err != nil {
