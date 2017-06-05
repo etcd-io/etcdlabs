@@ -15,7 +15,6 @@ ExecStartPre=/usr/bin/docker \
 ExecStart=/usr/bin/docker \
   run \
   --rm \
-  -p 80:80 \
   -p 4200:4200 \
   --name etcdlabs \
   --ulimit nofile=262144:262144 \

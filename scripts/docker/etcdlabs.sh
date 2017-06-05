@@ -13,7 +13,6 @@ fi
 docker run \
   --rm \
   -it \
-  -p 80:80 \
   -p 4200:4200 \
   quay.io/coreos/etcdlabs:latest \
   /bin/sh -c "pushd /gopath/src/github.com/coreos/etcdlabs && ./scripts/run/etcdlabs.sh"
