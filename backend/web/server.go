@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package backend
+package web
 
 import (
 	"context"
@@ -25,9 +25,12 @@ import (
 	"time"
 
 	"github.com/coreos/etcdlabs/cluster"
-	"github.com/coreos/etcdlabs/pkg/listener"
-	"github.com/coreos/etcdlabs/pkg/metrics"
+	"github.com/coreos/etcdlabs/pkg/gcp"
 	"github.com/coreos/etcdlabs/pkg/ratelimit"
+	"github.com/coreos/etcdlabs/pkg/record/recordpb"
+
+	"cloud.google.com/go/storage"
+	"github.com/golang/glog"
 )
 
 var (
@@ -73,25 +76,32 @@ type Server struct {
 var (
 	globalWebserverPort int
 
-	clientRequestIntervalLimit = 3 * time.Second
-	stopRestartIntervalLimit   = 5 * time.Second
+	globalCluster *cluster.Cluster
 
-	globalCluster              *cluster.Cluster
-	globalClientRequestLimiter ratelimit.RequestLimiter
-	globalStopRestartLimiter   ratelimit.RequestLimiter
+	globalClientRequestIntervalLimit = 3 * time.Second
+	globalClientRequestLimiter       ratelimit.RequestLimiter
 
-	globalMetrics metrics.Metrics
+	globalStopRestartIntervalLimit = 5 * time.Second
+	globalStopRestartLimiter       ratelimit.RequestLimiter
+
+	globalSyncRecordIntervalLimit = 30 * time.Second
+	globalSyncRecordLimiter       ratelimit.RequestLimiter
+
+	globalRecordMu      sync.RWMutex
+	globalRecordEnabled bool
+	globalRecord        = &recordpb.Record{
+		TestData: []*recordpb.Data{},
+	}
 )
 
 // StartServer starts a backend webserver with stoppable listener.
-func StartServer(port int, mt metrics.Metrics) (*Server, error) {
+func StartServer(port int, key []byte, recordTesterEps []string) (*Server, error) {
 	globalWebserverPort = port
-	globalMetrics = mt
 
-	stopc := make(chan struct{})
-	ln, err := listener.NewListenerStoppable("http", fmt.Sprintf("localhost:%d", port), nil, stopc)
-	if err != nil {
-		return nil, err
+	for _, ep := range recordTesterEps {
+		globalRecord.TestData = append(globalRecord.TestData, &recordpb.Data{
+			Endpoint: ep,
+		})
 	}
 
 	rootCtx, rootCancel := context.WithCancel(context.Background())
@@ -102,13 +112,13 @@ func StartServer(port int, mt metrics.Metrics) (*Server, error) {
 	globalCluster = c
 
 	// allow only 1 request for every 2 second
-	globalClientRequestLimiter = ratelimit.NewRequestLimiter(rootCtx, clientRequestIntervalLimit)
+	globalClientRequestLimiter = ratelimit.NewRequestLimiter(rootCtx, globalClientRequestIntervalLimit)
 
 	// rate-limit more strictly for every 3 second
-	globalStopRestartLimiter = ratelimit.NewRequestLimiter(rootCtx, stopRestartIntervalLimit)
+	globalStopRestartLimiter = ratelimit.NewRequestLimiter(rootCtx, globalStopRestartIntervalLimit)
 
-	// rate-limit fetch metrics for every 10 second
-	fetchMetricsLimiter = ratelimit.NewRequestLimiter(rootCtx, fetchMetricsRequestIntervalLimit)
+	// rate-limit fetch record for every 30 second
+	globalSyncRecordLimiter = ratelimit.NewRequestLimiter(rootCtx, globalSyncRecordIntervalLimit)
 
 	mux := http.NewServeMux()
 	mux.Handle("/conn", &ContextAdapter{
@@ -123,16 +133,17 @@ func StartServer(port int, mt metrics.Metrics) (*Server, error) {
 		ctx:     rootCtx,
 		handler: withCache(ContextHandlerFunc(clientRequestHandler)),
 	})
-	mux.Handle("/fetch-metrics", &ContextAdapter{
+	mux.Handle("/get-record", &ContextAdapter{
 		ctx:     rootCtx,
-		handler: withCache(ContextHandlerFunc(fetchMetricsRequestHandler)),
+		handler: withCache(ContextHandlerFunc(getRecordRequestHandler)),
 	})
 
+	stopc := make(chan struct{})
 	addrURL := url.URL{Scheme: "http", Host: fmt.Sprintf("localhost:%d", port)}
-	plog.Infof("started server %s", addrURL.String())
+	glog.Infof("started server %s", addrURL.String())
 	srv := &Server{
 		addrURL:    addrURL,
-		httpServer: &http.Server{Addr: addrURL.String(), Handler: mux},
+		httpServer: &http.Server{Addr: addrURL.Host, Handler: mux},
 		rootCancel: rootCancel,
 		stopc:      stopc,
 		donec:      make(chan struct{}),
@@ -141,17 +152,37 @@ func StartServer(port int, mt metrics.Metrics) (*Server, error) {
 	go func() {
 		defer func() {
 			if err := recover(); err != nil {
-				plog.Errorf("etcd-play error (%v)", err)
+				glog.Warningf("etcd-play error (%v)", err)
 				os.Exit(0)
 			}
 			srv.rootCancel()
 			close(srv.donec)
 		}()
 
+		if len(key) > 0 {
+			glog.Infof("creating GCS client")
+			var api *gcp.GCS
+			api, err = gcp.NewGCS(context.Background(), "etcd", storage.ScopeFullControl, key, "record")
+			if err == nil {
+				globalRecordMu.Lock()
+				globalRecordEnabled = true
+				globalRecordMu.Unlock()
+				go func() { syncRecord(api, globalRecord, srv.stopc) }()
+			} else {
+				glog.Warning(err)
+			}
+			defer api.Close()
+		} else {
+			glog.Infof("key not given; skip creating GCS client")
+			globalRecordMu.Lock()
+			globalRecordEnabled = false
+			globalRecordMu.Unlock()
+		}
+
 		go func() { updateClusterStatus(srv.stopc) }()
 		go func() { cleanCache(srv.stopc) }()
-		if err := srv.httpServer.Serve(ln); err != nil && err != listener.ErrListenerStopped {
-			plog.Panic(err)
+		if err := srv.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			glog.Fatal(err)
 		}
 	}()
 	return srv, nil
@@ -164,20 +195,20 @@ func (srv *Server) StopNotify() <-chan struct{} {
 
 // Stop stops the server. Useful for testing.
 func (srv *Server) Stop() {
-	plog.Warningf("stopping server %s", srv.addrURL.String())
+	glog.Warningf("stopping server %s", srv.addrURL.String())
 	srv.mu.Lock()
 	if srv.httpServer == nil {
 		srv.mu.Unlock()
 		return
 	}
 	close(srv.stopc)
+	srv.httpServer.Close()
 	<-srv.donec
-	srv.httpServer = nil
 	srv.mu.Unlock()
-	plog.Warningf("stopped server %s", srv.addrURL.String())
+	glog.Warningf("stopped server %s", srv.addrURL.String())
 
-	plog.Warning("stopping cluster")
+	glog.Warning("stopping cluster")
 	globalCluster.Shutdown()
 	globalCluster = nil
-	plog.Warning("stopped cluster")
+	glog.Warning("stopped cluster")
 }

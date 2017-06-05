@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package backend
+package web
 
 import (
 	"bytes"
@@ -30,13 +30,17 @@ var (
 	testBasePort = 35000
 )
 
+/*
+go test -v -run TestServer -logtostderr=true
+*/
+
 func TestServer(t *testing.T) {
 	testMu.Lock()
 	port := testBasePort
 	testBasePort++
 	testMu.Unlock()
 
-	srv, err := StartServer(port, nil)
+	srv, err := StartServer(port, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -495,7 +499,5 @@ func TestServer(t *testing.T) {
 
 	fmt.Println("DONE!")
 
-	// capnslog.SetGlobalLogLevel(capnslog.CRITICAL)
-	// defer capnslog.SetGlobalLogLevel(testLogLevel)
 	srv.Stop()
 }

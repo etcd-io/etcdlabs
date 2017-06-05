@@ -12,11 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package backend
+package web
 
 import (
 	"context"
 	"net/http"
+
+	"github.com/golang/glog"
 )
 
 // ContextHandler handles ServeHTTP with context.
@@ -40,6 +42,6 @@ type ContextAdapter struct {
 
 func (ca *ContextAdapter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if err := ca.handler.ServeHTTPContext(ca.ctx, w, req); err != nil {
-		plog.Errorf("ServeHTTP (%v) [method: %q | path: %q]", err, req.Method, req.URL.Path)
+		glog.Warningf("ServeHTTP (%v) [method: %q | path: %q]", err, req.Method, req.URL.Path)
 	}
 }

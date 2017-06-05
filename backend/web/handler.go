@@ -12,23 +12,104 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package backend
+package web
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"io/ioutil"
 	"net/http"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/coreos/etcdlabs/cluster/clusterpb"
+	"github.com/coreos/etcdlabs/pkg/gcp"
+	"github.com/coreos/etcdlabs/pkg/record"
+	"github.com/coreos/etcdlabs/pkg/record/recordpb"
 
 	"github.com/coreos/etcd/clientv3"
 	humanize "github.com/dustin/go-humanize"
+	"github.com/golang/glog"
+	"github.com/golang/protobuf/proto"
 )
+
+func _syncRecord(api *gcp.GCS, rec *recordpb.Record) error {
+	// fetch from storage first
+	rc, err := api.Get("record")
+	if err != nil {
+		return err
+	}
+	var d []byte
+	d, err = ioutil.ReadAll(rc)
+	if err != nil {
+		return err
+	}
+	rc.Close()
+	if err == nil {
+		if err = proto.Unmarshal(d, rec); err != nil {
+			return err
+		}
+	} else {
+		glog.Warning("run at first time?", err)
+	}
+
+	if rec.Total == 0 {
+		// initial total in case it ran the first time
+		// update this manually
+		rec.Total = 118000000
+	}
+
+	// fetch from tester
+	if err = record.SyncFromTester(rec); err != nil {
+		return err
+	}
+
+	// overwrite back to storage
+	rd, err := proto.Marshal(rec)
+	if err != nil {
+		return err
+	}
+
+	err = api.Put("record", rd)
+	if err != nil {
+		return err
+	}
+
+	glog.Infof("uploaded: %+v", rec)
+	return nil
+}
+
+func syncRecord(api *gcp.GCS, rec *recordpb.Record, stopc <-chan struct{}) {
+	for {
+		err := _syncRecord(api, rec)
+		if err != nil {
+			glog.Warning(err)
+		} else {
+			glog.Infof("synced record")
+		}
+
+		tick := time.NewTicker(globalSyncRecordIntervalLimit)
+		defer tick.Stop()
+
+		for {
+			select {
+			case <-stopc:
+				return
+			case <-tick.C:
+			}
+			err = _syncRecord(api, rec)
+			if err != nil {
+				glog.Warning(err)
+			} else {
+				glog.Infof("synced record")
+			}
+		}
+	}
+}
 
 type key int
 
@@ -54,7 +135,7 @@ func updateClusterStatus(stopc <-chan struct{}) {
 		}
 
 		if len(globalUserCache) == 0 {
-			plog.Info("no user online")
+			glog.Info("no user online")
 			continue
 		}
 		globalCluster.UpdateMemberStatus()
@@ -73,7 +154,7 @@ func cleanCache(stopc <-chan struct{}) {
 		for k, v := range globalUserCache {
 			since := time.Since(v.lastActive)
 			if since > 15*time.Minute {
-				plog.Infof("removing inactive user %q (last active %v)", k, since)
+				glog.Infof("removing inactive user %q (last active %v)", k, since)
 				delete(globalUserCache, k)
 			}
 		}
@@ -88,7 +169,7 @@ func withCache(h ContextHandler) ContextHandler {
 
 		globalUserCacheLock.Lock()
 		if _, ok := globalUserCache[userID]; !ok { // if user visits first time, create user cache
-			plog.Infof("just created user %q", userID)
+			glog.Infof("just created user %q", userID)
 			globalUserCache[userID] = userData{lastActive: time.Now()}
 		}
 		globalUserCacheLock.Unlock()
@@ -116,7 +197,7 @@ func connectHandler(ctx context.Context, w http.ResponseWriter, req *http.Reques
 		}
 
 	case http.MethodDelete: // user leaves component
-		plog.Infof("user %q just left (user deleted)", userID)
+		glog.Infof("user %q just left (user deleted)", userID)
 		globalUserCacheLock.Lock()
 		delete(globalUserCache, userID)
 		globalUserCacheLock.Unlock()
@@ -242,7 +323,7 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 	case http.MethodPost:
 		cresp := ClientResponse{Success: true}
 		defer func() {
-			plog.Info(cresp.Result)
+			glog.Info(cresp.Result)
 		}()
 		if rmsg, ok := globalClientRequestLimiter.Check(); !ok {
 			cresp.Success = false
@@ -483,7 +564,7 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 				return json.NewEncoder(w).Encode(cresp)
 			}
 
-			plog.Printf("starting 'stop-node' on %q(%s)", globalCluster.MemberStatus(idx).Name, globalCluster.MemberStatus(idx).ID)
+			glog.Infof("starting 'stop-node' on %q(%s)", globalCluster.MemberStatus(idx).Name, globalCluster.MemberStatus(idx).ID)
 			if globalCluster.IsStopped(idx) {
 				cresp.Success = false
 				cresp.Result = fmt.Sprintf("%s is already stopped (took %v)", globalCluster.MemberStatus(idx).Name, roundDownDuration(time.Since(reqStart), minScaleToDisplay))
@@ -491,7 +572,7 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 				return json.NewEncoder(w).Encode(cresp)
 			}
 			globalCluster.Stop(idx)
-			plog.Printf("finished 'stop-node' on %q(%s)", globalCluster.MemberStatus(idx).Name, globalCluster.MemberStatus(idx).ID)
+			glog.Infof("finished 'stop-node' on %q(%s)", globalCluster.MemberStatus(idx).Name, globalCluster.MemberStatus(idx).ID)
 
 			cresp.Result = fmt.Sprintf("stopped %s (took %v)", globalCluster.MemberStatus(idx).Name, roundDownDuration(time.Since(reqStart), minScaleToDisplay))
 			cresp.ResultLines = []string{cresp.Result}
@@ -508,24 +589,24 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 			}
 			globalStopRestartLimiter.Advance()
 
-			plog.Printf("starting 'restart-node' on %q(%s)", globalCluster.MemberStatus(idx).Name, globalCluster.MemberStatus(idx).ID)
+			glog.Infof("starting 'restart-node' on %q(%s)", globalCluster.MemberStatus(idx).Name, globalCluster.MemberStatus(idx).ID)
 			if !globalCluster.IsStopped(idx) {
 				cresp.Success = false
 				cresp.Result = fmt.Sprintf("%s is already started (took %v)", globalCluster.MemberStatus(idx).Name, roundDownDuration(time.Since(reqStart), minScaleToDisplay))
 				cresp.ResultLines = []string{cresp.Result}
-				plog.Warningf("'restart-node' %s", cresp.Result)
+				glog.Warningf("'restart-node' %s", cresp.Result)
 				return json.NewEncoder(w).Encode(cresp)
 			}
 
 			if rerr := globalCluster.Restart(idx); rerr != nil {
-				plog.Warningf("'restart-node' error %v", rerr)
+				glog.Warningf("'restart-node' error %v", rerr)
 				cresp.Success = false
 				cresp.Result = rerr.Error()
 			} else {
 				cresp.Success = true
 				cresp.Result = fmt.Sprintf("restarted %s (took %v)", globalCluster.MemberStatus(idx).Name, roundDownDuration(time.Since(reqStart), minScaleToDisplay))
 			}
-			plog.Printf("finished 'restart-node' on %q(%s)", globalCluster.MemberStatus(idx).Name, globalCluster.MemberStatus(idx).ID)
+			glog.Infof("finished 'restart-node' on %q(%s)", globalCluster.MemberStatus(idx).Name, globalCluster.MemberStatus(idx).ID)
 
 			cresp.ResultLines = []string{cresp.Result}
 			if err := json.NewEncoder(w).Encode(cresp); err != nil {
@@ -535,6 +616,63 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 		default:
 			return fmt.Errorf("unknown action %q", creq.Action)
 		}
+
+	default:
+		http.Error(w, "Method Not Allowed", 405)
+	}
+
+	return nil
+}
+
+// TesterStatus wraps metrics.TesterStatus.
+type TesterStatus struct {
+	Endpoint      string
+	CurrentCase   string
+	CurrentFailed string
+}
+
+// RecordResponse translates client's GET response in frontend-friendly format.
+type RecordResponse struct {
+	Success   bool
+	Result    string
+	Since     string
+	TotalCase string
+	Statuses  []TesterStatus
+}
+
+// getRecordRequestHandler handles get record requests.
+func getRecordRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
+	switch req.Method {
+	case http.MethodGet:
+		globalRecordMu.RLock()
+		defer globalRecordMu.RUnlock()
+
+		if !globalRecordEnabled {
+			mresp := RecordResponse{Success: false, Result: "record is disabled"}
+			return json.NewEncoder(w).Encode(mresp)
+		}
+
+		mresp := RecordResponse{Success: true}
+
+		globalRecordMu.RLock()
+		ss := []string{}
+		for _, v := range globalRecord.TestData {
+			tm, _ := time.Parse("2006-01-02 15:04:05 -0700 MST", v.Started)
+			ss = append(ss, humanize.Time(tm))
+		}
+		mresp.Since = strings.Join(ss, ",")
+		mresp.TotalCase = humanize.Comma(int64(globalRecord.Total))
+		mresp.Result = fmt.Sprintf("total case %s (%d)", mresp.TotalCase, time.Now().Unix())
+		for _, d := range globalRecord.TestData { // serve stale status
+			mresp.Statuses = append(mresp.Statuses, TesterStatus{
+				Endpoint:      d.Endpoint,
+				CurrentCase:   humanize.Comma(int64(d.Current)),
+				CurrentFailed: humanize.Comma(int64(d.CurrentFailed)),
+			})
+		}
+		globalRecordMu.RUnlock()
+
+		return json.NewEncoder(w).Encode(mresp)
 
 	default:
 		http.Error(w, "Method Not Allowed", 405)
