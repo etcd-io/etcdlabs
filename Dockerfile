@@ -29,7 +29,7 @@ RUN apt-get -y update \
 ENV GO_VERSION=1.8.3
 ENV DOWNLOAD_URL=https://storage.googleapis.com/golang
 RUN curl -s ${DOWNLOAD_URL}/go${GO_VERSION}.linux-amd64.tar.gz | tar -v -C /usr/local/ -xz
-ENV GOPATH=/go
+ENV GOPATH=/gopath
 ENV PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 RUN go version

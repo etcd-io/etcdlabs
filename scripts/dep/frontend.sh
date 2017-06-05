@@ -6,7 +6,7 @@ if ! [[ "$0" =~ "scripts/dep/frontend.sh" ]]; then
     exit 255
 fi
 
-npm install -g tslint
+# npm install -g tslint
 yarn install
 npm rebuild node-sass
 yarn install
