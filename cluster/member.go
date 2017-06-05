@@ -74,7 +74,7 @@ func (m *Member) Restart() error {
 
 	m.statusLock.RLock()
 	if m.status.State != clusterpb.StoppedMemberStatus {
-		plog.Warningf("%s is already started", m.cfg.Name)
+		glog.Warningf("%s is already started", m.cfg.Name)
 		m.statusLock.RUnlock()
 		return nil
 	}
@@ -113,7 +113,7 @@ func (m *Member) Stop() {
 
 	m.statusLock.RLock()
 	if m.status.State == clusterpb.StoppedMemberStatus {
-		plog.Warningf("%s is already stopped", m.cfg.Name)
+		glog.Warningf("%s is already stopped", m.cfg.Name)
 		m.statusLock.RUnlock()
 		return
 	}
@@ -144,7 +144,7 @@ func (m *Member) Stop() {
 		cerr = fmt.Errorf("received from EtcdServer.StopNotify")
 	}
 	if cerr != nil {
-		plog.Warningf("shutdown with %q", cerr.Error())
+		glog.Warningf("shutdown with %q", cerr.Error())
 	} else {
 		glog.Infof("shutdown with no error")
 	}
@@ -176,7 +176,7 @@ func (m *Member) WaitForLeader() error {
 		if err == nil {
 			break
 		}
-		plog.Warning(err)
+		glog.Warning(err)
 	}
 
 	for {
@@ -196,7 +196,7 @@ func (m *Member) WaitForLeader() error {
 		resp, err := cli.Status(ctx, m.cfg.LCUrls[0].Host)
 		cancel()
 		if err != nil {
-			plog.Warning(err)
+			glog.Warning(err)
 			time.Sleep(time.Second)
 			continue
 		}
