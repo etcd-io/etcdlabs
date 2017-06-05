@@ -660,9 +660,9 @@ func getRecordRequestHandler(ctx context.Context, w http.ResponseWriter, req *ht
 			tm, _ := time.Parse("2006-01-02 15:04:05 -0700 MST", v.Started)
 			ss = append(ss, humanize.Time(tm))
 		}
-		mresp.Since = strings.Join(ss, ",")
+		mresp.Since = strings.Join(ss, ", ")
 		mresp.TotalCase = humanize.Comma(int64(globalRecord.Total))
-		mresp.Result = fmt.Sprintf("total case %s (%d)", mresp.TotalCase, time.Now().Unix())
+		mresp.Result = fmt.Sprintf("total case %s, fetched at %d", mresp.TotalCase, time.Now().Unix())
 		for _, d := range globalRecord.TestData { // serve stale status
 			mresp.Statuses = append(mresp.Statuses, TesterStatus{
 				Endpoint:      d.Endpoint,
