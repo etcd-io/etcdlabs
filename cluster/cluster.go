@@ -11,13 +11,14 @@ import (
 	"sync"
 	"time"
 
-	"golang.org/x/sync/errgroup"
+	"github.com/coreos/etcdlabs/cluster/clusterpb"
 
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/embed"
 	"github.com/coreos/etcd/pkg/netutil"
 	"github.com/coreos/etcd/pkg/transport"
-	"github.com/coreos/etcdlabs/cluster/clusterpb"
+	"github.com/golang/glog"
+	"golang.org/x/sync/errgroup"
 )
 
 // Cluster contains all embedded etcd Members in the same cluster.
@@ -92,7 +93,7 @@ func Start(ccfg Config) (clus *Cluster, err error) {
 		return nil, fmt.Errorf("max cluster size is 7, got %d", ccfg.Size)
 	}
 
-	plog.Printf("starting %d Members (root directory %q, root port :%d)", ccfg.Size, ccfg.RootDir, ccfg.RootPort)
+	glog.Infof("starting %d Members (root directory %q, root port :%d)", ccfg.Size, ccfg.RootDir, ccfg.RootPort)
 
 	dt := ccfg.DialTimeout
 	if dt == time.Duration(0) {
@@ -116,23 +117,23 @@ func Start(ccfg Config) (clus *Cluster, err error) {
 	}
 
 	if !existFileOrDir(ccfg.RootDir) {
-		plog.Printf("creating root directory %q", ccfg.RootDir)
+		glog.Infof("creating root directory %q", ccfg.RootDir)
 		if err = mkdirAll(ccfg.RootDir); err != nil {
 			return nil, err
 		}
 	} else {
-		plog.Printf("removing root directory %q", ccfg.RootDir)
+		glog.Infof("removing root directory %q", ccfg.RootDir)
 		os.RemoveAll(ccfg.RootDir)
 	}
 
-	plog.Printf("getting default host")
+	glog.Infof("getting default host")
 	dhost, err := netutil.GetDefaultHost()
 	if err != nil {
 		plog.Warning(err)
 		plog.Warning("overwriting default host with 'localhost")
 		dhost = "localhost"
 	}
-	plog.Printf("detected default host %q", dhost)
+	glog.Infof("detected default host %q", dhost)
 
 	if !ccfg.PeerTLSInfo.Empty() && ccfg.PeerAutoTLS {
 		return nil, fmt.Errorf("choose either auto peer TLS or manual peer TLS")
@@ -237,14 +238,14 @@ func (clus *Cluster) Restart(i int) error {
 
 // Add adds one member.
 func (clus *Cluster) Add() error {
-	plog.Printf("getting default host")
+	glog.Infof("getting default host")
 	dhost, err := netutil.GetDefaultHost()
 	if err != nil {
 		plog.Warning(err)
 		plog.Warning("overwriting default host with 'localhost")
 		dhost = "localhost"
 	}
-	plog.Printf("detected default host %q", dhost)
+	glog.Infof("detected default host %q", dhost)
 
 	clus.opLock.Lock()
 	defer clus.opLock.Unlock()
@@ -397,7 +398,7 @@ func (clus *Cluster) Shutdown() {
 	wg.Wait()
 
 	os.RemoveAll(clus.rootDir)
-	plog.Printf("successfully shutdown cluster (deleted %q)", clus.rootDir)
+	glog.Infof("successfully shutdown cluster (deleted %q)", clus.rootDir)
 }
 
 // WaitForLeader waits for cluster to elect a new leader.
