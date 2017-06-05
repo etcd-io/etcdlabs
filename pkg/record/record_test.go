@@ -27,6 +27,7 @@ import (
 	"github.com/coreos/etcdlabs/pkg/record/recordpb"
 
 	"github.com/coreos/etcd/tools/functional-tester/etcd-agent/client"
+	"github.com/golang/glog"
 	"github.com/golang/protobuf/proto"
 )
 
@@ -47,7 +48,7 @@ func TestRecord(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println(string(bts))
+	glog.Info(string(bts))
 
 	rec2 := &recordpb.Record{}
 	if err = proto.Unmarshal(bts, rec2); err != nil {
@@ -62,7 +63,7 @@ func TestRecord(t *testing.T) {
 	if jerr != nil {
 		t.Fatal(jerr)
 	}
-	fmt.Println(string(btsj))
+	glog.Info(string(btsj))
 }
 
 func TestFetch(t *testing.T) {

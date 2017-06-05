@@ -27,6 +27,7 @@ import (
 	"github.com/coreos/etcdlabs/pkg/record/recordpb"
 
 	"github.com/coreos/etcd/tools/functional-tester/etcd-agent/client"
+	"github.com/golang/glog"
 )
 
 func max(n1, n2 int) int {
@@ -109,6 +110,7 @@ func fetchStatus(ep string) (Status, error) {
 // fetchFailedCases fetches etcd-tester record from its '/metrics' handler.
 // etcd_funcational_tester_case_failed_total{desc="failpoint github.com/coreos/etcd/etcdserver/raftAfterSave panic all"} 139
 func fetchFailedCases(ep string) (map[string]int64, error) {
+	glog.Infof("fetching %q", ep)
 	resp, err := http.Get(ep)
 	if err != nil {
 		return nil, err
