@@ -40,29 +40,21 @@
         Please visit <a href="http://dash.etcd.io/" target="_blank" class="normal-link">dash.etcd.io</a> for realtime testing cluster dashboards.
     </p>
     <button md-raised-button color="primary" (click)="clickRefresh();">Refresh</button>
-    <button md-raised-button *ngIf="metricsLastUpdate !== ''">last Update: {{metricsLastUpdate}}</button>
+    <button md-raised-button *ngIf="recordSince !== ''">last Update: {{recordSince}} ({{recordResult}})</button>
     <br><br>
-    <p *ngIf="!metricsSuccess" class="narrow-paragraph error-message-normal">
-        {{metricsResult}}
+    <p *ngIf="!recordSuccess" class="narrow-paragraph error-message-normal">
+        {{recordErrorMessage}}
     </p>
-    <p *ngIf="!metricsSuccess" class="narrow-paragraph error-message-normal">
-        {{metricsErrorMessage}}
-    </p>
-    <br *ngIf="!metricsSuccess">
+    <br *ngIf="!recordSuccess">
     <table class="table narrow-paragraph">
         <thead>
             <tr>
                 <th>Testing Cluster</th>
-                <th><a href="http://dash.etcd.io/dashboard/db/functional-tests" target="_blank" class="normal-link">5-node</a></th>
-                <th><a href="http://dash.etcd.io/dashboard/db/functional-tests-failpoints" target="_blank" class="normal-link">5-node failpoints</a></th>
+                <th><a href="http://dash.etcd.io/dashboard/db/functional-tests" target="_blank" class="normal-link">{{status5Node.Endpoint}}</a></th>
+                <th><a href="http://dash.etcd.io/dashboard/db/functional-tests-failpoints" target="_blank" class="normal-link">{{status5NodeFailpoints.Endpoint}}</a></th>
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <th scope="row">Total Injects</th>
-                <td>{{status5Node.TotalCase}}</td>
-                <td>{{status5NodeFailpoints.TotalCase}}</td>
-            </tr>
             <tr>
                 <th scope="row">Current Injects</th>
                 <td>{{status5Node.CurrentCase}}</td>
@@ -75,11 +67,6 @@
             </tr>
         </tbody>
     </table>
-    <hr align="left" class="footer-top-line">
-    <footer class="narrow-footer">
-        [1] Important bugs and debugging story can be found at <a href="https://github.com/coreos/etcdlabs/tree/master/debug-etcd"
-            target="_blank" class="footer-link">etcdlabs/debug-etcd</a>.
-    </footer>
     <div align="right" class="narrow-paragraph"><a href="/tests#top" class="normal-link">↑ top</a></div>
     <br><br>
 </div>

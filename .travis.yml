@@ -3,7 +3,7 @@ language: go
 sudo: false
 
 go:
-- 1.8.1
+- 1.8.3
 
 script:
-- ./test
+- ./scripts/tests/go.sh

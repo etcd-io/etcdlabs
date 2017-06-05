@@ -1,31 +1,31 @@
 import { Component, AfterContentInit } from '@angular/core';
 
 import { Http } from '@angular/http';
-import { TesterMetricsService, TesterStatus, MetricsResponse } from './tester-metrics.service';
+import { TesterRecordService, TesterStatus, RecordResponse } from './tester-record.service';
 
 @Component({
     selector: 'app-tests',
     templateUrl: 'tests.component.html',
     styleUrls: ['common.component.css'],
-    providers: [TesterMetricsService],
+    providers: [TesterRecordService],
 })
 export class TestsComponent implements AfterContentInit {
-    metricsLastUpdate: string;
-    metricsSuccess: boolean;
-    metricsResult: string;
-    metricsErrorMessage: string;
+    recordSince: string;
+    recordSuccess: boolean;
+    recordResult: string;
+    recordErrorMessage: string;
 
     status5Node: TesterStatus;
     status5NodeFailpoints: TesterStatus;
 
-    constructor(private metricsService: TesterMetricsService, private http: Http) {
-        this.metricsLastUpdate = '';
-        this.metricsSuccess = true;
-        this.metricsResult = '';
-        this.metricsErrorMessage = '';
+    constructor(private metricsService: TesterRecordService, private http: Http) {
+        this.recordSince = '';
+        this.recordSuccess = true;
+        this.recordResult = '';
+        this.recordErrorMessage = '';
 
-        this.status5Node = new TesterStatus('5-node', '0', '0', '0');
-        this.status5NodeFailpoints = new TesterStatus('5-node failpoints', '0', '0', '0');
+        this.status5Node = new TesterStatus('5-node', '0', '0');
+        this.status5NodeFailpoints = new TesterStatus('5-node failpoints', '0', '0');
     }
 
     ngAfterContentInit() {
@@ -33,17 +33,17 @@ export class TestsComponent implements AfterContentInit {
         this.clickRefresh();
     }
 
-    processMetricsResponse(resp: MetricsResponse) {
-        this.metricsLastUpdate = resp.LastUpdate;
-        this.metricsSuccess = resp.Success;
-        this.metricsResult = resp.Result;
+    processRecordResponse(resp: RecordResponse) {
+        this.recordSince = resp.Since;
+        this.recordSuccess = resp.Success;
+        this.recordResult = resp.Result;
 
-        if (String(this.metricsResult) !== 'metrics is disabled') {
+        if (String(this.recordResult) !== 'record is disabled') {
             for (let _i = 0; _i < resp.Statuses.length; _i++) {
                 let status = resp.Statuses[_i];
-                if (status.Name === '5-node') {
+                if (_i === 0) {
                     this.status5Node = status;
-                } else if (status.Name === '5-node-failpoints') {
+                } else if (_i === 1) {
                     this.status5NodeFailpoints = status;
                 };
             };
@@ -51,11 +51,11 @@ export class TestsComponent implements AfterContentInit {
     };
 
     clickRefresh() {
-        let metricsResponse: MetricsResponse;
-        this.metricsService.fetchMetrics().subscribe(
-            fetchedMetrics => metricsResponse = fetchedMetrics,
-            error => this.metricsErrorMessage = <any>error,
-            () => this.processMetricsResponse(metricsResponse),
+        let recordResponse: RecordResponse;
+        this.metricsService.getRecord().subscribe(
+            gotRecord => recordResponse = gotRecord,
+            error => this.recordErrorMessage = <any>error,
+            () => this.processRecordResponse(recordResponse),
         );
     };
 }
