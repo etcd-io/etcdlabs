@@ -1,5 +1,5 @@
-hash: 135c12c4b507cadc99f687f5fff736e8c3bee1b8537e43b7b7215afeb5c38c20
-updated: 2017-06-05T11:44:42.556646034-07:00
+hash: a77485d9e56a559dc1ad3d298d014e02888b8ecc7035f733b74caf46f225e0d5
+updated: 2017-06-05T13:19:48.414623802-07:00
 imports:
 - name: cloud.google.com/go
   version: 2e6a95edb1071d750f6d7db777bf66cd2997af6c
@@ -98,7 +98,7 @@ imports:
   - journal
   - util
 - name: github.com/coreos/pkg
-  version: 099530d80109cc4876ac866c38dded19786731d0
+  version: 3ac0863d7acf3bc44daf49afef8919af12f704ef
   subpackages:
   - capnslog
 - name: github.com/dgrijalva/jwt-go

@@ -12,10 +12,6 @@ import:
   - pkg/httputil
   - pkg/netutil
   - tools/functional-tester/etcd-agent/client
-- package: github.com/coreos/pkg
-  version: 099530d80109cc4876ac866c38dded19786731d0
-  subpackages:
-  - capnslog
 - package: github.com/dustin/go-humanize
   version: 259d2a102b871d17f30e3cd9881a642961a1e486
 - package: github.com/gogo/protobuf
