@@ -21,8 +21,8 @@
             "app-etcd-theme.scss"
         ],
         "scripts": [],
+        "environmentSource": "environments/environment.ts",
         "environments": {
-            "source": "environments/environment.ts",
             "prod": "environments/environment.prod.ts",
             "dev": "environments/environment.dev.ts"
         }
