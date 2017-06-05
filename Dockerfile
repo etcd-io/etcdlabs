@@ -67,4 +67,11 @@ ADD nginx.conf /etc/nginx/sites-available/default
 EXPOSE 4200
 EXPOSE 80
 
+# for Grafana dashboard
+EXPOSE 2389
+EXPOSE 2391
+EXPOSE 2393
+EXPOSE 2395
+EXPOSE 2397
+
 RUN pwd
