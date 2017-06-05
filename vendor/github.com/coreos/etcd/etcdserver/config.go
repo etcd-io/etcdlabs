@@ -54,6 +54,10 @@ type ServerConfig struct {
 
 	AutoCompactionRetention int
 	QuotaBackendBytes       int64
+	MaxTxnOps               uint
+
+	// MaxRequestBytes is the maximum request size to send over raft.
+	MaxRequestBytes uint
 
 	StrictReconfigCheck bool
 

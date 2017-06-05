@@ -1,5 +1,5 @@
-hash: 67cd87897d79fce64b63da58a983158ff699e857608c068b657302747da53346
-updated: 2017-05-19T14:21:03.689424466-07:00
+hash: c677b65a75833f12d158c7631832441fbb42e23e11e38ba4ef565167776e1c32
+updated: 2017-06-05T08:15:48.273573467-07:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -10,7 +10,7 @@ imports:
 - name: github.com/cockroachdb/cmux
   version: 112f0506e7743d64a6eb8fedbcff13d9979bbf92
 - name: github.com/coreos/etcd
-  version: fd7de051a4e57178b168e8a3c9e33bb34c007398
+  version: 9c2bbc51ca6c4a3aa514bfef365db82fe6962848
   subpackages:
   - alarm
   - auth
@@ -80,7 +80,7 @@ imports:
   - wal
   - wal/walpb
 - name: github.com/coreos/go-semver
-  version: 568e959cd89871e61434c1143528d9162da89ef2
+  version: 8ab6407b697782a06568d4b7f1db25550ec2e4c6
   subpackages:
   - semver
 - name: github.com/coreos/go-systemd
@@ -96,7 +96,7 @@ imports:
 - name: github.com/dustin/go-humanize
   version: 259d2a102b871d17f30e3cd9881a642961a1e486
 - name: github.com/ghodss/yaml
-  version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
+  version: 0ca9ea5df5451ffdf184b4428c902747c2c11cd7
 - name: github.com/go-sql-driver/mysql
   version: 9dee4ca50b83acdf57a35fb9e6fb4be640afa2f3
 - name: github.com/gogo/protobuf
