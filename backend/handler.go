@@ -24,8 +24,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/coreos/etcdlabs/cluster/clusterpb"
+
 	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcdlabs/clusterpb"
 	humanize "github.com/dustin/go-humanize"
 )
 

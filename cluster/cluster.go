@@ -17,7 +17,7 @@ import (
 	"github.com/coreos/etcd/embed"
 	"github.com/coreos/etcd/pkg/netutil"
 	"github.com/coreos/etcd/pkg/transport"
-	"github.com/coreos/etcdlabs/clusterpb"
+	"github.com/coreos/etcdlabs/cluster/clusterpb"
 )
 
 // Cluster contains all embedded etcd Members in the same cluster.

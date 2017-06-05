@@ -12,7 +12,7 @@ import (
 	"github.com/coreos/etcd/etcdserver/api/v3client"
 	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
 	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcdlabs/clusterpb"
+	"github.com/coreos/etcdlabs/cluster/clusterpb"
 
 	humanize "github.com/dustin/go-humanize"
 	"google.golang.org/grpc"
