@@ -35,7 +35,6 @@ var (
 func main() {
 	flag.IntVar(&webPort, "web-port", 2200, "Specify the web port for backend.")
 	flag.StringVar(&recordTesterEps, "record-tester-endpoints", "http://10.240.0.10:9028,http://10.240.0.17:9028", "Specify etcd tester endpoints.")
-
 	flag.Parse()
 
 	// assume the instance is created with gcp-key metadata
