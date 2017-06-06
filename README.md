@@ -4,6 +4,8 @@
 
 - [etcd website](http://play.etcd.io)
 
+<img src="./etcdlabs.gif" alt="etcdlabs" width="620">
+
 See [etcd-play][old-etcd-play] for old code.
 
 #### Technology Used

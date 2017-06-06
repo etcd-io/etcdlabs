@@ -32,15 +32,15 @@
 				<md-input-container><input mdInput type="text" [(ngModel)]="flag.initialClusterState" placeholder="cluster state"></md-input-container>
 				<span *ngIf="flag.initialClusterState != 'new' && flag.initialClusterState != 'existing'" class="error-message">Cluster state must be either 'new' or 'existing'</span>
 				<br *ngIf="etcd.secure">
-				<md-input-container><input mdInput *ngIf="etcd.secure" dividerColor="warn" type="text" [(ngModel)]="flag.certsDir" placeholder="etcd certs directory"></md-input-container>
+				<md-input-container *ngIf="etcd.secure"><input mdInput dividerColor="warn" type="text" [(ngModel)]="flag.certsDir" placeholder="etcd certs directory"></md-input-container>
 				<br *ngIf="etcd.secure">
-				<md-input-container><input mdInput *ngIf="etcd.secure" dividerColor="warn" type="text" [(ngModel)]="flag.clientRootCAFile" placeholder="client trusted root CA"></md-input-container>
-				<md-input-container><input mdInput *ngIf="etcd.secure" dividerColor="warn" type="text" [(ngModel)]="flag.clientCertFile" placeholder="client cert (public)"></md-input-container>
-				<md-input-container><input mdInput *ngIf="etcd.secure" dividerColor="warn" type="text" [(ngModel)]="flag.clientKeyFile" placeholder="client key (private)"></md-input-container>
+				<md-input-container *ngIf="etcd.secure"><input mdInput dividerColor="warn" type="text" [(ngModel)]="flag.clientRootCAFile" placeholder="client trusted root CA"></md-input-container>
+				<md-input-container *ngIf="etcd.secure"><input mdInput dividerColor="warn" type="text" [(ngModel)]="flag.clientCertFile" placeholder="client cert (public)"></md-input-container>
+				<md-input-container *ngIf="etcd.secure"><input mdInput dividerColor="warn" type="text" [(ngModel)]="flag.clientKeyFile" placeholder="client key (private)"></md-input-container>
 				<br *ngIf="etcd.secure">
-				<md-input-container><input mdInput *ngIf="etcd.secure" dividerColor="warn" type="text" [(ngModel)]="flag.peerRootCAFile" placeholder="peer trusted root CA"></md-input-container>
-				<md-input-container><input mdInput *ngIf="etcd.secure" dividerColor="warn" type="text" [(ngModel)]="flag.peerCertFile" placeholder="peer cert (public)"></md-input-container>
-				<md-input-container><input mdInput *ngIf="etcd.secure" dividerColor="warn" type="text" [(ngModel)]="flag.peerKeyFile" placeholder="peer key (private)"></md-input-container>
+				<md-input-container *ngIf="etcd.secure"><input mdInput dividerColor="warn" type="text" [(ngModel)]="flag.peerRootCAFile" placeholder="peer trusted root CA"></md-input-container>
+				<md-input-container *ngIf="etcd.secure"><input mdInput dividerColor="warn" type="text" [(ngModel)]="flag.peerCertFile" placeholder="peer cert (public)"></md-input-container>
+				<md-input-container *ngIf="etcd.secure"><input mdInput dividerColor="warn" type="text" [(ngModel)]="flag.peerKeyFile" placeholder="peer key (private)"></md-input-container>
 			</div>
 		</div>
 		<br>
