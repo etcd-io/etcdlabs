@@ -133,7 +133,7 @@ export class PlayComponent implements OnInit, AfterContentInit, AfterViewChecked
   constructor(private backendService: BackendService, private http: Http) {
     this.logOutputLines = [];
 
-    this.selectedTab = 3;
+    this.selectedTab = 0;
 
     this.connect = backendService.connect;
     this.connectErrorMessage = '';
