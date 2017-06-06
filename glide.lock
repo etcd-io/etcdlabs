@@ -1,5 +1,5 @@
-hash: a77485d9e56a559dc1ad3d298d014e02888b8ecc7035f733b74caf46f225e0d5
-updated: 2017-06-05T13:19:48.414623802-07:00
+hash: b130b41e411cb928d2e804fbf37654f34a5843481146982007ca6df1c3538899
+updated: 2017-06-06T14:57:39.455783503-07:00
 imports:
 - name: cloud.google.com/go
   version: 2e6a95edb1071d750f6d7db777bf66cd2997af6c
@@ -17,7 +17,7 @@ imports:
 - name: github.com/cockroachdb/cmux
   version: 112f0506e7743d64a6eb8fedbcff13d9979bbf92
 - name: github.com/coreos/etcd
-  version: 9c2bbc51ca6c4a3aa514bfef365db82fe6962848
+  version: 7350525937cea814d428fb01f619d9c5720efd9c
   subpackages:
   - alarm
   - auth
