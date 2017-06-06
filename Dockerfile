@@ -15,13 +15,11 @@ RUN apt-get -y update \
   apt-transport-https \
   python \
   libssl-dev \
-  mysql-client \
   nginx \
   && apt-get -y update \
   && apt-get -y upgrade \
   && apt-get -y autoremove \
   && apt-get -y autoclean \
-  && mysql --version \
   && uname -a \
   && ulimit -n
 
