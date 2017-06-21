@@ -18,6 +18,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"math"
+	"math/rand"
 	"sort"
 	"sync"
 	"sync/atomic"
@@ -31,6 +32,10 @@ import (
 const (
 	// NoLease is a special LeaseID representing the absence of a lease.
 	NoLease = LeaseID(0)
+
+	// maximum number of leases to revoke per iteration
+	// TODO: make this configurable?
+	leaseRevokeRate = 1000
 )
 
 var (
@@ -322,8 +327,20 @@ func (le *lessor) Promote(extend time.Duration) {
 
 	// refresh the expiries of all leases.
 	for _, l := range le.leaseMap {
-		l.refresh(extend)
+		// randomize expiry with 士10%, otherwise leases of same TTL
+		// will expire all at the same time,
+		l.refresh(extend + computeRandomDelta(l.ttl))
 	}
+}
+
+func computeRandomDelta(seconds int64) time.Duration {
+	var delta int64
+	if seconds > 10 {
+		delta = int64(float64(seconds) * 0.1 * rand.Float64())
+	} else {
+		delta = rand.Int63n(10)
+	}
+	return time.Duration(delta) * time.Second
 }
 
 func (le *lessor) Demote() {
@@ -422,6 +439,10 @@ func (le *lessor) runLoop() {
 		le.mu.Unlock()
 
 		if len(ls) != 0 {
+			// rate limit
+			if len(ls) > leaseRevokeRate/2 {
+				ls = ls[:leaseRevokeRate/2]
+			}
 			select {
 			case <-le.stopC:
 				return
