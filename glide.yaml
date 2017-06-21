@@ -1,7 +1,7 @@
 package: github.com/coreos/etcdlabs
 import:
 - package: github.com/coreos/etcd
-  version: 7350525937cea814d428fb01f619d9c5720efd9c
+  version: a40cdc7baa333e230098ee3de5d4d36b31716dda
   subpackages:
   - clientv3
   - clientv3/namespace
@@ -26,10 +26,18 @@ import:
   - jsonpb
   - proto
 - package: google.golang.org/grpc
-  version: v1.2.1
+  version: v1.4.1
   subpackages:
+  - codes
   - credentials
   - grpclog
+  - internal
+  - metadata
+  - naming
+  - peer
+  - transport
+  - health
+  - health/grpc_health_v1
 - package: golang.org/x/sync
   version: 5a06fca2c336a4b2b2fcb45702e8c47621b2aa2c
   subpackages:
