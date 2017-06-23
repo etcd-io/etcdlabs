@@ -12,6 +12,7 @@ import (
 
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/pkg/transport"
+	"github.com/golang/glog"
 )
 
 var testTLS = transport.TLSInfo{
@@ -90,6 +91,10 @@ func TestCluster_Recover_client_auto_TLS_scheme(t *testing.T) {
 }
 */
 
+/*
+go test -v -run TestCluster_Recover_peer_client_manual_TLS_scheme -logtostderr
+*/
+
 func TestCluster_Recover_peer_client_manual_TLS_scheme(t *testing.T) {
 	testCluster(t, Config{EmbeddedClient: true, Size: 3, PeerTLSInfo: testTLS, ClientTLSInfo: testTLS}, true, true)
 }
@@ -114,7 +119,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 	println()
 	println()
 	println()
-	fmt.Println("starting cluster")
+	glog.Info("starting cluster")
 	c, err := Start(cfg)
 	if err != nil {
 		t.Fatal(err)
@@ -123,7 +128,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 		println()
 		println()
 		println()
-		fmt.Println("shutting down the cluster")
+		glog.Info("shutting down the cluster")
 		c.Shutdown()
 	}()
 
@@ -136,7 +141,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 		println()
 		println()
 		println()
-		fmt.Println("making write requests")
+		glog.Info("making write requests")
 		cli, _, err := c.Client(c.AllEndpoints(scheme)...)
 		if err != nil {
 			t.Fatal(err)
@@ -157,7 +162,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 	println()
 	println()
 	println()
-	fmt.Println("calling UpdateMemberStatus")
+	glog.Info("calling UpdateMemberStatus")
 	c.UpdateMemberStatus()
 	hashes1 := make([]uint32, len(c.Members))
 	for i := range c.Members {
@@ -168,7 +173,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 		println()
 		println()
 		println()
-		fmt.Println("stopping leader")
+		glog.Info("stopping leader")
 		leadidx := c.LeadIdx
 		c.Stop(leadidx)
 		time.Sleep(5 * time.Second)
@@ -180,7 +185,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 		println()
 		println()
 		println()
-		fmt.Println("recovering old leader")
+		glog.Info("recovering old leader")
 		if err = c.Restart(leadidx); err != nil {
 			t.Fatal(err)
 		}
@@ -194,7 +199,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 	println()
 	println()
 	println()
-	fmt.Println("calling UpdateMemberStatus")
+	glog.Info("calling UpdateMemberStatus")
 	c.UpdateMemberStatus()
 	hashes2 := make([]uint32, len(c.Members))
 	for i := range c.Members {
@@ -208,7 +213,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 		println()
 		println()
 		println()
-		fmt.Println("making read requests")
+		glog.Info("making read requests")
 		cli, _, err := c.Client(c.AllEndpoints(scheme)...)
 		if err != nil {
 			t.Fatal(err)
@@ -236,7 +241,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 	println()
 	println()
 	println()
-	fmt.Println("calling UpdateMemberStatus")
+	glog.Info("calling UpdateMemberStatus")
 	c.UpdateMemberStatus()
 	hashes3 := make([]uint32, len(c.Members))
 	for i := range c.Members {
@@ -250,10 +255,11 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 		println()
 		println()
 		println()
-		fmt.Println("adding a new member")
+		glog.Info("adding a new member")
 		if err := c.Add(); err != nil {
 			t.Fatal(err)
 		}
+		glog.Info("added a new member")
 		if err := c.WaitForLeader(); err != nil {
 			t.Fatal(err)
 		}
@@ -262,9 +268,11 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 	println()
 	println()
 	println()
+	glog.Info("AllMemberStatus 1")
 	for i, st := range c.AllMemberStatus() {
 		fmt.Printf("Member Status: %q, %+v\n", c.Members[i].cfg.Name, st)
 	}
+	glog.Info("AllMemberStatus 2")
 
 	func() {
 		time.Sleep(10 * time.Second)
@@ -274,7 +282,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 		println()
 		println()
 		println()
-		fmt.Println("removing the member")
+		glog.Info("removing the member")
 		leadidx := c.LeadIdx
 		if err := c.Remove(leadidx); err != nil {
 			t.Fatal(err)
