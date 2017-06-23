@@ -1,5 +1,5 @@
-hash: 4f28f59d627aff8ca4e250ace7439952d4cb01d6178fb2f19cf3fc4c617f354a
-updated: 2017-06-21T11:05:31.433757096-07:00
+hash: d98fb4a120d4f236f5e50b54f8dc9034f31a4ead95a5b10f3b482805cd64d206
+updated: 2017-06-22T17:04:29.673610579-07:00
 imports:
 - name: cloud.google.com/go
   version: 2e6a95edb1071d750f6d7db777bf66cd2997af6c
@@ -17,7 +17,7 @@ imports:
 - name: github.com/cockroachdb/cmux
   version: 112f0506e7743d64a6eb8fedbcff13d9979bbf92
 - name: github.com/coreos/etcd
-  version: a40cdc7baa333e230098ee3de5d4d36b31716dda
+  version: 0fe8fdcb291166b3a7fe354f3d113ab078f40875
   subpackages:
   - alarm
   - auth
@@ -236,7 +236,7 @@ imports:
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: 42c095b6c9bdd80d4435b064508c398afdb0ec99
+  version: b15215fb911b24a5d61d57feec4233d610530464
   subpackages:
   - codes
   - credentials
