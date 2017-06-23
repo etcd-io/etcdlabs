@@ -23,6 +23,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/golang/glog"
 )
 
 var (
@@ -49,7 +51,7 @@ func TestServer(t *testing.T) {
 	tu.Path = "/client-request"
 
 	time.Sleep(7 * time.Second)
-	fmt.Println("getting server status update...")
+	glog.Info("getting server status update...")
 	func() {
 		resp, err := http.Get(srv.addrURL.String() + "/server-status")
 		if err != nil {
@@ -74,7 +76,7 @@ func TestServer(t *testing.T) {
 	}()
 
 	println()
-	fmt.Println("stressing node1...")
+	glog.Info("stressing node1...")
 	func() {
 		req := ClientRequest{
 			Action:    "stress",
@@ -108,7 +110,7 @@ func TestServer(t *testing.T) {
 	}()
 
 	println()
-	fmt.Println("expecting rate-limit error from node1...")
+	glog.Info("expecting rate-limit error from node1...")
 	func() {
 		req := ClientRequest{
 			Action:    "stress",
@@ -140,7 +142,7 @@ func TestServer(t *testing.T) {
 
 	println()
 	time.Sleep(7 * time.Second)
-	fmt.Println("expecting error from specifying no endpoints...")
+	glog.Info("expecting error from specifying no endpoints...")
 	func() {
 		req := ClientRequest{
 			Action: "stress",
@@ -171,7 +173,7 @@ func TestServer(t *testing.T) {
 
 	println()
 	time.Sleep(7 * time.Second)
-	fmt.Println("writing to node2...")
+	glog.Info("writing to node2...")
 	func() {
 		req := ClientRequest{
 			Action:    "write",
@@ -208,7 +210,7 @@ func TestServer(t *testing.T) {
 
 	println()
 	time.Sleep(7 * time.Second)
-	fmt.Println("prefix-range from node3...")
+	glog.Info("prefix-range from node3...")
 	func() {
 		req := ClientRequest{
 			Action:      "get",
@@ -243,7 +245,7 @@ func TestServer(t *testing.T) {
 
 	println()
 	time.Sleep(2 * time.Second)
-	fmt.Println("delete-prefix from node4...")
+	glog.Info("delete-prefix from node4...")
 	func() {
 		req := ClientRequest{
 			Action:      "delete",
@@ -275,7 +277,7 @@ func TestServer(t *testing.T) {
 
 	println()
 	time.Sleep(7 * time.Second)
-	fmt.Println("get from node5...")
+	glog.Info("get from node5...")
 	func() {
 		req := ClientRequest{
 			Action:    "get",
@@ -306,7 +308,7 @@ func TestServer(t *testing.T) {
 
 	println()
 	time.Sleep(7 * time.Second)
-	fmt.Println("stop node1...")
+	glog.Info("stop node1...")
 	func() {
 		req := ClientRequest{
 			Action:    "stop-node",
@@ -338,7 +340,7 @@ func TestServer(t *testing.T) {
 	}()
 
 	println()
-	fmt.Println("expecting rate-limit excess error from stopping node1...")
+	glog.Info("expecting rate-limit excess error from stopping node1...")
 	func() {
 		req := ClientRequest{
 			Action:    "stop-node",
@@ -371,7 +373,7 @@ func TestServer(t *testing.T) {
 
 	println()
 	time.Sleep(7 * time.Second)
-	fmt.Println("expecting errors after stopping same node1...")
+	glog.Info("expecting errors after stopping same node1...")
 	func() {
 		req := ClientRequest{
 			Action:    "stress",
@@ -404,7 +406,7 @@ func TestServer(t *testing.T) {
 
 	println()
 	time.Sleep(5 * time.Second)
-	fmt.Println("restart node1...")
+	glog.Info("restart node1...")
 	func() {
 		req := ClientRequest{
 			Action:    "restart-node",
@@ -433,7 +435,7 @@ func TestServer(t *testing.T) {
 	}()
 
 	println()
-	fmt.Println("expected rate-limit excess from restarting node1...")
+	glog.Info("expected rate-limit excess from restarting node1...")
 	func() {
 		req := ClientRequest{
 			Action:    "restart-node",
@@ -466,7 +468,7 @@ func TestServer(t *testing.T) {
 
 	println()
 	time.Sleep(7 * time.Second)
-	fmt.Println("expected errors from restarting same node1...")
+	glog.Info("expected errors from restarting same node1...")
 	func() {
 		req := ClientRequest{
 			Action:    "restart-node",
@@ -497,7 +499,7 @@ func TestServer(t *testing.T) {
 		}
 	}()
 
-	fmt.Println("DONE!")
+	glog.Info("DONE!")
 
 	srv.Stop()
 }
