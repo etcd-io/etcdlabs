@@ -6,6 +6,6 @@ if ! [[ "$0" =~ "./scripts/run/etcdlabs.sh" ]]; then
   exit 255
 fi
 
-./backend-web-server -web-port 2200 -record-tester-endpoints http://10.240.0.10:9028,http://10.240.0.17:9028 -logtostderr=true &
+./backend-web-server -web-port 2200 -record-tester-endpoints http://10.240.0.34:9028,http://10.240.0.40:9028 -logtostderr=true &
 yarn start-prod &
 wait
