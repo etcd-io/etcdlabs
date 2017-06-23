@@ -181,7 +181,7 @@ func Start(ccfg Config) (clus *Cluster, err error) {
 		cfg.PeerTLSInfo = ccfg.PeerTLSInfo
 
 		// auto-compaction every hour
-		cfg.AutoCompactionMode = compactor.Periodic
+		cfg.AutoCompactionMode = compactor.ModePeriodic
 		cfg.AutoCompactionRetention = 1
 
 		clus.Members[i] = &Member{
