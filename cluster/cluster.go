@@ -293,6 +293,7 @@ func (clus *Cluster) Add() error {
 	cfg.PeerTLSInfo = clus.ccfg.PeerTLSInfo
 
 	// auto-compaction every hour
+	cfg.AutoCompactionMode = compactor.ModePeriodic
 	cfg.AutoCompactionRetention = 1
 
 	clus.Members = append(clus.Members, &Member{
