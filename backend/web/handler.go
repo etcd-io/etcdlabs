@@ -60,7 +60,7 @@ func _syncRecord(api *gcp.GCS, rec *recordpb.Record) error {
 	if rec.Total == 0 {
 		// initial total in case it ran the first time
 		// update this manually
-		rec.Total = 118000000
+		rec.Total = 120000000
 	}
 
 	// fetch from tester
@@ -644,9 +644,6 @@ type RecordResponse struct {
 func getRecordRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
 	switch req.Method {
 	case http.MethodGet:
-		globalRecordMu.RLock()
-		defer globalRecordMu.RUnlock()
-
 		if !globalRecordEnabled {
 			mresp := RecordResponse{Success: false, Result: "record is disabled"}
 			return json.NewEncoder(w).Encode(mresp)
@@ -655,6 +652,8 @@ func getRecordRequestHandler(ctx context.Context, w http.ResponseWriter, req *ht
 		mresp := RecordResponse{Success: true}
 
 		globalRecordMu.RLock()
+		defer globalRecordMu.RUnlock()
+
 		ss := []string{}
 		for _, v := range globalRecord.TestData {
 			tm, _ := time.Parse("2006-01-02 15:04:05 -0700 MST", v.Started)
@@ -670,7 +669,6 @@ func getRecordRequestHandler(ctx context.Context, w http.ResponseWriter, req *ht
 				CurrentFailed: humanize.Comma(int64(d.CurrentFailed)),
 			})
 		}
-		globalRecordMu.RUnlock()
 
 		return json.NewEncoder(w).Encode(mresp)
 
