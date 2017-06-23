@@ -2,7 +2,6 @@ import { Routes, RouterModule } from '@angular/router';
 
 import { HomeComponent } from './home/home.component';
 import { InstallComponent } from './install/install.component';
-import { TestsComponent } from './tests/tests.component';
 import { PlayComponent } from './play/play.component';
 import { NotFoundComponent } from './not-found.component';
 
@@ -10,7 +9,6 @@ const appRoutes: Routes = [
     { path: '', redirectTo: '/install', pathMatch: 'full' },
     { path: 'home', component: HomeComponent },
     { path: 'install', component: InstallComponent },
-    { path: 'tests', component: TestsComponent },
     { path: 'play', component: PlayComponent },
     { path: '**', component: NotFoundComponent },
 ];
@@ -21,6 +19,5 @@ export const routedComponents = [
     HomeComponent,
     InstallComponent,
     PlayComponent,
-    TestsComponent,
     NotFoundComponent,
 ];

@@ -19,97 +19,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"io/ioutil"
 	"net/http"
 	"sort"
-	"strings"
 	"sync"
 	"time"
 
 	"github.com/coreos/etcdlabs/cluster/clusterpb"
-	"github.com/coreos/etcdlabs/pkg/gcp"
-	"github.com/coreos/etcdlabs/pkg/record"
-	"github.com/coreos/etcdlabs/pkg/record/recordpb"
 
 	"github.com/coreos/etcd/clientv3"
 	humanize "github.com/dustin/go-humanize"
 	"github.com/golang/glog"
-	"github.com/golang/protobuf/proto"
 )
-
-func _syncRecord(api *gcp.GCS, rec *recordpb.Record) error {
-	// fetch from storage first
-	rc, err := api.Get("record")
-	if err != nil {
-		return err
-	}
-	var d []byte
-	d, err = ioutil.ReadAll(rc)
-	if err != nil {
-		return err
-	}
-	rc.Close()
-	if err == nil {
-		if err = proto.Unmarshal(d, rec); err != nil {
-			return err
-		}
-	} else {
-		glog.Warning("run at first time?", err)
-	}
-
-	if rec.Total == 0 {
-		// initial total in case it ran the first time
-		// update this manually
-		rec.Total = 120000000
-	}
-
-	// fetch from tester
-	if err = record.SyncFromTester(rec); err != nil {
-		return err
-	}
-
-	// overwrite back to storage
-	rd, err := proto.Marshal(rec)
-	if err != nil {
-		return err
-	}
-
-	err = api.Put("record", rd)
-	if err != nil {
-		return err
-	}
-
-	glog.Infof("uploaded: %+v", rec)
-	return nil
-}
-
-func syncRecord(api *gcp.GCS, rec *recordpb.Record, stopc <-chan struct{}) {
-	for {
-		err := _syncRecord(api, rec)
-		if err != nil {
-			glog.Warning(err)
-		} else {
-			glog.Infof("synced record")
-		}
-
-		tick := time.NewTicker(globalSyncRecordIntervalLimit)
-		defer tick.Stop()
-
-		for {
-			select {
-			case <-stopc:
-				return
-			case <-tick.C:
-			}
-			err = _syncRecord(api, rec)
-			if err != nil {
-				glog.Warning(err)
-			} else {
-				glog.Infof("synced record")
-			}
-		}
-	}
-}
 
 type key int
 
@@ -616,61 +536,6 @@ func clientRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.
 		default:
 			return fmt.Errorf("unknown action %q", creq.Action)
 		}
-
-	default:
-		http.Error(w, "Method Not Allowed", 405)
-	}
-
-	return nil
-}
-
-// TesterStatus wraps metrics.TesterStatus.
-type TesterStatus struct {
-	Endpoint      string
-	CurrentCase   string
-	CurrentFailed string
-}
-
-// RecordResponse translates client's GET response in frontend-friendly format.
-type RecordResponse struct {
-	Success   bool
-	Result    string
-	Since     string
-	TotalCase string
-	Statuses  []TesterStatus
-}
-
-// getRecordRequestHandler handles get record requests.
-func getRecordRequestHandler(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
-	switch req.Method {
-	case http.MethodGet:
-		if !globalRecordEnabled {
-			mresp := RecordResponse{Success: false, Result: "record is disabled"}
-			return json.NewEncoder(w).Encode(mresp)
-		}
-
-		mresp := RecordResponse{Success: true}
-
-		globalRecordMu.RLock()
-		defer globalRecordMu.RUnlock()
-
-		ss := []string{}
-		for _, v := range globalRecord.TestData {
-			tm, _ := time.Parse("2006-01-02 15:04:05 -0700 MST", v.Started)
-			ss = append(ss, humanize.Time(tm))
-		}
-		mresp.Since = strings.Join(ss, ", ")
-		mresp.TotalCase = humanize.Comma(int64(globalRecord.Total))
-		mresp.Result = fmt.Sprintf("total case %s, fetched at %d", mresp.TotalCase, time.Now().Unix())
-		for _, d := range globalRecord.TestData { // serve stale status
-			mresp.Statuses = append(mresp.Statuses, TesterStatus{
-				Endpoint:      d.Endpoint,
-				CurrentCase:   humanize.Comma(int64(d.Current)),
-				CurrentFailed: humanize.Comma(int64(d.CurrentFailed)),
-			})
-		}
-
-		return json.NewEncoder(w).Encode(mresp)
 
 	default:
 		http.Error(w, "Method Not Allowed", 405)

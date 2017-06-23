@@ -25,11 +25,8 @@ import (
 	"time"
 
 	"github.com/coreos/etcdlabs/cluster"
-	"github.com/coreos/etcdlabs/pkg/gcp"
 	"github.com/coreos/etcdlabs/pkg/ratelimit"
-	"github.com/coreos/etcdlabs/pkg/record/recordpb"
 
-	"cloud.google.com/go/storage"
 	"github.com/golang/glog"
 )
 
@@ -83,27 +80,11 @@ var (
 
 	globalStopRestartIntervalLimit = 5 * time.Second
 	globalStopRestartLimiter       ratelimit.RequestLimiter
-
-	globalSyncRecordIntervalLimit = 30 * time.Second
-	globalSyncRecordLimiter       ratelimit.RequestLimiter
-
-	globalRecordMu      sync.RWMutex
-	globalRecordEnabled bool
-	globalRecord        = &recordpb.Record{
-		TestData: []*recordpb.Data{},
-	}
 )
 
 // StartServer starts a backend webserver with stoppable listener.
-func StartServer(port int, key []byte, recordTesterEps []string) (*Server, error) {
+func StartServer(port int) (*Server, error) {
 	globalWebserverPort = port
-
-	glog.Infof("tester endpoints %+v", recordTesterEps)
-	for _, ep := range recordTesterEps {
-		globalRecord.TestData = append(globalRecord.TestData, &recordpb.Data{
-			Endpoint: ep,
-		})
-	}
 
 	rootCtx, rootCancel := context.WithCancel(context.Background())
 	c, err := startCluster(rootCtx, rootCancel)
@@ -118,9 +99,6 @@ func StartServer(port int, key []byte, recordTesterEps []string) (*Server, error
 	// rate-limit more strictly for every 3 second
 	globalStopRestartLimiter = ratelimit.NewRequestLimiter(rootCtx, globalStopRestartIntervalLimit)
 
-	// rate-limit fetch record for every 30 second
-	globalSyncRecordLimiter = ratelimit.NewRequestLimiter(rootCtx, globalSyncRecordIntervalLimit)
-
 	mux := http.NewServeMux()
 	mux.Handle("/conn", &ContextAdapter{
 		ctx:     rootCtx,
@@ -133,10 +111,6 @@ func StartServer(port int, key []byte, recordTesterEps []string) (*Server, error
 	mux.Handle("/client-request", &ContextAdapter{
 		ctx:     rootCtx,
 		handler: withCache(ContextHandlerFunc(clientRequestHandler)),
-	})
-	mux.Handle("/get-record", &ContextAdapter{
-		ctx:     rootCtx,
-		handler: withCache(ContextHandlerFunc(getRecordRequestHandler)),
 	})
 
 	stopc := make(chan struct{})
@@ -159,26 +133,6 @@ func StartServer(port int, key []byte, recordTesterEps []string) (*Server, error
 			srv.rootCancel()
 			close(srv.donec)
 		}()
-
-		if len(key) > 0 {
-			glog.Infof("creating GCS client")
-			var api *gcp.GCS
-			api, err = gcp.NewGCS(context.Background(), "etcd", storage.ScopeFullControl, key, "record")
-			if err == nil {
-				globalRecordMu.Lock()
-				globalRecordEnabled = true
-				globalRecordMu.Unlock()
-				go func() { syncRecord(api, globalRecord, srv.stopc) }()
-			} else {
-				glog.Warning(err)
-			}
-			defer api.Close()
-		} else {
-			glog.Infof("key not given; skip creating GCS client")
-			globalRecordMu.Lock()
-			globalRecordEnabled = false
-			globalRecordMu.Unlock()
-		}
 
 		go func() { updateClusterStatus(srv.stopc) }()
 		go func() { cleanCache(srv.stopc) }()
