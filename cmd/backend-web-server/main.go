@@ -19,10 +19,8 @@ import (
 	"flag"
 	"os"
 	"os/signal"
-	"strings"
 
 	"github.com/coreos/etcdlabs/backend/web"
-	"github.com/coreos/etcdlabs/pkg/gcp"
 
 	"github.com/golang/glog"
 )
@@ -34,19 +32,10 @@ var (
 
 func main() {
 	flag.IntVar(&webPort, "web-port", 2200, "Specify the web port for backend.")
-	flag.StringVar(&recordTesterEps, "record-tester-endpoints", " http://10.240.0.34:9028,http://10.240.0.40:9028", "Specify etcd tester endpoints.")
 	flag.Parse()
 
-	// assume the instance is created with gcp-key metadata
-	key, err := gcp.GetComputeMetadata("instance/attributes/gcp-key")
-	if err != nil {
-		glog.Warning(err)
-	} else {
-		glog.Infof("found GCS key %s...", string(key)[:5])
-	}
-
 	glog.Info("starting web server")
-	srv, err := web.StartServer(webPort, key, strings.Split(recordTesterEps, ","))
+	srv, err := web.StartServer(webPort)
 	if err != nil {
 		glog.Fatal(err)
 	}
