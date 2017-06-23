@@ -14,6 +14,7 @@ import (
 	"github.com/coreos/etcdlabs/cluster/clusterpb"
 
 	"github.com/coreos/etcd/clientv3"
+	"github.com/coreos/etcd/compactor"
 	"github.com/coreos/etcd/embed"
 	"github.com/coreos/etcd/pkg/netutil"
 	"github.com/coreos/etcd/pkg/transport"
@@ -180,6 +181,7 @@ func Start(ccfg Config) (clus *Cluster, err error) {
 		cfg.PeerTLSInfo = ccfg.PeerTLSInfo
 
 		// auto-compaction every hour
+		cfg.AutoCompactionMode = compactor.Periodic
 		cfg.AutoCompactionRetention = 1
 
 		clus.Members[i] = &Member{
