@@ -98,6 +98,7 @@ var (
 func StartServer(port int, key []byte, recordTesterEps []string) (*Server, error) {
 	globalWebserverPort = port
 
+	glog.Infof("tester endpoints %+v", recordTesterEps)
 	for _, ep := range recordTesterEps {
 		globalRecord.TestData = append(globalRecord.TestData, &recordpb.Data{
 			Endpoint: ep,
