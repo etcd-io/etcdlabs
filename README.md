@@ -11,8 +11,8 @@ See [etcd-play][old-etcd-play] for old code.
 #### Technology Used
 
 - Frontend
-    - [Angular 2](https://angular.io/)
-    - [Angular 2 Material](https://github.com/angular/material2)
+    - [Angular 4+](https://angular.io/)
+    - [Angular Material](https://github.com/angular/material2)
     - [TypeScript](https://www.typescriptlang.org/index.html)
 - Backend
     - [Go](https://golang.org/)
