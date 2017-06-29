@@ -21,25 +21,25 @@ fi
 GLIDE_ROOT="$GOPATH/src/github.com/Masterminds/glide"
 go get -d -u github.com/Masterminds/glide
 pushd "${GLIDE_ROOT}"
-	git reset --hard HEAD
-	go install -v
+  git reset --hard HEAD
+  go install -v
 popd
 
 GLIDE_VC_ROOT="$GOPATH/src/github.com/sgotti/glide-vc"
 go get -d -u github.com/sgotti/glide-vc
 pushd "${GLIDE_VC_ROOT}"
-	git reset --hard HEAD
-	go install -v
+  git reset --hard HEAD
+  go install -v
 popd
 
 rm -rf ./vendor
 
 if [ -n "$1" ]; then
-	echo "glide get on $(echo $1)"
-	glide get --strip-vendor $1
+  echo "glide get on $(echo $1)"
+  glide get --strip-vendor $1
 else
-	echo "glide update on *"
-	glide update --strip-vendor
+  echo "glide update on *"
+  glide update --strip-vendor
 fi;
 
 glide vc --no-tests --only-code
