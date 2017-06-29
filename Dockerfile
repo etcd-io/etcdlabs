@@ -5,14 +5,21 @@ RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selectio
 
 RUN apt-get -y update \
   && apt-get -y install \
-  apt-utils \
+  build-essential \
   gcc \
-  curl \
+  apt-utils \
+  pkg-config \
+  software-properties-common \
+  apt-transport-https \
+  libssl-dev \
+  sudo \
   bash \
   bash-completion \
+  curl \
+  wget \
   tar \
-  build-essential \
-  apt-transport-https \
+  unzip \
+  git \
   python \
   libssl-dev \
   nginx \
@@ -24,20 +31,25 @@ RUN apt-get -y update \
   && ulimit -n
 
 # Install go for backend
-ENV GO_VERSION=1.8.3
-ENV DOWNLOAD_URL=https://storage.googleapis.com/golang
-RUN curl -s ${DOWNLOAD_URL}/go${GO_VERSION}.linux-amd64.tar.gz | tar -v -C /usr/local/ -xz
-ENV GOPATH=/gopath
-ENV PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
-RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
-RUN go version
+ENV GOROOT /usr/local/go
+ENV GOPATH /gopath
+ENV PATH ${GOPATH}/bin:${GOROOT}/bin:${PATH}
+ENV GO_VERSION 1.9beta2
+ENV GO_DOWNLOAD_URL https://storage.googleapis.com/golang
+RUN rm -rf ${GOROOT} \
+  && curl -s ${GO_DOWNLOAD_URL}/go${GO_VERSION}.linux-amd64.tar.gz | tar -v -C /usr/local/ -xz \
+  && mkdir -p ${GOPATH}/src ${GOPATH}/bin \
+  && go version
 
 # Compile backend
 RUN mkdir -p $GOPATH/src/github.com/coreos/etcdlabs
 ADD . $GOPATH/src/github.com/coreos/etcdlabs
-WORKDIR $GOPATH/src/github.com/coreos/etcdlabs
 
-RUN go build -o ./backend-web-server -v ./cmd/backend-web-server
+RUN pushd $GOPATH/src/github.com/coreos/etcdlabs \
+  && echo "Updating Go dependencies..." \
+  && ./scripts/dep/go.sh \
+  && go build -o ./backend-web-server -v ./cmd/backend-web-server \
+  && popd
 
 # Install Angular, NodeJS for frontend
 # 'node' needs to be in $PATH for 'yarn start' command
@@ -47,15 +59,20 @@ RUN pushd ${GOPATH}/src/github.com/coreos/etcdlabs \
   && echo "Running nvm scripts..." \
   && source $NVM_DIR/nvm.sh \
   && nvm ls-remote \
-  && nvm install 7.10.0 \
+  && nvm install v8.1.2 \
   && curl https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
   && echo "deb http://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
   && apt-get -y update && apt-get -y install yarn \
+  && echo "Updating frontend dependencies..." \
   && rm -rf ./node_modules \
   && yarn install \
-  && npm rebuild node-sass \
+  && npm rebuild node-sass --force \
   && npm install \
-  && cp /usr/local/nvm/versions/node/v7.10.0/bin/node /usr/bin/node \
+  && nvm alias default 8.1.2 \
+  && nvm alias default node \
+  && which node \
+  && node -v \
+  && cp /usr/local/nvm/versions/node/v8.1.2/bin/node /usr/bin/node \
   && popd
 
 # Configure reverse proxy

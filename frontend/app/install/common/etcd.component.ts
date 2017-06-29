@@ -241,11 +241,11 @@ export class Etcd {
     getInstallCommandGitSource(gitUser: string, gitBranch: string) {
         let divide = getDivider(this.getExecDir());
 
-        let txt = 'if [ "${GOPATH}" == "" ]; then' + `
-    ` + 'echo "GOPATH does not exist!"' + `
-    ` + 'exit 255' + `
+        let txt = 'if [ "${GOPATH}" === "" ]; then' + `
+  ` + 'echo "GOPATH does not exist!"' + `
+  ` + 'exit 255' + `
 ` + 'else' + `
-    ` + 'echo "GOPATH: ${GOPATH}"' + `
+  ` + 'echo "GOPATH: ${GOPATH}"' + `
 fi
 
 GIT_PATH=github.com/coreos/etcd
@@ -255,8 +255,8 @@ BRANCH_NAME=${gitBranch}
 
 ` + 'rm -rf ${GOPATH}/src/${GIT_PATH}' + `
 ` + 'git clone https://github.com/${USER_NAME}/etcd' + ' \\' + `
-    ` + '--branch ${BRANCH_NAME}' + ' \\' + `
-    ` + '${GOPATH}/src/${GIT_PATH}' + `
+  ` + '--branch ${BRANCH_NAME}' + ' \\' + `
+  ` + '${GOPATH}/src/${GIT_PATH}' + `
 
 ` + 'cd ${GOPATH}/src/${GIT_PATH} && ./build' + `
 
@@ -299,8 +299,9 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
 `;
         }
         let copycmd = 'sudo cp /tmp/test-etcd/etcd* ' + this.getExecDir();
-        if (this.getExecDir() == '/tmp/test-etcd') {
-            copycmd = '# sudo cp /tmp/test-etcd/etcd* [YOUR_EXEC_DIR]';
+        if (this.getExecDir() === '/tmp/test-etcd') {
+            copycmd = '# sudo cp /tmp/test-etcd/etcd* [YOUR_EXEC_DIR]' + `
+` + '# sudo mkdir -p /opt/bin/ && sudo cp /tmp/test-etcd/etcd* /opt/bin/';
         }
         txt += copycmd + `
 
@@ -337,8 +338,9 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
 `;
         }
         let copycmd = 'sudo cp /tmp/test-etcd/etcd* ' + this.getExecDir();
-        if (this.getExecDir() == '/tmp/test-etcd') {
-            copycmd = '# sudo cp /tmp/test-etcd/etcd* [YOUR_EXEC_DIR]';
+        if (this.getExecDir() === '/tmp/test-etcd') {
+            copycmd = '# sudo cp /tmp/test-etcd/etcd* [YOUR_EXEC_DIR]' + `
+` + '# sudo mkdir -p /opt/bin/ && sudo cp /tmp/test-etcd/etcd* /opt/bin/';
         }
         txt += copycmd + `
 
@@ -467,7 +469,7 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
 
         let txt = '';
         let lineBreak = ' \\' + `
-    `;
+  `;
         if (oneLine) {
             lineBreak = ' ';
         }
@@ -491,7 +493,7 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
         let exec = this.getExecDir() + divide + 'etcdctl';
 
         let lineBreak = `
-    `;
+  `;
         let cmd = 'ETCDCTL_API=3 ' + exec + ' \\' + lineBreak + '--endpoints' + ' ' + this.getClientEndpointsTxt() + ' \\' + lineBreak;
         if (this.secure) {
             cmd += '--cacert' + ' ' + flag.getCertsDir() + '/' + flag.clientRootCAFile
@@ -580,7 +582,7 @@ sudo mv /tmp/${flag.name}.service /etc/systemd/system/${flag.name}.service
 
         let execStart = execDocker;
         let lineBreak = ' \\' + `
-    `;
+  `;
         for (let _i = 0; _i < dockerRunFlags.length; _i++) {
             execStart += lineBreak + dockerRunFlags[_i];
         }
