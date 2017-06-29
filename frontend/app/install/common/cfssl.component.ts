@@ -229,10 +229,10 @@ ${hostTxt}
 }
 EOF
 cfssl gencert` + ' \\' + `
-    --ca ${this.getCertsDir()}/${this.rootCAPrefix}.pem` + ' \\' + `
-    --ca-key ${this.getCertsDir()}/${this.rootCAPrefix}-key.pem` + ' \\' + `
-    --config ${this.getCertsDir()}/${this.gencertFileName}` + ' \\' + `
-    ` + `${this.getCertsDir()}/${name}-ca-csr.json | cfssljson --bare ${this.getCertsDir()}/${name}
+  --ca ${this.getCertsDir()}/${this.rootCAPrefix}.pem` + ' \\' + `
+  --ca-key ${this.getCertsDir()}/${this.rootCAPrefix}-key.pem` + ' \\' + `
+  --config ${this.getCertsDir()}/${this.gencertFileName}` + ' \\' + `
+  ` + `${this.getCertsDir()}/${name}-ca-csr.json | cfssljson --bare ${this.getCertsDir()}/${name}
 
 `;
     }
