@@ -6,16 +6,24 @@ if ! [[ "$0" =~ "./scripts/dep/frontend.sh" ]]; then
   exit 255
 fi
 
+<<COMMENT
+SKIP_REBUILD=1 ./scripts/dep/frontend.sh
+COMMENT
+
 source ${NVM_DIR}/nvm.sh
 nvm install v8.1.3
 
 echo "Updating frontend dependencies with 'yarn' and 'npm'..."
 rm -f ./package-lock.json
 yarn install
-npm rebuild node-sass --force
-yarn install
+if [[ "${SKIP_REBUILD}" ]]; then
+  echo "SKIP_REBUILD is defined; skipping..."
+else
+  echo "SKIP_REBUILD is not defined; rebuilding..."
+  npm rebuild node-sass --force
+  yarn install
+fi
 npm install
-# npm install -g tslint
 
 nvm install v8.1.3
 nvm alias default 8.1.3
