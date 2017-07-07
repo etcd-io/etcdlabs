@@ -1,5 +1,5 @@
-hash: eb6c16789af307e07e9fb282c91ba78e9cbc058cee97891cedbbb5ae372438e9
-updated: 2017-07-06T13:08:50.595675809-07:00
+hash: 4e55a556f3ede71d761c9561848135776cfe3f70295520ac8d17ed698184de02
+updated: 2017-07-07T11:35:39.011849664-07:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -10,7 +10,7 @@ imports:
 - name: github.com/coreos/bbolt
   version: ad39960eb40bb33c9bda31bed2eaf4fdda15efe6
 - name: github.com/coreos/etcd
-  version: 2e7615281e621ad4c808263577860d62c7efdc4b
+  version: 64840adf70e4af953060ec3bb0e77cb5d59318d4
   subpackages:
   - alarm
   - auth
