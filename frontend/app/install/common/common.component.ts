@@ -1,7 +1,7 @@
 export class ParentComponent {
     latestReleaseVersion: string;
     constructor() {
-        this.latestReleaseVersion = 'v3.2.1';
+        this.latestReleaseVersion = 'v3.2.2';
     }
     getLatestReleaseVersion() {
         return this.latestReleaseVersion;
