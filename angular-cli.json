@@ -1,6 +1,6 @@
 {
     "project": {
-        "version": "1.3.0-beta.0",
+        "version": "1.3.0-beta.1",
         "name": "app-etcd"
     },
     "apps": [{
@@ -42,6 +42,9 @@
     "defaults": {
         "styleExt": "css",
         "prefixInterfaces": false,
-        "lazyRoutePrefix": "+"
+        "lazyRoutePrefix": "+",
+        "serve": {
+            "proxyConfig": "proxy.config.json"
+        }
     }
 }
