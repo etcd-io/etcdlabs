@@ -21,6 +21,7 @@ import (
 	defaultLog "log"
 	"net"
 	"net/http"
+	"net/url"
 	"path/filepath"
 	"sync"
 	"time"
@@ -35,6 +36,7 @@ import (
 	"github.com/coreos/etcd/pkg/types"
 	"github.com/coreos/etcd/rafthttp"
 	"github.com/coreos/pkg/capnslog"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 var plog = capnslog.NewPackageLogger("github.com/coreos/etcd", "embed")
@@ -55,9 +57,10 @@ const (
 
 // Etcd contains a running etcd server and its listeners.
 type Etcd struct {
-	Peers   []*peerListener
-	Clients []net.Listener
-	Server  *etcdserver.EtcdServer
+	Peers            []*peerListener
+	Clients          []net.Listener
+	metricsListeners []net.Listener
+	Server           *etcdserver.EtcdServer
 
 	cfg   Config
 	stopc chan struct{}
@@ -189,11 +192,29 @@ func (e *Etcd) Config() Config {
 func (e *Etcd) Close() {
 	e.closeOnce.Do(func() { close(e.stopc) })
 
-	// (gRPC server) stops accepting new connections,
-	// RPCs, and blocks until all pending RPCs are finished
+	timeout := 2 * time.Second
+	if e.Server != nil {
+		timeout = e.Server.Cfg.ReqTimeout()
+	}
 	for _, sctx := range e.sctxs {
 		for gs := range sctx.grpcServerC {
-			gs.GracefulStop()
+			ch := make(chan struct{})
+			go func() {
+				defer close(ch)
+				// close listeners to stop accepting new connections,
+				// will block on any existing transports
+				gs.GracefulStop()
+			}()
+			// wait until all pending RPCs are finished
+			select {
+			case <-ch:
+			case <-time.After(timeout):
+				// took too long, manually close open transports
+				// e.g. watch streams
+				gs.Stop()
+				// concurrent GracefulStop should be interrupted
+				<-ch
+			}
 		}
 	}
 
@@ -204,6 +225,9 @@ func (e *Etcd) Close() {
 		if e.Clients[i] != nil {
 			e.Clients[i].Close()
 		}
+	}
+	for i := range e.metricsListeners {
+		e.metricsListeners[i].Close()
 	}
 
 	// close rafthttp transports
@@ -400,6 +424,25 @@ func (e *Etcd) serve() (err error) {
 			e.errHandler(s.serve(e.Server, &e.cfg.ClientTLSInfo, h, e.errHandler))
 		}(sctx)
 	}
+
+	if len(e.cfg.ListenMetricsUrls) > 0 {
+		// TODO: maybe etcdhttp.MetricsPath or get the path from the user-provided URL
+		metricsMux := http.NewServeMux()
+		metricsMux.Handle("/metrics", prometheus.Handler())
+
+		for _, murl := range e.cfg.ListenMetricsUrls {
+			ml, err := transport.NewListener(murl.Host, murl.Scheme, &e.cfg.ClientTLSInfo)
+			if err != nil {
+				return err
+			}
+			e.metricsListeners = append(e.metricsListeners, ml)
+			go func(u url.URL, ln net.Listener) {
+				plog.Info("listening for metrics on ", u.String())
+				e.errHandler(http.Serve(ln, metricsMux))
+			}(murl, ml)
+		}
+	}
+
 	return nil
 }
 
