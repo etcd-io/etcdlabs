@@ -1,5 +1,5 @@
-hash: ea66eae546e7fdd5e05b5f9af0287815ad672e5844389efc54608731cfa352a6
-updated: 2017-07-24T09:49:23.395107748-07:00
+hash: 9c08f90706e42b0989c0a1294b1423ec9a0745111e4b1aa2791b9367752bc34e
+updated: 2017-08-01T11:36:33.960480356-07:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -10,7 +10,7 @@ imports:
 - name: github.com/coreos/bbolt
   version: ad39960eb40bb33c9bda31bed2eaf4fdda15efe6
 - name: github.com/coreos/etcd
-  version: e9a7f3551bce5b90522345f71e52d04b08090928
+  version: 585b1d7bdc3ca30b1d43b774cc5c5f0dde0a9ab0
   subpackages:
   - alarm
   - auth
@@ -179,7 +179,7 @@ imports:
   subpackages:
   - unix
 - name: golang.org/x/text
-  version: 836efe42bb4aa16aaa17b9c155d8813d336ed720
+  version: 3bd178b88a8180be2df394a1fbb81313916f0e7b
   subpackages:
   - secure/bidirule
   - transform
@@ -190,7 +190,7 @@ imports:
   subpackages:
   - rate
 - name: google.golang.org/genproto
-  version: b0a3dcfcd1a9bd48e63634bd8802960804cf8315
+  version: 09f6ed296fc66555a25fe4ce95173148778dfa85
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
