@@ -11,8 +11,8 @@
 		<md-checkbox [(ngModel)]="etcd.enableProfile">Enable profiler</md-checkbox>
 		<md-checkbox [(ngModel)]="etcd.debug">Debug mode</md-checkbox>
 		<p></p>
-		<md-input-container><input mdInput type="number" [(ngModel)]="etcd.autoCompactHour" placeholder="auto compaction (hour)e"></md-input-container>
-		<md-input-container><input mdInput type="number" [(ngModel)]="etcd.clusterSize" placeholder="Cluster size (up to 7)e"></md-input-container>
+		<md-input-container><input mdInput type="number" [(ngModel)]="etcd.autoCompactHour" placeholder="auto compaction (hour)"></md-input-container>
+		<md-input-container><input mdInput type="number" [(ngModel)]="etcd.clusterSize" placeholder="Cluster size (up to 7)"></md-input-container>
 		<span *ngIf="etcd.clusterSize > 7" class="error-message">This tool only supports up to 7 nodes</span>
 		<span *ngIf="etcd.clusterSize < 1" class="error-message">Minimum cluster size is 1</span>
 		<span *ngIf="etcd.clusterSize % 2 == 0" class="error-message">Cluster size should an odd number</span>
