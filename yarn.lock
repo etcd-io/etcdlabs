@@ -2,12 +2,11 @@
 # yarn lockfile v1
 
 
-"@angular-devkit/build-optimizer@0.0.3":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@angular-devkit/build-optimizer/-/build-optimizer-0.0.3.tgz#092bdf732b79a779ce540f9bb99d6590dd971204"
+"@angular-devkit/build-optimizer@0.0.9":
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/@angular-devkit/build-optimizer/-/build-optimizer-0.0.9.tgz#c5e54c0b5e13d48bafdb2b5613bd2bded9439458"
   dependencies:
     loader-utils "^1.1.0"
-    magic-string "^0.19.1"
     source-map "^0.5.6"
     typescript "^2.3.3"
 
@@ -23,13 +22,13 @@
   dependencies:
     tslib "^1.7.1"
 
-"@angular/cli@1.3.0-rc.3":
-  version "1.3.0-rc.3"
-  resolved "https://registry.yarnpkg.com/@angular/cli/-/cli-1.3.0-rc.3.tgz#5a6999382f956b6109d3042569659972bca38a63"
+"@angular/cli@1.3.0-rc.5":
+  version "1.3.0-rc.5"
+  resolved "https://registry.yarnpkg.com/@angular/cli/-/cli-1.3.0-rc.5.tgz#d34c4fc1ba3ad7ed5b03f0d5bef7f11e9b8ec740"
   dependencies:
-    "@angular-devkit/build-optimizer" "0.0.3"
+    "@angular-devkit/build-optimizer" "0.0.9"
     "@ngtools/json-schema" "1.1.0"
-    "@ngtools/webpack" "1.6.0-rc.3"
+    "@ngtools/webpack" "1.6.0-rc.5"
     autoprefixer "^6.5.3"
     chalk "^2.0.1"
     circular-dependency-plugin "^3.0.0"
@@ -76,6 +75,7 @@
     semver "^5.1.0"
     silent-error "^1.0.0"
     source-map-loader "^0.2.0"
+    source-map-support "^0.4.1"
     style-loader "^0.13.1"
     stylus "^0.54.5"
     stylus-loader "^3.0.1"
@@ -169,9 +169,9 @@
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@ngtools/json-schema/-/json-schema-1.1.0.tgz#c3a0c544d62392acc2813a42c8a0dc6f58f86922"
 
-"@ngtools/webpack@1.6.0-rc.3":
-  version "1.6.0-rc.3"
-  resolved "https://registry.yarnpkg.com/@ngtools/webpack/-/webpack-1.6.0-rc.3.tgz#1cc0885c5075f66ac322e68eaf256bff172dd134"
+"@ngtools/webpack@1.6.0-rc.5":
+  version "1.6.0-rc.5"
+  resolved "https://registry.yarnpkg.com/@ngtools/webpack/-/webpack-1.6.0-rc.5.tgz#3c98cbc3359c93e6ec7bff6bd6dec54c9cf55945"
   dependencies:
     loader-utils "^1.0.2"
     magic-string "^0.22.3"
@@ -3312,12 +3312,6 @@ lru-cache@^4.0.1:
 macaddress@^0.2.8:
   version "0.2.8"
   resolved "https://registry.yarnpkg.com/macaddress/-/macaddress-0.2.8.tgz#5904dc537c39ec6dbefeae902327135fa8511f12"
-
-magic-string@^0.19.1:
-  version "0.19.1"
-  resolved "https://registry.yarnpkg.com/magic-string/-/magic-string-0.19.1.tgz#14d768013caf2ec8fdea16a49af82fc377e75201"
-  dependencies:
-    vlq "^0.2.1"
 
 magic-string@^0.22.3:
   version "0.22.3"
