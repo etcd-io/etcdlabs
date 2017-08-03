@@ -15,7 +15,7 @@ sudo mv /tmp/cfssljson /usr/local/bin/cfssljson
 /usr/local/bin/cfssl version
 /usr/local/bin/cfssljson -h
 
-mkdir -p $HOME/certs
+mkdir -p ${HOME}/certs
 
 
 rm -f /tmp/cfssl* && rm -rf /tmp/certs && mkdir -p /tmp/certs
@@ -31,7 +31,7 @@ sudo mv /tmp/cfssljson /usr/local/bin/cfssljson
 /usr/local/bin/cfssl version
 /usr/local/bin/cfssljson -h
 
-mkdir -p $HOME/certs
+mkdir -p ${HOME}/certs
 COMMENT
 
 go get -v github.com/cloudflare/cfssl/cmd/cfssl
