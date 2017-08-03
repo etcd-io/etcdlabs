@@ -19,5 +19,5 @@ docker run \
   -p 2395:2395 \
   -p 2397:2397 \
   -p 4200:4200 \
-  quay.io/coreos/etcdlabs:latest \
+  gcr.io/etcd-development/etcdlabs:latest \
   /bin/sh -c "pushd /gopath/src/github.com/coreos/etcdlabs && ./scripts/run/etcdlabs.sh"

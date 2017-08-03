@@ -8,9 +8,8 @@ RestartSec=5s
 TimeoutStartSec=0
 LimitNOFILE=40000
 
-ExecStartPre=/usr/bin/docker \
-  pull \
-  quay.io/coreos/etcdlabs:latest
+ExecStartPre=/usr/bin/docker login -u oauth2accesstoken -p "$(/usr/bin/gcloud auth application-default print-access-token)" https://gcr.io
+ExecStartPre=/usr/bin/docker pull gcr.io/etcd-development/etcdlabs:latest
 
 ExecStart=/usr/bin/docker \
   run \
@@ -23,7 +22,7 @@ ExecStart=/usr/bin/docker \
   -p 4200:4200 \
   --name etcdlabs \
   --ulimit nofile=262144:262144 \
-  quay.io/coreos/etcdlabs:latest \
+  gcr.io/etcd-development/etcdlabs:latest \
   /bin/sh -c "pushd /gopath/src/github.com/coreos/etcdlabs && ./scripts/run/etcdlabs.sh"
 
 ExecStop=/usr/bin/docker rm --force etcdlabs
