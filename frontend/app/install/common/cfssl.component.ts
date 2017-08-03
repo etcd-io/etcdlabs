@@ -234,6 +234,8 @@ cfssl gencert` + ' \\' + `
   --config ${this.getCertsDir()}/${this.gencertFileName}` + ' \\' + `
   ` + `${this.getCertsDir()}/${name}-ca-csr.json | cfssljson --bare ${this.getCertsDir()}/${name}
 
+# verify
+openssl x509 -in ${this.getCertsDir()}/${name}.pem -text -noout
 `;
     }
 
