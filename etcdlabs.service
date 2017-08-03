@@ -8,7 +8,6 @@ RestartSec=5s
 TimeoutStartSec=0
 LimitNOFILE=40000
 
-ExecStartPre=/usr/bin/docker login -u oauth2accesstoken -p "$(/usr/bin/gcloud auth application-default print-access-token)" https://gcr.io
 ExecStartPre=/usr/bin/docker pull gcr.io/etcd-development/etcdlabs:latest
 
 ExecStart=/usr/bin/docker \
