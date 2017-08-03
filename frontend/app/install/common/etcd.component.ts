@@ -578,7 +578,6 @@ sudo mv /tmp/${flag.name}.service /etc/systemd/system/${flag.name}.service
             dockerRunFlags.push('--volume' + '=' + flag.getCertsDir() + ':' + '/etcd-ssl-certs-dir');
         }
         dockerRunFlags.push('gcr.io/etcd-development/etcd:' + this.version);
-        // dockerRunFlags.push('quay.io/coreos/etcd:' + this.version);
         dockerRunFlags.push('/usr/local/bin/etcd');
 
         let execStart = execDocker;
