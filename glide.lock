@@ -1,5 +1,5 @@
-hash: e4c5b697ee590c03d83146d3b96f82483e096f33f2c60fffe788ab8d1b22cb0b
-updated: 2017-08-09T10:37:27.91921269-07:00
+hash: 4dc22bafb905ecee7f6a631af31f366ed0e2f3b2d8c08e49ccf1672ee4b1730b
+updated: 2017-08-11T09:33:55.843019369-07:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -8,9 +8,9 @@ imports:
 - name: github.com/cockroachdb/cmux
   version: 112f0506e7743d64a6eb8fedbcff13d9979bbf92
 - name: github.com/coreos/bbolt
-  version: ad39960eb40bb33c9bda31bed2eaf4fdda15efe6
+  version: 12923fe56c105bca6efbbcc258cd762b4258333d
 - name: github.com/coreos/etcd
-  version: 04413454acebaa81fb3787b1d7763ea0f6ebc61e
+  version: 135b7f78c9e79c794c28bfc772205a716460e368
   subpackages:
   - alarm
   - auth
@@ -179,7 +179,7 @@ imports:
   subpackages:
   - unix
 - name: golang.org/x/text
-  version: 3bd178b88a8180be2df394a1fbb81313916f0e7b
+  version: b19bf474d317b857955b12035d2c5acb57ce8b01
   subpackages:
   - secure/bidirule
   - transform
