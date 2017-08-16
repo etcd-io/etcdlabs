@@ -217,9 +217,9 @@
   version "1.6.26"
   resolved "https://registry.yarnpkg.com/@types/angular/-/angular-1.6.26.tgz#a96cccef648de0bf7435f3b9bad13f2430719305"
 
-"@types/angular@1.6.28":
-  version "1.6.28"
-  resolved "https://registry.yarnpkg.com/@types/angular/-/angular-1.6.28.tgz#e85d62c72c5fbd408b463cd2c9d24f75cc6bec98"
+"@types/angular@1.6.29":
+  version "1.6.29"
+  resolved "https://registry.yarnpkg.com/@types/angular/-/angular-1.6.29.tgz#8d654495f05986a44841694bf1f721d9971055da"
 
 "@types/hammerjs@2.0.34":
   version "2.0.34"
@@ -2869,9 +2869,9 @@ jasmine-core@~2.6.0:
   version "2.6.4"
   resolved "https://registry.yarnpkg.com/jasmine-core/-/jasmine-core-2.6.4.tgz#dec926cd0a9fa287fb6db5c755fa487e74cecac5"
 
-jasmine-spec-reporter@4.2.0:
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/jasmine-spec-reporter/-/jasmine-spec-reporter-4.2.0.tgz#7d56e842b40fcc5524f598c75cea505252d74ea3"
+jasmine-spec-reporter@4.2.1:
+  version "4.2.1"
+  resolved "https://registry.yarnpkg.com/jasmine-spec-reporter/-/jasmine-spec-reporter-4.2.1.tgz#1d632aec0341670ad324f92ba84b4b32b35e9e22"
   dependencies:
     colors "1.1.2"
 
