@@ -1,16 +1,14 @@
-hash: 90035f00dc11b8ec90f3d18eff1795cd570db68360d2d5619f8c4383510954f3
-updated: 2017-08-21T13:35:41.463140329-07:00
+hash: 85ba60a41c44438d94f2833c378b283f7d51eb25594e0cbb9fb4dd6b30f57c02
+updated: 2017-08-23T13:57:48.216591692-07:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
   subpackages:
   - quantile
-- name: github.com/cockroachdb/cmux
-  version: 112f0506e7743d64a6eb8fedbcff13d9979bbf92
 - name: github.com/coreos/bbolt
-  version: 12923fe56c105bca6efbbcc258cd762b4258333d
+  version: e1c92081e510bb6b2bbfc93e7e6bd0b6dabd3e12
 - name: github.com/coreos/etcd
-  version: 0bf404676ded23b82e96f7a917125536a6581eda
+  version: 897cadc88c5f4b01a8df6b760ec4b68ff1ece842
   subpackages:
   - alarm
   - auth
@@ -149,6 +147,8 @@ imports:
   version: a1dba9ce8baed984a2495b658c82687f8157b98f
   subpackages:
   - xfs
+- name: github.com/soheilhy/cmux
+  version: bb79a83465015a27a175925ebd155e660f55e9f1
 - name: github.com/ugorji/go
   version: ded73eae5db7e7a0ef6f55aace87a2873c5d2b74
   subpackages:
