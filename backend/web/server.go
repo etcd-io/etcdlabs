@@ -100,6 +100,10 @@ func StartServer(port int) (*Server, error) {
 	globalStopRestartLimiter = ratelimit.NewRequestLimiter(rootCtx, globalStopRestartIntervalLimit)
 
 	mux := http.NewServeMux()
+	mux.Handle("/health", &ContextAdapter{
+		ctx:     rootCtx,
+		handler: ContextHandlerFunc(healthHandler),
+	})
 	mux.Handle("/conn", &ContextAdapter{
 		ctx:     rootCtx,
 		handler: withCache(ContextHandlerFunc(connectHandler)),

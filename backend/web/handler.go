@@ -98,6 +98,11 @@ func withCache(h ContextHandler) ContextHandler {
 	})
 }
 
+func healthHandler(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
+	w.Write([]byte("1"))
+	return nil
+}
+
 // Connect contains initial server state.
 type Connect struct {
 	WebPort int
