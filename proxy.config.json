@@ -1,4 +1,8 @@
 {
+    "/health": {
+        "target": "http://0.0.0.0:2200",
+        "secure": "false"
+    },
     "/conn": {
         "target": "http://0.0.0.0:2200",
         "secure": "false"
@@ -8,10 +12,6 @@
         "secure": "false"
     },
     "/client-request": {
-        "target": "http://0.0.0.0:2200",
-        "secure": "false"
-    },
-    "/get-record": {
         "target": "http://0.0.0.0:2200",
         "secure": "false"
     }
