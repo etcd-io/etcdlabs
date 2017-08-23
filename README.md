@@ -20,3 +20,22 @@ See [etcd-play][old-etcd-play] for old code.
 [old-etcd-play]: https://github.com/coreos/etcd-play
 [cistat]: https://travis-ci.org/coreos/etcdlabs
 [etcdlabs-godoc]: https://godoc.org/github.com/coreos/etcdlabs
+
+#### Build and Push to gcr.io
+
+```bash
+./scripts/docker/build-push.sh
+```
+
+#### Run locally
+
+```bash
+./scripts/docker/etcdlabs.sh
+```
+
+```bash
+curl -L http://localhost:4200/health
+1
+```
+
+And open http://localhost:4200
