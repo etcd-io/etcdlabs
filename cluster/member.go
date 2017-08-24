@@ -263,7 +263,7 @@ func (m *Member) Client(scheme bool, eps ...string) (cli *clientv3.Client, tlsCf
 	return cli, tlsCfg, err
 }
 
-// FetchMemberStatus fetches member status (make sure to close the client outside of this funciton).
+// FetchMemberStatus fetches member status (make sure to close the client outside of this function).
 func (m *Member) FetchMemberStatus() error {
 	cli, tlsCfg, err := m.Client(false)
 	if err != nil {

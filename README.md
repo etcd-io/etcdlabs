@@ -1,6 +1,8 @@
 # etcdlabs
 
-[![Build Status](https://img.shields.io/travis/coreos/etcdlabs.svg?style=flat-square)][cistat] [![Godoc](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)][etcdlabs-godoc]
+[![Go Report Card](https://goreportcard.com/badge/github.com/coreos/etcdlabs?style=flat-square)](https://goreportcard.com/report/github.com/coreos/etcdlabs)
+[![Build Status](https://img.shields.io/travis/coreos/etcdlabs.svg?style=flat-square)](https://travis-ci.org/coreos/etcdlabs)
+[![Godoc](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)](https://godoc.org/github.com/coreos/etcdlabs)
 
 - [etcd website](http://play.etcd.io)
 
