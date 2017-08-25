@@ -32,8 +32,28 @@ See [etcd-play][old-etcd-play] for old code.
 #### Run locally
 
 ```bash
+docker build --tag gcr.io/etcd-development/etcdlabs:latest --file ./Dockerfile .
+
+docker run \
+  --rm \
+  -it \
+  -p 2389:2389 \
+  -p 2391:2391 \
+  -p 2393:2393 \
+  -p 2395:2395 \
+  -p 2397:2397 \
+  -p 4200:4200 \
+  gcr.io/etcd-development/etcdlabs:latest \
+  /bin/sh -c "pushd /gopath/src/github.com/coreos/etcdlabs && ./scripts/run/etcdlabs.sh"
+```
+
+Or
+
+```bash
 ./scripts/docker/etcdlabs.sh
 ```
+
+To check that it's running:
 
 ```bash
 curl -L http://localhost:4200/health
