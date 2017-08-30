@@ -11,8 +11,8 @@
 		<md-checkbox [(ngModel)]="etcd.enableProfile">Enable profiler</md-checkbox>
 		<md-checkbox [(ngModel)]="etcd.debug">Debug mode</md-checkbox>
 		<p></p>
-		<md-input-container><input mdInput type="number" [(ngModel)]="etcd.autoCompactHour" placeholder="auto compaction (hour)"></md-input-container>
-		<md-input-container><input mdInput type="number" [(ngModel)]="etcd.clusterSize" placeholder="Cluster size (up to 7)"></md-input-container>
+		<md-form-field><input mdInput type="number" [(ngModel)]="etcd.autoCompactHour" placeholder="auto compaction (hour)"></md-form-field>
+		<md-form-field><input mdInput type="number" [(ngModel)]="etcd.clusterSize" placeholder="Cluster size (up to 7)"></md-form-field>
 		<span *ngIf="etcd.clusterSize > 7" class="error-message">This tool only supports up to 7 nodes</span>
 		<span *ngIf="etcd.clusterSize < 1" class="error-message">Minimum cluster size is 1</span>
 		<span *ngIf="etcd.clusterSize % 2 == 0" class="error-message">Cluster size should an odd number</span>
@@ -21,26 +21,26 @@
 			<div *ngIf="etcd.clusterSize > i">
 				<br>
 				<md-card-subtitle class="sub-sub-title">Node {{i+1}}</md-card-subtitle>
-				<md-input-container><input mdInput type="text" [(ngModel)]="flag.name" placeholder="etcd name"></md-input-container>
-				<md-input-container><input mdInput type="text" [(ngModel)]="flag.dataDir" placeholder="etcd data directory"></md-input-container>
+				<md-form-field><input mdInput type="text" [(ngModel)]="flag.name" placeholder="etcd name"></md-form-field>
+				<md-form-field><input mdInput type="text" [(ngModel)]="flag.dataDir" placeholder="etcd data directory"></md-form-field>
 				<br>
-				<md-input-container><input mdInput type="text" [(ngModel)]="flag.ipAddress" placeholder="IP address"></md-input-container>
-				<md-input-container><input mdInput type="number" [(ngModel)]="flag.clientPort" placeholder="client port"></md-input-container>
-				<md-input-container><input mdInput type="number" [(ngModel)]="flag.peerPort" placeholder="peer port"></md-input-container>
+				<md-form-field><input mdInput type="text" [(ngModel)]="flag.ipAddress" placeholder="IP address"></md-form-field>
+				<md-form-field><input mdInput type="number" [(ngModel)]="flag.clientPort" placeholder="client port"></md-form-field>
+				<md-form-field><input mdInput type="number" [(ngModel)]="flag.peerPort" placeholder="peer port"></md-form-field>
 				<br>
-				<md-input-container><input mdInput type="text" [(ngModel)]="flag.initialClusterToken" placeholder="cluster token"></md-input-container>
-				<md-input-container><input mdInput type="text" [(ngModel)]="flag.initialClusterState" placeholder="cluster state"></md-input-container>
+				<md-form-field><input mdInput type="text" [(ngModel)]="flag.initialClusterToken" placeholder="cluster token"></md-form-field>
+				<md-form-field><input mdInput type="text" [(ngModel)]="flag.initialClusterState" placeholder="cluster state"></md-form-field>
 				<span *ngIf="flag.initialClusterState != 'new' && flag.initialClusterState != 'existing'" class="error-message">Cluster state must be either 'new' or 'existing'</span>
 				<br *ngIf="etcd.secure">
-				<md-input-container *ngIf="etcd.secure"><input mdInput dividerColor="warn" type="text" [(ngModel)]="flag.certsDir" placeholder="etcd certs directory"></md-input-container>
+				<md-form-field *ngIf="etcd.secure"><input mdInput dividerColor="warn" type="text" [(ngModel)]="flag.certsDir" placeholder="etcd certs directory"></md-form-field>
 				<br *ngIf="etcd.secure">
-				<md-input-container *ngIf="etcd.secure"><input mdInput dividerColor="warn" type="text" [(ngModel)]="flag.clientRootCAFile" placeholder="client trusted root CA"></md-input-container>
-				<md-input-container *ngIf="etcd.secure"><input mdInput dividerColor="warn" type="text" [(ngModel)]="flag.clientCertFile" placeholder="client cert (public)"></md-input-container>
-				<md-input-container *ngIf="etcd.secure"><input mdInput dividerColor="warn" type="text" [(ngModel)]="flag.clientKeyFile" placeholder="client key (private)"></md-input-container>
+				<md-form-field *ngIf="etcd.secure"><input mdInput dividerColor="warn" type="text" [(ngModel)]="flag.clientRootCAFile" placeholder="client trusted root CA"></md-form-field>
+				<md-form-field *ngIf="etcd.secure"><input mdInput dividerColor="warn" type="text" [(ngModel)]="flag.clientCertFile" placeholder="client cert (public)"></md-form-field>
+				<md-form-field *ngIf="etcd.secure"><input mdInput dividerColor="warn" type="text" [(ngModel)]="flag.clientKeyFile" placeholder="client key (private)"></md-form-field>
 				<br *ngIf="etcd.secure">
-				<md-input-container *ngIf="etcd.secure"><input mdInput dividerColor="warn" type="text" [(ngModel)]="flag.peerRootCAFile" placeholder="peer trusted root CA"></md-input-container>
-				<md-input-container *ngIf="etcd.secure"><input mdInput dividerColor="warn" type="text" [(ngModel)]="flag.peerCertFile" placeholder="peer cert (public)"></md-input-container>
-				<md-input-container *ngIf="etcd.secure"><input mdInput dividerColor="warn" type="text" [(ngModel)]="flag.peerKeyFile" placeholder="peer key (private)"></md-input-container>
+				<md-form-field *ngIf="etcd.secure"><input mdInput dividerColor="warn" type="text" [(ngModel)]="flag.peerRootCAFile" placeholder="peer trusted root CA"></md-form-field>
+				<md-form-field *ngIf="etcd.secure"><input mdInput dividerColor="warn" type="text" [(ngModel)]="flag.peerCertFile" placeholder="peer cert (public)"></md-form-field>
+				<md-form-field *ngIf="etcd.secure"><input mdInput dividerColor="warn" type="text" [(ngModel)]="flag.peerKeyFile" placeholder="peer key (private)"></md-form-field>
 			</div>
 		</div>
 		<br>
@@ -67,10 +67,10 @@
 			<br>
 			<h5>Install cfssl</h5>
 			<br>
-			<md-input-container><input mdInput type="text" [(ngModel)]="cfssl.arch" placeholder="arch"></md-input-container>
-			<md-input-container><input mdInput type="text" [(ngModel)]="cfssl.version" placeholder="cfssl version"></md-input-container>
-			<md-input-container><input mdInput type="text" [(ngModel)]="cfssl.execDir" placeholder="cfssl exec dir"></md-input-container>
-			<md-input-container><input mdInput type="text" [(ngModel)]="cfssl.srcCertsDir" placeholder="source certs dir"></md-input-container>
+			<md-form-field><input mdInput type="text" [(ngModel)]="cfssl.arch" placeholder="arch"></md-form-field>
+			<md-form-field><input mdInput type="text" [(ngModel)]="cfssl.version" placeholder="cfssl version"></md-form-field>
+			<md-form-field><input mdInput type="text" [(ngModel)]="cfssl.execDir" placeholder="cfssl exec dir"></md-form-field>
+			<md-form-field><input mdInput type="text" [(ngModel)]="cfssl.srcCertsDir" placeholder="source certs dir"></md-form-field>
 			<br>
 			<div class="osx-window">
 				<div class="window">
@@ -95,17 +95,17 @@
 				portable installation experience across multiple cloud-based and on-premises Kubernetes deployments.
 			</p>
 			<br>
-			<md-input-container><input mdInput type="text" [(ngModel)]="cfssl.organization" placeholder="Organization"></md-input-container>
-			<md-input-container><input mdInput type="text" [(ngModel)]="cfssl.organizationUnit" placeholder="Organization Unit"></md-input-container>
-			<md-input-container><input mdInput type="text" [(ngModel)]="cfssl.locationCity" placeholder="City"></md-input-container>
-			<md-input-container><input mdInput type="text" [(ngModel)]="cfssl.locationState" placeholder="State"></md-input-container>
-			<md-input-container><input mdInput type="text" [(ngModel)]="cfssl.locationCountry" placeholder="Country"></md-input-container>
+			<md-form-field><input mdInput type="text" [(ngModel)]="cfssl.organization" placeholder="Organization"></md-form-field>
+			<md-form-field><input mdInput type="text" [(ngModel)]="cfssl.organizationUnit" placeholder="Organization Unit"></md-form-field>
+			<md-form-field><input mdInput type="text" [(ngModel)]="cfssl.locationCity" placeholder="City"></md-form-field>
+			<md-form-field><input mdInput type="text" [(ngModel)]="cfssl.locationState" placeholder="State"></md-form-field>
+			<md-form-field><input mdInput type="text" [(ngModel)]="cfssl.locationCountry" placeholder="Country"></md-form-field>
 			<br>
-			<md-input-container><input mdInput type="text" [(ngModel)]="cfssl.keyAlgorithm" placeholder="Key Algorithm"></md-input-container>
-			<md-input-container><input mdInput type="number" [(ngModel)]="cfssl.keySize" placeholder="Key Size"></md-input-container>
-			<md-input-container><input mdInput type="number" [(ngModel)]="cfssl.keyExpirationHour" placeholder="Key Expiration (hour)"></md-input-container>
+			<md-form-field><input mdInput type="text" [(ngModel)]="cfssl.keyAlgorithm" placeholder="Key Algorithm"></md-form-field>
+			<md-form-field><input mdInput type="number" [(ngModel)]="cfssl.keySize" placeholder="Key Size"></md-form-field>
+			<md-form-field><input mdInput type="number" [(ngModel)]="cfssl.keyExpirationHour" placeholder="Key Expiration (hour)"></md-form-field>
 			<br>
-			<md-input-container><input mdInput type="text" [(ngModel)]="cfssl.commonName" placeholder="Common Name"></md-input-container>
+			<md-form-field><input mdInput type="text" [(ngModel)]="cfssl.commonName" placeholder="Common Name"></md-form-field>
 			<br>
 			<br>
 			<pre class="code-dark">{{cfssl.getRootCACommand()}}</pre> Results:
@@ -184,7 +184,7 @@
 				etcd is written in Go. To build from source, you need Go 1.7+. This assumes host OS is Linux.
 			</p>
 			<br>
-			<md-input-container><input mdInput type="text" [(ngModel)]="go.version" placeholder="Go version"></md-input-container>
+			<md-form-field><input mdInput type="text" [(ngModel)]="go.version" placeholder="Go version"></md-form-field>
 			<br>
 			<div class="osx-window">
 				<div class="window">
@@ -204,9 +204,9 @@
 				Now let's build etcd from source.
 			</p>
 			<p>
-				<md-input-container><input mdInput type="text" [(ngModel)]="inputGitUser" placeholder="Git User"></md-input-container>
-				<md-input-container><input mdInput type="text" [(ngModel)]="inputGitBranch" placeholder="Git Branch"></md-input-container>
-				<md-input-container><input mdInput type="text" [(ngModel)]="etcd.execDir" placeholder="etcd exec dir"></md-input-container>
+				<md-form-field><input mdInput type="text" [(ngModel)]="inputGitUser" placeholder="Git User"></md-form-field>
+				<md-form-field><input mdInput type="text" [(ngModel)]="inputGitBranch" placeholder="Git Branch"></md-form-field>
+				<md-form-field><input mdInput type="text" [(ngModel)]="etcd.execDir" placeholder="etcd exec dir"></md-form-field>
 			</p>
 			<div class="osx-window">
 				<div class="window-narrow">
@@ -236,8 +236,8 @@
 				the simplest way to run etcd.
 			</p>
 			<br>
-			<md-input-container><input mdInput type="text" [(ngModel)]="etcd.version" placeholder="etcd version"></md-input-container>
-			<md-input-container><input mdInput type="text" [(ngModel)]="etcd.execDir" placeholder="etcd exec dir"></md-input-container>
+			<md-form-field><input mdInput type="text" [(ngModel)]="etcd.version" placeholder="etcd version"></md-form-field>
+			<md-form-field><input mdInput type="text" [(ngModel)]="etcd.execDir" placeholder="etcd exec dir"></md-form-field>
 			<br>
 			<br>
 			<h5>Install on Linux</h5>
@@ -319,8 +319,8 @@
 				<a href="https://en.wikipedia.org/wiki/Init" target="_blank" class="normal-link">init</a> system.
 			</p>
 			<br>
-			<md-input-container><input mdInput type="text" [(ngModel)]="etcd.version" placeholder="etcd version"></md-input-container>
-			<md-input-container><input mdInput type="text" [(ngModel)]="etcd.execDir" placeholder="etcd exec dir"></md-input-container>
+			<md-form-field><input mdInput type="text" [(ngModel)]="etcd.version" placeholder="etcd version"></md-form-field>
+			<md-form-field><input mdInput type="text" [(ngModel)]="etcd.execDir" placeholder="etcd exec dir"></md-form-field>
 			<br>
 			<br>
 			<h5>Install on Linux</h5>
@@ -399,7 +399,7 @@
 				Seems like etcd is configured to run in localhost. Please make sure ports and data directory do not conflict!
 			</p>
 			<br>
-			<md-input-container><input mdInput type="text" [(ngModel)]="etcd.version" placeholder="etcd version"></md-input-container>
+			<md-form-field><input mdInput type="text" [(ngModel)]="etcd.version" placeholder="etcd version"></md-form-field>
 			<br>
 			<div *ngFor="let flag of etcd.flags; let i = index;">
 				<div *ngIf="etcd.clusterSize > i">
