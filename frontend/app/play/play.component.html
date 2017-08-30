@@ -80,7 +80,7 @@
 			<md-card class="client-card">
 				<md-tab-group [(selectedIndex)]="selectedTab">
 					<md-tab>
-						<ng-template md-tab-label><b>Write</b></ng-template>
+						<ng-template mdTabLabel><b>Write</b></ng-template>
 							<br>
 							<div align="center">
 								<span class="select-node-checkbox">Endpoints: </span>
@@ -110,7 +110,7 @@
 							</p>
 					</md-tab>
 					<md-tab>
-						<ng-template md-tab-label><b>Delete</b></ng-template>
+						<ng-template mdTabLabel><b>Delete</b></ng-template>
 							<br>
 							<div align="center">
 								<span class="select-node-checkbox">Endpoints: </span>
@@ -133,7 +133,7 @@
 							</p>
 					</md-tab>
 					<md-tab>
-						<ng-template md-tab-label><b>Read</b></ng-template>
+						<ng-template mdTabLabel><b>Read</b></ng-template>
 							<br>
 							<div align="center">
 								<span class="select-node-checkbox">Endpoints: </span>
@@ -156,7 +156,7 @@
 							</p>
 					</md-tab>
 					<md-tab *ngFor="let memberStatus of memberStatuses;">
-						<ng-template md-tab-label>{{memberStatus.Name}}</ng-template>
+						<ng-template mdTabLabel>{{memberStatus.Name}}</ng-template>
 							<br>
 							<div align="center">
 								<!--md-tooltip="Click to kill {{memberStatus.Name}}" -->
