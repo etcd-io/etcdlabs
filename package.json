@@ -38,7 +38,7 @@
         "@types/node": "8.0.26",
         "@types/hammerjs": "2.0.35",
         "@types/jasmine": "2.5.54",
-        "core-js": "2.5.0",
+        "core-js": "2.5.1",
         "rxjs": "5.4.3",
         "typescript": "2.4.2",
         "ts-node": "3.3.0",
