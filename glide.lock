@@ -1,5 +1,5 @@
-hash: 65e463ef68c42eb5bd5d4bd8561afc90ea73bb9a773b1016ddcb187b365a8017
-updated: 2017-08-31T15:09:27.605601587-07:00
+hash: 27af97e45dd63c6c5548478443b714ce2afb24cf646c352243a700e842604936
+updated: 2017-09-01T09:34:25.054133237-07:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -8,7 +8,7 @@ imports:
 - name: github.com/coreos/bbolt
   version: e1c92081e510bb6b2bbfc93e7e6bd0b6dabd3e12
 - name: github.com/coreos/etcd
-  version: 4c725cee26ec53dc3fa8706b3c0f5d0df7d7e79d
+  version: b61c7489e0064ff35e179507ecda0aa734f563c0
   subpackages:
   - alarm
   - auth
@@ -26,6 +26,7 @@ imports:
   - etcdserver/api/etcdhttp
   - etcdserver/api/v2http
   - etcdserver/api/v2http/httptypes
+  - etcdserver/api/v2v3
   - etcdserver/api/v3client
   - etcdserver/api/v3election
   - etcdserver/api/v3election/v3electionpb
