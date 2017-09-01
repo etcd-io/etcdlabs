@@ -55,7 +55,7 @@ func updateClusterStatus(stopc <-chan struct{}) {
 		}
 
 		if len(globalUserCache) == 0 {
-			glog.Info("no user online")
+			// glog.Info("no user online")
 			continue
 		}
 		globalCluster.UpdateMemberStatus()
