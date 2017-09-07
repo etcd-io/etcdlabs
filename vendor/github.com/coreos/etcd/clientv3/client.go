@@ -59,9 +59,9 @@ type Client struct {
 	ctx    context.Context
 	cancel context.CancelFunc
 
-	// Username is a username for authentication
+	// Username is a user name for authentication.
 	Username string
-	// Password is a password for authentication
+	// Password is a password for authentication.
 	Password string
 	// tokenCred is an instance of WithPerRPCCredentials()'s argument
 	tokenCred *authTokenCredential
@@ -216,11 +216,8 @@ func (c *Client) dialSetupOpts(endpoint string, dopts ...grpc.DialOption) (opts 
 	}
 	if c.cfg.DialKeepAliveTime > 0 {
 		params := keepalive.ClientParameters{
-			Time: c.cfg.DialKeepAliveTime,
-		}
-		// Only relevant when KeepAliveTime is non-zero
-		if c.cfg.DialKeepAliveTimeout > 0 {
-			params.Timeout = c.cfg.DialKeepAliveTimeout
+			Time:    c.cfg.DialKeepAliveTime,
+			Timeout: c.cfg.DialKeepAliveTimeout,
 		}
 		opts = append(opts, grpc.WithKeepaliveParams(params))
 	}
@@ -320,7 +317,7 @@ func (c *Client) dial(endpoint string, dopts ...grpc.DialOption) (*grpc.ClientCo
 		if err != nil {
 			if toErr(ctx, err) != rpctypes.ErrAuthNotEnabled {
 				if err == ctx.Err() && ctx.Err() != c.ctx.Err() {
-					err = grpc.ErrClientConnTimeout
+					err = context.DeadlineExceeded
 				}
 				return nil, err
 			}
@@ -377,7 +374,7 @@ func newClient(cfg *Config) (*Client, error) {
 
 	client.balancer = newSimpleBalancer(cfg.Endpoints)
 	// use Endpoints[0] so that for https:// without any tls config given, then
-	// grpc will assume the ServerName is in the endpoint.
+	// grpc will assume the certificate server name is the endpoint host.
 	conn, err := client.dial(cfg.Endpoints[0], grpc.WithBalancer(client.balancer))
 	if err != nil {
 		client.cancel()
@@ -397,7 +394,7 @@ func newClient(cfg *Config) (*Client, error) {
 		case <-waitc:
 		}
 		if !hasConn {
-			err := grpc.ErrClientConnTimeout
+			err := context.DeadlineExceeded
 			select {
 			case err = <-client.dialerrc:
 			default:
