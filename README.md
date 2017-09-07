@@ -51,8 +51,8 @@ Or
 To check that it's running:
 
 ```bash
-curl -L http://localhost:4200/healthz
-ok
+curl -L http://localhost:4200/health
+OK
 ```
 
 And open http://localhost:4200
