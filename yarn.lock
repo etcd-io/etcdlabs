@@ -35,9 +35,9 @@
   dependencies:
     tslib "^1.7.1"
 
-"@angular/cli@1.4.0":
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/@angular/cli/-/cli-1.4.0.tgz#c7b6f87c793e8147a4a4f5b472245b942be10556"
+"@angular/cli@1.4.1":
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/@angular/cli/-/cli-1.4.1.tgz#3999b93385c87b7c8d1511131c21280ba0e2cf12"
   dependencies:
     "@angular-devkit/build-optimizer" "~0.0.18"
     "@angular-devkit/schematics" "~0.0.21"
