@@ -59,7 +59,7 @@ RUN pushd ${GOPATH}/src/github.com/coreos/etcdlabs \
   && echo "Running nvm scripts..." \
   && source $NVM_DIR/nvm.sh \
   && nvm ls-remote \
-  && nvm install v8.4.0 \
+  && nvm install v8.5.0 \
   && curl https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
   && echo "deb http://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
   && apt-get -y update && apt-get -y install yarn \
@@ -68,11 +68,11 @@ RUN pushd ${GOPATH}/src/github.com/coreos/etcdlabs \
   && yarn install \
   && npm rebuild node-sass --force \
   && npm install \
-  && nvm alias default 8.4.0 \
+  && nvm alias default 8.5.0 \
   && nvm alias default node \
   && which node \
   && node -v \
-  && cp /usr/local/nvm/versions/node/v8.4.0/bin/node /usr/bin/node \
+  && cp /usr/local/nvm/versions/node/v8.5.0/bin/node /usr/bin/node \
   && popd
 
 # Configure reverse proxy
