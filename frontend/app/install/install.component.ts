@@ -92,7 +92,7 @@ export class InstallComponent extends ParentComponent {
                 ),
                 new EtcdFlag(
                     's3',
-                    '/tmp/etcd/s2',
+                    '/tmp/etcd/s3',
                     '${HOME}/certs',
                     'localhost',
                     32379,
