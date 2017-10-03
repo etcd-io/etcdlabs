@@ -107,6 +107,7 @@ export class PlayComponent implements OnInit, AfterContentInit, AfterViewChecked
 
   playgroundActive: boolean;
   serverUptime: string;
+  serverVisits: number;
   userN: number;
   users: string[];
   memberStatuses: MemberStatus[];
@@ -142,6 +143,7 @@ export class PlayComponent implements OnInit, AfterContentInit, AfterViewChecked
 
     this.playgroundActive = backendService.serverStatus.PlaygroundActive;
     this.serverUptime = backendService.serverStatus.ServerUptime;
+    this.serverVisits = backendService.serverStatus.ServerVisits;
     this.userN = backendService.serverStatus.UserN;
     this.users = backendService.serverStatus.Users;
     this.memberStatuses = backendService.serverStatus.MemberStatuses;
@@ -295,6 +297,7 @@ export class PlayComponent implements OnInit, AfterContentInit, AfterViewChecked
 
     this.playgroundActive = resp.PlaygroundActive;
     this.serverUptime = resp.ServerUptime;
+    this.serverVisits = resp.ServerVisits;
     this.userN = resp.UserN;
     this.users = resp.Users;
     this.memberStatuses = resp.MemberStatuses;
