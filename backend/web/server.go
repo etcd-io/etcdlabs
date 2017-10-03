@@ -27,6 +27,7 @@ import (
 	"github.com/coreos/etcdlabs/cluster"
 	"github.com/coreos/etcdlabs/pkg/ratelimit"
 
+	"github.com/axiomhq/hyperloglog"
 	"github.com/golang/glog"
 )
 
@@ -73,7 +74,8 @@ type Server struct {
 var (
 	globalWebserverPort int
 
-	globalCluster *cluster.Cluster
+	globalCluster      *cluster.Cluster
+	globalServerVisits = hyperloglog.New16()
 
 	globalClientRequestIntervalLimit = 3 * time.Second
 	globalClientRequestLimiter       ratelimit.RequestLimiter

@@ -85,6 +85,7 @@ func cleanCache(stopc <-chan struct{}) {
 func withCache(h ContextHandler) ContextHandler {
 	return ContextHandlerFunc(func(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
 		userID := generateUserID(req)
+		globalServerVisits.Insert([]byte(userID))
 		ctx = context.WithValue(ctx, userKey, &userID)
 
 		globalUserCacheLock.Lock()
@@ -143,6 +144,9 @@ type ServerStatus struct {
 	// ServerUptime is the duration since last deploy.
 	ServerUptime string
 
+	// ServerVisits is the number visits since last deploy.
+	ServerVisits uint64
+
 	// UserN is the number of online users.
 	UserN int
 
@@ -193,6 +197,7 @@ func serverStatusHandler(ctx context.Context, w http.ResponseWriter, req *http.R
 		resp := ServerStatus{
 			PlaygroundActive: active,
 			ServerUptime:     humanize.Time(globalCluster.Started),
+			ServerVisits:     globalServerVisits.Estimate(),
 			UserN:            getUserIDsN(),
 			Users:            getUserIDs(),
 			MemberStatuses:   globalCluster.AllMemberStatus(),
