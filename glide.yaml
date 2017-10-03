@@ -1,5 +1,7 @@
 package: github.com/coreos/etcdlabs
 import:
+- package: github.com/axiomhq/hyperloglog
+  version: f93c8603a35921d1f4d742cf063ff5d4c4092f21
 - package: github.com/coreos/etcd
   version: 9c3474e4e028782cc0a33df004977c73d7743c45
   subpackages:
