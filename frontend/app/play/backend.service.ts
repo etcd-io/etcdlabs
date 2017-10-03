@@ -57,18 +57,21 @@ export class MemberStatus {
 export class ServerStatus {
   PlaygroundActive: boolean;
   ServerUptime: string;
+  ServerVisits: number;
   UserN: number;
   Users: string[];
   MemberStatuses: MemberStatus[];
   constructor(
     active: boolean,
     serverUptime: string,
+    serverVisits: number,
     userN: number,
     users: string[],
     memberStatuses: MemberStatus[],
   ) {
     this.PlaygroundActive = active;
     this.ServerUptime = serverUptime;
+    this.ServerVisits = serverVisits;
     this.UserN = userN;
     this.Users = users;
     this.MemberStatuses = memberStatuses;
@@ -97,7 +100,7 @@ export class BackendService {
       new MemberStatus('node4', 'None', 'None', false, 'Stopped', 'node4 has not started...', 0, '0 B', 0),
       new MemberStatus('node5', 'None', 'None', false, 'Stopped', 'node5 has not started...', 0, '0 B', 0),
     ];
-    this.serverStatus = new ServerStatus(false, '0s', 0, [], memberStatuses);
+    this.serverStatus = new ServerStatus(false, '0s', 0, 0, [], memberStatuses);
   }
 
   ///////////////////////////////////////////////////////
