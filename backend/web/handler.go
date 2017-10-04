@@ -85,7 +85,7 @@ func cleanCache(stopc <-chan struct{}) {
 func withCache(h ContextHandler) ContextHandler {
 	return ContextHandlerFunc(func(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
 		userID := generateUserID(req)
-		globalServerVisits.Insert([]byte(userID))
+		globalServerVisits.Insert([]byte(userID + time.Now().String()[:10]))
 		ctx = context.WithValue(ctx, userKey, &userID)
 
 		globalUserCacheLock.Lock()
