@@ -45,7 +45,7 @@ export class InstallComponent extends ParentComponent {
             'California',
             'USA',
             'rsa',
-            4096,
+            2048,
             87600,
             'etcd-root-ca'
         );
