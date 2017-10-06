@@ -3,7 +3,7 @@ language: go
 sudo: false
 
 go:
-- tip
+- 1.9.1
 
 script:
 - ./scripts/tests/go.sh
