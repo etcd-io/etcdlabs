@@ -118,7 +118,7 @@ export class EtcdFlag {
 # remove this directory if the cluster is new; keep if restarting etcd
 `;
         if (ds !== '') {
-            cs += `# sudo rm -rf ` + ds + `
+            cs += `# rm -rf ` + ds + `
 `;
         }
         return cs;
