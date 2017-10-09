@@ -1,6 +1,6 @@
 {
     "project": {
-        "version": "1.4.3",
+        "version": "1.5.0-beta.4",
         "name": "app-etcd"
     },
     "apps": [{
