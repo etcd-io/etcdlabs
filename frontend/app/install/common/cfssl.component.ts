@@ -101,7 +101,7 @@ export class CFSSL {
     getInstallCommand(arch: string) {
         let divide = getDivider(this.getExecDir());
 
-        return `rm -f /tmp/cfssl* && rm -rf /tmp/certs && mkdir -p /tmp/certs
+        let txt = `rm -f /tmp/cfssl* && rm -rf /tmp/certs && mkdir -p /tmp/certs
 
 curl -L https://pkg.cfssl.org/${this.version}/cfssl_${arch} -o /tmp/cfssl
 chmod +x /tmp/cfssl
@@ -116,6 +116,13 @@ sudo mv /tmp/cfssljson ` + this.getExecDir() + `/cfssljson
 
 mkdir -p ${this.getCertsDir()}
 `;
+        if (arch === 'darwin-amd64') {
+            txt = `<<COMMENT
+brew install cfssl
+COMMENT
+` + txt;
+        }
+        return txt;
     }
 
     getRootCACommand() {
