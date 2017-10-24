@@ -120,6 +120,7 @@ mkdir -p ${this.getCertsDir()}
             txt = `<<COMMENT
 brew install cfssl
 COMMENT
+
 ` + txt;
         }
         return txt;
