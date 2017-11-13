@@ -294,7 +294,7 @@ func (clus *Cluster) Add() error {
 
 	// auto-compaction every hour
 	cfg.AutoCompactionMode = compactor.ModePeriodic
-	cfg.AutoCompactionRetention = 1
+	cfg.AutoCompactionRetention = "1h"
 
 	clus.Members = append(clus.Members, &Member{
 		clus: clus,
