@@ -1,9 +1,9 @@
 package: github.com/coreos/etcdlabs
 import:
 - package: github.com/axiomhq/hyperloglog
-  version: f93c8603a35921d1f4d742cf063ff5d4c4092f21
+  version: 730eea1500d5c665305c6717138f62f269c2bf79
 - package: github.com/coreos/etcd
-  version: 9c3474e4e028782cc0a33df004977c73d7743c45
+  version: adeb1fb6200e2fee245edaa02a9c6ed4c9cf1adb
   subpackages:
   - clientv3
   - clientv3/namespace
@@ -15,20 +15,20 @@ import:
   - pkg/netutil
   - tools/functional-tester/etcd-agent/client
 - package: github.com/dustin/go-humanize
-  version: 259d2a102b871d17f30e3cd9881a642961a1e486
+  version: bb3d318650d48840a39aa21a027c6630e198e626
 - package: github.com/gogo/protobuf
-  version: 8d70fb3182befc465c4a1eac8ad4d38ff49778e2
+  version: 616a82ed12d78d24d4839363e8f3c5d3f20627cf
   subpackages:
   - gogoproto
   - proto
   - protoc-gen-gogo/descriptor
 - package: github.com/golang/protobuf
-  version: 4bd1920723d7b7c925de087aa32e2187708897f7
+  version: 1643683e1b54a9e88ad26d98f81400c8c9d9f4f9
   subpackages:
   - jsonpb
   - proto
 - package: google.golang.org/grpc
-  version: v1.5.1
+  version: v1.7.2
   subpackages:
   - codes
   - credentials
@@ -41,7 +41,7 @@ import:
   - health
   - health/grpc_health_v1
 - package: golang.org/x/sync
-  version: 5a06fca2c336a4b2b2fcb45702e8c47621b2aa2c
+  version: fd80eb99c8f653c847d294a001bdf2a3a6f768f5
   subpackages:
   - errgroup
 - package: golang.org/x/time
