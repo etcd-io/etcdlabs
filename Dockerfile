@@ -34,7 +34,7 @@ RUN apt-get -y update \
 ENV GOROOT /usr/local/go
 ENV GOPATH /gopath
 ENV PATH ${GOPATH}/bin:${GOROOT}/bin:${PATH}
-ENV GO_VERSION 1.9.1
+ENV GO_VERSION 1.9.2
 ENV GO_DOWNLOAD_URL https://storage.googleapis.com/golang
 RUN rm -rf ${GOROOT} \
   && curl -s ${GO_DOWNLOAD_URL}/go${GO_VERSION}.linux-amd64.tar.gz | tar -v -C /usr/local/ -xz \
@@ -55,11 +55,11 @@ RUN pushd $GOPATH/src/github.com/coreos/etcdlabs \
 # 'node' needs to be in $PATH for 'yarn start' command
 ENV NVM_DIR /usr/local/nvm
 RUN pushd ${GOPATH}/src/github.com/coreos/etcdlabs \
-  && curl https://raw.githubusercontent.com/creationix/nvm/v0.33.5/install.sh | /bin/bash \
+  && curl https://raw.githubusercontent.com/creationix/nvm/v0.33.6/install.sh | /bin/bash \
   && echo "Running nvm scripts..." \
   && source $NVM_DIR/nvm.sh \
   && nvm ls-remote \
-  && nvm install v8.7.0 \
+  && nvm install v8.9.1 \
   && curl https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
   && echo "deb http://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
   && apt-get -y update && apt-get -y install yarn \
@@ -68,11 +68,11 @@ RUN pushd ${GOPATH}/src/github.com/coreos/etcdlabs \
   && yarn install \
   && npm rebuild node-sass --force \
   && npm install \
-  && nvm alias default 8.7.0 \
+  && nvm alias default 8.9.1 \
   && nvm alias default node \
   && which node \
   && node -v \
-  && cp /usr/local/nvm/versions/node/v8.7.0/bin/node /usr/bin/node \
+  && cp /usr/local/nvm/versions/node/v8.9.1/bin/node /usr/bin/node \
   && popd
 
 # Configure reverse proxy
