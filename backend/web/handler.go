@@ -196,9 +196,9 @@ func serverStatusHandler(ctx context.Context, w http.ResponseWriter, req *http.R
 
 		active = active && globalCluster != nil
 
-		globalServerVisits.Lock()
+		globalServerVisitsMu.Lock()
 		vnum := globalServerVisits.Estimate()
-		globalServerVisits.Unlock()
+		globalServerVisitsMu.Unlock()
 		resp := ServerStatus{
 			PlaygroundActive: active,
 			ServerUptime:     humanize.Time(globalCluster.Started),
