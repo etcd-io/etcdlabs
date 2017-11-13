@@ -6,13 +6,13 @@
 	<p class="narrow-paragraph">
 		This is an example workflow to install and deploy etcd.
 	</p>
-	<md-card>
-		<md-checkbox [(ngModel)]="etcd.secure">Secure connection (HTTPS)</md-checkbox>
-		<md-checkbox [(ngModel)]="etcd.enableProfile">Enable profiler</md-checkbox>
-		<md-checkbox [(ngModel)]="etcd.debug">Debug mode</md-checkbox>
+	<mat-card>
+		<mat-checkbox [(ngModel)]="etcd.secure">Secure connection (HTTPS)</mat-checkbox>
+		<mat-checkbox [(ngModel)]="etcd.enableProfile">Enable profiler</mat-checkbox>
+		<mat-checkbox [(ngModel)]="etcd.debug">Debug mode</mat-checkbox>
 		<p></p>
-		<md-form-field><input mdInput type="number" [(ngModel)]="etcd.autoCompactHour" placeholder="auto compaction (hour)"></md-form-field>
-		<md-form-field><input mdInput type="number" [(ngModel)]="etcd.clusterSize" placeholder="Cluster size (up to 7)"></md-form-field>
+		<mat-form-field><input matInput type="number" [(ngModel)]="etcd.autoCompactHour" placeholder="auto compaction (hour)"></mat-form-field>
+		<mat-form-field><input matInput type="number" [(ngModel)]="etcd.clusterSize" placeholder="Cluster size (up to 7)"></mat-form-field>
 		<span *ngIf="etcd.clusterSize > 7" class="error-message">This tool only supports up to 7 nodes</span>
 		<span *ngIf="etcd.clusterSize < 1" class="error-message">Minimum cluster size is 1</span>
 		<span *ngIf="etcd.clusterSize % 2 == 0" class="error-message">Cluster size should an odd number</span>
@@ -20,41 +20,41 @@
 		<div *ngFor="let flag of etcd.flags; let i = index;">
 			<div *ngIf="etcd.clusterSize > i">
 				<br>
-				<md-card-subtitle class="sub-sub-title">Node {{i+1}}</md-card-subtitle>
-				<md-form-field><input mdInput type="text" [(ngModel)]="flag.name" placeholder="etcd name"></md-form-field>
-				<md-form-field><input mdInput type="text" [(ngModel)]="flag.dataDir" placeholder="etcd data directory"></md-form-field>
+				<mat-card-subtitle class="sub-sub-title">Node {{i+1}}</mat-card-subtitle>
+				<mat-form-field><input matInput type="text" [(ngModel)]="flag.name" placeholder="etcd name"></mat-form-field>
+				<mat-form-field><input matInput type="text" [(ngModel)]="flag.dataDir" placeholder="etcd data directory"></mat-form-field>
 				<br>
-				<md-form-field><input mdInput type="text" [(ngModel)]="flag.ipAddress" placeholder="IP address"></md-form-field>
-				<md-form-field><input mdInput type="number" [(ngModel)]="flag.clientPort" placeholder="client port"></md-form-field>
-				<md-form-field><input mdInput type="number" [(ngModel)]="flag.peerPort" placeholder="peer port"></md-form-field>
+				<mat-form-field><input matInput type="text" [(ngModel)]="flag.ipAddress" placeholder="IP address"></mat-form-field>
+				<mat-form-field><input matInput type="number" [(ngModel)]="flag.clientPort" placeholder="client port"></mat-form-field>
+				<mat-form-field><input matInput type="number" [(ngModel)]="flag.peerPort" placeholder="peer port"></mat-form-field>
 				<br>
-				<md-form-field><input mdInput type="text" [(ngModel)]="flag.initialClusterToken" placeholder="cluster token"></md-form-field>
-				<md-form-field><input mdInput type="text" [(ngModel)]="flag.initialClusterState" placeholder="cluster state"></md-form-field>
+				<mat-form-field><input matInput type="text" [(ngModel)]="flag.initialClusterToken" placeholder="cluster token"></mat-form-field>
+				<mat-form-field><input matInput type="text" [(ngModel)]="flag.initialClusterState" placeholder="cluster state"></mat-form-field>
 				<span *ngIf="flag.initialClusterState != 'new' && flag.initialClusterState != 'existing'" class="error-message">Cluster state must be either 'new' or 'existing'</span>
 				<br *ngIf="etcd.secure">
-				<md-form-field *ngIf="etcd.secure"><input mdInput dividerColor="warn" type="text" [(ngModel)]="flag.certsDir" placeholder="etcd certs directory"></md-form-field>
+				<mat-form-field *ngIf="etcd.secure"><input matInput dividerColor="warn" type="text" [(ngModel)]="flag.certsDir" placeholder="etcd certs directory"></mat-form-field>
 				<br *ngIf="etcd.secure">
-				<md-form-field *ngIf="etcd.secure"><input mdInput dividerColor="warn" type="text" [(ngModel)]="flag.clientRootCAFile" placeholder="client trusted root CA"></md-form-field>
-				<md-form-field *ngIf="etcd.secure"><input mdInput dividerColor="warn" type="text" [(ngModel)]="flag.clientCertFile" placeholder="client cert (public)"></md-form-field>
-				<md-form-field *ngIf="etcd.secure"><input mdInput dividerColor="warn" type="text" [(ngModel)]="flag.clientKeyFile" placeholder="client key (private)"></md-form-field>
+				<mat-form-field *ngIf="etcd.secure"><input matInput dividerColor="warn" type="text" [(ngModel)]="flag.clientRootCAFile" placeholder="client trusted root CA"></mat-form-field>
+				<mat-form-field *ngIf="etcd.secure"><input matInput dividerColor="warn" type="text" [(ngModel)]="flag.clientCertFile" placeholder="client cert (public)"></mat-form-field>
+				<mat-form-field *ngIf="etcd.secure"><input matInput dividerColor="warn" type="text" [(ngModel)]="flag.clientKeyFile" placeholder="client key (private)"></mat-form-field>
 				<br *ngIf="etcd.secure">
-				<md-form-field *ngIf="etcd.secure"><input mdInput dividerColor="warn" type="text" [(ngModel)]="flag.peerRootCAFile" placeholder="peer trusted root CA"></md-form-field>
-				<md-form-field *ngIf="etcd.secure"><input mdInput dividerColor="warn" type="text" [(ngModel)]="flag.peerCertFile" placeholder="peer cert (public)"></md-form-field>
-				<md-form-field *ngIf="etcd.secure"><input mdInput dividerColor="warn" type="text" [(ngModel)]="flag.peerKeyFile" placeholder="peer key (private)"></md-form-field>
+				<mat-form-field *ngIf="etcd.secure"><input matInput dividerColor="warn" type="text" [(ngModel)]="flag.peerRootCAFile" placeholder="peer trusted root CA"></mat-form-field>
+				<mat-form-field *ngIf="etcd.secure"><input matInput dividerColor="warn" type="text" [(ngModel)]="flag.peerCertFile" placeholder="peer cert (public)"></mat-form-field>
+				<mat-form-field *ngIf="etcd.secure"><input matInput dividerColor="warn" type="text" [(ngModel)]="flag.peerKeyFile" placeholder="peer key (private)"></mat-form-field>
 			</div>
 		</div>
 		<br>
-		<md-card-actions>
-			<a href="{{etcd.getFlagHelpURL()}}" target="_blank"><button md-button color="warn">More flags</button></a>
-		</md-card-actions>
-	</md-card>
+		<mat-card-actions>
+			<a href="{{etcd.getFlagHelpURL()}}" target="_blank"><button mat-button color="warn">More flags</button></a>
+		</mat-card-actions>
+	</mat-card>
 	<br>
 	<div align="left" class="narrow-paragraph"><a href="/install#top-top" class="normal-link">↑ top</a></div>
 	<br><br>
 	<div id="top"></div>
-	<md-tab-group>
-		<md-tab>
-			<ng-template mdTabLabel>
+	<mat-tab-group>
+		<mat-tab>
+			<ng-template matTabLabel>
 				TLS
 			</ng-template>
 			<br>
@@ -67,9 +67,9 @@
 			<br>
 			<h5>Install cfssl</h5>
 			<br>
-			<md-form-field><input mdInput type="text" [(ngModel)]="cfssl.version" placeholder="cfssl version"></md-form-field>
-			<md-form-field><input mdInput type="text" [(ngModel)]="cfssl.execDir" placeholder="cfssl exec dir"></md-form-field>
-			<md-form-field><input mdInput type="text" [(ngModel)]="cfssl.srcCertsDir" placeholder="source certs dir"></md-form-field>
+			<mat-form-field><input matInput type="text" [(ngModel)]="cfssl.version" placeholder="cfssl version"></mat-form-field>
+			<mat-form-field><input matInput type="text" [(ngModel)]="cfssl.execDir" placeholder="cfssl exec dir"></mat-form-field>
+			<mat-form-field><input matInput type="text" [(ngModel)]="cfssl.srcCertsDir" placeholder="source certs dir"></mat-form-field>
 			<br>
 			<br>
 			<h5>Install on Linux</h5>
@@ -111,17 +111,17 @@
 				portable installation experience across multiple cloud-based and on-premises Kubernetes deployments.
 			</p>
 			<br>
-			<md-form-field><input mdInput type="text" [(ngModel)]="cfssl.organization" placeholder="Organization"></md-form-field>
-			<md-form-field><input mdInput type="text" [(ngModel)]="cfssl.organizationUnit" placeholder="Organization Unit"></md-form-field>
-			<md-form-field><input mdInput type="text" [(ngModel)]="cfssl.locationCity" placeholder="City"></md-form-field>
-			<md-form-field><input mdInput type="text" [(ngModel)]="cfssl.locationState" placeholder="State"></md-form-field>
-			<md-form-field><input mdInput type="text" [(ngModel)]="cfssl.locationCountry" placeholder="Country"></md-form-field>
+			<mat-form-field><input matInput type="text" [(ngModel)]="cfssl.organization" placeholder="Organization"></mat-form-field>
+			<mat-form-field><input matInput type="text" [(ngModel)]="cfssl.organizationUnit" placeholder="Organization Unit"></mat-form-field>
+			<mat-form-field><input matInput type="text" [(ngModel)]="cfssl.locationCity" placeholder="City"></mat-form-field>
+			<mat-form-field><input matInput type="text" [(ngModel)]="cfssl.locationState" placeholder="State"></mat-form-field>
+			<mat-form-field><input matInput type="text" [(ngModel)]="cfssl.locationCountry" placeholder="Country"></mat-form-field>
 			<br>
-			<md-form-field><input mdInput type="text" [(ngModel)]="cfssl.keyAlgorithm" placeholder="Key Algorithm"></md-form-field>
-			<md-form-field><input mdInput type="number" [(ngModel)]="cfssl.keySize" placeholder="Key Size"></md-form-field>
-			<md-form-field><input mdInput type="number" [(ngModel)]="cfssl.keyExpirationHour" placeholder="Key Expiration (hour)"></md-form-field>
+			<mat-form-field><input matInput type="text" [(ngModel)]="cfssl.keyAlgorithm" placeholder="Key Algorithm"></mat-form-field>
+			<mat-form-field><input matInput type="number" [(ngModel)]="cfssl.keySize" placeholder="Key Size"></mat-form-field>
+			<mat-form-field><input matInput type="number" [(ngModel)]="cfssl.keyExpirationHour" placeholder="Key Expiration (hour)"></mat-form-field>
 			<br>
-			<md-form-field><input mdInput type="text" [(ngModel)]="cfssl.commonName" placeholder="Common Name"></md-form-field>
+			<mat-form-field><input matInput type="text" [(ngModel)]="cfssl.commonName" placeholder="Common Name"></mat-form-field>
 			<br>
 			<br>
 			<pre class="code-dark">{{cfssl.getRootCACommand()}}</pre> Results:
@@ -184,9 +184,9 @@
 			<div align="right" class="narrow-paragraph"><a href="/install#top" class="normal-link">↑ top</a></div>
 			<br>
 			<br>
-		</md-tab>
-		<md-tab>
-			<ng-template mdTabLabel>
+		</mat-tab>
+		<mat-tab>
+			<ng-template matTabLabel>
 				Build
 			</ng-template>
 			<br>
@@ -200,7 +200,7 @@
 				etcd is written in Go. To build from source, you need Go 1.7+. This assumes host OS is Linux.
 			</p>
 			<br>
-			<md-form-field><input mdInput type="text" [(ngModel)]="go.version" placeholder="Go version"></md-form-field>
+			<mat-form-field><input matInput type="text" [(ngModel)]="go.version" placeholder="Go version"></mat-form-field>
 			<br>
 			<div class="osx-window">
 				<div class="window">
@@ -220,9 +220,9 @@
 				Now let's build etcd from source.
 			</p>
 			<p>
-				<md-form-field><input mdInput type="text" [(ngModel)]="inputGitUser" placeholder="Git User"></md-form-field>
-				<md-form-field><input mdInput type="text" [(ngModel)]="inputGitBranch" placeholder="Git Branch"></md-form-field>
-				<md-form-field><input mdInput type="text" [(ngModel)]="etcd.execDir" placeholder="etcd exec dir"></md-form-field>
+				<mat-form-field><input matInput type="text" [(ngModel)]="inputGitUser" placeholder="Git User"></mat-form-field>
+				<mat-form-field><input matInput type="text" [(ngModel)]="inputGitBranch" placeholder="Git Branch"></mat-form-field>
+				<mat-form-field><input matInput type="text" [(ngModel)]="etcd.execDir" placeholder="etcd exec dir"></mat-form-field>
 			</p>
 			<div class="osx-window">
 				<div class="window-narrow">
@@ -240,9 +240,9 @@
 			<div align="right" class="narrow-paragraph"><a href="/install#top" class="normal-link">↑ top</a></div>
 			<br>
 			<br>
-		</md-tab>
-		<md-tab>
-			<ng-template mdTabLabel>
+		</mat-tab>
+		<mat-tab>
+			<ng-template matTabLabel>
 				Bare metal, VM
 			</ng-template>
 			<br>
@@ -252,8 +252,8 @@
 				the simplest way to run etcd.
 			</p>
 			<br>
-			<md-form-field><input mdInput type="text" [(ngModel)]="etcd.version" placeholder="etcd version"></md-form-field>
-			<md-form-field><input mdInput type="text" [(ngModel)]="etcd.execDir" placeholder="etcd exec dir"></md-form-field>
+			<mat-form-field><input matInput type="text" [(ngModel)]="etcd.version" placeholder="etcd version"></mat-form-field>
+			<mat-form-field><input matInput type="text" [(ngModel)]="etcd.execDir" placeholder="etcd exec dir"></mat-form-field>
 			<br>
 			<br>
 			<h5>Install on Linux</h5>
@@ -323,9 +323,9 @@
 			<div align="right" class="narrow-paragraph"><a href="/install#top" class="normal-link">↑ top</a></div>
 			<br>
 			<br>
-		</md-tab>
-		<md-tab>
-			<ng-template mdTabLabel>
+		</mat-tab>
+		<mat-tab>
+			<ng-template matTabLabel>
 				systemd
 			</ng-template>
 			<br>
@@ -335,8 +335,8 @@
 				<a href="https://en.wikipedia.org/wiki/Init" target="_blank" class="normal-link">init</a> system.
 			</p>
 			<br>
-			<md-form-field><input mdInput type="text" [(ngModel)]="etcd.version" placeholder="etcd version"></md-form-field>
-			<md-form-field><input mdInput type="text" [(ngModel)]="etcd.execDir" placeholder="etcd exec dir"></md-form-field>
+			<mat-form-field><input matInput type="text" [(ngModel)]="etcd.version" placeholder="etcd version"></mat-form-field>
+			<mat-form-field><input matInput type="text" [(ngModel)]="etcd.execDir" placeholder="etcd exec dir"></mat-form-field>
 			<br>
 			<br>
 			<h5>Install on Linux</h5>
@@ -395,9 +395,9 @@
 			<div align="right" class="narrow-paragraph"><a href="/install#top" class="normal-link">↑ top</a></div>
 			<br>
 			<br>
-		</md-tab>
-		<md-tab>
-			<ng-template mdTabLabel>
+		</mat-tab>
+		<mat-tab>
+			<ng-template matTabLabel>
 				Docker
 			</ng-template>
 			<br>
@@ -415,7 +415,7 @@
 				Seems like etcd is configured to run in localhost. Please make sure ports and data directory do not conflict!
 			</p>
 			<br>
-			<md-form-field><input mdInput type="text" [(ngModel)]="etcd.version" placeholder="etcd version"></md-form-field>
+			<mat-form-field><input matInput type="text" [(ngModel)]="etcd.version" placeholder="etcd version"></mat-form-field>
 			<br>
 			<div *ngFor="let flag of etcd.flags; let i = index;">
 				<div *ngIf="etcd.clusterSize > i">
@@ -451,9 +451,9 @@
 			<div align="right" class="narrow-paragraph"><a href="/install#top" class="normal-link">↑ top</a></div>
 			<br>
 			<br>
-		</md-tab>
-		<md-tab>
-			<ng-template mdTabLabel>
+		</mat-tab>
+		<mat-tab>
+			<ng-template matTabLabel>
 				Container Linux
 			</ng-template>
 			<br>
@@ -465,6 +465,6 @@
 			<div align="right" class="narrow-paragraph"><a href="/install#top" class="normal-link">↑ top</a></div>
 			<br>
 			<br>
-		</md-tab>
-	</md-tab-group>
+		</mat-tab>
+	</mat-tab-group>
 </div>

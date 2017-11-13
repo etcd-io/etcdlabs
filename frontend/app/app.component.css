@@ -1,4 +1,4 @@
-md-toolbar a {
-    /*select all <a> elements inside <md-toolbar> elements*/
+mat-toolbar a {
+    /*select all <a> elements inside <mat-toolbar> elements*/
     color: white;
 }

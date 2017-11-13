@@ -7,13 +7,13 @@ import { HttpModule, JsonpModule } from '@angular/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import {
-  MdButtonModule,
-  MdToolbarModule,
-  MdCardModule,
-  MdMenuModule,
-  MdInputModule,
-  MdTabsModule,
-  MdCheckboxModule,
+  MatButtonModule,
+  MatToolbarModule,
+  MatCardModule,
+  MatMenuModule,
+  MatInputModule,
+  MatTabsModule,
+  MatCheckboxModule,
 } from '@angular/material';
 
 import { AppComponent } from './app.component';
@@ -30,13 +30,13 @@ import { routing, routedComponents } from './app.routing';
     // BrowserAnimationsModule,
     NoopAnimationsModule,
 
-    MdButtonModule,
-    MdToolbarModule,
-    MdCardModule,
-    MdMenuModule,
-    MdInputModule,
-    MdTabsModule,
-    MdCheckboxModule,
+    MatButtonModule,
+    MatToolbarModule,
+    MatCardModule,
+    MatMenuModule,
+    MatInputModule,
+    MatTabsModule,
+    MatCheckboxModule,
 
     routing,
   ],

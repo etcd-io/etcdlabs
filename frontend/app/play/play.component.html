@@ -1,8 +1,8 @@
 <div class="play-group">
-	<button (click)="clickConnect()" md-raised-button color="primary" *ngIf="!connected">Connect</button>
-	<button (click)="clickDisconnect()" md-raised-button color="warn" *ngIf="connected">Disconnect</button>
-	<button md-raised-button (click)="clickShowUser()">{{userN}} user(s) online</button>
-	<button md-raised-button>Up {{serverUptime}} (visits {{serverVisits}})</button>
+	<button (click)="clickConnect()" mat-raised-button color="primary" *ngIf="!connected">Connect</button>
+	<button (click)="clickDisconnect()" mat-raised-button color="warn" *ngIf="connected">Disconnect</button>
+	<button mat-raised-button (click)="clickShowUser()">{{userN}} user(s) online</button>
+	<button mat-raised-button>Up {{serverUptime}} (visits {{serverVisits}})</button>
 	<br>
 	<div *ngIf="showUser">
 		<br>
@@ -77,18 +77,18 @@
 			</svg>
 		</div>
 		<div class="block block-copy half">
-			<md-card class="client-card">
-				<md-tab-group [(selectedIndex)]="selectedTab">
-					<md-tab>
-						<ng-template mdTabLabel><b>Write</b></ng-template>
+			<mat-card class="client-card">
+				<mat-tab-group [(selectedIndex)]="selectedTab">
+					<mat-tab>
+						<ng-template matTabLabel><b>Write</b></ng-template>
 							<br>
 							<div align="center">
 								<span class="select-node-checkbox">Endpoints: </span>
-								<md-checkbox [(ngModel)]="selectedNodes[0]" [checked]="true"><span class="select-node-checkbox">{{ memberStatuses[0].Name }}</span></md-checkbox>
-								<md-checkbox [(ngModel)]="selectedNodes[1]"><span class="select-node-checkbox">{{ memberStatuses[1].Name }}</span></md-checkbox>
-								<md-checkbox [(ngModel)]="selectedNodes[2]"><span class="select-node-checkbox">{{ memberStatuses[2].Name }}</span></md-checkbox>
-								<md-checkbox [(ngModel)]="selectedNodes[3]"><span class="select-node-checkbox">{{ memberStatuses[3].Name }}</span></md-checkbox>
-								<md-checkbox [(ngModel)]="selectedNodes[4]"><span class="select-node-checkbox">{{ memberStatuses[4].Name }}</span></md-checkbox>
+								<mat-checkbox [(ngModel)]="selectedNodes[0]" [checked]="true"><span class="select-node-checkbox">{{ memberStatuses[0].Name }}</span></mat-checkbox>
+								<mat-checkbox [(ngModel)]="selectedNodes[1]"><span class="select-node-checkbox">{{ memberStatuses[1].Name }}</span></mat-checkbox>
+								<mat-checkbox [(ngModel)]="selectedNodes[2]"><span class="select-node-checkbox">{{ memberStatuses[2].Name }}</span></mat-checkbox>
+								<mat-checkbox [(ngModel)]="selectedNodes[3]"><span class="select-node-checkbox">{{ memberStatuses[3].Name }}</span></mat-checkbox>
+								<mat-checkbox [(ngModel)]="selectedNodes[4]"><span class="select-node-checkbox">{{ memberStatuses[4].Name }}</span></mat-checkbox>
 							</div>
 							<br>
 							<div class="input-group">
@@ -97,8 +97,8 @@
 								<input type="text" style="min-width: 250px;" class="form-control" placeholder="Type your key..." [(ngModel)]="inputKey" />
 								<!--processWrite(inputKey.value, inputValue.value); inputKey.value=''; inputValue.value='';-->
 								<span class="input-group-btn">
-								<button md-button color="primary" (click)="processClientRequest('write');">Submit</button>
-								<button md-button color="warn" (click)="processClientRequest('stress');">Stress</button>
+								<button mat-button color="primary" (click)="processClientRequest('write');">Submit</button>
+								<button mat-button color="warn" (click)="processClientRequest('stress');">Stress</button>
 								</span>
 							</div>
 							<div class="input-group">
@@ -108,61 +108,61 @@
 							<p class="client-card-text-status">
 								{{writeResult}} <span *ngIf='clientResponseError'>(error: {{clientResponseError}})</span>
 							</p>
-					</md-tab>
-					<md-tab>
-						<ng-template mdTabLabel><b>Delete</b></ng-template>
+					</mat-tab>
+					<mat-tab>
+						<ng-template matTabLabel><b>Delete</b></ng-template>
 							<br>
 							<div align="center">
 								<span class="select-node-checkbox">Endpoints: </span>
-								<md-checkbox [(ngModel)]="selectedNodes[0]" [checked]="true"><span class="select-node-checkbox">{{ memberStatuses[0].Name }}</span></md-checkbox>
-								<md-checkbox [(ngModel)]="selectedNodes[1]"><span class="select-node-checkbox">{{ memberStatuses[1].Name }}</span></md-checkbox>
-								<md-checkbox [(ngModel)]="selectedNodes[2]"><span class="select-node-checkbox">{{ memberStatuses[2].Name }}</span></md-checkbox>
-								<md-checkbox [(ngModel)]="selectedNodes[3]"><span class="select-node-checkbox">{{ memberStatuses[3].Name }}</span></md-checkbox>
-								<md-checkbox [(ngModel)]="selectedNodes[4]"><span class="select-node-checkbox">{{ memberStatuses[4].Name }}</span></md-checkbox>
+								<mat-checkbox [(ngModel)]="selectedNodes[0]" [checked]="true"><span class="select-node-checkbox">{{ memberStatuses[0].Name }}</span></mat-checkbox>
+								<mat-checkbox [(ngModel)]="selectedNodes[1]"><span class="select-node-checkbox">{{ memberStatuses[1].Name }}</span></mat-checkbox>
+								<mat-checkbox [(ngModel)]="selectedNodes[2]"><span class="select-node-checkbox">{{ memberStatuses[2].Name }}</span></mat-checkbox>
+								<mat-checkbox [(ngModel)]="selectedNodes[3]"><span class="select-node-checkbox">{{ memberStatuses[3].Name }}</span></mat-checkbox>
+								<mat-checkbox [(ngModel)]="selectedNodes[4]"><span class="select-node-checkbox">{{ memberStatuses[4].Name }}</span></mat-checkbox>
 							</div>
 							<br>
 							<div class="input-group">
 								<input type="text" style="min-width: 250px;" class="form-control" placeholder="Type your key..." [(ngModel)]="inputKey" />
 								<span class="input-group-btn">
-								<button md-button color="primary" (click)="processClientRequest('delete');">Submit</button>
-								<md-checkbox [(ngModel)]="deleteReadByPrefix"><span class="prefix-checkbox">Prefix</span></md-checkbox>
+								<button mat-button color="primary" (click)="processClientRequest('delete');">Submit</button>
+								<mat-checkbox [(ngModel)]="deleteReadByPrefix"><span class="prefix-checkbox">Prefix</span></mat-checkbox>
 								</span>
 							</div>
 							<p class="client-card-text-status">
 								{{deleteResult}} <span *ngIf='clientResponseError'>(error: {{clientResponseError}})</span>
 							</p>
-					</md-tab>
-					<md-tab>
-						<ng-template mdTabLabel><b>Read</b></ng-template>
+					</mat-tab>
+					<mat-tab>
+						<ng-template matTabLabel><b>Read</b></ng-template>
 							<br>
 							<div align="center">
 								<span class="select-node-checkbox">Endpoints: </span>
-								<md-checkbox [(ngModel)]="selectedNodes[0]" [checked]="true"><span class="select-node-checkbox">{{ memberStatuses[0].Name }}</span></md-checkbox>
-								<md-checkbox [(ngModel)]="selectedNodes[1]"><span class="select-node-checkbox">{{ memberStatuses[1].Name }}</span></md-checkbox>
-								<md-checkbox [(ngModel)]="selectedNodes[2]"><span class="select-node-checkbox">{{ memberStatuses[2].Name }}</span></md-checkbox>
-								<md-checkbox [(ngModel)]="selectedNodes[3]"><span class="select-node-checkbox">{{ memberStatuses[3].Name }}</span></md-checkbox>
-								<md-checkbox [(ngModel)]="selectedNodes[4]"><span class="select-node-checkbox">{{ memberStatuses[4].Name }}</span></md-checkbox>
+								<mat-checkbox [(ngModel)]="selectedNodes[0]" [checked]="true"><span class="select-node-checkbox">{{ memberStatuses[0].Name }}</span></mat-checkbox>
+								<mat-checkbox [(ngModel)]="selectedNodes[1]"><span class="select-node-checkbox">{{ memberStatuses[1].Name }}</span></mat-checkbox>
+								<mat-checkbox [(ngModel)]="selectedNodes[2]"><span class="select-node-checkbox">{{ memberStatuses[2].Name }}</span></mat-checkbox>
+								<mat-checkbox [(ngModel)]="selectedNodes[3]"><span class="select-node-checkbox">{{ memberStatuses[3].Name }}</span></mat-checkbox>
+								<mat-checkbox [(ngModel)]="selectedNodes[4]"><span class="select-node-checkbox">{{ memberStatuses[4].Name }}</span></mat-checkbox>
 							</div>
 							<br>
 							<div class="input-group">
 								<input type="text" style="min-width: 250px;" class="form-control" placeholder="Type your key..." [(ngModel)]="inputKey" />
 								<span class="input-group-btn">
-								<button md-button color="primary" (click)="processClientRequest('get');">Submit</button>
-								<md-checkbox [(ngModel)]="deleteReadByPrefix"><span class="prefix-checkbox">Prefix</span></md-checkbox>
+								<button mat-button color="primary" (click)="processClientRequest('get');">Submit</button>
+								<mat-checkbox [(ngModel)]="deleteReadByPrefix"><span class="prefix-checkbox">Prefix</span></mat-checkbox>
 								</span>
 							</div>
 							<p class="client-card-text-status">
 								{{readResult}} <span *ngIf='clientResponseError'>(error: {{clientResponseError}})</span>
 							</p>
-					</md-tab>
-					<md-tab *ngFor="let memberStatus of memberStatuses;">
-						<ng-template mdTabLabel>{{memberStatus.Name}}</ng-template>
+					</mat-tab>
+					<mat-tab *ngFor="let memberStatus of memberStatuses;">
+						<ng-template matTabLabel>{{memberStatus.Name}}</ng-template>
 							<br>
 							<div align="center">
-								<!--md-tooltip="Click to kill {{memberStatus.Name}}" -->
-								<!--md-tooltip="Click to restart {{memberStatus.Name}}"-->
-								<button md-button color="warn" (click)="processClientRequest('stop-node');">Stop</button>
-								<button md-button (click)="processClientRequest('restart-node');">Restart</button>
+								<!--matTooltip="Click to kill {{memberStatus.Name}}" -->
+								<!--matTooltip="Click to restart {{memberStatus.Name}}"-->
+								<button mat-button color="warn" (click)="processClientRequest('stop-node');">Stop</button>
+								<button mat-button (click)="processClientRequest('restart-node');">Restart</button>
 							</div>
 							<ul>
 								<li><span class="client-card-text-list-title">ID:</span> <span class="client-card-text-id">{{memberStatus.ID}}</span></li>
@@ -178,9 +178,9 @@
 							<p class="client-card-text-status">
 								{{memberStatus.StateTxt}} <span *ngIf='serverStatusErrorMessage'>(error: {{serverStatusErrorMessage}})</span>
 							</p>
-					</md-tab>
-				</md-tab-group>
-			</md-card>
+					</mat-tab>
+				</mat-tab-group>
+			</mat-card>
 		</div>
 	</div>
 	<div class="inner">

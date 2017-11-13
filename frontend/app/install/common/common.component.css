@@ -1,11 +1,11 @@
 /deep/ .mdTabLabel {
     /*TODO: adjust mdTabLabel size by class*/
     text-align: center;
-    /*decrease width of md-tab labels*/
+    /*decrease width of mat-tab labels*/
     min-width: 50px !important;
 }
 
-md-divider {
+mat-divider {
     color: lightgray;
 }
 
@@ -18,7 +18,7 @@ a {
     text-decoration: none !important;
 }
 
-.install-group md-checkbox {
+.install-group mat-checkbox {
     margin: 10px;
 }
 
