@@ -74,8 +74,9 @@ type Server struct {
 var (
 	globalWebserverPort int
 
-	globalCluster      *cluster.Cluster
-	globalServerVisits = hyperloglog.New16()
+	globalCluster        *cluster.Cluster
+	globalServerVisitsMu sync.Mutex
+	globalServerVisits   = hyperloglog.New16()
 
 	globalClientRequestIntervalLimit = 3 * time.Second
 	globalClientRequestLimiter       ratelimit.RequestLimiter
