@@ -16,10 +16,9 @@ package etcdserver
 
 import (
 	"bytes"
+	"context"
 	"encoding/binary"
 	"time"
-
-	"github.com/gogo/protobuf/proto"
 
 	"github.com/coreos/etcd/auth"
 	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
@@ -29,7 +28,7 @@ import (
 	"github.com/coreos/etcd/mvcc"
 	"github.com/coreos/etcd/raft"
 
-	"golang.org/x/net/context"
+	"github.com/gogo/protobuf/proto"
 )
 
 const (
@@ -687,12 +686,14 @@ func (s *EtcdServer) linearizableReadNotify(ctx context.Context) error {
 }
 
 func (s *EtcdServer) AuthInfoFromCtx(ctx context.Context) (*auth.AuthInfo, error) {
-	if s.Cfg.ClientCertAuthEnabled {
-		authInfo := s.AuthStore().AuthInfoFromTLS(ctx)
-		if authInfo != nil {
-			return authInfo, nil
-		}
+	authInfo, err := s.AuthStore().AuthInfoFromCtx(ctx)
+	if authInfo != nil || err != nil {
+		return authInfo, err
 	}
+	if !s.Cfg.ClientCertAuthEnabled {
+		return nil, nil
+	}
+	authInfo = s.AuthStore().AuthInfoFromTLS(ctx)
+	return authInfo, nil
 
-	return s.AuthStore().AuthInfoFromCtx(ctx)
 }

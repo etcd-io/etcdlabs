@@ -151,10 +151,11 @@ func (ti *treeIndex) Tombstone(key []byte, rev revision) error {
 // at or after the given rev. The returned slice is sorted in the order
 // of revision.
 func (ti *treeIndex) RangeSince(key, end []byte, rev int64) []revision {
+	keyi := &keyIndex{key: key}
+
 	ti.RLock()
 	defer ti.RUnlock()
 
-	keyi := &keyIndex{key: key}
 	if end == nil {
 		item := ti.tree.Get(keyi)
 		if item == nil {
@@ -221,16 +222,16 @@ func compactIndex(rev int64, available map[revision]struct{}, emptyki *[]*keyInd
 	}
 }
 
-func (a *treeIndex) Equal(bi index) bool {
+func (ti *treeIndex) Equal(bi index) bool {
 	b := bi.(*treeIndex)
 
-	if a.tree.Len() != b.tree.Len() {
+	if ti.tree.Len() != b.tree.Len() {
 		return false
 	}
 
 	equal := true
 
-	a.tree.Ascend(func(item btree.Item) bool {
+	ti.tree.Ascend(func(item btree.Item) bool {
 		aki := item.(*keyIndex)
 		bki := b.tree.Get(item).(*keyIndex)
 		if !aki.equal(bki) {

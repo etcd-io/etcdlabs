@@ -15,6 +15,7 @@
 package embed
 
 import (
+	"context"
 	"io/ioutil"
 	defaultLog "log"
 	"net"
@@ -36,7 +37,7 @@ import (
 
 	gw "github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/soheilhy/cmux"
-	"golang.org/x/net/context"
+	"github.com/tmc/grpc-websocket-proxy/wsproxy"
 	"golang.org/x/net/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -66,7 +67,12 @@ func newServeCtx() *serveCtx {
 // serve accepts incoming connections on the listener l,
 // creating a new service goroutine for each. The service goroutines
 // read requests and then call handler to reply to them.
-func (sctx *serveCtx) serve(s *etcdserver.EtcdServer, tlsinfo *transport.TLSInfo, handler http.Handler, errHandler func(error)) error {
+func (sctx *serveCtx) serve(
+	s *etcdserver.EtcdServer,
+	tlsinfo *transport.TLSInfo,
+	handler http.Handler,
+	errHandler func(error),
+	gopts ...grpc.ServerOption) error {
 	logger := defaultLog.New(ioutil.Discard, "etcdhttp", 0)
 	<-s.ReadyNotify()
 	plog.Info("ready to serve client requests")
@@ -77,7 +83,7 @@ func (sctx *serveCtx) serve(s *etcdserver.EtcdServer, tlsinfo *transport.TLSInfo
 	servLock := v3lock.NewLockServer(v3c)
 
 	if sctx.insecure {
-		gs := v3rpc.Server(s, nil)
+		gs := v3rpc.Server(s, nil, gopts...)
 		sctx.grpcServerC <- gs
 		v3electionpb.RegisterElectionServer(gs, servElection)
 		v3lockpb.RegisterLockServer(gs, servLock)
@@ -111,7 +117,7 @@ func (sctx *serveCtx) serve(s *etcdserver.EtcdServer, tlsinfo *transport.TLSInfo
 		if tlsErr != nil {
 			return tlsErr
 		}
-		gs := v3rpc.Server(s, tlscfg)
+		gs := v3rpc.Server(s, tlscfg, gopts...)
 		sctx.grpcServerC <- gs
 		v3electionpb.RegisterElectionServer(gs, servElection)
 		v3lockpb.RegisterLockServer(gs, servLock)
@@ -209,7 +215,19 @@ func (sctx *serveCtx) createMux(gwmux *gw.ServeMux, handler http.Handler) *http.
 		httpmux.Handle(path, h)
 	}
 
-	httpmux.Handle("/v3alpha/", gwmux)
+	httpmux.Handle(
+		"/v3alpha/",
+		wsproxy.WebsocketProxy(
+			gwmux,
+			wsproxy.WithRequestMutator(
+				// Default to the POST method for streams
+				func(incoming *http.Request, outgoing *http.Request) *http.Request {
+					outgoing.Method = "POST"
+					return outgoing
+				},
+			),
+		),
+	)
 	if handler != nil {
 		httpmux.Handle("/", handler)
 	}

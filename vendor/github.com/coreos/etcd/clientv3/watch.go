@@ -15,6 +15,7 @@
 package clientv3
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"time"
@@ -22,10 +23,11 @@ import (
 	v3rpc "github.com/coreos/etcd/etcdserver/api/v3rpc/rpctypes"
 	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
 	mvccpb "github.com/coreos/etcd/mvcc/mvccpb"
-	"golang.org/x/net/context"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 )
 
 const (
@@ -90,7 +92,7 @@ func (wr *WatchResponse) Err() error {
 		return v3rpc.ErrCompacted
 	case wr.Canceled:
 		if len(wr.cancelReason) != 0 {
-			return v3rpc.Error(grpc.Errorf(codes.FailedPrecondition, "%s", wr.cancelReason))
+			return v3rpc.Error(status.Error(codes.FailedPrecondition, wr.cancelReason))
 		}
 		return v3rpc.ErrFutureRev
 	}
@@ -761,6 +763,8 @@ func (w *watchGrpcStream) joinSubstreams() {
 }
 
 // openWatchClient retries opening a watch client until success or halt.
+// manually retry in case "ws==nil && err==nil"
+// TODO: remove FailFast=false
 func (w *watchGrpcStream) openWatchClient() (ws pb.Watch_WatchClient, err error) {
 	for {
 		select {

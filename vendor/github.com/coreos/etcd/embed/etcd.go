@@ -23,6 +23,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"strconv"
 	"sync"
 	"time"
 
@@ -42,6 +43,7 @@ import (
 
 	"github.com/soheilhy/cmux"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/keepalive"
 )
 
 var plog = capnslog.NewPackageLogger("github.com/coreos/etcd", "embed")
@@ -106,10 +108,10 @@ func StartEtcd(inCfg *Config) (e *Etcd, err error) {
 	}()
 
 	if e.Peers, err = startPeerListeners(cfg); err != nil {
-		return
+		return e, err
 	}
 	if e.sctxs, err = startClientListeners(cfg); err != nil {
-		return
+		return e, err
 	}
 	for _, sctx := range e.sctxs {
 		e.Clients = append(e.Clients, sctx.l)
@@ -124,6 +126,24 @@ func StartEtcd(inCfg *Config) (e *Etcd, err error) {
 		urlsmap, token, err = cfg.PeerURLsMapAndToken("etcd")
 		if err != nil {
 			return e, fmt.Errorf("error setting up initial cluster: %v", err)
+		}
+	}
+
+	var (
+		autoCompactionRetention time.Duration
+		h                       int
+	)
+	// AutoCompactionRetention defaults to "0" if not set.
+	if len(cfg.AutoCompactionRetention) == 0 {
+		cfg.AutoCompactionRetention = "0"
+	}
+	h, err = strconv.Atoi(cfg.AutoCompactionRetention)
+	if err == nil {
+		autoCompactionRetention = time.Duration(int64(h)) * time.Hour
+	} else {
+		autoCompactionRetention, err = time.ParseDuration(cfg.AutoCompactionRetention)
+		if err != nil {
+			return nil, fmt.Errorf("error parsing AutoCompactionRetention: %v", err)
 		}
 	}
 
@@ -145,7 +165,7 @@ func StartEtcd(inCfg *Config) (e *Etcd, err error) {
 		PeerTLSInfo:             cfg.PeerTLSInfo,
 		TickMs:                  cfg.TickMs,
 		ElectionTicks:           cfg.ElectionTicks(),
-		AutoCompactionRetention: cfg.AutoCompactionRetention,
+		AutoCompactionRetention: autoCompactionRetention,
 		AutoCompactionMode:      cfg.AutoCompactionMode,
 		QuotaBackendBytes:       cfg.QuotaBackendBytes,
 		MaxTxnOps:               cfg.MaxTxnOps,
@@ -157,7 +177,7 @@ func StartEtcd(inCfg *Config) (e *Etcd, err error) {
 	}
 
 	if e.Server, err = etcdserver.NewServer(srvcfg); err != nil {
-		return
+		return e, err
 	}
 
 	// buffer channel so goroutines on closed connections won't wait forever
@@ -170,7 +190,7 @@ func StartEtcd(inCfg *Config) (e *Etcd, err error) {
 	var peerTLScfg *tls.Config
 	if !cfg.PeerTLSInfo.Empty() {
 		if peerTLScfg, err = cfg.PeerTLSInfo.ServerConfig(); err != nil {
-			return
+			return e, err
 		}
 	}
 	for _, p := range e.Peers {
@@ -194,10 +214,10 @@ func StartEtcd(inCfg *Config) (e *Etcd, err error) {
 	}
 
 	if err = e.serve(); err != nil {
-		return
+		return e, err
 	}
 	serving = true
-	return
+	return e, nil
 }
 
 // Config returns the current configuration.
@@ -424,9 +444,23 @@ func (e *Etcd) serve() (err error) {
 	}
 	h = http.Handler(&cors.CORSHandler{Handler: h, Info: e.cfg.CorsInfo})
 
+	gopts := []grpc.ServerOption{}
+	if e.cfg.GRPCKeepAliveMinTime > time.Duration(0) {
+		gopts = append(gopts, grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
+			MinTime:             e.cfg.GRPCKeepAliveMinTime,
+			PermitWithoutStream: false,
+		}))
+	}
+	if e.cfg.GRPCKeepAliveInterval > time.Duration(0) &&
+		e.cfg.GRPCKeepAliveTimeout > time.Duration(0) {
+		gopts = append(gopts, grpc.KeepaliveParams(keepalive.ServerParameters{
+			Time:    e.cfg.GRPCKeepAliveInterval,
+			Timeout: e.cfg.GRPCKeepAliveTimeout,
+		}))
+	}
 	for _, sctx := range e.sctxs {
 		go func(s *serveCtx) {
-			e.errHandler(s.serve(e.Server, &e.cfg.ClientTLSInfo, h, e.errHandler))
+			e.errHandler(s.serve(e.Server, &e.cfg.ClientTLSInfo, h, e.errHandler, gopts...))
 		}(sctx)
 	}
 
