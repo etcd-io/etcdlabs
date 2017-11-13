@@ -1,5 +1,5 @@
-/deep/ .mdTabLabel {
-    /*TODO: adjust mdTabLabel size by class*/
+/deep/ .matTabLabel {
+    /*TODO: adjust matTabLabel size by class*/
     text-align: center;
     /*decrease width of mat-tab labels*/
     min-width: 50px !important;
