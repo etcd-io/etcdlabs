@@ -182,7 +182,7 @@ func Start(ccfg Config) (clus *Cluster, err error) {
 
 		// auto-compaction every hour
 		cfg.AutoCompactionMode = compactor.ModePeriodic
-		cfg.AutoCompactionRetention = 1
+		cfg.AutoCompactionRetention = "1h"
 
 		clus.Members[i] = &Member{
 			clus: clus,
