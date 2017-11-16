@@ -1,5 +1,5 @@
-hash: 2f836c7fb6ab792cc638356cf699388fe14870bdea03e2cd091a290b5f77f236
-updated: 2017-11-13T09:08:50.366853-08:00
+hash: a55191cf7decc1758e9e27b310c2bc0638874d35ca676d325b733737756c67a2
+updated: 2017-11-16T14:42:20.136138-08:00
 imports:
 - name: github.com/axiomhq/hyperloglog
   version: 730eea1500d5c665305c6717138f62f269c2bf79
@@ -8,9 +8,9 @@ imports:
   subpackages:
   - quantile
 - name: github.com/coreos/bbolt
-  version: 3c6cbfb299c11444eb2f8c9d48f0d2ce09157423
+  version: 32c383e75ce054674c53b5a07e55de85332aee14
 - name: github.com/coreos/etcd
-  version: adeb1fb6200e2fee245edaa02a9c6ed4c9cf1adb
+  version: 23fb330df77a51305f53d1377a13d5ab161a85d5
   subpackages:
   - alarm
   - auth
@@ -106,7 +106,7 @@ imports:
 - name: github.com/ghodss/yaml
   version: 0ca9ea5df5451ffdf184b4428c902747c2c11cd7
 - name: github.com/gogo/protobuf
-  version: 616a82ed12d78d24d4839363e8f3c5d3f20627cf
+  version: 100ba4e885062801d56799d78530b73b178a78f3
   subpackages:
   - gogoproto
   - proto
@@ -114,7 +114,7 @@ imports:
 - name: github.com/golang/glog
   version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
 - name: github.com/golang/protobuf
-  version: 1643683e1b54a9e88ad26d98f81400c8c9d9f4f9
+  version: 5a0f697c9ed9d68fef0116532c6e05cfeae00e55
   subpackages:
   - jsonpb
   - proto
@@ -215,7 +215,7 @@ imports:
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: 5ffe3083946d5603a0578721101dc8165b1d5b5f
+  version: 401e0e00e4bb830a10496d64cd95e068c5bf50de
   subpackages:
   - balancer
   - codes
