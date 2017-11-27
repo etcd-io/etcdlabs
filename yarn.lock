@@ -17,6 +17,12 @@
   dependencies:
     source-map "^0.5.6"
 
+"@angular-devkit/core@0.0.21":
+  version "0.0.21"
+  resolved "https://registry.yarnpkg.com/@angular-devkit/core/-/core-0.0.21.tgz#e2ba4ac0a4e1156f884c083b15eb1c26ddfb2ba8"
+  dependencies:
+    source-map "^0.5.6"
+
 "@angular-devkit/schematics@~0.0.34":
   version "0.0.35"
   resolved "https://registry.yarnpkg.com/@angular-devkit/schematics/-/schematics-0.0.35.tgz#23dbe2c8dd430114a903a7995d6eefcf1f0f648d"
@@ -38,15 +44,15 @@
   dependencies:
     tslib "^1.7.1"
 
-"@angular/cli@1.5.3":
-  version "1.5.3"
-  resolved "https://registry.yarnpkg.com/@angular/cli/-/cli-1.5.3.tgz#9d98abbfdf42706853dfeb10f33410adf6b8038b"
+"@angular/cli@1.6.0-rc.0":
+  version "1.6.0-rc.0"
+  resolved "https://registry.yarnpkg.com/@angular/cli/-/cli-1.6.0-rc.0.tgz#e6bf974dcb2263e026d3d4ffa4480e4e78f9c7cf"
   dependencies:
     "@angular-devkit/build-optimizer" "~0.0.31"
     "@angular-devkit/schematics" "~0.0.34"
     "@ngtools/json-schema" "1.1.0"
-    "@ngtools/webpack" "1.8.3"
-    "@schematics/angular" "~0.1.0"
+    "@ngtools/webpack" "1.9.0-rc.0"
+    "@schematics/angular" "~0.1.5"
     autoprefixer "^6.5.3"
     chalk "~2.2.0"
     circular-dependency-plugin "^3.0.0"
@@ -181,9 +187,9 @@
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@ngtools/json-schema/-/json-schema-1.1.0.tgz#c3a0c544d62392acc2813a42c8a0dc6f58f86922"
 
-"@ngtools/webpack@1.8.3":
-  version "1.8.3"
-  resolved "https://registry.yarnpkg.com/@ngtools/webpack/-/webpack-1.8.3.tgz#8bafa749fc2626d11e146899e5b14e3e85bc787f"
+"@ngtools/webpack@1.9.0-rc.0":
+  version "1.9.0-rc.0"
+  resolved "https://registry.yarnpkg.com/@ngtools/webpack/-/webpack-1.9.0-rc.0.tgz#632e91c0e888e20c717eabeef58107e24d4ed663"
   dependencies:
     chalk "~2.2.0"
     enhanced-resolve "^3.1.0"
@@ -193,11 +199,11 @@
     source-map "^0.5.6"
     tree-kill "^1.0.0"
 
-"@schematics/angular@~0.1.0":
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/@schematics/angular/-/angular-0.1.2.tgz#4d24e385c21bf2cc9ce4d3c91a8dbdd81aa463ac"
+"@schematics/angular@~0.1.5":
+  version "0.1.7"
+  resolved "https://registry.yarnpkg.com/@schematics/angular/-/angular-0.1.7.tgz#2306aeec118ca185e180882eff54f5116de4ef05"
   dependencies:
-    "@angular-devkit/core" "0.0.20"
+    "@angular-devkit/core" "0.0.21"
 
 "@types/angular-animate@1.5.9":
   version "1.5.9"
@@ -229,9 +235,9 @@
   dependencies:
     "@types/angular" "*"
 
-"@types/angular-sanitize@1.3.6":
-  version "1.3.6"
-  resolved "https://registry.yarnpkg.com/@types/angular-sanitize/-/angular-sanitize-1.3.6.tgz#fec2bd040d38708e46f02e66fba5199e8a64b22e"
+"@types/angular-sanitize@1.3.7":
+  version "1.3.7"
+  resolved "https://registry.yarnpkg.com/@types/angular-sanitize/-/angular-sanitize-1.3.7.tgz#1c4fcf5f517adccc731f3c977704c0543eb19cf9"
   dependencies:
     "@types/angular" "*"
 
