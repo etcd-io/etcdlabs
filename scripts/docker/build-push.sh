@@ -8,7 +8,7 @@ fi
 
 docker build --tag gcr.io/etcd-development/etcdlabs:latest --file ./Dockerfile .
 
-gcloud docker -- login -u _json_key -p "$(cat /etc/gcp-key-etcd.json)" https://gcr.io
+gcloud docker -- login -u _json_key -p "$(cat /etc/gcp-key-etcd-development.json)" https://gcr.io
 
 gcloud docker -- push gcr.io/etcd-development/etcdlabs:latest
 
