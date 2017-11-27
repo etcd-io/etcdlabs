@@ -3,7 +3,7 @@ import:
 - package: github.com/axiomhq/hyperloglog
   version: 730eea1500d5c665305c6717138f62f269c2bf79
 - package: github.com/coreos/etcd
-  version: 15bfc1b36162805e8a90ae747d955667870c2f95
+  version: 5fbb4590fd5bcfd48e9bce58800ebf75660e4ce4
   subpackages:
   - clientv3
   - clientv3/namespace
