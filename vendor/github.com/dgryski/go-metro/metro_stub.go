@@ -7,3 +7,4 @@ package metro
 //go:noescape
 
 func Hash64(buffer []byte, seed uint64) uint64
+func Hash64Str(buffer string, seed uint64) uint64

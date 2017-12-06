@@ -1,5 +1,5 @@
-hash: 62abd9c1f5be7d1f50ab7a387c20875a1ff7739ef7e3a831961368403d239efc
-updated: 2017-11-27T08:58:26.939789-08:00
+hash: 5a489b0e6e32765d6651824abca5024e01698d91a9c445b9c328b6e879c3d2f5
+updated: 2017-12-06T12:15:11.446617-08:00
 imports:
 - name: github.com/axiomhq/hyperloglog
   version: 730eea1500d5c665305c6717138f62f269c2bf79
@@ -10,7 +10,7 @@ imports:
 - name: github.com/coreos/bbolt
   version: 32c383e75ce054674c53b5a07e55de85332aee14
 - name: github.com/coreos/etcd
-  version: 5fbb4590fd5bcfd48e9bce58800ebf75660e4ce4
+  version: 84e51cabc754e0fc81d839e83fc9c7945a0cd766
   subpackages:
   - alarm
   - auth
@@ -100,7 +100,7 @@ imports:
 - name: github.com/dgryski/go-bits
   version: 2ad8d707cc05b1815ce6ff2543bb5e8d8f9298ef
 - name: github.com/dgryski/go-metro
-  version: 0f6473574cdfd7be3962c41fb23dc4768b1f7deb
+  version: e7aec1ade50b797c654e33c634eadabefab66c6e
 - name: github.com/dustin/go-humanize
   version: bb3d318650d48840a39aa21a027c6630e198e626
 - name: github.com/ghodss/yaml
@@ -161,7 +161,7 @@ imports:
   subpackages:
   - xfs
 - name: github.com/sirupsen/logrus
-  version: 95cd2b9c79aa5e72ab0bc69b7ccc2be15bf850f6
+  version: f006c2ac4710855cf0f916dd6b77acf6b048dc6e
 - name: github.com/soheilhy/cmux
   version: bb79a83465015a27a175925ebd155e660f55e9f1
 - name: github.com/tmc/grpc-websocket-proxy
@@ -215,7 +215,7 @@ imports:
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: 401e0e00e4bb830a10496d64cd95e068c5bf50de
+  version: 9a2334748bab9638f1480ad4f0ac6ac0c6c3a486
   subpackages:
   - balancer
   - codes

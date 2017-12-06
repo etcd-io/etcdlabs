@@ -237,13 +237,24 @@ func NewConfig() *Config {
 	return cfg
 }
 
+func logTLSHandshakeFailure(conn *tls.Conn, err error) {
+	state := conn.ConnectionState()
+	remoteAddr := conn.RemoteAddr().String()
+	serverName := state.ServerName
+	if len(state.PeerCertificates) > 0 {
+		cert := state.PeerCertificates[0]
+		ips, dns := cert.IPAddresses, cert.DNSNames
+		plog.Infof("rejected connection from %q (error %q, ServerName %q, IPAddresses %q, DNSNames %q)", remoteAddr, err.Error(), serverName, ips, dns)
+	} else {
+		plog.Infof("rejected connection from %q (error %q, ServerName %q)", remoteAddr, err.Error(), serverName)
+	}
+}
+
 // SetupLogging initializes etcd logging.
 // Must be called after flag parsing.
 func (cfg *Config) SetupLogging() {
-	cfg.ClientTLSInfo.HandshakeFailure = func(conn *tls.Conn, err error) {
-		plog.Infof("rejected connection from %q (%v)", conn.RemoteAddr().String(), err)
-	}
-	cfg.PeerTLSInfo.HandshakeFailure = cfg.ClientTLSInfo.HandshakeFailure
+	cfg.ClientTLSInfo.HandshakeFailure = logTLSHandshakeFailure
+	cfg.PeerTLSInfo.HandshakeFailure = logTLSHandshakeFailure
 
 	capnslog.SetGlobalLogLevel(capnslog.INFO)
 	if cfg.Debug {
@@ -409,6 +420,12 @@ func (cfg *Config) Validate() error {
 		return ErrConflictBootstrapFlags
 	}
 
+	if cfg.TickMs <= 0 {
+		return fmt.Errorf("--heartbeat-interval must be >0 (set to %dms)", cfg.TickMs)
+	}
+	if cfg.ElectionMs <= 0 {
+		return fmt.Errorf("--election-timeout must be >0 (set to %dms)", cfg.ElectionMs)
+	}
 	if 5*cfg.TickMs > cfg.ElectionMs {
 		return fmt.Errorf("--election-timeout[%vms] should be at least as 5 times as --heartbeat-interval[%vms]", cfg.ElectionMs, cfg.TickMs)
 	}

@@ -83,3 +83,7 @@ func Hash64(buffer []byte, seed uint64) uint64 {
 
 	return hash
 }
+
+func Hash64Str(buffer string, seed uint64) uint64 {
+	return Hash64([]byte(buffer), seed)
+}
