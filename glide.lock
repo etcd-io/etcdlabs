@@ -1,5 +1,5 @@
-hash: 5a489b0e6e32765d6651824abca5024e01698d91a9c445b9c328b6e879c3d2f5
-updated: 2017-12-06T12:15:11.446617-08:00
+hash: 149a608ce02708d8c48fd7cb01d48acc82fe2feba2d88be27c9e9ef3f2422071
+updated: 2017-12-14T09:42:17.519222-08:00
 imports:
 - name: github.com/axiomhq/hyperloglog
   version: 730eea1500d5c665305c6717138f62f269c2bf79
@@ -8,9 +8,9 @@ imports:
   subpackages:
   - quantile
 - name: github.com/coreos/bbolt
-  version: 32c383e75ce054674c53b5a07e55de85332aee14
+  version: 48ea1b39c25fc1bab3506fbc712ecbaa842c4d2d
 - name: github.com/coreos/etcd
-  version: 84e51cabc754e0fc81d839e83fc9c7945a0cd766
+  version: b48cf77abb78755c8654eb8da61bc90a32802e7d
   subpackages:
   - alarm
   - auth

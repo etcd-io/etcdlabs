@@ -54,13 +54,19 @@ type serveCtx struct {
 
 	userHandlers    map[string]http.Handler
 	serviceRegister func(*grpc.Server)
-	grpcServerC     chan *grpc.Server
+	serversC        chan *servers
+}
+
+type servers struct {
+	secure bool
+	grpc   *grpc.Server
+	http   *http.Server
 }
 
 func newServeCtx() *serveCtx {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &serveCtx{ctx: ctx, cancel: cancel, userHandlers: make(map[string]http.Handler),
-		grpcServerC: make(chan *grpc.Server, 2), // in case sctx.insecure,sctx.secure true
+		serversC: make(chan *servers, 2), // in case sctx.insecure,sctx.secure true
 	}
 }
 
@@ -72,7 +78,7 @@ func (sctx *serveCtx) serve(
 	tlsinfo *transport.TLSInfo,
 	handler http.Handler,
 	errHandler func(error),
-	gopts ...grpc.ServerOption) error {
+	gopts ...grpc.ServerOption) (err error) {
 	logger := defaultLog.New(ioutil.Discard, "etcdhttp", 0)
 	<-s.ReadyNotify()
 	plog.Info("ready to serve client requests")
@@ -82,9 +88,15 @@ func (sctx *serveCtx) serve(
 	servElection := v3election.NewElectionServer(v3c)
 	servLock := v3lock.NewLockServer(v3c)
 
+	var gs *grpc.Server
+	defer func() {
+		if err != nil && gs != nil {
+			gs.Stop()
+		}
+	}()
+
 	if sctx.insecure {
-		gs := v3rpc.Server(s, nil, gopts...)
-		sctx.grpcServerC <- gs
+		gs = v3rpc.Server(s, nil, gopts...)
 		v3electionpb.RegisterElectionServer(gs, servElection)
 		v3lockpb.RegisterLockServer(gs, servLock)
 		if sctx.serviceRegister != nil {
@@ -93,10 +105,8 @@ func (sctx *serveCtx) serve(
 		grpcl := m.Match(cmux.HTTP2())
 		go func() { errHandler(gs.Serve(grpcl)) }()
 
-		opts := []grpc.DialOption{
-			grpc.WithInsecure(),
-		}
-		gwmux, err := sctx.registerGateway(opts)
+		var gwmux *gw.ServeMux
+		gwmux, err = sctx.registerGateway([]grpc.DialOption{grpc.WithInsecure()})
 		if err != nil {
 			return err
 		}
@@ -109,6 +119,8 @@ func (sctx *serveCtx) serve(
 		}
 		httpl := m.Match(cmux.HTTP1())
 		go func() { errHandler(srvhttp.Serve(httpl)) }()
+
+		sctx.serversC <- &servers{grpc: gs, http: srvhttp}
 		plog.Noticef("serving insecure client requests on %s, this is strongly discouraged!", sctx.l.Addr().String())
 	}
 
@@ -117,8 +129,7 @@ func (sctx *serveCtx) serve(
 		if tlsErr != nil {
 			return tlsErr
 		}
-		gs := v3rpc.Server(s, tlscfg, gopts...)
-		sctx.grpcServerC <- gs
+		gs = v3rpc.Server(s, tlscfg, gopts...)
 		v3electionpb.RegisterElectionServer(gs, servElection)
 		v3lockpb.RegisterLockServer(gs, servLock)
 		if sctx.serviceRegister != nil {
@@ -131,14 +142,16 @@ func (sctx *serveCtx) serve(
 		dtls.InsecureSkipVerify = true
 		creds := credentials.NewTLS(dtls)
 		opts := []grpc.DialOption{grpc.WithTransportCredentials(creds)}
-		gwmux, err := sctx.registerGateway(opts)
+		var gwmux *gw.ServeMux
+		gwmux, err = sctx.registerGateway(opts)
 		if err != nil {
 			return err
 		}
 
-		tlsl, lerr := transport.NewTLSListener(m.Match(cmux.Any()), tlsinfo)
-		if lerr != nil {
-			return lerr
+		var tlsl net.Listener
+		tlsl, err = transport.NewTLSListener(m.Match(cmux.Any()), tlsinfo)
+		if err != nil {
+			return err
 		}
 		// TODO: add debug flag; enable logging when debug flag is set
 		httpmux := sctx.createMux(gwmux, handler)
@@ -150,10 +163,11 @@ func (sctx *serveCtx) serve(
 		}
 		go func() { errHandler(srv.Serve(tlsl)) }()
 
+		sctx.serversC <- &servers{secure: true, grpc: gs, http: srv}
 		plog.Infof("serving client requests on %s", sctx.l.Addr().String())
 	}
 
-	close(sctx.grpcServerC)
+	close(sctx.serversC)
 	return m.Serve()
 }
 
