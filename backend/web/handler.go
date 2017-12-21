@@ -86,7 +86,7 @@ func withCache(h ContextHandler) ContextHandler {
 	return ContextHandlerFunc(func(ctx context.Context, w http.ResponseWriter, req *http.Request) error {
 		userID := generateUserID(req)
 		globalServerVisitsMu.Lock()
-		globalServerVisits.Insert([]byte(fmt.Sprintf("%s%s", userID, time.Now().String()[:16])))
+		globalServerVisits.Insert([]byte(fmt.Sprintf("%s%s", userID, time.Now().String()[:13])))
 		globalServerVisitsMu.Unlock()
 		ctx = context.WithValue(ctx, userKey, &userID)
 
