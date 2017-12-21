@@ -3,7 +3,7 @@ import:
 - package: github.com/axiomhq/hyperloglog
   version: 730eea1500d5c665305c6717138f62f269c2bf79
 - package: github.com/coreos/etcd
-  version: b48cf77abb78755c8654eb8da61bc90a32802e7d
+  version: c8dc19bf4bc40545016a8a110c9a999c9391ddb8
   subpackages:
   - clientv3
   - clientv3/namespace
@@ -28,7 +28,7 @@ import:
   - jsonpb
   - proto
 - package: google.golang.org/grpc
-  version: v1.7.4
+  version: v1.7.5
   subpackages:
   - codes
   - credentials
