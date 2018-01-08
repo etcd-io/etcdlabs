@@ -2,10 +2,12 @@ package hyperloglog
 
 import (
 	"math"
+	"math/bits"
 
-	bits "github.com/dgryski/go-bits"
 	metro "github.com/dgryski/go-metro"
 )
+
+var hash = hashFunc
 
 func beta14(ez float64) float64 {
 	zl := math.Log(ez + 1)
@@ -46,7 +48,7 @@ func alpha(m float64) float64 {
 func getPosVal(x uint64, p uint8) (uint64, uint8) {
 	i := bextr(x, 64-p, p) // {x63,...,x64-p}
 	w := x<<p | 1<<(p-1)   // {x63-p,...,x0}
-	rho := uint8(bits.Clz(w)) + 1
+	rho := uint8(bits.LeadingZeros64(w)) + 1
 	return i, rho
 }
 
@@ -66,5 +68,3 @@ func bextr32(v uint32, start, length uint8) uint32 {
 func hashFunc(e []byte) uint64 {
 	return metro.Hash64(e, 1337)
 }
-
-var hash func(buf []byte) uint64

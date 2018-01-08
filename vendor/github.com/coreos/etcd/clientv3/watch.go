@@ -46,6 +46,20 @@ type Watcher interface {
 	// through the returned channel. If revisions waiting to be sent over the
 	// watch are compacted, then the watch will be canceled by the server, the
 	// client will post a compacted error watch response, and the channel will close.
+	// If the context "ctx" is canceled or timed out, returned "WatchChan" is closed,
+	// and "WatchResponse" from this closed channel has zero events and nil "Err()".
+	// If the context is "context.Background/TODO", returned "WatchChan" will not be closed
+	// and wait until events happen, except when server returns a non-recoverable error.
+	// For example, when context passed with "WithRequireLeader" and the connected server
+	// has no leader, error "etcdserver: no leader" is returned, and then "WatchChan" is
+	// closed with non-nil "Err()".
+	// Otherwise, as long as the context has not been canceled or timed out, watch will
+	// retry on other recoverable errors forever until reconnected.
+	//
+	// TODO: explicitly set context error in the last "WatchResponse" message and close channel?
+	// Currently, client contexts are overwritten with "valCtx" that never closes.
+	// TODO(v3.4): configure watch retry policy, limit maximum retry number
+	// (see https://github.com/coreos/etcd/issues/8980)
 	Watch(ctx context.Context, key string, opts ...OpOption) WatchChan
 
 	// Close closes the watcher and cancels all watch requests.
@@ -353,7 +367,8 @@ func (w *watcher) closeStream(wgs *watchGrpcStream) {
 }
 
 func (w *watchGrpcStream) addSubstream(resp *pb.WatchResponse, ws *watcherStream) {
-	if resp.WatchId == -1 {
+	// check watch ID for backward compatibility (<= v3.3)
+	if resp.WatchId == -1 || (resp.Canceled && resp.CancelReason != "") {
 		// failed; no channel
 		close(ws.recvc)
 		return
@@ -439,6 +454,7 @@ func (w *watchGrpcStream) run() {
 		// Watch() requested
 		case wreq := <-w.reqc:
 			outc := make(chan WatchResponse, 1)
+			// TODO: pass custom watch ID?
 			ws := &watcherStream{
 				initReq: *wreq,
 				id:      -1,
@@ -539,6 +555,7 @@ func (w *watchGrpcStream) dispatchEvent(pbresp *pb.WatchResponse) bool {
 	for i, ev := range pbresp.Events {
 		events[i] = (*Event)(ev)
 	}
+	// TODO: return watch ID?
 	wr := &WatchResponse{
 		Header:          *pbresp.Header,
 		Events:          events,
