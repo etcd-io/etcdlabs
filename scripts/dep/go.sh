@@ -6,5 +6,6 @@ if ! [[ "$0" =~ "./scripts/dep/go.sh" ]]; then
   exit 255
 fi
 
+go get -v -u github.com/golang/dep/cmd/dep
 dep ensure -v
 dep prune -v
