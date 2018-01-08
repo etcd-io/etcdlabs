@@ -34,7 +34,7 @@ export class InstallComponent extends ParentComponent {
         ///////////////////////////////////////////////////
         this.cfssl = new CFSSL(
             'R1.2',
-            '/opt/bin',
+            '/usr/local/bin',
             '/tmp/certs',
             'etcd-root-ca',
             'etcd-gencert.json',

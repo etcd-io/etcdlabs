@@ -301,7 +301,7 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
         let copycmd = 'sudo cp /tmp/test-etcd/etcd* ' + this.getExecDir();
         if (this.getExecDir() === '/tmp/test-etcd') {
             copycmd = '# sudo cp /tmp/test-etcd/etcd* [YOUR_EXEC_DIR]' + `
-` + '# sudo mkdir -p /opt/bin/ && sudo cp /tmp/test-etcd/etcd* /opt/bin/';
+` + '# sudo mkdir -p /usr/local/bin/ && sudo cp /tmp/test-etcd/etcd* /usr/local/bin/';
         }
         txt += copycmd + `
 
@@ -340,7 +340,7 @@ GITHUB_URL=https://github.com/coreos/etcd/releases/download
         let copycmd = 'sudo cp /tmp/test-etcd/etcd* ' + this.getExecDir();
         if (this.getExecDir() === '/tmp/test-etcd') {
             copycmd = '# sudo cp /tmp/test-etcd/etcd* [YOUR_EXEC_DIR]' + `
-` + '# sudo mkdir -p /opt/bin/ && sudo cp /tmp/test-etcd/etcd* /opt/bin/';
+` + '# sudo mkdir -p /usr/local/bin/ && sudo cp /tmp/test-etcd/etcd* /usr/local/bin/';
         }
         txt += copycmd + `
 
