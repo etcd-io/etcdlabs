@@ -1,50 +1,74 @@
 ################################
 # Direct dependencies
+
+# v3.3.0 RC
 [[constraint]]
   name = "github.com/coreos/etcd"
-  revision = "44e1f6f019a98dbea4c8c8def5f077fb0dd83e8a"
+  source = "https://github.com/coreos/etcd"
+  revision = "eaf6ae02e47edbea90aa7f0fe6c4d558611e00ab"
 
+# v1.7.5
 [[constraint]]
   name = "google.golang.org/grpc"
-  version = "1.7.5"
+  source = "https://github.com/grpc/grpc-go"
+  revision = "5b3c4e850e90a4cf6a20ebd46c8b32a0a3afcb9e"
 
-[[constraint]]
-  name = "github.com/dustin/go-humanize"
-  revision = "bb3d318650d48840a39aa21a027c6630e198e626"
 
 [[constraint]]
   name = "github.com/gogo/protobuf"
-  version = "0.4.0"
+  source = "https://github.com/gogo/protobuf"
+  revision = "160de10b2537169b5ae3e7e221d28269ef40d311"
 
 [[constraint]]
   name = "github.com/golang/protobuf"
-  revision = "5a0f697c9ed9d68fef0116532c6e05cfeae00e55"
+  source = "https://github.com/golang/protobuf"
+  revision = "1e59b77b52bf8e4b449a57e6f79f21226d571845"
 
-[[constraint]]
-  name = "github.com/golang/glog"
-  revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
-
-[[constraint]]
-  name = "github.com/axiomhq/hyperloglog"
-  revision = "baba800be098d9f4303352fa6214a933e371e3da"
 
 [[constraint]]
   name = "golang.org/x/sync"
+  source = "https://github.com/golang/sync"
   revision = "fd80eb99c8f653c847d294a001bdf2a3a6f768f5"
 
 [[constraint]]
   name = "golang.org/x/time"
+  source = "https://github.com/golang/time"
   revision = "6dc17368e09b0e8634d71cac8168d853e869a0c7"
+
+
+[[constraint]]
+  name = "github.com/golang/glog"
+  source = "https://github.com/golang/glog"
+  revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
+
+
+[[constraint]]
+  name = "github.com/dustin/go-humanize"
+  source = "https://github.com/dustin/go-humanize"
+  revision = "bb3d318650d48840a39aa21a027c6630e198e626"
+
+[[constraint]]
+  name = "github.com/axiomhq/hyperloglog"
+  source = "https://github.com/axiomhq/hyperloglog"
+  revision = "baba800be098d9f4303352fa6214a933e371e3da"
+
+
 ################################
 
 ################################
-# Transitive dependencies, but to override
+# Transitive dependencies, and overrides
+
+# v1.3.1-coreos.6
 [[override]]
   name = "github.com/coreos/bbolt"
-  version = "v1.3.1-coreos.6"
+  source = "https://github.com/coreos/bbolt"
+  revision = "48ea1b39c25fc1bab3506fbc712ecbaa842c4d2d"
 
-# https://github.com/grpc-ecosystem/grpc-gateway
+# v1.3.0
 [[override]]
   name = "github.com/grpc-ecosystem/grpc-gateway"
-  version = "v1.3.0"
+  source = "https://github.com/grpc-ecosystem/grpc-gateway"
+  revision = "8cc3a55af3bcf171a1c23a90c4df9cf591706104"
+
+
 ################################

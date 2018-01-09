@@ -5,6 +5,7 @@
   name = "github.com/axiomhq/hyperloglog"
   packages = ["."]
   revision = "baba800be098d9f4303352fa6214a933e371e3da"
+  source = "https://github.com/axiomhq/hyperloglog"
 
 [[projects]]
   branch = "master"
@@ -16,7 +17,7 @@
   name = "github.com/coreos/bbolt"
   packages = ["."]
   revision = "48ea1b39c25fc1bab3506fbc712ecbaa842c4d2d"
-  version = "v1.3.1-coreos.6"
+  source = "https://github.com/coreos/bbolt"
 
 [[projects]]
   name = "github.com/coreos/etcd"
@@ -89,7 +90,8 @@
     "wal",
     "wal/walpb"
   ]
-  revision = "44e1f6f019a98dbea4c8c8def5f077fb0dd83e8a"
+  revision = "eaf6ae02e47edbea90aa7f0fe6c4d558611e00ab"
+  source = "https://github.com/coreos/etcd"
 
 [[projects]]
   name = "github.com/coreos/go-semver"
@@ -124,6 +126,7 @@
   name = "github.com/dustin/go-humanize"
   packages = ["."]
   revision = "bb3d318650d48840a39aa21a027c6630e198e626"
+  source = "https://github.com/dustin/go-humanize"
 
 [[projects]]
   name = "github.com/ghodss/yaml"
@@ -138,13 +141,14 @@
     "proto",
     "protoc-gen-gogo/descriptor"
   ]
-  revision = "100ba4e885062801d56799d78530b73b178a78f3"
-  version = "v0.4"
+  revision = "160de10b2537169b5ae3e7e221d28269ef40d311"
+  source = "https://github.com/gogo/protobuf"
 
 [[projects]]
   name = "github.com/golang/glog"
   packages = ["."]
   revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
+  source = "https://github.com/golang/glog"
 
 [[projects]]
   name = "github.com/golang/protobuf"
@@ -157,7 +161,8 @@
     "ptypes/struct",
     "ptypes/timestamp"
   ]
-  revision = "5a0f697c9ed9d68fef0116532c6e05cfeae00e55"
+  revision = "1e59b77b52bf8e4b449a57e6f79f21226d571845"
+  source = "https://github.com/golang/protobuf"
 
 [[projects]]
   name = "github.com/google/btree"
@@ -183,7 +188,7 @@
     "utilities"
   ]
   revision = "8cc3a55af3bcf171a1c23a90c4df9cf591706104"
-  version = "v1.3.0"
+  source = "https://github.com/grpc-ecosystem/grpc-gateway"
 
 [[projects]]
   name = "github.com/jonboulle/clockwork"
@@ -287,6 +292,7 @@
   name = "golang.org/x/sync"
   packages = ["errgroup"]
   revision = "fd80eb99c8f653c847d294a001bdf2a3a6f768f5"
+  source = "https://github.com/golang/sync"
 
 [[projects]]
   name = "golang.org/x/sys"
@@ -315,6 +321,7 @@
   name = "golang.org/x/time"
   packages = ["rate"]
   revision = "6dc17368e09b0e8634d71cac8168d853e869a0c7"
+  source = "https://github.com/golang/time"
 
 [[projects]]
   name = "google.golang.org/genproto"
@@ -345,7 +352,7 @@
     "transport"
   ]
   revision = "5b3c4e850e90a4cf6a20ebd46c8b32a0a3afcb9e"
-  version = "v1.7.5"
+  source = "https://github.com/grpc/grpc-go"
 
 [[projects]]
   name = "gopkg.in/yaml.v2"
@@ -355,6 +362,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "88b9fd86a4f44d25cc3f65e070f18ad06d793aadf17e7841dc910ea04aace242"
+  inputs-digest = "da275f7ab8c0a9b144e67c47fb43d3a1c8e651c831a8841c0051b3e0ff8ca97d"
   solver-name = "gps-cdcl"
   solver-version = 1

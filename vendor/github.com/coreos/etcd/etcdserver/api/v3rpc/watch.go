@@ -209,7 +209,7 @@ func (sws *serverWatchStream) recvLoop() error {
 			if !sws.isWatchPermitted(creq) {
 				wr := &pb.WatchResponse{
 					Header:       sws.newResponseHeader(sws.watchStream.Rev()),
-					WatchId:      creq.WatchId,
+					WatchId:      -1,
 					Canceled:     true,
 					Created:      true,
 					CancelReason: rpctypes.ErrGRPCPermissionDenied.Error(),
@@ -229,8 +229,8 @@ func (sws *serverWatchStream) recvLoop() error {
 			if rev == 0 {
 				rev = wsrev + 1
 			}
-			id, err := sws.watchStream.Watch(mvcc.WatchID(creq.WatchId), creq.Key, creq.RangeEnd, rev, filters...)
-			if err == nil {
+			id := sws.watchStream.Watch(creq.Key, creq.RangeEnd, rev, filters...)
+			if id != -1 {
 				sws.mu.Lock()
 				if creq.ProgressNotify {
 					sws.progress[id] = true
@@ -244,10 +244,7 @@ func (sws *serverWatchStream) recvLoop() error {
 				Header:   sws.newResponseHeader(wsrev),
 				WatchId:  int64(id),
 				Created:  true,
-				Canceled: err != nil,
-			}
-			if err != nil {
-				wr.CancelReason = err.Error()
+				Canceled: id == -1,
 			}
 			select {
 			case sws.ctrlStream <- wr:

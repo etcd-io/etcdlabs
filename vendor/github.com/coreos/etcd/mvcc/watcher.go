@@ -22,14 +22,8 @@ import (
 	"github.com/coreos/etcd/mvcc/mvccpb"
 )
 
-// AutoWatchID is the watcher ID passed in WatchStream.Watch when no
-// user-provided ID is available. If pass, an ID will automatically be assigned.
-const AutoWatchID WatchID = 0
-
 var (
-	ErrWatcherNotExist    = errors.New("mvcc: watcher does not exist")
-	ErrEmptyWatcherRange  = errors.New("mvcc: watcher range is empty")
-	ErrWatcherDuplicateID = errors.New("mvcc: duplicate watch ID provided on the WatchStream")
+	ErrWatcherNotExist = errors.New("mvcc: watcher does not exist")
 )
 
 type WatchID int64
@@ -42,13 +36,12 @@ type WatchStream interface {
 	// happened on the given key or range [key, end) from the given startRev.
 	//
 	// The whole event history can be watched unless compacted.
-	// If "startRev" <=0, watch observes events after currentRev.
+	// If `startRev` <=0, watch observes events after currentRev.
 	//
-	// The returned "id" is the ID of this watcher. It appears as WatchID
+	// The returned `id` is the ID of this watcher. It appears as WatchID
 	// in events that are sent to the created watcher through stream channel.
-	// The watch ID is used when it's not equal to AutoWatchID. Otherwise,
-	// an auto-generated watch ID is returned.
-	Watch(id WatchID, key, end []byte, startRev int64, fcs ...FilterFunc) (WatchID, error)
+	//
+	Watch(key, end []byte, startRev int64, fcs ...FilterFunc) WatchID
 
 	// Chan returns a chan. All watch response will be sent to the returned chan.
 	Chan() <-chan WatchResponse
@@ -105,34 +98,28 @@ type watchStream struct {
 }
 
 // Watch creates a new watcher in the stream and returns its WatchID.
-func (ws *watchStream) Watch(id WatchID, key, end []byte, startRev int64, fcs ...FilterFunc) (WatchID, error) {
+// TODO: return error if ws is closed?
+func (ws *watchStream) Watch(key, end []byte, startRev int64, fcs ...FilterFunc) WatchID {
 	// prevent wrong range where key >= end lexicographically
 	// watch request with 'WithFromKey' has empty-byte range end
 	if len(end) != 0 && bytes.Compare(key, end) != -1 {
-		return -1, ErrEmptyWatcherRange
+		return -1
 	}
 
 	ws.mu.Lock()
 	defer ws.mu.Unlock()
 	if ws.closed {
-		return -1, ErrEmptyWatcherRange
+		return -1
 	}
 
-	if id == AutoWatchID {
-		for ws.watchers[ws.nextID] != nil {
-			ws.nextID++
-		}
-		id = ws.nextID
-		ws.nextID++
-	} else if _, ok := ws.watchers[id]; ok {
-		return -1, ErrWatcherDuplicateID
-	}
+	id := ws.nextID
+	ws.nextID++
 
 	w, c := ws.watchable.watch(key, end, startRev, id, ws.ch, fcs...)
 
 	ws.cancels[id] = c
 	ws.watchers[id] = w
-	return id, nil
+	return id
 }
 
 func (ws *watchStream) Chan() <-chan WatchResponse {
