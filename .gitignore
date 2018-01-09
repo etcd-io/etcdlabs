@@ -38,7 +38,11 @@ etcdlabs-frontend.log
 vendor/**/*
 !vendor/**/
 !vendor/**/*.go
+!vendor/**/*.c
+!vendor/**/*.cpp
 !vendor/**/*.s
-!vendor/**/LICENSE*
 !vendor/**/COPYING*
+!vendor/**/PATENTS*
+!vendor/**/NOTICE*
+!vendor/**/LICENSE*
 vendor/**/*_test.go
