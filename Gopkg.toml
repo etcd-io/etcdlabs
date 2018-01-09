@@ -1,6 +1,5 @@
 ################################
 # Direct dependencies
-
 [[constraint]]
   name = "github.com/coreos/etcd"
   revision = "44e1f6f019a98dbea4c8c8def5f077fb0dd83e8a"
@@ -40,7 +39,6 @@
 
 ################################
 # Transitive dependencies, but to override
-
 [[override]]
   name = "github.com/coreos/bbolt"
   version = "v1.3.1-coreos.6"
