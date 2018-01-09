@@ -2,11 +2,11 @@
 # Direct dependencies
 
 
-# v3.3.0 RC
+# master branch
 [[constraint]]
   name = "github.com/coreos/etcd"
   source = "https://github.com/coreos/etcd"
-  revision = "eaf6ae02e47edbea90aa7f0fe6c4d558611e00ab"
+  revision = "9bd9d2041f796da58d4479b58247cbb725386278"
 
 # v1.7.5
 [[constraint]]
