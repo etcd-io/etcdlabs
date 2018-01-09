@@ -1,6 +1,7 @@
 ################################
 # Direct dependencies
 
+
 # v3.3.0 RC
 [[constraint]]
   name = "github.com/coreos/etcd"
@@ -55,8 +56,10 @@
 
 ################################
 
+
 ################################
 # Transitive dependencies, and overrides
+
 
 # v1.3.1-coreos.6
 [[override]]
