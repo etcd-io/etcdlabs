@@ -6,7 +6,7 @@ import { PlayComponent } from './play/play.component';
 import { NotFoundComponent } from './not-found.component';
 
 const appRoutes: Routes = [
-    { path: '', redirectTo: '/play', pathMatch: 'full' },
+    { path: '', redirectTo: '/install', pathMatch: 'full' },
     { path: 'home', component: HomeComponent },
     { path: 'install', component: InstallComponent },
     { path: 'play', component: PlayComponent },
