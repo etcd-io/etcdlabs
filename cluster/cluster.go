@@ -14,8 +14,8 @@ import (
 	"github.com/coreos/etcdlabs/cluster/clusterpb"
 
 	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/compactor"
 	"github.com/coreos/etcd/embed"
+	"github.com/coreos/etcd/internal/compactor"
 	"github.com/coreos/etcd/pkg/netutil"
 	"github.com/coreos/etcd/pkg/transport"
 	"github.com/golang/glog"

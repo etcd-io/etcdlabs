@@ -22,7 +22,7 @@ import (
 
 	v3rpc "github.com/coreos/etcd/etcdserver/api/v3rpc/rpctypes"
 	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
-	mvccpb "github.com/coreos/etcd/mvcc/mvccpb"
+	mvccpb "github.com/coreos/etcd/internal/mvcc/mvccpb"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -48,6 +48,8 @@ type Watcher interface {
 	// client will post a compacted error watch response, and the channel will close.
 	// If the context "ctx" is canceled or timed out, returned "WatchChan" is closed,
 	// and "WatchResponse" from this closed channel has zero events and nil "Err()".
+	// The context "ctx" MUST be canceled, as soon as watcher is no longer being used,
+	// to release the associated resources.
 	// If the context is "context.Background/TODO", returned "WatchChan" will not be closed
 	// and wait until events happen, except when server returns a non-recoverable error.
 	// For example, when context passed with "WithRequireLeader" and the connected server

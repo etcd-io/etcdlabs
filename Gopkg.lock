@@ -22,14 +22,9 @@
 [[projects]]
   name = "github.com/coreos/etcd"
   packages = [
-    "alarm",
-    "auth",
-    "auth/authpb",
     "client",
     "clientv3",
     "clientv3/concurrency",
-    "compactor",
-    "discovery",
     "embed",
     "error",
     "etcdserver",
@@ -52,12 +47,21 @@
     "etcdserver/etcdserverpb/gw",
     "etcdserver/membership",
     "etcdserver/stats",
-    "lease",
-    "lease/leasehttp",
-    "lease/leasepb",
-    "mvcc",
-    "mvcc/backend",
-    "mvcc/mvccpb",
+    "internal/alarm",
+    "internal/auth",
+    "internal/auth/authpb",
+    "internal/compactor",
+    "internal/discovery",
+    "internal/lease",
+    "internal/lease/leasehttp",
+    "internal/lease/leasepb",
+    "internal/mvcc",
+    "internal/mvcc/backend",
+    "internal/mvcc/mvccpb",
+    "internal/raftsnap",
+    "internal/raftsnap/snappb",
+    "internal/store",
+    "internal/version",
     "pkg/adt",
     "pkg/contention",
     "pkg/cors",
@@ -83,14 +87,10 @@
     "raft",
     "raft/raftpb",
     "rafthttp",
-    "snap",
-    "snap/snappb",
-    "store",
-    "version",
     "wal",
     "wal/walpb"
   ]
-  revision = "9bd9d2041f796da58d4479b58247cbb725386278"
+  revision = "1d99d3886f6cb5fb7ef13100c9587cc01820d38e"
   source = "https://github.com/coreos/etcd"
 
 [[projects]]
@@ -362,6 +362,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a82b6467f41b2b2031b691f79e11756c04fec67228ca1322f8898704b4dce217"
+  inputs-digest = "71dac5c6c3bc1f1ab2d95434018c28b57c3eb5f4f05beb0fede86d6af3bf6271"
   solver-name = "gps-cdcl"
   solver-version = 1
