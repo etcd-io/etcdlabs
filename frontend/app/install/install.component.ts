@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Meta, Title } from '@angular/platform-browser';
 import { ParentComponent } from './common/common.component';
 import { CFSSL } from './common/cfssl.component';
 import { Go } from './common/go.component';
@@ -28,7 +29,15 @@ export class InstallComponent extends ParentComponent {
     etcd: Etcd;
     ////////////////////////////////////
 
-    constructor() {
+    constructor(meta: Meta, title: Title) {
+        title.setTitle('etcd Labs');
+
+        meta.addTags([
+          { name: 'author', content: 'etcd'},
+          { name: 'keywords', content: 'etcd, etcd tutorial, etcd setting, etcd cluster, etcd install, etcd TLS, secure etcd'},
+          { name: 'description', content: 'This is etcd tutorial, install guides!' }
+        ]);
+
         super();
 
         ///////////////////////////////////////////////////
