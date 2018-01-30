@@ -15,7 +15,6 @@ import (
 
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/embed"
-	"github.com/coreos/etcd/internal/compactor"
 	"github.com/coreos/etcd/pkg/netutil"
 	"github.com/coreos/etcd/pkg/transport"
 	"github.com/golang/glog"
@@ -181,7 +180,7 @@ func Start(ccfg Config) (clus *Cluster, err error) {
 		cfg.PeerTLSInfo = ccfg.PeerTLSInfo
 
 		// auto-compaction every hour
-		cfg.AutoCompactionMode = compactor.ModePeriodic
+		cfg.AutoCompactionMode = embed.CompactorModePeriodic
 		cfg.AutoCompactionRetention = "1h"
 
 		clus.Members[i] = &Member{
@@ -293,7 +292,7 @@ func (clus *Cluster) Add() error {
 	cfg.PeerTLSInfo = clus.ccfg.PeerTLSInfo
 
 	// auto-compaction every hour
-	cfg.AutoCompactionMode = compactor.ModePeriodic
+	cfg.AutoCompactionMode = embed.CompactorModePeriodic
 	cfg.AutoCompactionRetention = "1h"
 
 	clus.Members = append(clus.Members, &Member{
