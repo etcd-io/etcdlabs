@@ -90,7 +90,7 @@
     "wal",
     "wal/walpb"
   ]
-  revision = "42ef97d6d55a4566f34961b3f47a81946c70eb7e"
+  revision = "d7e18880a9891e7fb2d1a7cea4d70f48f4dfc6ac"
   source = "https://github.com/coreos/etcd"
 
 [[projects]]
@@ -362,6 +362,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "cdccca97f19f7e7c5e335a87583232e43cd9177d22bc84d38754e9861966dfbf"
+  inputs-digest = "092fd6fb07b7efddc6f319a77532c71c77ce6bc60a01dbd75ce4d96abe188330"
   solver-name = "gps-cdcl"
   solver-version = 1
