@@ -42,11 +42,11 @@
     "etcdserver/api/v3lock/v3lockpb/gw",
     "etcdserver/api/v3rpc",
     "etcdserver/api/v3rpc/rpctypes",
-    "etcdserver/auth",
     "etcdserver/etcdserverpb",
     "etcdserver/etcdserverpb/gw",
     "etcdserver/membership",
     "etcdserver/stats",
+    "etcdserver/v2auth",
     "internal/alarm",
     "internal/auth",
     "internal/auth/authpb",
@@ -72,6 +72,7 @@
     "pkg/httputil",
     "pkg/idutil",
     "pkg/ioutil",
+    "pkg/logger",
     "pkg/logutil",
     "pkg/netutil",
     "pkg/pathutil",
@@ -90,7 +91,7 @@
     "wal",
     "wal/walpb"
   ]
-  revision = "d7e18880a9891e7fb2d1a7cea4d70f48f4dfc6ac"
+  revision = "ebd58a0ea38be84755ff57a5b846c126862731d7"
   source = "https://github.com/coreos/etcd"
 
 [[projects]]
@@ -362,6 +363,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "092fd6fb07b7efddc6f319a77532c71c77ce6bc60a01dbd75ce4d96abe188330"
+  inputs-digest = "8d903a43117acef5b8c6fbfec646537b2a4932fa22c898c0a040dc74ae00c927"
   solver-name = "gps-cdcl"
   solver-version = 1

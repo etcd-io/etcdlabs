@@ -98,6 +98,7 @@ func unsafeRange(c *bolt.Cursor, key, endKey []byte, limit int64) (keys [][]byte
 		isMatch = func(b []byte) bool { return bytes.Equal(b, key) }
 		limit = 1
 	}
+
 	for ck, cv := c.Seek(key); ck != nil && isMatch(ck); ck, cv = c.Next() {
 		vs = append(vs, cv)
 		keys = append(keys, ck)
@@ -154,18 +155,16 @@ func (t *batchTx) Unlock() {
 	t.Mutex.Unlock()
 }
 
+func (t *batchTx) safePending() int {
+	t.Mutex.Lock()
+	defer t.Mutex.Unlock()
+	return t.pending
+}
+
 func (t *batchTx) commit(stop bool) {
 	// commit the last tx
 	if t.tx != nil {
 		if t.pending == 0 && !stop {
-			t.backend.mu.RLock()
-			defer t.backend.mu.RUnlock()
-
-			// t.tx.DB()==nil if 'CommitAndStop' calls 'batchTx.commit(true)',
-			// which initializes *bolt.Tx.db and *bolt.Tx.meta as nil; panics t.tx.Size().
-			// Server must make sure 'batchTx.commit(false)' does not follow
-			// 'batchTx.commit(true)' (e.g. stopping backend, and inflight Hash call).
-			atomic.StoreInt64(&t.backend.size, t.tx.Size())
 			return
 		}
 
