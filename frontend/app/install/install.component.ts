@@ -61,7 +61,7 @@ export class InstallComponent extends ParentComponent {
         ///////////////////////////////////////////////////
 
         ///////////////////////////////////////////////////
-        this.go = new Go('1.9.4');
+        this.go = new Go('1.10');
         this.inputGitUser = 'coreos';
         this.inputGitBranch = 'master';
         ///////////////////////////////////////////////////
@@ -73,7 +73,7 @@ export class InstallComponent extends ParentComponent {
             true,
             false,
             false,
-            1,
+            0, // disable auto-compaction by default
             3,
             [
                 new EtcdFlag(
