@@ -21,12 +21,12 @@ import (
 	"time"
 
 	"github.com/coreos/etcd/etcdserver/stats"
-	"github.com/coreos/etcd/internal/raftsnap"
 	"github.com/coreos/etcd/pkg/logutil"
 	"github.com/coreos/etcd/pkg/transport"
 	"github.com/coreos/etcd/pkg/types"
 	"github.com/coreos/etcd/raft"
 	"github.com/coreos/etcd/raft/raftpb"
+	"github.com/coreos/etcd/raftsnap"
 
 	"github.com/coreos/pkg/capnslog"
 	"github.com/xiang90/probing"
@@ -85,6 +85,8 @@ type Transporter interface {
 	// If the connection is active since peer was added, it returns the adding time.
 	// If the connection is currently inactive, it returns zero time.
 	ActiveSince(id types.ID) time.Time
+	// ActivePeers returns the number of active peers.
+	ActivePeers() int
 	// Stop closes the connections and stops the transporter.
 	Stop()
 }
@@ -338,8 +340,8 @@ func (t *Transport) UpdatePeer(id types.ID, us []string) {
 }
 
 func (t *Transport) ActiveSince(id types.ID) time.Time {
-	t.mu.Lock()
-	defer t.mu.Unlock()
+	t.mu.RLock()
+	defer t.mu.RUnlock()
 	if p, ok := t.peers[id]; ok {
 		return p.activeSince()
 	}
@@ -375,6 +377,20 @@ func (t *Transport) Resume() {
 	}
 }
 
+// ActivePeers returns a channel that closes when an initial
+// peer connection has been established. Use this to wait until the
+// first peer connection becomes active.
+func (t *Transport) ActivePeers() (cnt int) {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	for _, p := range t.peers {
+		if !p.activeSince().IsZero() {
+			cnt++
+		}
+	}
+	return cnt
+}
+
 type nopTransporter struct{}
 
 func NewNopTransporter() Transporter {
@@ -391,6 +407,7 @@ func (s *nopTransporter) RemovePeer(id types.ID)              {}
 func (s *nopTransporter) RemoveAllPeers()                     {}
 func (s *nopTransporter) UpdatePeer(id types.ID, us []string) {}
 func (s *nopTransporter) ActiveSince(id types.ID) time.Time   { return time.Time{} }
+func (s *nopTransporter) ActivePeers() int                    { return 0 }
 func (s *nopTransporter) Stop()                               {}
 func (s *nopTransporter) Pause()                              {}
 func (s *nopTransporter) Resume()                             {}

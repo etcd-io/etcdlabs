@@ -22,11 +22,16 @@
 [[projects]]
   name = "github.com/coreos/etcd"
   packages = [
+    "alarm",
+    "auth",
+    "auth/authpb",
     "client",
     "clientv3",
+    "clientv3/balancer",
     "clientv3/concurrency",
+    "compactor",
+    "discovery",
     "embed",
-    "error",
     "etcdserver",
     "etcdserver/api",
     "etcdserver/api/etcdhttp",
@@ -47,21 +52,14 @@
     "etcdserver/membership",
     "etcdserver/stats",
     "etcdserver/v2auth",
-    "internal/alarm",
-    "internal/auth",
-    "internal/auth/authpb",
-    "internal/compactor",
-    "internal/discovery",
-    "internal/lease",
-    "internal/lease/leasehttp",
-    "internal/lease/leasepb",
-    "internal/mvcc",
-    "internal/mvcc/backend",
-    "internal/mvcc/mvccpb",
-    "internal/raftsnap",
-    "internal/raftsnap/snappb",
-    "internal/store",
-    "internal/version",
+    "etcdserver/v2error",
+    "etcdserver/v2store",
+    "lease",
+    "lease/leasehttp",
+    "lease/leasepb",
+    "mvcc",
+    "mvcc/backend",
+    "mvcc/mvccpb",
     "pkg/adt",
     "pkg/contention",
     "pkg/cors",
@@ -72,7 +70,6 @@
     "pkg/httputil",
     "pkg/idutil",
     "pkg/ioutil",
-    "pkg/logger",
     "pkg/logutil",
     "pkg/netutil",
     "pkg/pathutil",
@@ -88,10 +85,13 @@
     "raft",
     "raft/raftpb",
     "rafthttp",
+    "raftsnap",
+    "raftsnap/snappb",
+    "version",
     "wal",
     "wal/walpb"
   ]
-  revision = "ebd58a0ea38be84755ff57a5b846c126862731d7"
+  revision = "34241efb115f1b30946ad2de0a4cc6a7a4f21a84"
   source = "https://github.com/coreos/etcd"
 
 [[projects]]
@@ -363,6 +363,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8d903a43117acef5b8c6fbfec646537b2a4932fa22c898c0a040dc74ae00c927"
+  inputs-digest = "c45ab7596c6fc286931b425ec2ebad6817cd124a2c24424b886959078c237eb9"
   solver-name = "gps-cdcl"
   solver-version = 1

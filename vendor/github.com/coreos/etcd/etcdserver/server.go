@@ -29,22 +29,20 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/coreos/etcd/alarm"
+	"github.com/coreos/etcd/auth"
+	"github.com/coreos/etcd/compactor"
+	"github.com/coreos/etcd/discovery"
 	"github.com/coreos/etcd/etcdserver/api"
 	"github.com/coreos/etcd/etcdserver/api/v2http/httptypes"
 	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
 	"github.com/coreos/etcd/etcdserver/membership"
 	"github.com/coreos/etcd/etcdserver/stats"
-	"github.com/coreos/etcd/internal/alarm"
-	"github.com/coreos/etcd/internal/auth"
-	"github.com/coreos/etcd/internal/compactor"
-	"github.com/coreos/etcd/internal/discovery"
-	"github.com/coreos/etcd/internal/lease"
-	"github.com/coreos/etcd/internal/lease/leasehttp"
-	"github.com/coreos/etcd/internal/mvcc"
-	"github.com/coreos/etcd/internal/mvcc/backend"
-	"github.com/coreos/etcd/internal/raftsnap"
-	"github.com/coreos/etcd/internal/store"
-	"github.com/coreos/etcd/internal/version"
+	"github.com/coreos/etcd/etcdserver/v2store"
+	"github.com/coreos/etcd/lease"
+	"github.com/coreos/etcd/lease/leasehttp"
+	"github.com/coreos/etcd/mvcc"
+	"github.com/coreos/etcd/mvcc/backend"
 	"github.com/coreos/etcd/pkg/fileutil"
 	"github.com/coreos/etcd/pkg/idutil"
 	"github.com/coreos/etcd/pkg/pbutil"
@@ -55,6 +53,8 @@ import (
 	"github.com/coreos/etcd/raft"
 	"github.com/coreos/etcd/raft/raftpb"
 	"github.com/coreos/etcd/rafthttp"
+	"github.com/coreos/etcd/raftsnap"
+	"github.com/coreos/etcd/version"
 	"github.com/coreos/etcd/wal"
 
 	"github.com/coreos/go-semver/semver"
@@ -112,13 +112,15 @@ func init() {
 type Response struct {
 	Term    uint64
 	Index   uint64
-	Event   *store.Event
-	Watcher store.Watcher
+	Event   *v2store.Event
+	Watcher v2store.Watcher
 	Err     error
 }
 
 type ServerV2 interface {
 	Server
+	Leader() types.ID
+
 	// Do takes a V2 request and attempts to fulfill it, returning a Response.
 	Do(ctx context.Context, r pb.Request) (Response, error)
 	stats.Stats
@@ -127,16 +129,12 @@ type ServerV2 interface {
 
 type ServerV3 interface {
 	Server
-	ID() types.ID
-	RaftTimer
+	RaftStatusGetter
 }
 
 func (s *EtcdServer) ClientCertAuthEnabled() bool { return s.Cfg.ClientCertAuthEnabled }
 
 type Server interface {
-	// Leader returns the ID of the leader Server.
-	Leader() types.ID
-
 	// AddMember attempts to add a member into the cluster. It will return
 	// ErrIDRemoved if member ID is removed from the cluster, or return
 	// ErrIDExists if member ID exists in the cluster.
@@ -174,6 +172,9 @@ type EtcdServer struct {
 	inflightSnapshots int64  // must use atomic operations to access; keep 64-bit aligned.
 	appliedIndex      uint64 // must use atomic operations to access; keep 64-bit aligned.
 	committedIndex    uint64 // must use atomic operations to access; keep 64-bit aligned.
+	term              uint64 // must use atomic operations to access; keep 64-bit aligned.
+	lead              uint64 // must use atomic operations to access; keep 64-bit aligned.
+
 	// consistIndex used to hold the offset of current executing entry
 	// It is initialized to 0 before executing any entry.
 	consistIndex consistentIndex // must use atomic operations to access; keep 64-bit aligned.
@@ -205,7 +206,7 @@ type EtcdServer struct {
 
 	cluster *membership.RaftCluster
 
-	store       store.Store
+	v2store     v2store.Store
 	snapshotter *raftsnap.Snapshotter
 
 	applyV2 ApplierV2
@@ -251,12 +252,20 @@ type EtcdServer struct {
 
 	leadTimeMu      sync.RWMutex
 	leadElectedTime time.Time
+
+	hostWhitelist map[string]struct{}
 }
 
 // NewServer creates a new EtcdServer from the supplied configuration. The
 // configuration is considered static for the lifetime of the EtcdServer.
 func NewServer(cfg ServerConfig) (srv *EtcdServer, err error) {
-	st := store.New(StoreClusterPrefix, StoreKeysPrefix)
+	if cfg.PreVote {
+		plog.Info("Raft Pre-Vote is enabled")
+	} else {
+		plog.Info("Raft Pre-Vote is disabled")
+	}
+
+	st := v2store.New(StoreClusterPrefix, StoreKeysPrefix)
 
 	var (
 		w  *wal.WAL
@@ -414,7 +423,7 @@ func NewServer(cfg ServerConfig) (srv *EtcdServer, err error) {
 		readych:     make(chan struct{}),
 		Cfg:         cfg,
 		errorc:      make(chan error, 1),
-		store:       st,
+		v2store:     st,
 		snapshotter: ss,
 		r: *newRaftNode(
 			raftNodeConfig{
@@ -434,9 +443,10 @@ func NewServer(cfg ServerConfig) (srv *EtcdServer, err error) {
 		peerRt:        prt,
 		reqIDGen:      idutil.NewGenerator(uint16(id), time.Now()),
 		forceVersionC: make(chan struct{}),
+		hostWhitelist: cfg.HostWhitelist,
 	}
 
-	srv.applyV2 = &applierV2store{store: srv.store, cluster: srv.cluster}
+	srv.applyV2 = &applierV2store{store: srv.v2store, cluster: srv.cluster}
 
 	srv.be = be
 	minTTL := time.Duration((3*cfg.ElectionTicks)/2) * heartbeat
@@ -521,12 +531,51 @@ func NewServer(cfg ServerConfig) (srv *EtcdServer, err error) {
 	return srv, nil
 }
 
+func (s *EtcdServer) adjustTicks() {
+	clusterN := len(s.cluster.Members())
+
+	// single-node fresh start, or single-node recovers from snapshot
+	if clusterN == 1 {
+		ticks := s.Cfg.ElectionTicks - 1
+		plog.Infof("%s as single-node; fast-forwarding %d ticks (election ticks %d)", s.ID(), ticks, s.Cfg.ElectionTicks)
+		s.r.advanceTicks(ticks)
+		return
+	}
+
+	// retry up to "rafthttp.ConnReadTimeout", which is 5-sec
+	// until peer connection reports; otherwise:
+	// 1. all connections failed, or
+	// 2. no active peers, or
+	// 3. restarted single-node with no snapshot
+	// then, do nothing, because advancing ticks would have no effect
+	waitTime := rafthttp.ConnReadTimeout
+	itv := 50 * time.Millisecond
+	for i := int64(0); i < int64(waitTime/itv); i++ {
+		select {
+		case <-time.After(itv):
+		case <-s.stopping:
+			return
+		}
+
+		peerN := s.r.transport.ActivePeers()
+		if peerN > 1 {
+			// multi-node received peer connection reports
+			// adjust ticks, in case slow leader message receive
+			ticks := s.Cfg.ElectionTicks - 2
+			plog.Infof("%s initialzed peer connection; fast-forwarding %d ticks (election ticks %d) with %d active peer(s)", s.ID(), ticks, s.Cfg.ElectionTicks, peerN)
+			s.r.advanceTicks(ticks)
+			return
+		}
+	}
+}
+
 // Start performs any initialization of the Server necessary for it to
 // begin serving requests. It must be called before Do or Process.
 // Start must be non-blocking; any long-running server functionality
 // should be implemented in goroutines.
 func (s *EtcdServer) Start() {
 	s.start()
+	s.goAttach(func() { s.adjustTicks() })
 	s.goAttach(func() { s.publish(s.Cfg.ReqTimeout()) })
 	s.goAttach(s.purgeFile)
 	s.goAttach(func() { monitorFileDescriptor(s.stopping) })
@@ -582,8 +631,6 @@ func (s *EtcdServer) purgeFile() {
 	}
 }
 
-func (s *EtcdServer) ID() types.ID { return s.id }
-
 func (s *EtcdServer) Cluster() api.Cluster { return s.cluster }
 
 func (s *EtcdServer) ApplyWait() <-chan struct{} { return s.applyWait.Wait(s.getCommittedIndex()) }
@@ -626,6 +673,16 @@ func (s *EtcdServer) ReportSnapshot(id uint64, status raft.SnapshotStatus) {
 	s.r.ReportSnapshot(id, status)
 }
 
+// IsHostWhitelisted returns true if the host is whitelisted.
+// If whitelist is empty, allow all.
+func (s *EtcdServer) IsHostWhitelisted(host string) bool {
+	if len(s.hostWhitelist) == 0 { // allow all
+		return true
+	}
+	_, ok := s.hostWhitelist[host]
+	return ok
+}
+
 type etcdProgress struct {
 	confState raftpb.ConfState
 	snapi     uint64
@@ -637,6 +694,8 @@ type etcdProgress struct {
 // and helps decouple state machine logic from Raft algorithms.
 // TODO: add a state machine interface to apply the commit entries and do snapshot/recover
 type raftReadyHandler struct {
+	getLead              func() (lead uint64)
+	updateLead           func(lead uint64)
 	updateLeadership     func(newLeader bool)
 	updateCommittedIndex func(uint64)
 }
@@ -666,6 +725,8 @@ func (s *EtcdServer) run() {
 		return
 	}
 	rh := &raftReadyHandler{
+		getLead:    func() (lead uint64) { return s.getLead() },
+		updateLead: func(lead uint64) { s.setLead(lead) },
 		updateLeadership: func(newLeader bool) {
 			if !s.isLeader() {
 				if s.lessor != nil {
@@ -783,7 +844,7 @@ func (s *EtcdServer) run() {
 			plog.Infof("the data-dir used by this member must be removed.")
 			return
 		case <-getSyncC():
-			if s.store.HasTTLKeys() {
+			if s.v2store.HasTTLKeys() {
 				s.sync(s.Cfg.ReqTimeout())
 			}
 		case <-s.stop:
@@ -881,7 +942,7 @@ func (s *EtcdServer) applySnapshot(ep *etcdProgress, apply *apply) {
 	}
 
 	plog.Info("recovering store v2...")
-	if err := s.store.Recovery(apply.snapshot.Data); err != nil {
+	if err := s.v2store.Recovery(apply.snapshot.Data); err != nil {
 		plog.Panicf("recovery store error: %v", err)
 	}
 	plog.Info("finished recovering store v2")
@@ -1040,14 +1101,14 @@ func (s *EtcdServer) StopNotify() <-chan struct{} { return s.done }
 func (s *EtcdServer) SelfStats() []byte { return s.stats.JSON() }
 
 func (s *EtcdServer) LeaderStats() []byte {
-	lead := atomic.LoadUint64(&s.r.lead)
+	lead := s.getLead()
 	if lead != uint64(s.id) {
 		return nil
 	}
 	return s.lstats.JSON()
 }
 
-func (s *EtcdServer) StoreStats() []byte { return s.store.JsonStats() }
+func (s *EtcdServer) StoreStats() []byte { return s.v2store.JsonStats() }
 
 func (s *EtcdServer) checkMembershipOperationPermission(ctx context.Context) error {
 	if s.authStore == nil {
@@ -1160,20 +1221,58 @@ func (s *EtcdServer) UpdateMember(ctx context.Context, memb membership.Member) (
 	return s.configure(ctx, cc)
 }
 
-// Implement the RaftTimer interface
+func (s *EtcdServer) setCommittedIndex(v uint64) {
+	atomic.StoreUint64(&s.committedIndex, v)
+}
 
-func (s *EtcdServer) Index() uint64 { return atomic.LoadUint64(&s.r.index) }
+func (s *EtcdServer) getCommittedIndex() uint64 {
+	return atomic.LoadUint64(&s.committedIndex)
+}
 
-func (s *EtcdServer) AppliedIndex() uint64 { return atomic.LoadUint64(&s.r.appliedindex) }
+func (s *EtcdServer) setAppliedIndex(v uint64) {
+	atomic.StoreUint64(&s.appliedIndex, v)
+}
 
-func (s *EtcdServer) Term() uint64 { return atomic.LoadUint64(&s.r.term) }
+func (s *EtcdServer) getAppliedIndex() uint64 {
+	return atomic.LoadUint64(&s.appliedIndex)
+}
 
-// Lead is only for testing purposes.
-// TODO: add Raft server interface to expose raft related info:
-// Index, Term, Lead, Committed, Applied, LastIndex, etc.
-func (s *EtcdServer) Lead() uint64 { return atomic.LoadUint64(&s.r.lead) }
+func (s *EtcdServer) setTerm(v uint64) {
+	atomic.StoreUint64(&s.term, v)
+}
 
-func (s *EtcdServer) Leader() types.ID { return types.ID(s.Lead()) }
+func (s *EtcdServer) getTerm() uint64 {
+	return atomic.LoadUint64(&s.term)
+}
+
+func (s *EtcdServer) setLead(v uint64) {
+	atomic.StoreUint64(&s.lead, v)
+}
+
+func (s *EtcdServer) getLead() uint64 {
+	return atomic.LoadUint64(&s.lead)
+}
+
+// RaftStatusGetter represents etcd server and Raft progress.
+type RaftStatusGetter interface {
+	ID() types.ID
+	Leader() types.ID
+	CommittedIndex() uint64
+	AppliedIndex() uint64
+	Term() uint64
+}
+
+func (s *EtcdServer) ID() types.ID { return s.id }
+
+func (s *EtcdServer) Leader() types.ID { return types.ID(s.getLead()) }
+
+func (s *EtcdServer) Lead() uint64 { return s.getLead() }
+
+func (s *EtcdServer) CommittedIndex() uint64 { return s.getCommittedIndex() }
+
+func (s *EtcdServer) AppliedIndex() uint64 { return s.getAppliedIndex() }
+
+func (s *EtcdServer) Term() uint64 { return s.getTerm() }
 
 type confChangeResponse struct {
 	membs []*membership.Member
@@ -1293,6 +1392,8 @@ func (s *EtcdServer) apply(es []raftpb.Entry, confState *raftpb.ConfState) (appl
 		switch e.Type {
 		case raftpb.EntryNormal:
 			s.applyEntryNormal(&e)
+			s.setAppliedIndex(e.Index)
+			s.setTerm(e.Term)
 		case raftpb.EntryConfChange:
 			// set the consistent index of current executing entry
 			if e.Index > s.consistIndex.ConsistentIndex() {
@@ -1302,15 +1403,13 @@ func (s *EtcdServer) apply(es []raftpb.Entry, confState *raftpb.ConfState) (appl
 			pbutil.MustUnmarshal(&cc, e.Data)
 			removedSelf, err := s.applyConfChange(cc, confState)
 			s.setAppliedIndex(e.Index)
+			s.setTerm(e.Term)
 			shouldStop = shouldStop || removedSelf
 			s.w.Trigger(cc.ID, &confChangeResponse{s.cluster.Members(), err})
 		default:
 			plog.Panicf("entry type should be either EntryNormal or EntryConfChange")
 		}
-		atomic.StoreUint64(&s.r.index, e.Index)
-		atomic.StoreUint64(&s.r.term, e.Term)
-		appliedt = e.Term
-		appliedi = e.Index
+		appliedi, appliedt = e.Index, e.Term
 	}
 	return appliedt, appliedi, shouldStop
 }
@@ -1323,7 +1422,6 @@ func (s *EtcdServer) applyEntryNormal(e *raftpb.Entry) {
 		s.consistIndex.setConsistentIndex(e.Index)
 		shouldApplyV3 = true
 	}
-	defer s.setAppliedIndex(e.Index)
 
 	// raft state machine may generate noop entry when leader confirmation.
 	// skip it in advance to avoid some potential bug in the future
@@ -1441,7 +1539,7 @@ func (s *EtcdServer) applyConfChange(cc raftpb.ConfChange, confState *raftpb.Con
 
 // TODO: non-blocking snapshot
 func (s *EtcdServer) snapshot(snapi uint64, confState raftpb.ConfState) {
-	clone := s.store.Clone()
+	clone := s.v2store.Clone()
 	// commit kv to write metadata (for example: consistent index) to disk.
 	// KV().commit() updates the consistent index in backend.
 	// All operations that update consistent index must be called sequentially
@@ -1612,7 +1710,7 @@ func (s *EtcdServer) parseProposeCtxErr(err error, start time.Time) error {
 			return ErrTimeoutDueToLeaderFail
 		}
 
-		lead := types.ID(atomic.LoadUint64(&s.r.lead))
+		lead := types.ID(s.getLead())
 		switch lead {
 		case types.ID(raft.None):
 			// TODO: return error to specify it happens because the cluster does not have leader now
@@ -1655,23 +1753,6 @@ func (s *EtcdServer) restoreAlarms() error {
 		s.applyV3 = newApplierV3Corrupt(s.applyV3)
 	}
 	return nil
-}
-
-func (s *EtcdServer) getAppliedIndex() uint64 {
-	return atomic.LoadUint64(&s.appliedIndex)
-}
-
-func (s *EtcdServer) setAppliedIndex(v uint64) {
-	atomic.StoreUint64(&s.appliedIndex, v)
-	atomic.StoreUint64(&s.r.appliedindex, v)
-}
-
-func (s *EtcdServer) getCommittedIndex() uint64 {
-	return atomic.LoadUint64(&s.committedIndex)
-}
-
-func (s *EtcdServer) setCommittedIndex(v uint64) {
-	atomic.StoreUint64(&s.committedIndex, v)
 }
 
 // goAttach creates a goroutine on a given function and tracks it using

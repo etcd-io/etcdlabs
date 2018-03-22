@@ -26,8 +26,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/coreos/etcd/compactor"
 	"github.com/coreos/etcd/etcdserver"
-	"github.com/coreos/etcd/internal/compactor"
 	"github.com/coreos/etcd/pkg/cors"
 	"github.com/coreos/etcd/pkg/netutil"
 	"github.com/coreos/etcd/pkg/srv"
@@ -79,8 +79,9 @@ var (
 	DefaultInitialAdvertisePeerURLs = "http://localhost:2380"
 	DefaultAdvertiseClientURLs      = "http://localhost:2379"
 
-	defaultHostname   string
-	defaultHostStatus error
+	defaultHostname      string
+	defaultHostStatus    error
+	defaultHostWhitelist = []string{} // if empty, allow all
 )
 
 var (
@@ -106,18 +107,22 @@ func init() {
 
 // Config holds the arguments for configuring an etcd server.
 type Config struct {
-	// member
+	CorsInfo       *cors.CORSInfo
+	LPUrls, LCUrls []url.URL
+	Dir            string `json:"data-dir"`
+	WalDir         string `json:"wal-dir"`
+	MaxSnapFiles   uint   `json:"max-snapshots"`
+	MaxWalFiles    uint   `json:"max-wals"`
+	Name           string `json:"name"`
+	SnapCount      uint64 `json:"snapshot-count"`
 
-	CorsInfo                *cors.CORSInfo
-	LPUrls, LCUrls          []url.URL
-	Dir                     string `json:"data-dir"`
-	WalDir                  string `json:"wal-dir"`
-	MaxSnapFiles            uint   `json:"max-snapshots"`
-	MaxWalFiles             uint   `json:"max-wals"`
-	Name                    string `json:"name"`
-	SnapCount               uint64 `json:"snapshot-count"`
+	// AutoCompactionMode is either 'periodic' or 'revision'.
+	AutoCompactionMode string `json:"auto-compaction-mode"`
+	// AutoCompactionRetention is either duration string with time unit
+	// (e.g. '5m' for 5-minute), or revision unit (e.g. '5000').
+	// If no time unit is provided and compaction mode is 'periodic',
+	// the unit defaults to hour. For example, '5' translates into 5-hour.
 	AutoCompactionRetention string `json:"auto-compaction-retention"`
-	AutoCompactionMode      string `json:"auto-compaction-mode"`
 
 	// TickMs is the number of milliseconds between heartbeat ticks.
 	// TODO: decouple tickMs and heartbeat tick (current heartbeat tick = 1).
@@ -127,8 +132,6 @@ type Config struct {
 	QuotaBackendBytes int64 `json:"quota-backend-bytes"`
 	MaxTxnOps         uint  `json:"max-txn-ops"`
 	MaxRequestBytes   uint  `json:"max-request-bytes"`
-
-	// gRPC server options
 
 	// GRPCKeepAliveMinTime is the minimum interval that a client should
 	// wait before pinging server. When client pings "too fast", server
@@ -145,8 +148,6 @@ type Config struct {
 	// before closing a non-responsive connection. 0 to disable.
 	GRPCKeepAliveTimeout time.Duration `json:"grpc-keepalive-timeout"`
 
-	// clustering
-
 	APUrls, ACUrls        []url.URL
 	ClusterState          string `json:"initial-cluster-state"`
 	DNSCluster            string `json:"discovery-srv"`
@@ -158,14 +159,43 @@ type Config struct {
 	StrictReconfigCheck   bool   `json:"strict-reconfig-check"`
 	EnableV2              bool   `json:"enable-v2"`
 
-	// security
+	// PreVote is true to enable Raft Pre-Vote.
+	// If enabled, Raft runs an additional election phase
+	// to check whether it would get enough votes to win
+	// an election, thus minimizing disruptions.
+	// TODO: enable by default in 3.5.
+	PreVote bool `json:"pre-vote"`
 
 	ClientTLSInfo transport.TLSInfo
 	ClientAutoTLS bool
 	PeerTLSInfo   transport.TLSInfo
 	PeerAutoTLS   bool
 
-	// debug
+	// HostWhitelist lists acceptable hostnames from HTTP client requests.
+	// Client origin policy protects against "DNS Rebinding" attacks
+	// to insecure etcd servers. That is, any website can simply create
+	// an authorized DNS name, and direct DNS to "localhost" (or any
+	// other address). Then, all HTTP endpoints of etcd server listening
+	// on "localhost" becomes accessible, thus vulnerable to DNS rebinding
+	// attacks. See "CVE-2018-5702" for more detail.
+	//
+	// 1. If client connection is secure via HTTPS, allow any hostnames.
+	// 2. If client connection is not secure and "HostWhitelist" is not empty,
+	//    only allow HTTP requests whose Host field is listed in whitelist.
+	//
+	// Note that the client origin policy is enforced whether authentication
+	// is enabled or not, for tighter controls.
+	//
+	// By default, "HostWhitelist" is empty, which allows any hostnames.
+	// Note that when specifying hostnames, loopback addresses are not added
+	// automatically. To allow loopback interfaces, leave it empty or add them
+	// to whitelist manually (e.g. "localhost", "127.0.0.1", etc.).
+	//
+	// CVE-2018-5702 reference:
+	// - https://bugs.chromium.org/p/project-zero/issues/detail?id=1447#c2
+	// - https://github.com/transmission/transmission/pull/468
+	// - https://github.com/coreos/etcd/issues/9353
+	HostWhitelist []string `json:"host-whitelist"`
 
 	Debug                 bool   `json:"debug"`
 	LogPkgLevels          string `json:"log-package-levels"`
@@ -192,11 +222,7 @@ type Config struct {
 	//	embed.StartEtcd(cfg)
 	ServiceRegister func(*grpc.Server) `json:"-"`
 
-	// auth
-
 	AuthToken string `json:"auth-token"`
-
-	// Experimental flags
 
 	ExperimentalInitialCorruptCheck bool          `json:"experimental-initial-corrupt-check"`
 	ExperimentalCorruptCheckTime    time.Duration `json:"experimental-corrupt-check-time"`
@@ -221,7 +247,6 @@ type configJSON struct {
 }
 
 type securityConfig struct {
-	CAFile        string `json:"ca-file"`
 	CertFile      string `json:"cert-file"`
 	KeyFile       string `json:"key-file"`
 	CertAuth      bool   `json:"client-cert-auth"`
@@ -258,7 +283,9 @@ func NewConfig() *Config {
 		LogOutput:             DefaultLogOutput,
 		Metrics:               "basic",
 		EnableV2:              DefaultEnableV2,
+		HostWhitelist:         defaultHostWhitelist,
 		AuthToken:             "simple",
+		PreVote:               false, // TODO: enable by default in v3.5
 	}
 	cfg.InitialCluster = cfg.InitialClusterFromName(cfg.Name)
 	return cfg
@@ -393,7 +420,6 @@ func (cfg *configYAML) configFromFile(path string) error {
 	}
 
 	copySecurityDetails := func(tls *transport.TLSInfo, ysc *securityConfig) {
-		tls.CAFile = ysc.CAFile
 		tls.CertFile = ysc.CertFile
 		tls.KeyFile = ysc.KeyFile
 		tls.ClientCertAuth = ysc.CertAuth
@@ -407,6 +433,7 @@ func (cfg *configYAML) configFromFile(path string) error {
 	return cfg.Validate()
 }
 
+// Validate ensures that '*embed.Config' fields are properly configured.
 func (cfg *Config) Validate() error {
 	if err := checkBindURLs(cfg.LPUrls); err != nil {
 		return err
@@ -465,6 +492,13 @@ func (cfg *Config) Validate() error {
 		return ErrUnsetAdvertiseClientURLsFlag
 	}
 
+	switch cfg.AutoCompactionMode {
+	case "":
+	case CompactorModeRevision, CompactorModePeriodic:
+	default:
+		return fmt.Errorf("unknown auto-compaction-mode %q", cfg.AutoCompactionMode)
+	}
+
 	return nil
 }
 
@@ -489,7 +523,7 @@ func (cfg *Config) PeerURLsMapAndToken(which string) (urlsmap types.URLsMap, tok
 			plog.Noticef("got bootstrap from DNS for etcd-server at %s", s)
 		}
 		clusterStr := strings.Join(clusterStrs, ",")
-		if strings.Contains(clusterStr, "https://") && cfg.PeerTLSInfo.CAFile == "" {
+		if strings.Contains(clusterStr, "https://") && cfg.PeerTLSInfo.TrustedCAFile == "" {
 			cfg.PeerTLSInfo.ServerName = cfg.DNSCluster
 		}
 		urlsmap, err = types.NewURLsMap(clusterStr)

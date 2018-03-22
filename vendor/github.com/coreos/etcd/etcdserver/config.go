@@ -47,6 +47,11 @@ type ServerConfig struct {
 	ForceNewCluster     bool
 	PeerTLSInfo         transport.TLSInfo
 
+	// HostWhitelist lists acceptable hostnames from client requests.
+	// If server is insecure (no TLS), server only accepts requests
+	// whose Host header value exists in this white list.
+	HostWhitelist map[string]struct{}
+
 	TickMs           uint
 	ElectionTicks    int
 	BootstrapTimeout time.Duration
@@ -70,6 +75,9 @@ type ServerConfig struct {
 	// before serving any peer/client traffic.
 	InitialCorruptCheck bool
 	CorruptCheckTime    time.Duration
+
+	// PreVote is true to enable Raft Pre-Vote.
+	PreVote bool
 
 	Debug bool
 }

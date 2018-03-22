@@ -16,6 +16,7 @@ package embed
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
 	defaultLog "log"
 	"net"
@@ -33,6 +34,7 @@ import (
 	"github.com/coreos/etcd/etcdserver/api/v3rpc"
 	etcdservergw "github.com/coreos/etcd/etcdserver/etcdserverpb/gw"
 	"github.com/coreos/etcd/pkg/debugutil"
+	"github.com/coreos/etcd/pkg/httputil"
 	"github.com/coreos/etcd/pkg/transport"
 
 	gw "github.com/grpc-ecosystem/grpc-gateway/runtime"
@@ -114,7 +116,7 @@ func (sctx *serveCtx) serve(
 		httpmux := sctx.createMux(gwmux, handler)
 
 		srvhttp := &http.Server{
-			Handler:  wrapMux(httpmux),
+			Handler:  wrapMux(s, httpmux),
 			ErrorLog: logger, // do not log user error
 		}
 		httpl := m.Match(cmux.HTTP1())
@@ -157,7 +159,7 @@ func (sctx *serveCtx) serve(
 		httpmux := sctx.createMux(gwmux, handler)
 
 		srv := &http.Server{
-			Handler:   wrapMux(httpmux),
+			Handler:   wrapMux(s, httpmux),
 			TLSConfig: tlscfg,
 			ErrorLog:  logger, // do not log user error
 		}
@@ -230,7 +232,7 @@ func (sctx *serveCtx) createMux(gwmux *gw.ServeMux, handler http.Handler) *http.
 	}
 
 	httpmux.Handle(
-		"/v3beta/",
+		"/v3/",
 		wsproxy.WebsocketProxy(
 			gwmux,
 			wsproxy.WithRequestMutator(
@@ -248,19 +250,51 @@ func (sctx *serveCtx) createMux(gwmux *gw.ServeMux, handler http.Handler) *http.
 	return httpmux
 }
 
-// wraps HTTP multiplexer to mute requests to /v3alpha
-// TODO: deprecate this in 3.4 release
-func wrapMux(mux *http.ServeMux) http.Handler { return &v3alphaMutator{mux: mux} }
+// wrapMux wraps HTTP multiplexer:
+// - mutate gRPC gateway request paths
+// - check hostname whitelist
+// client HTTP requests goes here first
+func wrapMux(s *etcdserver.EtcdServer, mux *http.ServeMux) http.Handler {
+	return &httpWrapper{s: s, mux: mux}
+}
 
-type v3alphaMutator struct {
+type httpWrapper struct {
+	s   *etcdserver.EtcdServer
 	mux *http.ServeMux
 }
 
-func (m *v3alphaMutator) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	if req != nil && req.URL != nil && strings.HasPrefix(req.URL.Path, "/v3alpha/") {
-		req.URL.Path = strings.Replace(req.URL.Path, "/v3alpha/", "/v3beta/", 1)
+func (m *httpWrapper) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+	// redirect for backward compatibilities
+	if req != nil && req.URL != nil && strings.HasPrefix(req.URL.Path, "/v3beta/") {
+		req.URL.Path = strings.Replace(req.URL.Path, "/v3beta/", "/v3/", 1)
 	}
+
+	if req.TLS == nil { // check origin if client connection is not secure
+		host := httputil.GetHostname(req)
+		if !m.s.IsHostWhitelisted(host) {
+			plog.Warningf("rejecting HTTP request from %q to prevent DNS rebinding attacks", host)
+			// TODO: use Go's "http.StatusMisdirectedRequest" (421)
+			// https://github.com/golang/go/commit/4b8a7eafef039af1834ef9bfa879257c4a72b7b5
+			http.Error(rw, errCVE20185702(host), 421)
+			return
+		}
+	}
+
 	m.mux.ServeHTTP(rw, req)
+}
+
+// https://github.com/transmission/transmission/pull/468
+func errCVE20185702(host string) string {
+	return fmt.Sprintf(`
+etcd received your request, but the Host header was unrecognized.
+
+To fix this, choose one of the following options:
+- Enable TLS, then any HTTPS request will be allowed.
+- Add the hostname you want to use to the whitelist in settings.
+  - e.g. etcd --host-whitelist %q
+
+This requirement has been added to help prevent "DNS Rebinding" attacks (CVE-2018-5702).
+`, host)
 }
 
 func (sctx *serveCtx) registerUserHandler(s string, h http.Handler) {

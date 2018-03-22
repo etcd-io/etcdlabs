@@ -134,22 +134,13 @@ func StartEtcd(inCfg *Config) (e *Etcd, err error) {
 		}
 	}
 
-	var (
-		autoCompactionRetention time.Duration
-		h                       int
-	)
 	// AutoCompactionRetention defaults to "0" if not set.
 	if len(cfg.AutoCompactionRetention) == 0 {
 		cfg.AutoCompactionRetention = "0"
 	}
-	h, err = strconv.Atoi(cfg.AutoCompactionRetention)
-	if err == nil {
-		autoCompactionRetention = time.Duration(int64(h)) * time.Hour
-	} else {
-		autoCompactionRetention, err = time.ParseDuration(cfg.AutoCompactionRetention)
-		if err != nil {
-			return nil, fmt.Errorf("error parsing AutoCompactionRetention: %v", err)
-		}
+	autoCompactionRetention, err := parseCompactionRetention(cfg.AutoCompactionMode, cfg.AutoCompactionRetention)
+	if err != nil {
+		return e, err
 	}
 
 	srvcfg := etcdserver.ServerConfig{
@@ -180,12 +171,21 @@ func StartEtcd(inCfg *Config) (e *Etcd, err error) {
 		AuthToken:               cfg.AuthToken,
 		InitialCorruptCheck:     cfg.ExperimentalInitialCorruptCheck,
 		CorruptCheckTime:        cfg.ExperimentalCorruptCheckTime,
+		PreVote:                 cfg.PreVote,
 		Debug:                   cfg.Debug,
+	}
+
+	srvcfg.HostWhitelist = make(map[string]struct{}, len(cfg.HostWhitelist))
+	for _, h := range cfg.HostWhitelist {
+		if h != "" {
+			srvcfg.HostWhitelist[h] = struct{}{}
+		}
 	}
 
 	if e.Server, err = etcdserver.NewServer(srvcfg); err != nil {
 		return e, err
 	}
+	plog.Infof("%s starting with host whitelist %q", e.Server.ID(), cfg.HostWhitelist)
 
 	// buffer channel so goroutines on closed connections won't wait forever
 	e.errc = make(chan error, len(e.Peers)+len(e.Clients)+2*len(e.sctxs))
@@ -561,4 +561,23 @@ func (e *Etcd) errHandler(err error) {
 	case <-e.stopc:
 	case e.errc <- err:
 	}
+}
+
+func parseCompactionRetention(mode, retention string) (ret time.Duration, err error) {
+	h, err := strconv.Atoi(retention)
+	if err == nil {
+		switch mode {
+		case CompactorModeRevision:
+			ret = time.Duration(int64(h))
+		case CompactorModePeriodic:
+			ret = time.Duration(int64(h)) * time.Hour
+		}
+	} else {
+		// periodic compaction
+		ret, err = time.ParseDuration(retention)
+		if err != nil {
+			return 0, fmt.Errorf("error parsing CompactionRetention: %v", err)
+		}
+	}
+	return ret, nil
 }

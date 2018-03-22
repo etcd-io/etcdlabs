@@ -817,8 +817,15 @@ func (r *raft) Step(m pb.Message) error {
 			// nodes that have been removed from the cluster's configuration: a
 			// removed node will send MsgVotes (or MsgPreVotes) which will be ignored,
 			// but it will not receive MsgApp or MsgHeartbeat, so it will not create
-			// disruptive term increases
+			// disruptive term increases, by notifying leader of this node's activeness.
 			// The above comments also true for Pre-Vote
+			//
+			// When follower gets isolated, it soon starts an election ending
+			// up with a higher term than leader, although it won't receive enough
+			// votes to win the election. When it regains connectivity, this response
+			// with "pb.MsgAppResp" of higher term would force leader to step down.
+			// However, this disruption is inevitable to free this stuck node with
+			// fresh election. This can be prevented with Pre-Vote phase.
 			r.send(pb.Message{To: m.From, Type: pb.MsgAppResp})
 		} else if m.Type == pb.MsgPreVote {
 			// Before Pre-Vote enable, there may have candidate with higher term,
@@ -1128,13 +1135,13 @@ func stepCandidate(r *raft, m pb.Message) error {
 		r.logger.Infof("%x no leader at term %d; dropping proposal", r.id, r.Term)
 		return ErrProposalDropped
 	case pb.MsgApp:
-		r.becomeFollower(r.Term, m.From)
+		r.becomeFollower(m.Term, m.From) // always m.Term == r.Term
 		r.handleAppendEntries(m)
 	case pb.MsgHeartbeat:
-		r.becomeFollower(r.Term, m.From)
+		r.becomeFollower(m.Term, m.From) // always m.Term == r.Term
 		r.handleHeartbeat(m)
 	case pb.MsgSnap:
-		r.becomeFollower(m.Term, m.From)
+		r.becomeFollower(m.Term, m.From) // always m.Term == r.Term
 		r.handleSnapshot(m)
 	case myVoteRespType:
 		gr := r.poll(m.From, m.Type, !m.Reject)
@@ -1148,6 +1155,8 @@ func stepCandidate(r *raft, m pb.Message) error {
 				r.bcastAppend()
 			}
 		case len(r.votes) - gr:
+			// pb.MsgPreVoteResp contains future term of pre-candidate
+			// m.Term > r.Term; reuse r.Term
 			r.becomeFollower(r.Term, None)
 		}
 	case pb.MsgTimeoutNow:
