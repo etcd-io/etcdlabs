@@ -1,34 +1,16 @@
-FROM ubuntu:17.10
+FROM fedora:28
 
-RUN rm /bin/sh && ln -s /bin/bash /bin/sh
-RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
-
-RUN apt-get -y update \
-  && apt-get -y install \
-  build-essential \
-  gcc \
-  apt-utils \
-  pkg-config \
-  software-properties-common \
-  apt-transport-https \
-  libssl-dev \
-  sudo \
-  bash \
-  bash-completion \
-  curl \
-  wget \
-  tar \
-  unzip \
-  git \
-  python \
-  libssl-dev \
+RUN dnf check-update || true \
+  && dnf install --assumeyes \
+  git curl wget mercurial meld gcc gcc-c++ which \
+  gcc automake autoconf dh-autoreconf libtool libtool-ltdl \
+  tar unzip gzip \
   nginx \
-  && apt-get -y update \
-  && apt-get -y upgrade \
-  && apt-get -y autoremove \
-  && apt-get -y autoclean \
-  && uname -a \
-  && ulimit -n
+  && dnf check-update || true \
+  && dnf upgrade --assumeyes || true \
+  && dnf autoremove --assumeyes || true \
+  && dnf clean all || true \
+  && dnf reinstall which || true
 
 # Install go for backend
 ENV GOROOT /usr/local/go
@@ -54,15 +36,16 @@ RUN pushd $GOPATH/src/github.com/coreos/etcdlabs \
 # Install Angular, NodeJS for frontend
 # 'node' needs to be in $PATH for 'yarn start' command
 ENV NVM_DIR /usr/local/nvm
-RUN pushd ${GOPATH}/src/github.com/coreos/etcdlabs \
-  && curl https://raw.githubusercontent.com/creationix/nvm/v0.33.6/install.sh | /bin/bash \
+RUN dnf install --assumeyes npm \
+  && pushd ${GOPATH}/src/github.com/coreos/etcdlabs \
+  && curl https://raw.githubusercontent.com/creationix/nvm/v0.33.8/install.sh | /bin/bash \
   && echo "Running nvm scripts..." \
   && source $NVM_DIR/nvm.sh \
   && nvm ls-remote \
   && nvm install v9.5.0 \
-  && curl https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
-  && echo "deb http://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
-  && apt-get -y update && apt-get -y install yarn \
+  && curl --silent --location https://dl.yarnpkg.com/rpm/yarn.repo | sudo tee /etc/yum.repos.d/yarn.repo \
+  && dnf check-update --assumeyes \
+  && dnf install --assumeyes npm \
   && echo "Updating frontend dependencies..." \
   && rm -rf ./node_modules \
   && yarn install \
