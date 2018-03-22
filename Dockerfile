@@ -34,7 +34,7 @@ RUN apt-get -y update \
 ENV GOROOT /usr/local/go
 ENV GOPATH /gopath
 ENV PATH ${GOPATH}/bin:${GOROOT}/bin:${PATH}
-ENV GO_VERSION 1.9.4
+ENV GO_VERSION 1.10
 ENV GO_DOWNLOAD_URL https://storage.googleapis.com/golang
 RUN rm -rf ${GOROOT} \
   && curl -s ${GO_DOWNLOAD_URL}/go${GO_VERSION}.linux-amd64.tar.gz | tar -v -C /usr/local/ -xz \
