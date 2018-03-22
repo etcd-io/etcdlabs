@@ -5,7 +5,7 @@ RUN dnf check-update || true \
   git curl wget mercurial meld gcc gcc-c++ which \
   gcc automake autoconf dh-autoreconf libtool libtool-ltdl \
   tar unzip gzip \
-  nginx \
+  nginx sudo \
   && dnf check-update || true \
   && dnf upgrade --assumeyes || true \
   && dnf autoremove --assumeyes || true \
