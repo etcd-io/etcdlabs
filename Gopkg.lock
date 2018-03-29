@@ -62,11 +62,11 @@
     "mvcc/mvccpb",
     "pkg/adt",
     "pkg/contention",
-    "pkg/cors",
     "pkg/cpuutil",
     "pkg/crc",
     "pkg/debugutil",
     "pkg/fileutil",
+    "pkg/flags",
     "pkg/httputil",
     "pkg/idutil",
     "pkg/ioutil",
@@ -91,7 +91,7 @@
     "wal",
     "wal/walpb"
   ]
-  revision = "34241efb115f1b30946ad2de0a4cc6a7a4f21a84"
+  revision = "c35cd03a660182d70b3288783442c93c05340855"
   source = "https://github.com/coreos/etcd"
 
 [[projects]]
@@ -252,6 +252,12 @@
   version = "v0.1.3"
 
 [[projects]]
+  name = "github.com/spf13/pflag"
+  packages = ["."]
+  revision = "e57e3eeb33f795204c1ca35f56c44f83227c6e66"
+  version = "v1.0.0"
+
+[[projects]]
   name = "github.com/tmc/grpc-websocket-proxy"
   packages = ["wsproxy"]
   revision = "89b8d40f7ca833297db804fcb3be53a76d01c238"
@@ -363,6 +369,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c45ab7596c6fc286931b425ec2ebad6817cd124a2c24424b886959078c237eb9"
+  inputs-digest = "94b6a711692c31ef01462e6579cb41ab8d19824cdb79a029504564536af55f9a"
   solver-name = "gps-cdcl"
   solver-version = 1

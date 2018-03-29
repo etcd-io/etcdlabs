@@ -44,8 +44,9 @@ type ServerConfig struct {
 	InitialPeerURLsMap  types.URLsMap
 	InitialClusterToken string
 	NewCluster          bool
-	ForceNewCluster     bool
 	PeerTLSInfo         transport.TLSInfo
+
+	CORS map[string]struct{}
 
 	// HostWhitelist lists acceptable hostnames from client requests.
 	// If server is insecure (no TLS), server only accepts requests
@@ -80,6 +81,8 @@ type ServerConfig struct {
 	PreVote bool
 
 	Debug bool
+
+	ForceNewCluster bool
 }
 
 // VerifyBootstrap sanity-checks the initial config for bootstrap case
