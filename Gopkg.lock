@@ -4,7 +4,7 @@
 [[projects]]
   name = "github.com/axiomhq/hyperloglog"
   packages = ["."]
-  revision = "baba800be098d9f4303352fa6214a933e371e3da"
+  revision = "fe9507de02284497dca36b7bb982cb4881a35837"
   source = "https://github.com/axiomhq/hyperloglog"
 
 [[projects]]
@@ -91,7 +91,7 @@
     "wal",
     "wal/walpb"
   ]
-  revision = "c35cd03a660182d70b3288783442c93c05340855"
+  revision = "89c58b6f7a63836ea5533d1e63c728e09c57fa66"
   source = "https://github.com/coreos/etcd"
 
 [[projects]]
@@ -274,6 +274,31 @@
   version = "0.0.1"
 
 [[projects]]
+  name = "go.uber.org/atomic"
+  packages = ["."]
+  revision = "8474b86a5a6f79c443ce4b2992817ff32cf208b8"
+  version = "v1.3.1"
+
+[[projects]]
+  name = "go.uber.org/multierr"
+  packages = ["."]
+  revision = "3c4937480c32f4c13a875a1829af76c98ca3d40a"
+  version = "v1.1.0"
+
+[[projects]]
+  name = "go.uber.org/zap"
+  packages = [
+    ".",
+    "buffer",
+    "internal/bufferpool",
+    "internal/color",
+    "internal/exit",
+    "zapcore"
+  ]
+  revision = "35aad584952c3e7020db7b839f6b102de6271f89"
+  version = "v1.7.1"
+
+[[projects]]
   name = "golang.org/x/crypto"
   packages = [
     "bcrypt",
@@ -369,6 +394,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "94b6a711692c31ef01462e6579cb41ab8d19824cdb79a029504564536af55f9a"
+  inputs-digest = "6dce91f3125e6800e0811025cdab2721f9466dce51594d8e3985d7a9fce8c055"
   solver-name = "gps-cdcl"
   solver-version = 1

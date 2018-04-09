@@ -6,7 +6,7 @@
 [[constraint]]
   name = "github.com/coreos/etcd"
   source = "https://github.com/coreos/etcd"
-  revision = "c35cd03a660182d70b3288783442c93c05340855"
+  revision = "89c58b6f7a63836ea5533d1e63c728e09c57fa66"
 
 # v1.7.5
 [[constraint]]
@@ -51,7 +51,7 @@
 [[constraint]]
   name = "github.com/axiomhq/hyperloglog"
   source = "https://github.com/axiomhq/hyperloglog"
-  revision = "baba800be098d9f4303352fa6214a933e371e3da"
+  revision = "fe9507de02284497dca36b7bb982cb4881a35837"
 
 
 ################################
