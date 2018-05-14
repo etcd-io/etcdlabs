@@ -183,6 +183,8 @@ func Start(ccfg Config) (clus *Cluster, err error) {
 		cfg.AutoCompactionMode = embed.CompactorModePeriodic
 		cfg.AutoCompactionRetention = "1h"
 
+		cfg.Logger = "zap"
+
 		clus.Members[i] = &Member{
 			clus: clus,
 			cfg:  cfg,
