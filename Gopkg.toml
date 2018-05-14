@@ -75,3 +75,7 @@
 
 
 ################################
+
+[[constraint]]
+  name = "go.uber.org/zap"
+  version = "1.7.1"
