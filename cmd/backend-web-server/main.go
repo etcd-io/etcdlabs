@@ -23,6 +23,7 @@ import (
 	"github.com/coreos/etcdlabs/backend/web"
 
 	"github.com/golang/glog"
+	_ "github.com/ugorji/go/codec"
 )
 
 var (

@@ -265,7 +265,8 @@
 [[projects]]
   name = "github.com/ugorji/go"
   packages = ["codec"]
-  revision = "bdcc60b419d136a85cdf2e7cbcac34b3f1cd6e57"
+  revision = "f3cacc17c85ecb7f1b6a9e373ee85d1480919868"
+  source = "https://github.com/ugorji/go"
 
 [[projects]]
   name = "github.com/xiang90/probing"
@@ -394,6 +395,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "311cfaae0cb66c492471589634d7b075032a801dc2e6d2ffbb67735aac0f499a"
+  inputs-digest = "f8ce2daec20aa61d250f726dc4b8130d007d97a58c043f13cc288fc8ba53d558"
   solver-name = "gps-cdcl"
   solver-version = 1

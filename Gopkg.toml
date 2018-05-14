@@ -14,6 +14,11 @@
   source = "https://github.com/grpc/grpc-go"
   revision = "5b3c4e850e90a4cf6a20ebd46c8b32a0a3afcb9e"
 
+[[constraint]]
+  name = "github.com/ugorji/go"
+  source = "https://github.com/ugorji/go"
+  revision = "f3cacc17c85ecb7f1b6a9e373ee85d1480919868"
+
 
 [[constraint]]
   name = "github.com/gogo/protobuf"
