@@ -18,13 +18,14 @@ import (
 	"context"
 	"fmt"
 	"path"
+	"sort"
 	"strings"
 	"time"
 
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/clientv3/concurrency"
-	"github.com/coreos/etcd/etcdserver/v2error"
-	"github.com/coreos/etcd/etcdserver/v2store"
+	"github.com/coreos/etcd/etcdserver/api/v2error"
+	"github.com/coreos/etcd/etcdserver/api/v2store"
 	"github.com/coreos/etcd/mvcc/mvccpb"
 )
 
@@ -94,6 +95,9 @@ func (s *v2v3Store) Get(nodePath string, recursive, sorted bool) (*v2store.Event
 func (s *v2v3Store) getDir(nodePath string, recursive, sorted bool, rev int64) ([]*v2store.NodeExtern, error) {
 	rootNodes, err := s.getDirDepth(nodePath, 1, rev)
 	if err != nil || !recursive {
+		if sorted {
+			sort.Sort(v2store.NodeExterns(rootNodes))
+		}
 		return rootNodes, err
 	}
 	nextNodes := rootNodes
@@ -109,6 +113,10 @@ func (s *v2v3Store) getDir(nodePath string, recursive, sorted bool, rev int64) (
 		if nextNodes, err = s.getDirDepth(nodePath, i, rev); err != nil {
 			return nil, err
 		}
+	}
+
+	if sorted {
+		sort.Sort(v2store.NodeExterns(rootNodes))
 	}
 	return rootNodes, nil
 }
@@ -143,10 +151,20 @@ func (s *v2v3Store) Set(
 
 	ecode := 0
 	applyf := func(stm concurrency.STM) error {
-		parent := path.Dir(nodePath)
-		if !isRoot(parent) && stm.Rev(s.mkPath(parent)+"/") == 0 {
-			ecode = v2error.EcodeKeyNotFound
-			return nil
+		// build path if any directories in path do not exist
+		dirs := []string{}
+		for p := path.Dir(nodePath); !isRoot(p); p = path.Dir(p) {
+			pp := s.mkPath(p)
+			if stm.Rev(pp) > 0 {
+				ecode = v2error.EcodeNotDir
+				return nil
+			}
+			if stm.Rev(pp+"/") == 0 {
+				dirs = append(dirs, pp+"/")
+			}
+		}
+		for _, d := range dirs {
+			stm.Put(d, "")
 		}
 
 		key := s.mkPath(nodePath)
@@ -591,7 +609,7 @@ func (s *v2v3Store) mkV2Node(kv *mvccpb.KeyValue) *v2store.NodeExtern {
 		return nil
 	}
 	n := &v2store.NodeExtern{
-		Key:           string(s.mkNodePath(string(kv.Key))),
+		Key:           s.mkNodePath(string(kv.Key)),
 		Dir:           kv.Key[len(kv.Key)-1] == '/',
 		CreatedIndex:  mkV2Rev(kv.CreateRevision),
 		ModifiedIndex: mkV2Rev(kv.ModRevision),

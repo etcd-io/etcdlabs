@@ -20,10 +20,9 @@ import (
 
 	"net/http"
 
-	"github.com/coreos/etcd/etcdserver"
+	"github.com/coreos/etcd/etcdserver/api/v2error"
 	"github.com/coreos/etcd/etcdserver/api/v2http/httptypes"
 	"github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/etcdserver/v2error"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -64,7 +63,7 @@ func reportRequestReceived(request etcdserverpb.Request) {
 	incomingEvents.WithLabelValues(methodFromRequest(request)).Inc()
 }
 
-func reportRequestCompleted(request etcdserverpb.Request, response etcdserver.Response, startTime time.Time) {
+func reportRequestCompleted(request etcdserverpb.Request, startTime time.Time) {
 	method := methodFromRequest(request)
 	successfulEventsHandlingTime.WithLabelValues(method).Observe(time.Since(startTime).Seconds())
 }
@@ -87,9 +86,9 @@ func codeFromError(err error) int {
 	}
 	switch e := err.(type) {
 	case *v2error.Error:
-		return (*v2error.Error)(e).StatusCode()
+		return e.StatusCode()
 	case *httptypes.HTTPError:
-		return (*httptypes.HTTPError)(e).Code
+		return e.Code
 	default:
 		return http.StatusInternalServerError
 	}

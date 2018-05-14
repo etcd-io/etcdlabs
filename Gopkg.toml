@@ -6,7 +6,7 @@
 [[constraint]]
   name = "github.com/coreos/etcd"
   source = "https://github.com/coreos/etcd"
-  revision = "89c58b6f7a63836ea5533d1e63c728e09c57fa66"
+  revision = "53373fecdd4c02a73814c5fb8a7249c2339a526b"
 
 # v1.7.5
 [[constraint]]
@@ -46,7 +46,7 @@
 [[constraint]]
   name = "github.com/dustin/go-humanize"
   source = "https://github.com/dustin/go-humanize"
-  revision = "bb3d318650d48840a39aa21a027c6630e198e626"
+  revision = "02af3965c54e8cacf948b97fef38925c4120652c"
 
 [[constraint]]
   name = "github.com/axiomhq/hyperloglog"

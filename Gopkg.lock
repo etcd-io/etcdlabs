@@ -35,8 +35,12 @@
     "etcdserver",
     "etcdserver/api",
     "etcdserver/api/etcdhttp",
+    "etcdserver/api/v2auth",
+    "etcdserver/api/v2error",
     "etcdserver/api/v2http",
     "etcdserver/api/v2http/httptypes",
+    "etcdserver/api/v2stats",
+    "etcdserver/api/v2store",
     "etcdserver/api/v2v3",
     "etcdserver/api/v3client",
     "etcdserver/api/v3election",
@@ -50,10 +54,6 @@
     "etcdserver/etcdserverpb",
     "etcdserver/etcdserverpb/gw",
     "etcdserver/membership",
-    "etcdserver/stats",
-    "etcdserver/v2auth",
-    "etcdserver/v2error",
-    "etcdserver/v2store",
     "lease",
     "lease/leasehttp",
     "lease/leasepb",
@@ -91,7 +91,7 @@
     "wal",
     "wal/walpb"
   ]
-  revision = "89c58b6f7a63836ea5533d1e63c728e09c57fa66"
+  revision = "53373fecdd4c02a73814c5fb8a7249c2339a526b"
   source = "https://github.com/coreos/etcd"
 
 [[projects]]
@@ -126,7 +126,7 @@
 [[projects]]
   name = "github.com/dustin/go-humanize"
   packages = ["."]
-  revision = "bb3d318650d48840a39aa21a027c6630e198e626"
+  revision = "02af3965c54e8cacf948b97fef38925c4120652c"
   source = "https://github.com/dustin/go-humanize"
 
 [[projects]]
@@ -394,6 +394,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6dce91f3125e6800e0811025cdab2721f9466dce51594d8e3985d7a9fce8c055"
+  inputs-digest = "311cfaae0cb66c492471589634d7b075032a801dc2e6d2ffbb67735aac0f499a"
   solver-name = "gps-cdcl"
   solver-version = 1

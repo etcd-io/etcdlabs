@@ -23,6 +23,9 @@ import (
 	"path/filepath"
 
 	"github.com/coreos/etcd/pkg/fileutil"
+
+	humanize "github.com/dustin/go-humanize"
+	"go.uber.org/zap"
 )
 
 var ErrNoDBSnapshot = errors.New("snap: snapshot file doesn't exist")
@@ -55,7 +58,15 @@ func (s *Snapshotter) SaveDBFrom(r io.Reader, id uint64) (int64, error) {
 		return n, err
 	}
 
-	plog.Infof("saved database snapshot to disk [total bytes: %d]", n)
+	if s.lg != nil {
+		s.lg.Info(
+			"saved database snapshot to disk",
+			zap.Int64("bytes", n),
+			zap.String("size", humanize.Bytes(uint64(n))),
+		)
+	} else {
+		plog.Infof("saved database snapshot to disk [total bytes: %d]", n)
+	}
 
 	return n, nil
 }
@@ -66,8 +77,17 @@ func (s *Snapshotter) DBFilePath(id uint64) (string, error) {
 	if _, err := fileutil.ReadDir(s.dir); err != nil {
 		return "", err
 	}
-	if fn := s.dbFilePath(id); fileutil.Exist(fn) {
+	fn := s.dbFilePath(id)
+	if fileutil.Exist(fn) {
 		return fn, nil
+	}
+	if s.lg != nil {
+		s.lg.Warn(
+			"failed to find [SNAPSHOT-INDEX].snap.db",
+			zap.Uint64("snapshot-index", id),
+			zap.String("snapshot-file-path", fn),
+			zap.Error(ErrNoDBSnapshot),
+		)
 	}
 	return "", ErrNoDBSnapshot
 }

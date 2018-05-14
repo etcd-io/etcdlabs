@@ -41,7 +41,7 @@ func NewListener(addr, scheme string, tlsinfo *TLSInfo) (l net.Listener, err err
 	if l, err = newListener(addr, scheme); err != nil {
 		return nil, err
 	}
-	return wrapTLS(addr, scheme, tlsinfo, l)
+	return wrapTLS(scheme, tlsinfo, l)
 }
 
 func newListener(addr string, scheme string) (net.Listener, error) {
@@ -52,7 +52,7 @@ func newListener(addr string, scheme string) (net.Listener, error) {
 	return net.Listen("tcp", addr)
 }
 
-func wrapTLS(addr, scheme string, tlsinfo *TLSInfo, l net.Listener) (net.Listener, error) {
+func wrapTLS(scheme string, tlsinfo *TLSInfo, l net.Listener) (net.Listener, error) {
 	if scheme != "https" && scheme != "unixs" {
 		return l, nil
 	}
@@ -116,10 +116,12 @@ func SelfCert(lg *zap.Logger, dirpath string, hosts []string) (info TLSInfo, err
 	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
 	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
 	if err != nil {
-		info.Logger.Warn(
-			"cannot generate random number",
-			zap.Error(err),
-		)
+		if info.Logger != nil {
+			info.Logger.Warn(
+				"cannot generate random number",
+				zap.Error(err),
+			)
+		}
 		return
 	}
 
@@ -145,19 +147,23 @@ func SelfCert(lg *zap.Logger, dirpath string, hosts []string) (info TLSInfo, err
 
 	priv, err := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
 	if err != nil {
-		info.Logger.Warn(
-			"cannot generate ECDSA key",
-			zap.Error(err),
-		)
+		if info.Logger != nil {
+			info.Logger.Warn(
+				"cannot generate ECDSA key",
+				zap.Error(err),
+			)
+		}
 		return
 	}
 
 	derBytes, err := x509.CreateCertificate(rand.Reader, &tmpl, &tmpl, &priv.PublicKey, priv)
 	if err != nil {
-		info.Logger.Warn(
-			"cannot generate x509 certificate",
-			zap.Error(err),
-		)
+		if info.Logger != nil {
+			info.Logger.Warn(
+				"cannot generate x509 certificate",
+				zap.Error(err),
+			)
+		}
 		return
 	}
 
@@ -172,7 +178,9 @@ func SelfCert(lg *zap.Logger, dirpath string, hosts []string) (info TLSInfo, err
 	}
 	pem.Encode(certOut, &pem.Block{Type: "CERTIFICATE", Bytes: derBytes})
 	certOut.Close()
-	info.Logger.Debug("created cert file", zap.String("path", certPath))
+	if info.Logger != nil {
+		info.Logger.Info("created cert file", zap.String("path", certPath))
+	}
 
 	b, err := x509.MarshalECPrivateKey(priv)
 	if err != nil {
@@ -180,20 +188,43 @@ func SelfCert(lg *zap.Logger, dirpath string, hosts []string) (info TLSInfo, err
 	}
 	keyOut, err := os.OpenFile(keyPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
-		info.Logger.Warn(
-			"cannot key file",
-			zap.String("path", keyPath),
-			zap.Error(err),
-		)
+		if info.Logger != nil {
+			info.Logger.Warn(
+				"cannot key file",
+				zap.String("path", keyPath),
+				zap.Error(err),
+			)
+		}
 		return
 	}
 	pem.Encode(keyOut, &pem.Block{Type: "EC PRIVATE KEY", Bytes: b})
 	keyOut.Close()
-	info.Logger.Debug("created key file", zap.String("path", keyPath))
-
+	if info.Logger != nil {
+		info.Logger.Info("created key file", zap.String("path", keyPath))
+	}
 	return SelfCert(lg, dirpath, hosts)
 }
 
+// baseConfig is called on initial TLS handshake start.
+//
+// Previously,
+// 1. Server has non-empty (*tls.Config).Certificates on client hello
+// 2. Server calls (*tls.Config).GetCertificate iff:
+//    - Server's (*tls.Config).Certificates is not empty, or
+//    - Client supplies SNI; non-empty (*tls.ClientHelloInfo).ServerName
+//
+// When (*tls.Config).Certificates is always populated on initial handshake,
+// client is expected to provide a valid matching SNI to pass the TLS
+// verification, thus trigger server (*tls.Config).GetCertificate to reload
+// TLS assets. However, a cert whose SAN field does not include domain names
+// but only IP addresses, has empty (*tls.ClientHelloInfo).ServerName, thus
+// it was never able to trigger TLS reload on initial handshake; first
+// ceritifcate object was being used, never being updated.
+//
+// Now, (*tls.Config).Certificates is created empty on initial TLS client
+// handshake, in order to trigger (*tls.Config).GetCertificate and populate
+// rest of the certificates on every new TLS connection, even when client
+// SNI is empty (e.g. cert only includes IPs).
 func (info TLSInfo) baseConfig() (*tls.Config, error) {
 	if info.KeyFile == "" || info.CertFile == "" {
 		return nil, fmt.Errorf("KeyFile and CertFile must both be present[key: %v, cert: %v]", info.KeyFile, info.CertFile)
@@ -202,15 +233,14 @@ func (info TLSInfo) baseConfig() (*tls.Config, error) {
 		info.Logger = zap.NewNop()
 	}
 
-	tlsCert, err := tlsutil.NewCert(info.CertFile, info.KeyFile, info.parseFunc)
+	_, err := tlsutil.NewCert(info.CertFile, info.KeyFile, info.parseFunc)
 	if err != nil {
 		return nil, err
 	}
 
 	cfg := &tls.Config{
-		Certificates: []tls.Certificate{*tlsCert},
-		MinVersion:   tls.VersionTLS12,
-		ServerName:   info.ServerName,
+		MinVersion: tls.VersionTLS12,
+		ServerName: info.ServerName,
 	}
 
 	if info.AllowedCN != "" {
@@ -231,38 +261,46 @@ func (info TLSInfo) baseConfig() (*tls.Config, error) {
 	cfg.GetCertificate = func(clientHello *tls.ClientHelloInfo) (cert *tls.Certificate, err error) {
 		cert, err = tlsutil.NewCert(info.CertFile, info.KeyFile, info.parseFunc)
 		if os.IsNotExist(err) {
-			info.Logger.Warn(
-				"failed to find peer cert files",
-				zap.String("cert-file", info.CertFile),
-				zap.String("key-file", info.KeyFile),
-				zap.Error(err),
-			)
+			if info.Logger != nil {
+				info.Logger.Warn(
+					"failed to find peer cert files",
+					zap.String("cert-file", info.CertFile),
+					zap.String("key-file", info.KeyFile),
+					zap.Error(err),
+				)
+			}
 		} else if err != nil {
-			info.Logger.Warn(
-				"failed to create peer certificate",
-				zap.String("cert-file", info.CertFile),
-				zap.String("key-file", info.KeyFile),
-				zap.Error(err),
-			)
+			if info.Logger != nil {
+				info.Logger.Warn(
+					"failed to create peer certificate",
+					zap.String("cert-file", info.CertFile),
+					zap.String("key-file", info.KeyFile),
+					zap.Error(err),
+				)
+			}
 		}
 		return cert, err
 	}
 	cfg.GetClientCertificate = func(unused *tls.CertificateRequestInfo) (cert *tls.Certificate, err error) {
 		cert, err = tlsutil.NewCert(info.CertFile, info.KeyFile, info.parseFunc)
 		if os.IsNotExist(err) {
-			info.Logger.Warn(
-				"failed to find client cert files",
-				zap.String("cert-file", info.CertFile),
-				zap.String("key-file", info.KeyFile),
-				zap.Error(err),
-			)
+			if info.Logger != nil {
+				info.Logger.Warn(
+					"failed to find client cert files",
+					zap.String("cert-file", info.CertFile),
+					zap.String("key-file", info.KeyFile),
+					zap.Error(err),
+				)
+			}
 		} else if err != nil {
-			info.Logger.Warn(
-				"failed to create client certificate",
-				zap.String("cert-file", info.CertFile),
-				zap.String("key-file", info.KeyFile),
-				zap.Error(err),
-			)
+			if info.Logger != nil {
+				info.Logger.Warn(
+					"failed to create client certificate",
+					zap.String("cert-file", info.CertFile),
+					zap.String("key-file", info.KeyFile),
+					zap.Error(err),
+				)
+			}
 		}
 		return cert, err
 	}

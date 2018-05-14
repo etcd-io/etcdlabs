@@ -123,12 +123,6 @@ type lessor struct {
 	// demotec will be closed if the lessor is demoted.
 	demotec chan struct{}
 
-	// TODO: probably this should be a heap with a secondary
-	// id index.
-	// Now it is O(N) to loop over the leases to find expired ones.
-	// We want to make Grant, Revoke, and findExpiredLeases all O(logN) and
-	// Renew O(1).
-	// findExpiredLeases and Renew should be the most frequent operations.
 	leaseMap  map[LeaseID]*Lease
 	leaseHeap LeaseQueue
 	itemMap   map[LeaseItem]LeaseID
@@ -634,7 +628,7 @@ func (l *Lease) expired() bool {
 func (l *Lease) persistTo(b backend.Backend) {
 	key := int64ToBytes(int64(l.ID))
 
-	lpb := leasepb.Lease{ID: int64(l.ID), TTL: int64(l.ttl)}
+	lpb := leasepb.Lease{ID: int64(l.ID), TTL: l.ttl}
 	val, err := lpb.Marshal()
 	if err != nil {
 		panic("failed to marshal lease proto item")

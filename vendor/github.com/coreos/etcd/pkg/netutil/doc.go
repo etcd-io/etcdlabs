@@ -1,4 +1,4 @@
-// Copyright 2016 The etcd Authors
+// Copyright 2018 The etcd Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,22 +12,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package membership
-
-import (
-	"errors"
-
-	"github.com/coreos/etcd/etcdserver/api/v2error"
-)
-
-var (
-	ErrIDRemoved     = errors.New("membership: ID removed")
-	ErrIDExists      = errors.New("membership: ID exists")
-	ErrIDNotFound    = errors.New("membership: ID not found")
-	ErrPeerURLexists = errors.New("membership: peerURL exists")
-)
-
-func isKeyNotFound(err error) bool {
-	e, ok := err.(*v2error.Error)
-	return ok && e.ErrorCode == v2error.EcodeKeyNotFound
-}
+// Package netutil implements network-related utility functions.
+package netutil
