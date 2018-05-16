@@ -77,6 +77,7 @@
     "pkg/runtime",
     "pkg/schedule",
     "pkg/srv",
+    "pkg/systemd",
     "pkg/tlsutil",
     "pkg/transport",
     "pkg/types",
@@ -91,7 +92,7 @@
     "wal",
     "wal/walpb"
   ]
-  revision = "65b29b0bd2f36ff8378721006a5547aa8759743f"
+  revision = "b9c2d5bc5004d0a45e15d2fa6f4bfbb0725ae3a7"
   source = "https://github.com/coreos/etcd"
 
 [[projects]]
@@ -389,6 +390,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "14bf63d07a6c4cc2adac2f50ca0e71a931f94acef4f22edee4480fef998e3d4e"
+  inputs-digest = "79044743003d52de3ecf3dff6ee57c3ec5203961cd4bb4b1cf2b0e629680cdb6"
   solver-name = "gps-cdcl"
   solver-version = 1
