@@ -22,8 +22,8 @@ import (
 
 	"github.com/coreos/etcdlabs/backend/web"
 
-	"github.com/golang/glog"
 	_ "github.com/ugorji/go/codec"
+	"go.uber.org/zap"
 )
 
 var (
@@ -31,24 +31,34 @@ var (
 	recordTesterEps string
 )
 
+var lg *zap.SugaredLogger
+
+func init() {
+	l, err := zap.NewProduction()
+	if err != nil {
+		panic(err)
+	}
+	lg = l.Sugar()
+}
+
 func main() {
 	flag.IntVar(&webPort, "web-port", 2200, "Specify the web port for backend.")
 	flag.Parse()
 
-	glog.Info("starting web server")
+	lg.Info("starting web server")
 	srv, err := web.StartServer(webPort)
 	if err != nil {
-		glog.Fatal(err)
+		panic(err)
 	}
-	glog.Info("started web server")
+	lg.Info("started web server")
 	defer srv.Stop()
 
 	sc := make(chan os.Signal, 10)
 	signal.Notify(sc, os.Interrupt, os.Kill)
 	select {
 	case s := <-sc:
-		glog.Infof("shutting down server with signal %q", s.String())
+		lg.Infof("shutting down server with signal %q", s.String())
 	case <-srv.StopNotify():
-		glog.Info("shutting down server with stop signal")
+		lg.Info("shutting down server with stop signal")
 	}
 }

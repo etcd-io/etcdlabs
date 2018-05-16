@@ -16,10 +16,9 @@ package ratelimit
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
-
-	"github.com/golang/glog"
 )
 
 func TestRequestLimiter(t *testing.T) {
@@ -32,7 +31,7 @@ func TestRequestLimiter(t *testing.T) {
 		t.Fatalf("expected ok, got %q (%v)", msg, ok)
 	}
 	rl.Advance()
-	glog.Info("1:", msg)
+	fmt.Println("1:", msg)
 
 	// request right after first request must exceed rate-limit
 	msg, ok = rl.Check()
@@ -40,7 +39,7 @@ func TestRequestLimiter(t *testing.T) {
 		t.Fatalf("expected rate-limit-excess, got %q (%v)", msg, ok)
 	}
 	rl.Advance()
-	glog.Info("2:", msg)
+	fmt.Println("2:", msg)
 
 	// request after waiting rate-limit duration must be OK
 	time.Sleep(time.Second)
@@ -49,7 +48,7 @@ func TestRequestLimiter(t *testing.T) {
 		t.Fatalf("expected ok, got %q (%v)", msg, ok)
 	}
 	rl.Advance()
-	glog.Info("3:", msg)
+	fmt.Println("3:", msg)
 
 	// cancel the root context must return 'root context canceled'
 	cancel()
@@ -59,5 +58,5 @@ func TestRequestLimiter(t *testing.T) {
 		t.Fatalf("expected 'context canceled', got %q (%v)", msg, ok)
 	}
 	rl.Advance()
-	glog.Info("4:", msg)
+	fmt.Println("4:", msg)
 }

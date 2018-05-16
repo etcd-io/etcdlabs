@@ -12,7 +12,6 @@ import (
 
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/pkg/transport"
-	"github.com/golang/glog"
 )
 
 var testTLS = transport.TLSInfo{
@@ -92,7 +91,7 @@ func TestCluster_Recover_client_auto_TLS_scheme(t *testing.T) {
 */
 
 /*
-go test -v -run TestCluster_Recover_peer_client_manual_TLS_scheme -logtostderr
+go test -v -run TestCluster_Recover_peer_client_manual_TLS_scheme
 */
 
 func TestCluster_Recover_peer_client_manual_TLS_scheme(t *testing.T) {
@@ -119,7 +118,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 	println()
 	println()
 	println()
-	glog.Info("starting cluster")
+	fmt.Println("starting cluster")
 	c, err := Start(cfg)
 	if err != nil {
 		t.Fatal(err)
@@ -128,7 +127,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 		println()
 		println()
 		println()
-		glog.Info("shutting down the cluster")
+		fmt.Println("shutting down the cluster")
 		c.Shutdown()
 	}()
 
@@ -141,7 +140,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 		println()
 		println()
 		println()
-		glog.Info("making write requests")
+		fmt.Println("making write requests")
 		cli, _, err := c.Client(c.AllEndpoints(scheme)...)
 		if err != nil {
 			t.Fatal(err)
@@ -162,7 +161,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 	println()
 	println()
 	println()
-	glog.Info("calling UpdateMemberStatus")
+	fmt.Println("calling UpdateMemberStatus")
 	c.UpdateMemberStatus()
 	hashes1 := make([]uint32, len(c.Members))
 	for i := range c.Members {
@@ -173,7 +172,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 		println()
 		println()
 		println()
-		glog.Info("stopping leader")
+		fmt.Println("stopping leader")
 		leadidx := c.LeadIdx
 		c.Stop(leadidx)
 		time.Sleep(5 * time.Second)
@@ -185,7 +184,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 		println()
 		println()
 		println()
-		glog.Info("recovering old leader")
+		fmt.Println("recovering old leader")
 		if err = c.Restart(leadidx); err != nil {
 			t.Fatal(err)
 		}
@@ -199,7 +198,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 	println()
 	println()
 	println()
-	glog.Info("calling UpdateMemberStatus")
+	fmt.Println("calling UpdateMemberStatus")
 	c.UpdateMemberStatus()
 	hashes2 := make([]uint32, len(c.Members))
 	for i := range c.Members {
@@ -213,7 +212,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 		println()
 		println()
 		println()
-		glog.Info("making read requests")
+		fmt.Println("making read requests")
 		cli, _, err := c.Client(c.AllEndpoints(scheme)...)
 		if err != nil {
 			t.Fatal(err)
@@ -241,7 +240,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 	println()
 	println()
 	println()
-	glog.Info("calling UpdateMemberStatus")
+	fmt.Println("calling UpdateMemberStatus")
 	c.UpdateMemberStatus()
 	hashes3 := make([]uint32, len(c.Members))
 	for i := range c.Members {
@@ -255,11 +254,11 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 		println()
 		println()
 		println()
-		glog.Info("adding a new member")
+		fmt.Println("adding a new member")
 		if err := c.Add(); err != nil {
 			t.Fatal(err)
 		}
-		glog.Info("added a new member")
+		fmt.Println("added a new member")
 		if err := c.WaitForLeader(); err != nil {
 			t.Fatal(err)
 		}
@@ -268,11 +267,11 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 	println()
 	println()
 	println()
-	glog.Info("AllMemberStatus 1")
+	fmt.Println("AllMemberStatus 1")
 	for i, st := range c.AllMemberStatus() {
 		fmt.Printf("Member Status: %q, %+v\n", c.Members[i].cfg.Name, st)
 	}
-	glog.Info("AllMemberStatus 2")
+	fmt.Println("AllMemberStatus 2")
 
 	func() {
 		time.Sleep(10 * time.Second)
@@ -282,7 +281,7 @@ func testCluster(t *testing.T, cfg Config, scheme, stopRecover bool) {
 		println()
 		println()
 		println()
-		glog.Info("removing the member")
+		fmt.Println("removing the member")
 		leadidx := c.LeadIdx
 		if err := c.Remove(leadidx); err != nil {
 			t.Fatal(err)

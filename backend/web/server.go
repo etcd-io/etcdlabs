@@ -28,7 +28,6 @@ import (
 	"github.com/coreos/etcdlabs/pkg/ratelimit"
 
 	"github.com/axiomhq/hyperloglog"
-	"github.com/golang/glog"
 )
 
 var (
@@ -126,7 +125,7 @@ func StartServer(port int) (*Server, error) {
 
 	stopc := make(chan struct{})
 	addrURL := url.URL{Scheme: "http", Host: fmt.Sprintf("localhost:%d", port)}
-	glog.Infof("started server %s", addrURL.String())
+	lg.Infof("started server %s", addrURL.String())
 	srv := &Server{
 		addrURL:    addrURL,
 		httpServer: &http.Server{Addr: addrURL.Host, Handler: mux},
@@ -138,7 +137,7 @@ func StartServer(port int) (*Server, error) {
 	go func() {
 		defer func() {
 			if err := recover(); err != nil {
-				glog.Warningf("etcd-play error (%v)", err)
+				lg.Warnf("etcd-play error (%v)", err)
 				os.Exit(0)
 			}
 			srv.rootCancel()
@@ -148,7 +147,7 @@ func StartServer(port int) (*Server, error) {
 		go func() { updateClusterStatus(srv.stopc) }()
 		go func() { cleanCache(srv.stopc) }()
 		if err := srv.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			glog.Fatal(err)
+			lg.Fatal(err)
 		}
 	}()
 	return srv, nil
@@ -161,7 +160,7 @@ func (srv *Server) StopNotify() <-chan struct{} {
 
 // Stop stops the server. Useful for testing.
 func (srv *Server) Stop() {
-	glog.Warningf("stopping server %s", srv.addrURL.String())
+	lg.Warnf("stopping server %s", srv.addrURL.String())
 	srv.mu.Lock()
 	if srv.httpServer == nil {
 		srv.mu.Unlock()
@@ -171,10 +170,10 @@ func (srv *Server) Stop() {
 	srv.httpServer.Close()
 	<-srv.donec
 	srv.mu.Unlock()
-	glog.Warningf("stopped server %s", srv.addrURL.String())
+	lg.Warnf("stopped server %s", srv.addrURL.String())
 
-	glog.Warning("stopping cluster")
+	lg.Warn("stopping cluster")
 	globalCluster.Shutdown()
 	globalCluster = nil
-	glog.Warning("stopped cluster")
+	lg.Warn("stopped cluster")
 }

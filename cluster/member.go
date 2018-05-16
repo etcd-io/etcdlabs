@@ -15,7 +15,6 @@ import (
 	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
 	"github.com/coreos/etcd/pkg/types"
 	humanize "github.com/dustin/go-humanize"
-	"github.com/golang/glog"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -64,17 +63,17 @@ func (m *Member) Start() error {
 	m.status.IsLeader = false
 	m.statusLock.Unlock()
 
-	glog.Infof("started %s (client %s, peer %s)", m.cfg.Name, m.cfg.LCUrls[0].String(), m.cfg.LPUrls[0].String())
+	lg.Infof("started %s (client %s, peer %s)", m.cfg.Name, m.cfg.LCUrls[0].String(), m.cfg.LPUrls[0].String())
 	return nil
 }
 
 // Restart restarts the member.
 func (m *Member) Restart() error {
-	glog.Infof("restarting %q(%s)", m.cfg.Name, m.srv.Server.ID().String())
+	lg.Infof("restarting %q(%s)", m.cfg.Name, m.srv.Server.ID().String())
 
 	m.statusLock.RLock()
 	if m.status.State != clusterpb.StoppedMemberStatus {
-		glog.Warningf("%s is already started", m.cfg.Name)
+		lg.Warnf("%s is already started", m.cfg.Name)
 		m.statusLock.RUnlock()
 		return nil
 	}
@@ -103,17 +102,17 @@ func (m *Member) Restart() error {
 	m.status.StateTxt = fmt.Sprintf("%s just restarted (%s)", m.status.Name, humanize.Time(m.stoppedStartedAt))
 	m.statusLock.Unlock()
 
-	glog.Infof("restarted %q(%s)", m.cfg.Name, m.srv.Server.ID().String())
+	lg.Infof("restarted %q(%s)", m.cfg.Name, m.srv.Server.ID().String())
 	return nil
 }
 
 // Stop stops the member.
 func (m *Member) Stop() {
-	glog.Infof("stopping %q(%s)", m.cfg.Name, m.srv.Server.ID().String())
+	lg.Infof("stopping %q(%s)", m.cfg.Name, m.srv.Server.ID().String())
 
 	m.statusLock.RLock()
 	if m.status.State == clusterpb.StoppedMemberStatus {
-		glog.Warningf("%s is already stopped", m.cfg.Name)
+		lg.Warnf("%s is already stopped", m.cfg.Name)
 		m.statusLock.RUnlock()
 		return
 	}
@@ -144,11 +143,11 @@ func (m *Member) Stop() {
 		cerr = fmt.Errorf("received from EtcdServer.StopNotify")
 	}
 	if cerr != nil {
-		glog.Warningf("shutdown with %q", cerr.Error())
+		lg.Warnf("shutdown with %q", cerr.Error())
 	} else {
-		glog.Infof("shutdown with no error")
+		lg.Infof("shutdown with no error")
 	}
-	glog.Infof("stopped %q(%s)", m.cfg.Name, m.srv.Server.ID().String())
+	lg.Infof("stopped %q(%s)", m.cfg.Name, m.srv.Server.ID().String())
 }
 
 // WaitForLeader waits for the member to find a leader.
@@ -176,7 +175,7 @@ func (m *Member) WaitForLeader() error {
 		if err == nil {
 			break
 		}
-		glog.Warning(err)
+		lg.Warn(err)
 	}
 
 	for {
@@ -196,7 +195,7 @@ func (m *Member) WaitForLeader() error {
 		resp, err := cli.Status(ctx, m.cfg.LCUrls[0].Host)
 		cancel()
 		if err != nil {
-			glog.Warning(err)
+			lg.Warn(err)
 			time.Sleep(time.Second)
 			continue
 		}
@@ -204,14 +203,14 @@ func (m *Member) WaitForLeader() error {
 		m.status.ID = types.ID(resp.Header.MemberId).String()
 
 		if resp.Leader == uint64(0) {
-			glog.Infof("%s %s has no leader yet", m.cfg.Name, types.ID(resp.Header.MemberId))
+			lg.Infof("%s %s has no leader yet", m.cfg.Name, types.ID(resp.Header.MemberId))
 			m.status.IsLeader = false
 			m.status.State = clusterpb.FollowerMemberStatus
 			time.Sleep(time.Second)
 			continue
 		}
 
-		glog.Infof("%s %s has leader %s", m.cfg.Name, types.ID(resp.Header.MemberId), types.ID(resp.Leader))
+		lg.Infof("%s %s has leader %s", m.cfg.Name, types.ID(resp.Header.MemberId), types.ID(resp.Leader))
 		m.status.IsLeader = resp.Leader == resp.Header.MemberId
 		if m.status.IsLeader {
 			m.status.State = clusterpb.LeaderMemberStatus
