@@ -183,6 +183,7 @@ func Start(ccfg Config) (clus *Cluster, err error) {
 		cfg.AutoCompactionRetention = "1h"
 
 		cfg.Logger = "zap"
+		cfg.LogOutputs = []string{embed.StdErrLogOutput}
 
 		clus.Members[i] = &Member{
 			clus: clus,
