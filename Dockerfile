@@ -42,7 +42,7 @@ RUN dnf install --assumeyes npm \
   && echo "Running nvm scripts..." \
   && source $NVM_DIR/nvm.sh \
   && nvm ls-remote \
-  && nvm install v9.5.0 \
+  && nvm install v9.11.1 \
   && curl --silent --location https://dl.yarnpkg.com/rpm/yarn.repo | sudo tee /etc/yum.repos.d/yarn.repo \
   && dnf install yarn --assumeyes \
   && echo "Updating frontend dependencies..." \
@@ -50,11 +50,11 @@ RUN dnf install --assumeyes npm \
   && yarn install \
   && npm rebuild node-sass --force \
   && npm install \
-  && nvm alias default 9.5.0 \
+  && nvm alias default 9.11.1 \
   && nvm alias default node \
   && which node \
   && node -v \
-  && cp /usr/local/nvm/versions/node/v9.5.0/bin/node /usr/bin/node \
+  && cp /usr/local/nvm/versions/node/v9.11.1/bin/node /usr/bin/node \
   && popd
 
 # Configure reverse proxy
