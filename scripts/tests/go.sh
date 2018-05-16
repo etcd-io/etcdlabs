@@ -24,6 +24,6 @@ fi
 
 # TODO: run with multi-CPU (not right now because of port conflict)
 echo "Running tests..."
-go test -v $TESTS  -logtostderr
+go test -v $TESTS
 
 echo "Success"

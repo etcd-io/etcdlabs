@@ -91,7 +91,7 @@
     "wal",
     "wal/walpb"
   ]
-  revision = "53373fecdd4c02a73814c5fb8a7249c2339a526b"
+  revision = "65b29b0bd2f36ff8378721006a5547aa8759743f"
   source = "https://github.com/coreos/etcd"
 
 [[projects]]
@@ -144,12 +144,6 @@
   ]
   revision = "160de10b2537169b5ae3e7e221d28269ef40d311"
   source = "https://github.com/gogo/protobuf"
-
-[[projects]]
-  name = "github.com/golang/glog"
-  packages = ["."]
-  revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
-  source = "https://github.com/golang/glog"
 
 [[projects]]
   name = "github.com/golang/protobuf"
@@ -395,6 +389,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f8ce2daec20aa61d250f726dc4b8130d007d97a58c043f13cc288fc8ba53d558"
+  inputs-digest = "14bf63d07a6c4cc2adac2f50ca0e71a931f94acef4f22edee4480fef998e3d4e"
   solver-name = "gps-cdcl"
   solver-version = 1

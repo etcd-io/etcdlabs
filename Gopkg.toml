@@ -6,7 +6,7 @@
 [[constraint]]
   name = "github.com/coreos/etcd"
   source = "https://github.com/coreos/etcd"
-  revision = "53373fecdd4c02a73814c5fb8a7249c2339a526b"
+  revision = "65b29b0bd2f36ff8378721006a5547aa8759743f"
 
 # v1.7.5
 [[constraint]]
@@ -18,6 +18,10 @@
   name = "github.com/ugorji/go"
   source = "https://github.com/ugorji/go"
   revision = "f3cacc17c85ecb7f1b6a9e373ee85d1480919868"
+
+[[constraint]]
+  name = "go.uber.org/zap"
+  version = "1.8.0"
 
 
 [[constraint]]
@@ -40,12 +44,6 @@
   name = "golang.org/x/time"
   source = "https://github.com/golang/time"
   revision = "6dc17368e09b0e8634d71cac8168d853e869a0c7"
-
-
-[[constraint]]
-  name = "github.com/golang/glog"
-  source = "https://github.com/golang/glog"
-  revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
 
 
 [[constraint]]
@@ -80,7 +78,3 @@
 
 
 ################################
-
-[[constraint]]
-  name = "go.uber.org/zap"
-  version = "1.7.1"

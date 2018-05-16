@@ -17,8 +17,6 @@ package web
 import (
 	"context"
 	"net/http"
-
-	"github.com/golang/glog"
 )
 
 // ContextHandler handles ServeHTTP with context.
@@ -42,6 +40,6 @@ type ContextAdapter struct {
 
 func (ca *ContextAdapter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if err := ca.handler.ServeHTTPContext(ca.ctx, w, req); err != nil {
-		glog.Warningf("ServeHTTP (%v) [method: %q | path: %q]", err, req.Method, req.URL.Path)
+		lg.Warnf("ServeHTTP (%v) [method: %q | path: %q]", err, req.Method, req.URL.Path)
 	}
 }
