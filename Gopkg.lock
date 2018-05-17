@@ -92,7 +92,7 @@
     "wal",
     "wal/walpb"
   ]
-  revision = "b9c2d5bc5004d0a45e15d2fa6f4bfbb0725ae3a7"
+  revision = "ad4e8e94905a3feac3b18511774e242f9d0f860b"
   source = "https://github.com/coreos/etcd"
 
 [[projects]]
@@ -104,8 +104,8 @@
 [[projects]]
   name = "github.com/coreos/go-systemd"
   packages = ["journal"]
-  revision = "d2196463941895ee908e13531a23a39feb9e1243"
-  version = "v15"
+  revision = "39ca1b05acc7ad1220e09f133283b8859a8b71ab"
+  version = "v17"
 
 [[projects]]
   name = "github.com/coreos/pkg"
@@ -390,6 +390,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "79044743003d52de3ecf3dff6ee57c3ec5203961cd4bb4b1cf2b0e629680cdb6"
+  inputs-digest = "a13b92a9593b8517675e9b167352a015404c6c6502d42d23affa35f997f95081"
   solver-name = "gps-cdcl"
   solver-version = 1
