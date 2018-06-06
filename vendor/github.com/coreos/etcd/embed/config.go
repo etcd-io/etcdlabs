@@ -27,11 +27,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/coreos/etcd/compactor"
 	"github.com/coreos/etcd/etcdserver"
+	"github.com/coreos/etcd/etcdserver/api/v3compactor"
 	"github.com/coreos/etcd/pkg/flags"
 	"github.com/coreos/etcd/pkg/netutil"
 	"github.com/coreos/etcd/pkg/srv"
+	"github.com/coreos/etcd/pkg/tlsutil"
 	"github.com/coreos/etcd/pkg/transport"
 	"github.com/coreos/etcd/pkg/types"
 
@@ -94,7 +95,7 @@ var (
 	// If "AutoCompactionMode" is CompactorModePeriodic and
 	// "AutoCompactionRetention" is "1h", it automatically compacts
 	// compacts storage every hour.
-	CompactorModePeriodic = compactor.ModePeriodic
+	CompactorModePeriodic = v3compactor.ModePeriodic
 
 	// CompactorModeRevision is revision-based compaction mode
 	// for "Config.AutoCompactionMode" field.
@@ -102,7 +103,7 @@ var (
 	// "AutoCompactionRetention" is "1000", it compacts log on
 	// revision 5000 when the current revision is 6000.
 	// This runs every 5-minute if enough of logs have proceeded.
-	CompactorModeRevision = compactor.ModeRevision
+	CompactorModeRevision = v3compactor.ModeRevision
 )
 
 func init() {
@@ -111,12 +112,23 @@ func init() {
 
 // Config holds the arguments for configuring an etcd server.
 type Config struct {
-	Name         string `json:"name"`
-	Dir          string `json:"data-dir"`
-	WalDir       string `json:"wal-dir"`
-	SnapCount    uint64 `json:"snapshot-count"`
-	MaxSnapFiles uint   `json:"max-snapshots"`
-	MaxWalFiles  uint   `json:"max-wals"`
+	Name   string `json:"name"`
+	Dir    string `json:"data-dir"`
+	WalDir string `json:"wal-dir"`
+
+	SnapshotCount uint64 `json:"snapshot-count"`
+
+	// SnapshotCatchUpEntries is the number of entries for a slow follower
+	// to catch-up after compacting the raft storage entries.
+	// We expect the follower has a millisecond level latency with the leader.
+	// The max throughput is around 10K. Keep a 5K entries is enough for helping
+	// follower to catch up.
+	// WARNING: only change this for tests.
+	// Always use "DefaultSnapshotCatchUpEntries"
+	SnapshotCatchUpEntries uint64
+
+	MaxSnapFiles uint `json:"max-snapshots"`
+	MaxWalFiles  uint `json:"max-wals"`
 
 	// TickMs is the number of milliseconds between heartbeat ticks.
 	// TODO: decouple tickMs and heartbeat tick (current heartbeat tick = 1).
@@ -163,6 +175,11 @@ type Config struct {
 	ClientAutoTLS  bool
 	PeerTLSInfo    transport.TLSInfo
 	PeerAutoTLS    bool
+
+	// CipherSuites is a list of supported TLS cipher suites between
+	// client/server and peers. If empty, Go auto-populates the list.
+	// Note that cipher suites are prioritized in the given order.
+	CipherSuites []string `json:"cipher-suites"`
 
 	ClusterState          string `json:"initial-cluster-state"`
 	DNSCluster            string `json:"discovery-srv"`
@@ -342,7 +359,9 @@ func NewConfig() *Config {
 
 		Name: DefaultName,
 
-		SnapCount:       etcdserver.DefaultSnapCount,
+		SnapshotCount:          etcdserver.DefaultSnapshotCount,
+		SnapshotCatchUpEntries: etcdserver.DefaultSnapshotCatchUpEntries,
+
 		MaxTxnOps:       DefaultMaxTxnOps,
 		MaxRequestBytes: DefaultMaxRequestBytes,
 
@@ -495,6 +514,24 @@ func (cfg *configYAML) configFromFile(path string) error {
 	cfg.PeerAutoTLS = cfg.PeerSecurityJSON.AutoTLS
 
 	return cfg.Validate()
+}
+
+func updateCipherSuites(tls *transport.TLSInfo, ss []string) error {
+	if len(tls.CipherSuites) > 0 && len(ss) > 0 {
+		return fmt.Errorf("TLSInfo.CipherSuites is already specified (given %v)", ss)
+	}
+	if len(ss) > 0 {
+		cs := make([]uint16, len(ss))
+		for i, s := range ss {
+			var ok bool
+			cs[i], ok = tlsutil.GetCipherSuite(s)
+			if !ok {
+				return fmt.Errorf("unexpected TLS cipher suite %q", s)
+			}
+		}
+		tls.CipherSuites = cs
+	}
+	return nil
 }
 
 // Validate ensures that '*embed.Config' fields are properly configured.
@@ -690,39 +727,49 @@ func (cfg Config) defaultClientHost() bool {
 }
 
 func (cfg *Config) ClientSelfCert() (err error) {
-	if cfg.ClientAutoTLS && cfg.ClientTLSInfo.Empty() {
-		chosts := make([]string, len(cfg.LCUrls))
-		for i, u := range cfg.LCUrls {
-			chosts[i] = u.Host
-		}
-		cfg.ClientTLSInfo, err = transport.SelfCert(cfg.logger, filepath.Join(cfg.Dir, "fixtures", "client"), chosts)
-		return err
-	} else if cfg.ClientAutoTLS {
+	if !cfg.ClientAutoTLS {
+		return nil
+	}
+	if !cfg.ClientTLSInfo.Empty() {
 		if cfg.logger != nil {
 			cfg.logger.Warn("ignoring client auto TLS since certs given")
 		} else {
 			plog.Warningf("ignoring client auto TLS since certs given")
 		}
+		return nil
 	}
-	return nil
+	chosts := make([]string, len(cfg.LCUrls))
+	for i, u := range cfg.LCUrls {
+		chosts[i] = u.Host
+	}
+	cfg.ClientTLSInfo, err = transport.SelfCert(cfg.logger, filepath.Join(cfg.Dir, "fixtures", "client"), chosts)
+	if err != nil {
+		return err
+	}
+	return updateCipherSuites(&cfg.ClientTLSInfo, cfg.CipherSuites)
 }
 
 func (cfg *Config) PeerSelfCert() (err error) {
-	if cfg.PeerAutoTLS && cfg.PeerTLSInfo.Empty() {
-		phosts := make([]string, len(cfg.LPUrls))
-		for i, u := range cfg.LPUrls {
-			phosts[i] = u.Host
-		}
-		cfg.PeerTLSInfo, err = transport.SelfCert(cfg.logger, filepath.Join(cfg.Dir, "fixtures", "peer"), phosts)
-		return err
-	} else if cfg.PeerAutoTLS {
+	if !cfg.PeerAutoTLS {
+		return nil
+	}
+	if !cfg.PeerTLSInfo.Empty() {
 		if cfg.logger != nil {
 			cfg.logger.Warn("ignoring peer auto TLS since certs given")
 		} else {
 			plog.Warningf("ignoring peer auto TLS since certs given")
 		}
+		return nil
 	}
-	return nil
+	phosts := make([]string, len(cfg.LPUrls))
+	for i, u := range cfg.LPUrls {
+		phosts[i] = u.Host
+	}
+	cfg.PeerTLSInfo, err = transport.SelfCert(cfg.logger, filepath.Join(cfg.Dir, "fixtures", "peer"), phosts)
+	if err != nil {
+		return err
+	}
+	return updateCipherSuites(&cfg.PeerTLSInfo, cfg.CipherSuites)
 }
 
 // UpdateDefaultClusterFromName updates cluster advertise URLs with, if available, default host,

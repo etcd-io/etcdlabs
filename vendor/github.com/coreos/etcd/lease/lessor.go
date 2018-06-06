@@ -233,6 +233,8 @@ func (le *lessor) Grant(id LeaseID, ttl int64) (*Lease, error) {
 	heap.Push(&le.leaseHeap, item)
 	l.persistTo(le.b)
 
+	leaseTotalTTLs.Observe(float64(l.ttl))
+	leaseGranted.Inc()
 	return l, nil
 }
 
@@ -271,6 +273,8 @@ func (le *lessor) Revoke(id LeaseID) error {
 	le.b.BatchTx().UnsafeDelete(leaseBucketName, int64ToBytes(int64(l.ID)))
 
 	txn.End()
+
+	leaseRevoked.Inc()
 	return nil
 }
 
@@ -315,6 +319,8 @@ func (le *lessor) Renew(id LeaseID) (int64, error) {
 	l.refresh(0)
 	item := &LeaseWithTime{id: l.ID, expiration: l.expiry.UnixNano()}
 	heap.Push(&le.leaseHeap, item)
+
+	leaseRenewed.Inc()
 	return l.ttl, nil
 }
 
@@ -329,7 +335,6 @@ func (le *lessor) unsafeLeases() []*Lease {
 	for _, l := range le.leaseMap {
 		leases = append(leases, l)
 	}
-	sort.Sort(leasesByExpiry(leases))
 	return leases
 }
 
@@ -337,6 +342,7 @@ func (le *lessor) Leases() []*Lease {
 	le.mu.RLock()
 	ls := le.unsafeLeases()
 	le.mu.RUnlock()
+	sort.Sort(leasesByExpiry(ls))
 	return ls
 }
 
@@ -360,6 +366,7 @@ func (le *lessor) Promote(extend time.Duration) {
 
 	// adjust expiries in case of overlap
 	leases := le.unsafeLeases()
+	sort.Sort(leasesByExpiry(leases))
 
 	baseWindow := leases[0].Remaining()
 	nextWindow := baseWindow + time.Second

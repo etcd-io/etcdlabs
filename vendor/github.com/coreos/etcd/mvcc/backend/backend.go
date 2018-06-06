@@ -230,8 +230,9 @@ func (b *backend) Snapshot() Snapshot {
 				} else {
 					plog.Warningf("snapshotting is taking more than %v seconds to finish transferring %v MB [started at %v]", time.Since(start).Seconds(), float64(dbBytes)/float64(1024*1014), start)
 				}
+
 			case <-stopc:
-				snapshotDurations.Observe(time.Since(start).Seconds())
+				snapshotTransferSec.Observe(time.Since(start).Seconds())
 				return
 			}
 		}
@@ -415,6 +416,9 @@ func (b *backend) defrag() error {
 	atomic.StoreInt64(&b.size, size)
 	atomic.StoreInt64(&b.sizeInUse, size-(int64(db.Stats().FreePageN)*int64(db.Info().PageSize)))
 
+	took := time.Since(now)
+	defragSec.Observe(took.Seconds())
+
 	size2, sizeInUse2 := b.Size(), b.SizeInUse()
 	if b.lg != nil {
 		b.lg.Info(
@@ -426,7 +430,7 @@ func (b *backend) defrag() error {
 			zap.Int64("current-db-size-in-use-bytes-diff", sizeInUse2-sizeInUse1),
 			zap.Int64("current-db-size-in-use-bytes", sizeInUse2),
 			zap.String("current-db-size-in-use", humanize.Bytes(uint64(sizeInUse2))),
-			zap.Duration("took", time.Since(now)),
+			zap.Duration("took", took),
 		)
 	}
 	return nil

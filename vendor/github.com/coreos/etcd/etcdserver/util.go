@@ -18,9 +18,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/coreos/etcd/etcdserver/membership"
+	"github.com/coreos/etcd/etcdserver/api/membership"
+	"github.com/coreos/etcd/etcdserver/api/rafthttp"
 	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcd/rafthttp"
 
 	"go.uber.org/zap"
 )
@@ -113,7 +113,7 @@ func warnOfExpensiveGenericRequest(lg *zap.Logger, now time.Time, stringer fmt.S
 	if d > warnApplyDuration {
 		if lg != nil {
 			lg.Warn(
-				"request took too long",
+				"apply request took too long",
 				zap.Duration("took", d),
 				zap.Duration("expected-duration", warnApplyDuration),
 				zap.String("prefix", prefix),
@@ -122,5 +122,6 @@ func warnOfExpensiveGenericRequest(lg *zap.Logger, now time.Time, stringer fmt.S
 		} else {
 			plog.Warningf("%srequest %q took too long (%v) to execute", prefix, stringer.String(), d)
 		}
+		slowApplies.Inc()
 	}
 }

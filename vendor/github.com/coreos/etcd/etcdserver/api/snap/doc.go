@@ -1,4 +1,4 @@
-// Copyright 2016 The etcd Authors
+// Copyright 2015 The etcd Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,5 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package compactor implements automated policies for compacting etcd's mvcc storage.
-package compactor
+// Package snap handles Raft nodes' states with snapshots.
+// The snapshot logic is internal to etcd server and raft package.
+package snap

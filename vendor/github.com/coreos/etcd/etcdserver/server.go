@@ -29,16 +29,18 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/coreos/etcd/alarm"
 	"github.com/coreos/etcd/auth"
-	"github.com/coreos/etcd/compactor"
-	"github.com/coreos/etcd/discovery"
 	"github.com/coreos/etcd/etcdserver/api"
+	"github.com/coreos/etcd/etcdserver/api/membership"
+	"github.com/coreos/etcd/etcdserver/api/rafthttp"
+	"github.com/coreos/etcd/etcdserver/api/snap"
+	"github.com/coreos/etcd/etcdserver/api/v2discovery"
 	"github.com/coreos/etcd/etcdserver/api/v2http/httptypes"
 	stats "github.com/coreos/etcd/etcdserver/api/v2stats"
 	"github.com/coreos/etcd/etcdserver/api/v2store"
+	"github.com/coreos/etcd/etcdserver/api/v3alarm"
+	"github.com/coreos/etcd/etcdserver/api/v3compactor"
 	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/etcdserver/membership"
 	"github.com/coreos/etcd/lease"
 	"github.com/coreos/etcd/lease/leasehttp"
 	"github.com/coreos/etcd/mvcc"
@@ -52,8 +54,6 @@ import (
 	"github.com/coreos/etcd/pkg/wait"
 	"github.com/coreos/etcd/raft"
 	"github.com/coreos/etcd/raft/raftpb"
-	"github.com/coreos/etcd/rafthttp"
-	"github.com/coreos/etcd/raftsnap"
 	"github.com/coreos/etcd/version"
 	"github.com/coreos/etcd/wal"
 
@@ -64,7 +64,14 @@ import (
 )
 
 const (
-	DefaultSnapCount = 100000
+	DefaultSnapshotCount = 100000
+
+	// DefaultSnapshotCatchUpEntries is the number of entries for a slow follower
+	// to catch-up after compacting the raft storage entries.
+	// We expect the follower has a millisecond level latency with the leader.
+	// The max throughput is around 10K. Keep a 5K entries is enough for helping
+	// follower to catch up.
+	DefaultSnapshotCatchUpEntries uint64 = 5000
 
 	StoreClusterPrefix = "/0"
 	StoreKeysPrefix    = "/1"
@@ -212,7 +219,7 @@ type EtcdServer struct {
 	cluster *membership.RaftCluster
 
 	v2store     v2store.Store
-	snapshotter *raftsnap.Snapshotter
+	snapshotter *snap.Snapshotter
 
 	applyV2 ApplierV2
 
@@ -227,14 +234,14 @@ type EtcdServer struct {
 	bemu       sync.Mutex
 	be         backend.Backend
 	authStore  auth.AuthStore
-	alarmStore *alarm.AlarmStore
+	alarmStore *v3alarm.AlarmStore
 
 	stats  *stats.ServerStats
 	lstats *stats.LeaderStats
 
 	SyncTicker *time.Ticker
 	// compactor is used to auto-compact the KV.
-	compactor compactor.Compactor
+	compactor v3compactor.Compactor
 
 	// peerRt used to send requests (version, lease) to peers.
 	peerRt   http.RoundTripper
@@ -305,7 +312,7 @@ func NewServer(cfg ServerConfig) (srv *EtcdServer, err error) {
 			plog.Fatalf("create snapshot directory error: %v", err)
 		}
 	}
-	ss := raftsnap.New(cfg.Logger, cfg.SnapDir())
+	ss := snap.New(cfg.Logger, cfg.SnapDir())
 
 	bepath := cfg.backendPath()
 	beExist := fileutil.Exist(bepath)
@@ -368,7 +375,7 @@ func NewServer(cfg ServerConfig) (srv *EtcdServer, err error) {
 		}
 		if cfg.ShouldDiscover() {
 			var str string
-			str, err = discovery.JoinCluster(cfg.Logger, cfg.DiscoveryURL, cfg.DiscoveryProxy, m.ID, cfg.InitialPeerURLsMap.String())
+			str, err = v2discovery.JoinCluster(cfg.Logger, cfg.DiscoveryURL, cfg.DiscoveryProxy, m.ID, cfg.InitialPeerURLsMap.String())
 			if err != nil {
 				return nil, &DiscoveryError{Op: "join", Err: err}
 			}
@@ -410,7 +417,7 @@ func NewServer(cfg ServerConfig) (srv *EtcdServer, err error) {
 			}
 		}
 		snapshot, err = ss.Load()
-		if err != nil && err != raftsnap.ErrNoSnapshot {
+		if err != nil && err != snap.ErrNoSnapshot {
 			return nil, err
 		}
 		if snapshot != nil {
@@ -561,7 +568,7 @@ func NewServer(cfg ServerConfig) (srv *EtcdServer, err error) {
 	}
 	srv.authStore = auth.NewAuthStore(srv.getLogger(), srv.be, tp, int(cfg.BcryptCost))
 	if num := cfg.AutoCompactionRetention; num != 0 {
-		srv.compactor, err = compactor.New(cfg.Logger, cfg.AutoCompactionMode, num, srv.kv, srv)
+		srv.compactor, err = v3compactor.New(cfg.Logger, cfg.AutoCompactionMode, num, srv.kv, srv)
 		if err != nil {
 			return nil, err
 		}
@@ -703,14 +710,30 @@ func (s *EtcdServer) Start() {
 // This function is just used for testing.
 func (s *EtcdServer) start() {
 	lg := s.getLogger()
-	if s.Cfg.SnapCount == 0 {
-		if lg != nil {
 
+	if s.Cfg.SnapshotCount == 0 {
+		if lg != nil {
+			lg.Info(
+				"updating snapshot-count to default",
+				zap.Uint64("given-snapshot-count", s.Cfg.SnapshotCount),
+				zap.Uint64("updated-snapshot-count", DefaultSnapshotCount),
+			)
 		} else {
-			plog.Infof("set snapshot count to default %d", DefaultSnapCount)
+			plog.Infof("set snapshot count to default %d", DefaultSnapshotCount)
 		}
-		s.Cfg.SnapCount = DefaultSnapCount
+		s.Cfg.SnapshotCount = DefaultSnapshotCount
 	}
+	if s.Cfg.SnapshotCatchUpEntries == 0 {
+		if lg != nil {
+			lg.Info(
+				"updating snapshot catch-up entries to default",
+				zap.Uint64("given-snapshot-catchup-entries", s.Cfg.SnapshotCatchUpEntries),
+				zap.Uint64("updated-snapshot-catchup-entries", DefaultSnapshotCatchUpEntries),
+			)
+		}
+		s.Cfg.SnapshotCatchUpEntries = DefaultSnapshotCatchUpEntries
+	}
+
 	s.w = wait.New()
 	s.applyWait = wait.NewTimeList()
 	s.done = make(chan struct{})
@@ -743,6 +766,7 @@ func (s *EtcdServer) start() {
 			plog.Infof("starting server... [version: %v, cluster version: to_be_decided]", version.Version)
 		}
 	}
+
 	// TODO: if this is an empty log, writes all peer infos
 	// into the first entry
 	go s.run()
@@ -1058,7 +1082,8 @@ func (s *EtcdServer) applySnapshot(ep *etcdProgress, apply *apply) {
 			"applying snapshot",
 			zap.Uint64("current-snapshot-index", ep.snapi),
 			zap.Uint64("current-applied-index", ep.appliedi),
-			zap.Uint64("incoming-snapshot-index", apply.snapshot.Metadata.Index),
+			zap.Uint64("incoming-leader-snapshot-index", apply.snapshot.Metadata.Index),
+			zap.Uint64("incoming-leader-snapshot-term", apply.snapshot.Metadata.Term),
 		)
 	} else {
 		plog.Infof("applying snapshot at index %d...", ep.snapi)
@@ -1069,7 +1094,8 @@ func (s *EtcdServer) applySnapshot(ep *etcdProgress, apply *apply) {
 				"applied snapshot",
 				zap.Uint64("current-snapshot-index", ep.snapi),
 				zap.Uint64("current-applied-index", ep.appliedi),
-				zap.Uint64("incoming-snapshot-index", apply.snapshot.Metadata.Index),
+				zap.Uint64("incoming-leader-snapshot-index", apply.snapshot.Metadata.Index),
+				zap.Uint64("incoming-leader-snapshot-term", apply.snapshot.Metadata.Term),
 			)
 		} else {
 			plog.Infof("finished applying incoming snapshot at index %d", ep.snapi)
@@ -1083,6 +1109,7 @@ func (s *EtcdServer) applySnapshot(ep *etcdProgress, apply *apply) {
 				zap.Uint64("current-snapshot-index", ep.snapi),
 				zap.Uint64("current-applied-index", ep.appliedi),
 				zap.Uint64("incoming-leader-snapshot-index", apply.snapshot.Metadata.Index),
+				zap.Uint64("incoming-leader-snapshot-term", apply.snapshot.Metadata.Term),
 			)
 		} else {
 			plog.Panicf("snapshot index [%d] should > appliedi[%d] + 1",
@@ -1304,7 +1331,7 @@ func (s *EtcdServer) applyEntries(ep *etcdProgress, apply *apply) {
 }
 
 func (s *EtcdServer) triggerSnapshot(ep *etcdProgress) {
-	if ep.appliedi-ep.snapi <= s.Cfg.SnapCount {
+	if ep.appliedi-ep.snapi <= s.Cfg.SnapshotCount {
 		return
 	}
 
@@ -1314,7 +1341,7 @@ func (s *EtcdServer) triggerSnapshot(ep *etcdProgress) {
 			zap.String("local-member-id", s.ID().String()),
 			zap.Uint64("local-member-applied-index", ep.appliedi),
 			zap.Uint64("local-member-snapshot-index", ep.snapi),
-			zap.Uint64("local-member-snapshot-count", s.Cfg.SnapCount),
+			zap.Uint64("local-member-snapshot-count", s.Cfg.SnapshotCount),
 		)
 	} else {
 		plog.Infof("start to snapshot (applied: %d, lastsnap: %d)", ep.appliedi, ep.snapi)
@@ -1811,7 +1838,7 @@ func (s *EtcdServer) publish(timeout time.Duration) {
 	}
 }
 
-func (s *EtcdServer) sendMergedSnap(merged raftsnap.Message) {
+func (s *EtcdServer) sendMergedSnap(merged snap.Message) {
 	atomic.AddInt64(&s.inflightSnapshots, 1)
 
 	lg := s.getLogger()
@@ -2132,9 +2159,10 @@ func (s *EtcdServer) snapshot(snapi uint64, confState raftpb.ConfState) {
 
 		// keep some in memory log entries for slow followers.
 		compacti := uint64(1)
-		if snapi > numberOfCatchUpEntries {
-			compacti = snapi - numberOfCatchUpEntries
+		if snapi > s.Cfg.SnapshotCatchUpEntries {
+			compacti = snapi - s.Cfg.SnapshotCatchUpEntries
 		}
+
 		err = s.r.raftStorage.Compact(compacti)
 		if err != nil {
 			// the compaction was done asynchronously with the progress of raft.
@@ -2334,7 +2362,7 @@ func (s *EtcdServer) AuthStore() auth.AuthStore { return s.authStore }
 
 func (s *EtcdServer) restoreAlarms() error {
 	s.applyV3 = s.newApplierV3()
-	as, err := alarm.NewAlarmStore(s)
+	as, err := v3alarm.NewAlarmStore(s)
 	if err != nil {
 		return err
 	}

@@ -22,27 +22,31 @@
 [[projects]]
   name = "github.com/coreos/etcd"
   packages = [
-    "alarm",
     "auth",
     "auth/authpb",
     "client",
     "clientv3",
     "clientv3/balancer",
     "clientv3/concurrency",
-    "compactor",
-    "discovery",
     "embed",
     "etcdserver",
     "etcdserver/api",
     "etcdserver/api/etcdhttp",
+    "etcdserver/api/membership",
+    "etcdserver/api/rafthttp",
+    "etcdserver/api/snap",
+    "etcdserver/api/snap/snappb",
     "etcdserver/api/v2auth",
+    "etcdserver/api/v2discovery",
     "etcdserver/api/v2error",
     "etcdserver/api/v2http",
     "etcdserver/api/v2http/httptypes",
     "etcdserver/api/v2stats",
     "etcdserver/api/v2store",
     "etcdserver/api/v2v3",
+    "etcdserver/api/v3alarm",
     "etcdserver/api/v3client",
+    "etcdserver/api/v3compactor",
     "etcdserver/api/v3election",
     "etcdserver/api/v3election/v3electionpb",
     "etcdserver/api/v3election/v3electionpb/gw",
@@ -53,7 +57,6 @@
     "etcdserver/api/v3rpc/rpctypes",
     "etcdserver/etcdserverpb",
     "etcdserver/etcdserverpb/gw",
-    "etcdserver/membership",
     "lease",
     "lease/leasehttp",
     "lease/leasepb",
@@ -85,14 +88,11 @@
     "proxy/grpcproxy/adapter",
     "raft",
     "raft/raftpb",
-    "rafthttp",
-    "raftsnap",
-    "raftsnap/snappb",
     "version",
     "wal",
     "wal/walpb"
   ]
-  revision = "ad4e8e94905a3feac3b18511774e242f9d0f860b"
+  revision = "25f4d809800542a2fa85568f5c5cd0c881f7e010"
   source = "https://github.com/coreos/etcd"
 
 [[projects]]
@@ -390,6 +390,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a13b92a9593b8517675e9b167352a015404c6c6502d42d23affa35f997f95081"
+  inputs-digest = "9a78f6335ca7d8f27f99e7980946075e42209235ef7b1b208efc831391dd30ae"
   solver-name = "gps-cdcl"
   solver-version = 1

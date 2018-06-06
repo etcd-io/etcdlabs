@@ -22,30 +22,22 @@ import (
 	"sync"
 	"time"
 
+	"github.com/coreos/etcd/etcdserver/api/membership"
+	"github.com/coreos/etcd/etcdserver/api/rafthttp"
 	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/etcdserver/membership"
 	"github.com/coreos/etcd/pkg/contention"
 	"github.com/coreos/etcd/pkg/logutil"
 	"github.com/coreos/etcd/pkg/pbutil"
 	"github.com/coreos/etcd/pkg/types"
 	"github.com/coreos/etcd/raft"
 	"github.com/coreos/etcd/raft/raftpb"
-	"github.com/coreos/etcd/rafthttp"
 	"github.com/coreos/etcd/wal"
 	"github.com/coreos/etcd/wal/walpb"
 
-	"github.com/coreos/pkg/capnslog"
 	"go.uber.org/zap"
 )
 
 const (
-	// Number of entries for slow follower to catch-up after compacting
-	// the raft storage entries.
-	// We expect the follower has a millisecond level latency with the leader.
-	// The max throughput is around 10K. Keep a 5K entries is enough for helping
-	// follower to catch up.
-	numberOfCatchUpEntries = 5000
-
 	// The max throughput of etcd will not exceed 100MB/s (100K * 1KB value).
 	// Assuming the RTT is around 10ms, 1MB max size is large enough.
 	maxSizePerMsg = 1 * 1024 * 1024
@@ -66,7 +58,25 @@ var (
 )
 
 func init() {
-	raft.SetLogger(capnslog.NewPackageLogger("github.com/coreos/etcd", "raft"))
+	lcfg := &zap.Config{
+		Level:       zap.NewAtomicLevelAt(zap.InfoLevel),
+		Development: false,
+		Sampling: &zap.SamplingConfig{
+			Initial:    100,
+			Thereafter: 100,
+		},
+		Encoding:      "json",
+		EncoderConfig: zap.NewProductionEncoderConfig(),
+
+		OutputPaths:      []string{"stderr"},
+		ErrorOutputPaths: []string{"stderr"},
+	}
+	lg, err := logutil.NewRaftLogger(lcfg)
+	if err != nil {
+		log.Fatalf("cannot create raft logger %v", err)
+	}
+	raft.SetLogger(lg)
+
 	expvar.Publish("raft.status", expvar.Func(func() interface{} {
 		raftStatusMu.Lock()
 		defer raftStatusMu.Unlock()
@@ -358,14 +368,16 @@ func (r *raftNode) processMessages(ms []raftpb.Message) []raftpb.Message {
 				// TODO: limit request rate.
 				if r.lg != nil {
 					r.lg.Warn(
-						"heartbeat took too long to send out; server is overloaded, likely from slow disk",
-						zap.Duration("exceeded", exceed),
+						"leader failed to send out heartbeat on time; took too long, leader is overloaded likely from slow disk",
 						zap.Duration("heartbeat-interval", r.heartbeat),
+						zap.Duration("expected-duration", 2*r.heartbeat),
+						zap.Duration("exceeded-duration", exceed),
 					)
 				} else {
 					plog.Warningf("failed to send out heartbeat on time (exceeded the %v timeout for %v)", r.heartbeat, exceed)
 					plog.Warningf("server is likely overloaded")
 				}
+				heartbeatSendFailures.Inc()
 			}
 		}
 	}
