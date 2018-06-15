@@ -155,7 +155,7 @@
     "ptypes/struct",
     "ptypes/timestamp"
   ]
-  revision = "1e59b77b52bf8e4b449a57e6f79f21226d571845"
+  revision = "5831880292e721c76b58a16ecc60adc27d8e6355"
 
 [[projects]]
   name = "github.com/google/btree"
