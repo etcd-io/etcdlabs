@@ -92,7 +92,7 @@
     "wal",
     "wal/walpb"
   ]
-  revision = "25f4d809800542a2fa85568f5c5cd0c881f7e010"
+  revision = "97979dc2450dfb588123d01f7f957f1149e667dc"
   source = "https://github.com/coreos/etcd"
 
 [[projects]]
@@ -128,7 +128,6 @@
   name = "github.com/dustin/go-humanize"
   packages = ["."]
   revision = "02af3965c54e8cacf948b97fef38925c4120652c"
-  source = "https://github.com/dustin/go-humanize"
 
 [[projects]]
   name = "github.com/ghodss/yaml"
@@ -144,7 +143,6 @@
     "protoc-gen-gogo/descriptor"
   ]
   revision = "160de10b2537169b5ae3e7e221d28269ef40d311"
-  source = "https://github.com/gogo/protobuf"
 
 [[projects]]
   name = "github.com/golang/protobuf"
@@ -158,7 +156,6 @@
     "ptypes/timestamp"
   ]
   revision = "1e59b77b52bf8e4b449a57e6f79f21226d571845"
-  source = "https://github.com/golang/protobuf"
 
 [[projects]]
   name = "github.com/google/btree"
@@ -183,7 +180,7 @@
     "runtime/internal",
     "utilities"
   ]
-  revision = "8cc3a55af3bcf171a1c23a90c4df9cf591706104"
+  revision = "78a473d0e7485950359c782b3c663ee6981eed0c"
   source = "https://github.com/grpc-ecosystem/grpc-gateway"
 
 [[projects]]
@@ -320,7 +317,6 @@
   name = "golang.org/x/sync"
   packages = ["errgroup"]
   revision = "fd80eb99c8f653c847d294a001bdf2a3a6f768f5"
-  source = "https://github.com/golang/sync"
 
 [[projects]]
   name = "golang.org/x/sys"
@@ -349,7 +345,6 @@
   name = "golang.org/x/time"
   packages = ["rate"]
   revision = "6dc17368e09b0e8634d71cac8168d853e869a0c7"
-  source = "https://github.com/golang/time"
 
 [[projects]]
   name = "google.golang.org/genproto"
@@ -390,6 +385,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9a78f6335ca7d8f27f99e7980946075e42209235ef7b1b208efc831391dd30ae"
+  inputs-digest = "314852607f1d9c46e78fc4ba9ca0303b60c29644037ff484bc38b0206e3626c9"
   solver-name = "gps-cdcl"
   solver-version = 1
