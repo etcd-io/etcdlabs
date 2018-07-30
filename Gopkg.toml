@@ -6,13 +6,13 @@
 [[constraint]]
   name = "github.com/coreos/etcd"
   source = "https://github.com/coreos/etcd"
-  revision = "97979dc2450dfb588123d01f7f957f1149e667dc"
+  revision = "93be31d43a2728d1750120aeae7a483698ccead2"
 
-# v1.7.5
+# v1.13.0
 [[constraint]]
   name = "google.golang.org/grpc"
   source = "https://github.com/grpc/grpc-go"
-  revision = "5b3c4e850e90a4cf6a20ebd46c8b32a0a3afcb9e"
+  revision = "168a6198bcb0ef175f7dacec0b8691fc141dc9b8"
 
 [[constraint]]
   name = "github.com/ugorji/go"

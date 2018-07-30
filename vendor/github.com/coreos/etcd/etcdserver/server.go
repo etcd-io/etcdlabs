@@ -357,7 +357,6 @@ func NewServer(cfg ServerConfig) (srv *EtcdServer, err error) {
 		cl.SetID(types.ID(0), existingCluster.ID())
 		cl.SetStore(st)
 		cl.SetBackend(be)
-		cfg.Print()
 		id, n, s, w = startNode(cfg, cl, nil)
 		cl.SetID(id, existingCluster.ID())
 
@@ -393,7 +392,6 @@ func NewServer(cfg ServerConfig) (srv *EtcdServer, err error) {
 		}
 		cl.SetStore(st)
 		cl.SetBackend(be)
-		cfg.PrintWithInitial()
 		id, n, s, w = startNode(cfg, cl, cl.MemberIDs())
 		cl.SetID(id, cl.ID())
 
@@ -458,8 +456,6 @@ func NewServer(cfg ServerConfig) (srv *EtcdServer, err error) {
 			}
 		}
 
-		cfg.Print()
-
 		if !cfg.ForceNewCluster {
 			id, cl, n, s, w = restartNode(cfg, snapshot)
 		} else {
@@ -523,7 +519,7 @@ func NewServer(cfg ServerConfig) (srv *EtcdServer, err error) {
 
 	// always recover lessor before kv. When we recover the mvcc.KV it will reattach keys to its leases.
 	// If we recover mvcc.KV first, it will attach the keys to the wrong lessor before it recovers.
-	srv.lessor = lease.NewLessor(srv.be, int64(math.Ceil(minTTL.Seconds())))
+	srv.lessor = lease.NewLessor(srv.getLogger(), srv.be, lease.LessorConfig{MinLeaseTTL: int64(math.Ceil(minTTL.Seconds())), CheckpointInterval: cfg.LeaseCheckpointInterval})
 	srv.kv = mvcc.New(srv.getLogger(), srv.be, srv.lessor, &srv.consistIndex)
 	if beExist {
 		kvindex := srv.kv.ConsistentIndex()
@@ -580,6 +576,10 @@ func NewServer(cfg ServerConfig) (srv *EtcdServer, err error) {
 		return nil, err
 	}
 
+	srv.lessor.SetCheckpointer(func(ctx context.Context, cp *pb.LeaseCheckpointRequest) {
+		srv.raftRequestOnce(ctx, pb.InternalRaftRequest{LeaseCheckpoint: cp})
+	})
+
 	// TODO: move transport initialization near the definition of remote
 	tr := &rafthttp.Transport{
 		Logger:      cfg.Logger,
@@ -620,6 +620,10 @@ func (s *EtcdServer) getLogger() *zap.Logger {
 	return l
 }
 
+func tickToDur(ticks int, tickMs uint) string {
+	return fmt.Sprintf("%v", time.Duration(ticks)*time.Duration(tickMs)*time.Millisecond)
+}
+
 func (s *EtcdServer) adjustTicks() {
 	lg := s.getLogger()
 	clusterN := len(s.cluster.Members())
@@ -632,7 +636,9 @@ func (s *EtcdServer) adjustTicks() {
 				"started as single-node; fast-forwarding election ticks",
 				zap.String("local-member-id", s.ID().String()),
 				zap.Int("forward-ticks", ticks),
+				zap.String("forward-duration", tickToDur(ticks, s.Cfg.TickMs)),
 				zap.Int("election-ticks", s.Cfg.ElectionTicks),
+				zap.String("election-timeout", tickToDur(s.Cfg.ElectionTicks, s.Cfg.TickMs)),
 			)
 		} else {
 			plog.Infof("%s as single-node; fast-forwarding %d ticks (election ticks %d)", s.ID(), ticks, s.Cfg.ElectionTicks)
@@ -677,7 +683,9 @@ func (s *EtcdServer) adjustTicks() {
 					"initialized peer connections; fast-forwarding election ticks",
 					zap.String("local-member-id", s.ID().String()),
 					zap.Int("forward-ticks", ticks),
+					zap.String("forward-duration", tickToDur(ticks, s.Cfg.TickMs)),
 					zap.Int("election-ticks", s.Cfg.ElectionTicks),
+					zap.String("election-timeout", tickToDur(s.Cfg.ElectionTicks, s.Cfg.TickMs)),
 					zap.Int("active-remote-members", peerN),
 				)
 			} else {
@@ -699,7 +707,7 @@ func (s *EtcdServer) Start() {
 	s.goAttach(func() { s.adjustTicks() })
 	s.goAttach(func() { s.publish(s.Cfg.ReqTimeout()) })
 	s.goAttach(s.purgeFile)
-	s.goAttach(func() { monitorFileDescriptor(s.stopping) })
+	s.goAttach(func() { monitorFileDescriptor(s.getLogger(), s.stopping) })
 	s.goAttach(s.monitorVersions)
 	s.goAttach(s.linearizableReadLoop)
 	s.goAttach(s.monitorKVHash)
