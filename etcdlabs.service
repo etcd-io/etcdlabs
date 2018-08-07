@@ -1,6 +1,6 @@
 [Unit]
 Description=etcdlabs with Docker
-Documentation=https://github.com/coreos/etcdlabs
+Documentation=https://github.com/etcd-io/etcdlabs
 
 [Service]
 Restart=always
@@ -17,7 +17,7 @@ ExecStart=/usr/bin/docker \
   --name etcdlabs \
   --ulimit nofile=262144:262144 \
   gcr.io/etcd-development/etcdlabs:latest \
-  /bin/sh -c "pushd /gopath/src/github.com/coreos/etcdlabs && ./scripts/run/etcdlabs.sh"
+  /bin/sh -c "pushd /gopath/src/github.com/etcd-io/etcdlabs && ./scripts/run/etcdlabs.sh"
 
 ExecStop=/usr/bin/docker rm --force etcdlabs
 

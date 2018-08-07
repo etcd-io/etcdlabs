@@ -1,6 +1,6 @@
 [Unit]
 Description=etcdlabs with Docker
-Documentation=https://github.com/coreos/etcdlabs
+Documentation=https://github.com/etcd-io/etcdlabs
 
 [Service]
 Restart=always

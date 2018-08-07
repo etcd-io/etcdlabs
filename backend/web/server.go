@@ -24,8 +24,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/coreos/etcdlabs/cluster"
-	"github.com/coreos/etcdlabs/pkg/ratelimit"
+	"github.com/etcd-io/etcdlabs/cluster"
+	"github.com/etcd-io/etcdlabs/pkg/ratelimit"
 
 	"github.com/axiomhq/hyperloglog"
 )

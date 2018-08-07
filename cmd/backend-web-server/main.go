@@ -20,7 +20,7 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/coreos/etcdlabs/backend/web"
+	"github.com/etcd-io/etcdlabs/backend/web"
 
 	_ "github.com/ugorji/go/codec"
 	"go.uber.org/zap"

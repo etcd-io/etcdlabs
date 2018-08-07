@@ -42,10 +42,10 @@ RUN rm -rf ${GOROOT} \
   && go version
 
 # Compile backend
-RUN mkdir -p $GOPATH/src/github.com/coreos/etcdlabs
-ADD . $GOPATH/src/github.com/coreos/etcdlabs
+RUN mkdir -p $GOPATH/src/github.com/etcd-io/etcdlabs
+ADD . $GOPATH/src/github.com/etcd-io/etcdlabs
 
-RUN pushd $GOPATH/src/github.com/coreos/etcdlabs \
+RUN pushd $GOPATH/src/github.com/etcd-io/etcdlabs \
   && echo "Updating Go dependencies..." \
   && ./scripts/dep/go.sh \
   && go build -o ./backend-web-server -v ./cmd/backend-web-server \
@@ -54,7 +54,7 @@ RUN pushd $GOPATH/src/github.com/coreos/etcdlabs \
 # Install Angular, NodeJS for frontend
 # 'node' needs to be in $PATH for 'yarn start' command
 ENV NVM_DIR /usr/local/nvm
-RUN pushd ${GOPATH}/src/github.com/coreos/etcdlabs \
+RUN pushd ${GOPATH}/src/github.com/etcd-io/etcdlabs \
   && curl https://raw.githubusercontent.com/creationix/nvm/v0.33.6/install.sh | /bin/bash \
   && echo "Running nvm scripts..." \
   && source $NVM_DIR/nvm.sh \

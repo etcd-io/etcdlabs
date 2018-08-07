@@ -60,7 +60,7 @@
     "description": "website",
     "main": "index.js",
     "repository": {
-        "url": "https://github.com/coreos/etcdlabs",
+        "url": "https://github.com/etcd-io/etcdlabs",
         "type": "git"
     },
     "author": "Gyu-Ho Lee <gyuhox@gmail.com>"

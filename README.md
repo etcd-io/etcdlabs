@@ -1,8 +1,8 @@
 # etcdlabs
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/coreos/etcdlabs?style=flat-square)](https://goreportcard.com/report/github.com/coreos/etcdlabs)
-[![Build Status](https://img.shields.io/travis/coreos/etcdlabs.svg?style=flat-square)](https://travis-ci.org/coreos/etcdlabs)
-[![Godoc](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)](https://godoc.org/github.com/coreos/etcdlabs)
+[![Go Report Card](https://goreportcard.com/badge/github.com/etcd-io/etcdlabs?style=flat-square)](https://goreportcard.com/report/github.com/etcd-io/etcdlabs)
+[![Build Status](https://img.shields.io/travis/etcd-io/etcdlabs.svg?style=flat-square)](https://travis-ci.org/etcd-io/etcdlabs)
+[![Godoc](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)](https://godoc.org/github.com/etcd-io/etcdlabs)
 
 - [etcd website](http://play.etcd.io)
 
@@ -20,8 +20,8 @@ See [etcd-play][old-etcd-play] for old code.
     - [Go](https://golang.org/)
 
 [old-etcd-play]: https://github.com/coreos/etcd-play
-[cistat]: https://travis-ci.org/coreos/etcdlabs
-[etcdlabs-godoc]: https://godoc.org/github.com/coreos/etcdlabs
+[cistat]: https://travis-ci.org/etcd-io/etcdlabs
+[etcdlabs-godoc]: https://godoc.org/github.com/etcd-io/etcdlabs
 
 #### Build and Push to gcr.io
 
@@ -39,7 +39,7 @@ docker run \
   -it \
   -p 4200:4200 \
   gcr.io/etcd-development/etcdlabs:latest \
-  /bin/sh -c "pushd /gopath/src/github.com/coreos/etcdlabs && ./scripts/run/etcdlabs.sh"
+  /bin/sh -c "pushd /gopath/src/github.com/etcd-io/etcdlabs && ./scripts/run/etcdlabs.sh"
 ```
 
 Or

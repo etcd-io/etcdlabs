@@ -15,4 +15,4 @@ docker run \
   -it \
   -p 4200:4200 \
   gcr.io/etcd-development/etcdlabs:latest \
-  /bin/sh -c "pushd /gopath/src/github.com/coreos/etcdlabs && ./scripts/run/etcdlabs.sh"
+  /bin/sh -c "pushd /gopath/src/github.com/etcd-io/etcdlabs && ./scripts/run/etcdlabs.sh"

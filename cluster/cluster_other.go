@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/coreos/etcd/embed"
-	"github.com/coreos/etcdlabs/cluster/clusterpb"
+	"github.com/etcd-io/etcdlabs/cluster/clusterpb"
 )
 
 func (clus *Cluster) initialCluster() string {
