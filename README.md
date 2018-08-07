@@ -1,7 +1,7 @@
 # etcdlabs
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/etcd-io/etcdlabs?style=flat-square)](https://goreportcard.com/report/github.com/etcd-io/etcdlabs)
-[![Build Status](https://img.shields.io/travis/etcd-io/etcdlabs.svg?style=flat-square)](https://travis-ci.org/etcd-io/etcdlabs)
+[![Build Status](https://img.shields.io/travis/etcd-io/etcdlabs.svg?style=flat-square)](https://travis-ci.com/etcd-io/etcdlabs)
 [![Godoc](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)](https://godoc.org/github.com/etcd-io/etcdlabs)
 
 - [etcd website](http://play.etcd.io)
@@ -20,7 +20,7 @@ See [etcd-play][old-etcd-play] for old code.
     - [Go](https://golang.org/)
 
 [old-etcd-play]: https://github.com/coreos/etcd-play
-[cistat]: https://travis-ci.org/etcd-io/etcdlabs
+[cistat]: https://travis-ci.com/etcd-io/etcdlabs
 [etcdlabs-godoc]: https://godoc.org/github.com/etcd-io/etcdlabs
 
 #### Build and Push to gcr.io
