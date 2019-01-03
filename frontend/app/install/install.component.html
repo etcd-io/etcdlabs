@@ -15,7 +15,7 @@
 		<mat-form-field><input matInput type="number" [(ngModel)]="etcd.clusterSize" placeholder="Cluster size (up to 7)"></mat-form-field>
 		<span *ngIf="etcd.clusterSize > 7" class="error-message">This tool only supports up to 7 nodes</span>
 		<span *ngIf="etcd.clusterSize < 1" class="error-message">Minimum cluster size is 1</span>
-		<span *ngIf="etcd.clusterSize % 2 == 0" class="error-message">Cluster size should an odd number</span>
+		<span *ngIf="etcd.clusterSize % 2 == 0" class="error-message">Cluster size should be an odd number</span>
 		<br>
 		<div *ngFor="let flag of etcd.flags; let i = index;">
 			<div *ngIf="etcd.clusterSize > i">
