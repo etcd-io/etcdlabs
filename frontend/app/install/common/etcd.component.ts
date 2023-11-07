@@ -173,7 +173,7 @@ export class EtcdFlag {
     }
 }
 
-const flagHelpURL = 'https://github.com/coreos/etcd/blob/master/etcdmain/help.go';
+const flagHelpURL = 'https://github.com/etcd-io/etcd/blob/main/server/etcdmain/help.go';
 
 export class Etcd {
     version: string;
